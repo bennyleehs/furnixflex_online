@@ -1,0 +1,588 @@
+{
+    "countries": [
+        {
+            "name": "Malaysia",
+            "idd": "+60",
+            "time_zone": "GMT+8",
+            "currency_name": "Malaysian Ringgit",
+            "currency": "MYR",
+            "currency_symbol": "RM",
+            "states": [
+                {
+                    "name": "Johor",
+                    "cities": ["Johor Bahru", "Skudai", "Ulu Tiram", "Batu Pahat", "Muar", "Kluang", "Segamat", "Pontian", "Kota Tinggi", "Kulai", "Mersing", "Pasir Gudang"]
+                },
+                {
+                    "name": "Kedah",
+                    "cities": ["Alor Setar", "Sungai Petani", "Kulim", "Langkawi", "Jitra", "Baling", "Yan", "Kuala Nerang", "Pokok Sena", "Bandar Baharu"]
+                },
+                {
+                    "name": "Kelantan",
+                    "cities": ["Kota Bharu", "Pasir Mas", "Tumpat", "Tanah Merah", "Machang", "Kuala Krai", "Pasir Puteh", "Bachok", "Gua Musang", "Jeli"]
+                },
+                {
+                    "name": "Kuala Lumpur",
+                    "cities": ["Kuala Lumpur", "Cheras", "Wangsa Maju", "Bukit Bintang", "Kepong", "Setapak", "Sentul", "Setiawangsa", "Titiwangsa", "Bangsar"]
+                },
+                {
+                    "name": "Labuan",
+                    "cities": ["Labuan", "Victoria", "Kiansam", "Rancha-Rancha", "Layang-Layangan", "Tanjung Aru", "Nagalang"]
+                },
+                {
+                    "name": "Melaka",
+                    "cities": ["Melaka City", "Alor Gajah", "Jasin", "Ayer Keroh", "Klebang", "Masjid Tanah", "Merlimau", "Bukit Baru", "Ayer Molek"]
+                },
+                {
+                    "name": "Negeri Sembilan",
+                    "cities": ["Seremban", "Port Dickson", "Nilai", "Bahau", "Kuala Pilah", "Tampin", "Rembau", "Labu", "Mantin", "Pedas"]
+                },
+                {
+                    "name": "Pahang",
+                    "cities": ["Kuantan", "Temerloh", "Bentong", "Raub", "Pekan", "Jerantut", "Rompin", "Maran", "Cameron Highlands", "Mentakab"]
+                },
+                {
+                    "name": "Penang",
+                    "cities": ["George Town", "Butterworth", "Bukit Mertajam", "Nibong Tebal", "Balik Pulau", "Kepala Batas", "Tanjung Tokong", "Air Itam", "Bayan Lepas", "Seberang Perai"]
+                },
+                {
+                    "name": "Perak",
+                    "cities": ["Ipoh", "Taiping", "Teluk Intan", "Sitiawan", "Batu Gajah", "Lumut", "Kuala Kangsar", "Kampar", "Sungai Siput", "Tapah"]
+                },
+                {
+                    "name": "Perlis",
+                    "cities": ["Kangar", "Arau", "Kuala Perlis", "Padang Besar", "Simpang Ampat", "Jejawi", "Kaki Bukit", "Wang Kelian"]
+                },
+                {
+                    "name": "Putrajaya",
+                    "cities": ["Putrajaya", "Precinct 1", "Precinct 2", "Precinct 3", "Precinct 4", "Precinct 5"]
+                },
+                {
+                    "name": "Sabah",
+                    "cities": ["Kota Kinabalu", "Sandakan", "Tawau", "Lahad Datu", "Keningau", "Semporna", "Kudat", "Ranau", "Beaufort", "Papar"]
+                },
+                {
+                    "name": "Sarawak",
+                    "cities": ["Kuching", "Miri", "Sibu", "Bintulu", "Limbang", "Samarahan", "Sri Aman", "Kapit", "Sarikei", "Mukah"]
+                },
+                {
+                    "name": "Selangor",
+                    "cities": ["Shah Alam", "Petaling Jaya", "Klang", "Subang Jaya", "Ampang", "Kajang", "Puchong", "Rawang", "Sepang", "Hulu Langat"]
+                },
+                {
+                    "name": "Terengganu",
+                    "cities": ["Kuala Terengganu", "Kemaman", "Dungun", "Marang", "Besut", "Hulu Terengganu", "Setiu", "Paka", "Kertih", "Kuala Berang"]
+                }
+            ]
+        },
+        {
+            "name": "Singapore",
+            "idd": "+65",
+            "time_zone": "GMT+8",
+            "currency_name": "Singapore Dollar",
+            "currency": "SGD",
+            "currency_symbol": "S$",
+            "states": [
+                {
+                    "name": "Central Region",
+                    "cities": ["Downtown Core", "Marina East", "Marina South", "Museum", "Newton", "Orchard", "Outram", "River Valley", "Rochor", "Singapore River", "Straits View"]
+                },
+                {
+                    "name": "East Region",
+                    "cities": ["Bedok", "Changi", "Pasir Ris", "Paya Lebar", "Tampines"]
+                },
+                {
+                    "name": "North Region",
+                    "cities": ["Central Water Catchment", "Lim Chu Kang", "Mandai", "Sembawang", "Simpang", "Sungei Kadut", "Woodlands", "Yishun"]
+                },
+                {
+                    "name": "North-East Region",
+                    "cities": ["Ang Mo Kio", "Hougang", "North-Eastern Islands", "Punggol", "Seletar", "Sengkang", "Serangoon"]
+                },
+                {
+                    "name": "West Region",
+                    "cities": ["Boon Lay", "Bukit Batok", "Bukit Panjang", "Choa Chu Kang", "Clementi", "Jurong East", "Jurong West", "Pioneer", "Tengah", "Tuas", "Western Islands", "Western Water Catchment"]
+                }
+            ]
+        },
+        {
+            "name": "Indonesia",
+            "idd": "+62",
+            "time_zone": "GMT+7",
+            "currency_name": "Indonesian Rupiah",
+            "currency": "IDR",
+            "currency_symbol": "Rp",
+            "states": [
+                {
+                    "name": "Aceh",
+                    "cities": ["Banda Aceh", "Lhokseumawe", "Langsa", "Sabang", "Meulaboh"]
+                },
+                {
+                    "name": "Bali",
+                    "cities": ["Denpasar", "Kuta", "Ubud", "Singaraja", "Gianyar", "Seminyak", "Tabanan"]
+                },
+                {
+                    "name": "Bangka Belitung Islands",
+                    "cities": ["Pangkal Pinang", "Tanjung Pandan", "Muntok", "Sungailiat", "Belinyu"]
+                },
+                {
+                    "name": "Banten",
+                    "cities": ["Serang", "Tangerang", "Cilegon", "Pandeglang", "Rangkasbitung"]
+                },
+                {
+                    "name": "Bengkulu",
+                    "cities": ["Bengkulu", "Curup", "Manna", "Mukomuko", "Kepahiang"]
+                },
+                {
+                    "name": "Central Java",
+                    "cities": ["Semarang", "Surakarta", "Pekalongan", "Tegal", "Magelang", "Salatiga"]
+                },
+                {
+                    "name": "Central Kalimantan",
+                    "cities": ["Palangka Raya", "Sampit", "Pangkalan Bun", "Kuala Kapuas", "Muara Teweh"]
+                },
+                {
+                    "name": "Central Sulawesi",
+                    "cities": ["Palu", "Luwuk", "Toli-Toli", "Poso", "Parigi"]
+                },
+                {
+                    "name": "East Java",
+                    "cities": ["Surabaya", "Malang", "Kediri", "Madiun", "Jember", "Banyuwangi", "Probolinggo"]
+                },
+                {
+                    "name": "East Kalimantan",
+                    "cities": ["Samarinda", "Balikpapan", "Bontang", "Tenggarong", "Sangatta"]
+                },
+                {
+                    "name": "East Nusa Tenggara",
+                    "cities": ["Kupang", "Maumere", "Ende", "Labuan Bajo", "Waingapu"]
+                },
+                {
+                    "name": "Gorontalo",
+                    "cities": ["Gorontalo", "Limboto", "Marisa", "Tilamuta", "Kwandang"]
+                },
+                {
+                    "name": "Jakarta",
+                    "cities": ["Jakarta", "South Jakarta", "East Jakarta", "West Jakarta", "North Jakarta", "Central Jakarta", "Thousand Islands"]
+                },
+                {
+                    "name": "Jambi",
+                    "cities": ["Jambi", "Sungai Penuh", "Muara Bungo", "Kuala Tungkal", "Muara Bulian"]
+                },
+                {
+                    "name": "Lampung",
+                    "cities": ["Bandar Lampung", "Metro", "Kotabumi", "Pringsewu", "Liwa"]
+                },
+                {
+                    "name": "Maluku",
+                    "cities": ["Ambon", "Tual", "Masohi", "Namlea", "Dobo"]
+                },
+                {
+                    "name": "North Kalimantan",
+                    "cities": ["Tanjung Selor", "Tarakan", "Malinau", "Nunukan", "Tanjung Palas"]
+                },
+                {
+                    "name": "North Maluku",
+                    "cities": ["Ternate", "Tidore", "Sofifi", "Jailolo", "Tobelo"]
+                },
+                {
+                    "name": "North Sulawesi",
+                    "cities": ["Manado", "Bitung", "Tomohon", "Kotamobagu", "Tondano"]
+                },
+                {
+                    "name": "North Sumatra",
+                    "cities": ["Medan", "Pematang Siantar", "Binjai", "Tebing Tinggi", "Padang Sidempuan", "Tanjung Balai"]
+                },
+                {
+                    "name": "Papua",
+                    "cities": ["Jayapura", "Merauke", "Biak", "Timika", "Wamena", "Nabire"]
+                },
+                {
+                    "name": "Riau",
+                    "cities": ["Pekanbaru", "Dumai", "Bengkalis", "Tembilahan", "Rengat"]
+                },
+                {
+                    "name": "South Kalimantan",
+                    "cities": ["Banjarmasin", "Banjarbaru", "Martapura", "Kotabaru", "Kandangan"]
+                },
+                {
+                    "name": "South Sulawesi",
+                    "cities": ["Makassar", "Parepare", "Palopo", "Watampone", "Bantaeng"]
+                },
+                {
+                    "name": "South Sumatra",
+                    "cities": ["Palembang", "Prabumulih", "Lubuklinggau", "Pagar Alam", "Baturaja"]
+                },
+                {
+                    "name": "Southeast Sulawesi",
+                    "cities": ["Kendari", "Baubau", "Kolaka", "Raha", "Unaaha"]
+                },
+                {
+                    "name": "West Java",
+                    "cities": ["Bandung", "Bogor", "Bekasi", "Depok", "Cirebon", "Tasikmalaya", "Sukabumi"]
+                },
+                {
+                    "name": "West Kalimantan",
+                    "cities": ["Pontianak", "Singkawang", "Ketapang", "Sintang", "Putussibau"]
+                },
+                {
+                    "name": "West Nusa Tenggara",
+                    "cities": ["Mataram", "Bima", "Sumbawa Besar", "Dompu", "Praya"]
+                },
+                {
+                    "name": "West Papua",
+                    "cities": ["Manokwari", "Sorong", "Fakfak", "Kaimana", "Rasiei"]
+                },
+                {
+                    "name": "West Sulawesi",
+                    "cities": ["Mamuju", "Majene", "Polewali", "Mamasa", "Pasangkayu"]
+                },
+                {
+                    "name": "West Sumatra",
+                    "cities": ["Padang", "Bukittinggi", "Payakumbuh", "Padang Panjang", "Pariaman", "Sawahlunto", "Solok"]
+                },
+                {
+                    "name": "Yogyakarta",
+                    "cities": ["Yogyakarta", "Bantul", "Sleman", "Wonosari", "Wates"]
+                }
+            ]
+        },
+        {
+            "name": "Philippines",
+            "idd": "+63",
+            "time_zone": "GMT+8",
+            "currency_name": "Philippine Peso",
+            "currency": "PHP",
+            "currency_symbol": "₱",
+            "states": [
+                {
+                    "name": "Abra",
+                    "cities": ["Bangued", "Lagangilang", "Bucay", "Tayum", "Peñarrubia"]
+                },
+                {
+                    "name": "Agusan del Norte",
+                    "cities": ["Cabadbaran", "Butuan", "Buenavista", "Nasipit", "Carmen"]
+                },
+                {
+                    "name": "Agusan del Sur",
+                    "cities": ["Prosperidad", "San Francisco", "Bayugan", "Trento", "Bunawan"]
+                },
+                {
+                    "name": "Aklan",
+                    "cities": ["Kalibo", "Malay", "Numancia", "Boracay", "Banga"]
+                },
+                {
+                    "name": "Albay",
+                    "cities": ["Legazpi", "Tabaco", "Ligao", "Daraga", "Guinobatan"]
+                },
+                {
+                    "name": "Antique",
+                    "cities": ["San Jose de Buenavista", "Sibalom", "Culasi", "Hamtic", "Bugasong"]
+                },
+                {
+                    "name": "Apayao",
+                    "cities": ["Kabugao", "Luna", "Flora", "Pudtol", "Santa Marcela"]
+                },
+                {
+                    "name": "Aurora",
+                    "cities": ["Baler", "Casiguran", "Dipaculao", "Maria Aurora", "Dingalan"]
+                },
+                {
+                    "name": "Basilan",
+                    "cities": ["Isabela City", "Lamitan", "Maluso", "Lantawan", "Tipo-Tipo"]
+                },
+                {
+                    "name": "Bataan",
+                    "cities": ["Balanga", "Mariveles", "Limay", "Orion", "Dinalupihan"]
+                },
+                {
+                    "name": "Batanes",
+                    "cities": ["Basco", "Uyugan", "Mahatao", "Ivana", "Sabtang"]
+                },
+                {
+                    "name": "Batangas",
+                    "cities": ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Calaca"]
+                },
+                {
+                    "name": "Benguet",
+                    "cities": ["La Trinidad", "Baguio", "Tuba", "Itogon", "Mankayan"]
+                },
+                {
+                    "name": "Biliran",
+                    "cities": ["Naval", "Caibiran", "Biliran", "Cabucgayan", "Almeria"]
+                },
+                {
+                    "name": "Bohol",
+                    "cities": ["Tagbilaran", "Tubigon", "Jagna", "Talibon", "Panglao"]
+                },
+                {
+                    "name": "Bukidnon",
+                    "cities": ["Malaybalay", "Valencia", "Quezon", "Maramag", "Don Carlos"]
+                },
+                {
+                    "name": "Bulacan",
+                    "cities": ["Malolos", "Meycauayan", "San Jose del Monte", "Baliuag", "Plaridel"]
+                },
+                {
+                    "name": "Cagayan",
+                    "cities": ["Tuguegarao", "Aparri", "Lal-lo", "Penablanca", "Gattaran"]
+                },
+                {
+                    "name": "Camarines Norte",
+                    "cities": ["Daet", "Jose Panganiban", "Labo", "Talisay", "Santa Elena"]
+                },
+                {
+                    "name": "Camarines Sur",
+                    "cities": ["Naga", "Iriga", "Pili", "Calabanga", "Libmanan"]
+                },
+                {
+                    "name": "Camiguin",
+                    "cities": ["Mambajao", "Mahinog", "Guinsiliban", "Sagay", "Catarman"]
+                },
+                {
+                    "name": "Capiz",
+                    "cities": ["Roxas", "Panay", "Pilar", "Dao", "Dumalag"]
+                },
+                {
+                    "name": "Catanduanes",
+                    "cities": ["Virac", "San Andres", "Baras", "Gigmoto", "Bato"]
+                },
+                {
+                    "name": "Cavite",
+                    "cities": ["Trece Martires", "Cavite City", "Tagaytay", "Dasmariñas", "General Trias"]
+                },
+                {
+                    "name": "Cebu",
+                    "cities": ["Cebu City", "Mandaue", "Lapu-Lapu", "Talisay", "Danao"]
+                },
+                {
+                    "name": "Cotabato",
+                    "cities": ["Kidapawan", "Midsayap", "Kabacan", "Matalam", "M'lang"]
+                },
+                {
+                    "name": "Davao de Oro",
+                    "cities": ["Nabunturan", "Montevista", "Monkayo", "New Bataan", "Maco"]
+                },
+                {
+                    "name": "Davao del Norte",
+                    "cities": ["Tagum", "Panabo", "Island Garden City of Samal", "Santo Tomas", "Kapalong"]
+                },
+                {
+                    "name": "Davao del Sur",
+                    "cities": ["Digos", "Davao City", "Santa Cruz", "Bansalan", "Matanao"]
+                },
+                {
+                    "name": "Davao Occidental",
+                    "cities": ["Malita", "Don Marcelino", "Jose Abad Santos", "Santa Maria", "Sarangani"]
+                },
+                {
+                    "name": "Davao Oriental",
+                    "cities": ["Mati", "Baganga", "Caraga", "Lupon", "Tarragona"]
+                },
+                {
+                    "name": "Dinagat Islands",
+                    "cities": ["San Jose", "Dinagat", "Basilisa", "Libjo", "Loreto"]
+                },
+                {
+                    "name": "Eastern Samar",
+                    "cities": ["Borongan", "Guiuan", "Dolores", "Oras", "Balangiga"]
+                },
+                {
+                    "name": "Guimaras",
+                    "cities": ["Jordan", "Nueva Valencia", "Buenavista", "San Lorenzo", "Sibunag"]
+                },
+                {
+                    "name": "Ifugao",
+                    "cities": ["Lagawe", "Banaue", "Lamut", "Kiangan", "Hungduan"]
+                },
+                {
+                    "name": "Ilocos Norte",
+                    "cities": ["Laoag", "Batac", "San Nicolas", "Dingras", "Pagudpud"]
+                },
+                {
+                    "name": "Ilocos Sur",
+                    "cities": ["Vigan", "Candon", "Santa Maria", "Narvacan", "Tagudin"]
+                },
+                {
+                    "name": "Iloilo",
+                    "cities": ["Iloilo City", "Passi", "Oton", "San Jose de Buenavista", "Lambunao"]
+                },
+                {
+                    "name": "Isabela",
+                    "cities": ["Ilagan", "Cauayan", "Santiago", "Echague", "Gamu"]
+                },
+                {
+                    "name": "Kalinga",
+                    "cities": ["Tabuk", "Pinukpuk", "Lubuagan", "Tanudan", "Rizal"]
+                },
+                {
+                    "name": "La Union",
+                    "cities": ["San Fernando", "Agoo", "Bauang", "Rosario", "San Juan"]
+                },
+                {
+                    "name": "Laguna",
+                    "cities": ["Santa Cruz", "San Pablo", "Calamba", "Biñan", "Los Baños"]
+                },
+                {
+                    "name": "Lanao del Norte",
+                    "cities": ["Tubod", "Iligan", "Kapatagan", "Bacolod", "Kolambugan"]
+                },
+                {
+                    "name": "Lanao del Sur",
+                    "cities": ["Marawi", "Malabang", "Wao", "Butig", "Lumba-Bayabao"]
+                },
+                {
+                    "name": "Leyte",
+                    "cities": ["Tacloban", "Ormoc", "Baybay", "Tanauan", "Palo"]
+                },
+                {
+                    "name": "Maguindanao",
+                    "cities": ["Cotabato City", "Datu Odin Sinsuat", "Shariff Aguak", "Sultan Kudarat", "Datu Piang"]
+                },
+                {
+                    "name": "Marinduque",
+                    "cities": ["Boac", "Gasan", "Santa Cruz", "Torrijos", "Buenavista"]
+                },
+                {
+                    "name": "Masbate",
+                    "cities": ["Masbate City", "Aroroy", "Cataingan", "Uson", "Mandaon"]
+                },
+                {
+                    "name": "Metro Manila",
+                    "cities": ["Manila", "Quezon City", "Makati", "Pasig", "Taguig", "Pasay", "Caloocan", "Parañaque", "Mandaluyong", "Marikina"]
+                },
+                {
+                    "name": "Misamis Occidental",
+                    "cities": ["Oroquieta", "Ozamiz", "Tangub", "Clarin", "Jimenez"]
+                },
+                {
+                    "name": "Misamis Oriental",
+                    "cities": ["Cagayan de Oro", "Gingoog", "El Salvador", "Balingasag", "Tagoloan"]
+                },
+                {
+                    "name": "Mountain Province",
+                    "cities": ["Bontoc", "Sagada", "Bauko", "Paracelis", "Besao"]
+                },
+                {
+                    "name": "Negros Occidental",
+                    "cities": ["Bacolod", "Kabankalan", "Silay", "Bago", "La Carlota"]
+                },
+                {
+                    "name": "Negros Oriental",
+                    "cities": ["Dumaguete", "Bais", "Canlaon", "Guihulngan", "Tanjay"]
+                },
+                {
+                    "name": "Northern Samar",
+                    "cities": ["Catarman", "Allen", "Laoang", "Catubig", "Lavezares"]
+                },
+                {
+                    "name": "Nueva Ecija",
+                    "cities": ["Palayan", "Cabanatuan", "San Jose", "Gapan", "Science City of Muñoz"]
+                },
+                {
+                    "name": "Nueva Vizcaya",
+                    "cities": ["Bayombong", "Solano", "Bambang", "Dupax del Sur", "Kasibu"]
+                },
+                {
+                    "name": "Occidental Mindoro",
+                    "cities": ["Mamburao", "San Jose", "Sablayan", "Lubang", "Abra de Ilog"]
+                },
+                {
+                    "name": "Oriental Mindoro",
+                    "cities": ["Calapan", "Puerto Galera", "Pinamalayan", "Naujan", "Bansud"]
+                },
+                {
+                    "name": "Palawan",
+                    "cities": ["Puerto Princesa", "Coron", "El Nido", "Brooke's Point", "Aborlan"]
+                },
+                {
+                    "name": "Pampanga",
+                    "cities": ["San Fernando", "Angeles", "Mabalacat", "Apalit", "Mexico"]
+                },
+                {
+                    "name": "Pangasinan",
+                    "cities": ["Lingayen", "Dagupan", "Urdaneta", "Alaminos", "San Carlos"]
+                },
+                {
+                    "name": "Quezon",
+                    "cities": ["Lucena", "Tayabas", "Candelaria", "Sariaya", "Lucban"]
+                },
+                {
+                    "name": "Quirino",
+                    "cities": ["Cabarroguis", "Diffun", "Maddela", "Aglipay", "Nagtipunan"]
+                },
+                {
+                    "name": "Rizal",
+                    "cities": ["Antipolo", "Cainta", "Taytay", "Rodriguez", "San Mateo"]
+                },
+                {
+                    "name": "Romblon",
+                    "cities": ["Romblon", "Odiongan", "San Fernando", "Cajidiocan", "San Jose"]
+                },
+                {
+                    "name": "Samar",
+                    "cities": ["Catbalogan", "Calbayog", "Basey", "Gandara", "Paranas"]
+                },
+                {
+                    "name": "Sarangani",
+                    "cities": ["Alabel", "Glan", "Malapatan", "Kiamba", "Malungon"]
+                },
+                {
+                    "name": "Siquijor",
+                    "cities": ["Siquijor", "Larena", "Lazi", "Maria", "San Juan"]
+                },
+                {
+                    "name": "Sorsogon",
+                    "cities": ["Sorsogon City", "Bulan", "Irosin", "Gubat", "Pilar"]
+                },
+                {
+                    "name": "South Cotabato",
+                    "cities": ["Koronadal", "General Santos", "Polomolok", "Surallah", "Tupi"]
+                },
+                {
+                    "name": "Southern Leyte",
+                    "cities": ["Maasin", "Sogod", "Silago", "Macrohon", "Liloan"]
+                },
+                {
+                    "name": "Sultan Kudarat",
+                    "cities": ["Isulan", "Tacurong", "Lebak", "Kalamansig", "Esperanza"]
+                },
+                {
+                    "name": "Sulu",
+                    "cities": ["Jolo", "Indanan", "Parang", "Maimbung", "Patikul"]
+                },
+                {
+                    "name": "Surigao del Norte",
+                    "cities": ["Surigao City", "Dapa", "Del Carmen", "Claver", "Mainit"]
+                },
+                {
+                    "name": "Surigao del Sur",
+                    "cities": ["Tandag", "Bislig", "Hinatuan", "Lianga", "Cantilan"]
+                },
+                {
+                    "name": "Tarlac",
+                    "cities": ["Tarlac City", "Paniqui", "Capas", "Concepcion", "Gerona"]
+                },
+                {
+                    "name": "Tawi-Tawi",
+                    "cities": ["Bongao", "Sitangkai", "Languyan", "Sapa-Sapa", "Sibutu"]
+                },
+                {
+                    "name": "Zambales",
+                    "cities": ["Iba", "Olongapo", "Subic", "Castillejos", "San Marcelino"]
+                },
+                {
+                    "name": "Zamboanga del Norte",
+                    "cities": ["Dipolog", "Dapitan", "Siay", "Sindangan", "Liloy"]
+                },
+                {
+                    "name": "Zamboanga del Sur",
+                    "cities": ["Pagadian", "Zamboanga City", "Aurora", "Molave", "Lakewood"]
+                },
+                {
+                    "name": "Zamboanga Sibugay",
+                    "cities": ["Ipil", "Buug", "Titay", "Siay", "Kabasalan"]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+.break-on-slash {
+    white-space: pre-wrap; /* Preserve line breaks and wrap text */
+    word-break: break-word; /* Break long words if necessary */
+  }
