@@ -30,7 +30,7 @@ or
 npm run dev
 ```
 
-### Push to remote github (Classyportal)
+### Before push to remote github (Classyportal)
 using Git Bash
 
 ```
