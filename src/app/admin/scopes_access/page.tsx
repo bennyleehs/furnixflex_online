@@ -1,6 +1,6 @@
 // src/app/admin/scopes_access/page.tsx
 "use client";
-// 5th-3rd ver
+
 import { useState, useEffect, useRef } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
@@ -14,6 +14,8 @@ interface AccessRow {
   role: string;
   accessPath: string;
   key: string;
+  originalKey: string;
+  id: string; // Added id field for table operations
 }
 
 export default function AccessList() {
@@ -34,7 +36,7 @@ export default function AccessList() {
       const normalizedToOriginalKeyMap: Record<string, string> = {};
 
       Object.entries(accessData).forEach(([originalKey, value]) => {
-        const normalizedKey = originalKey.toUpperCase();
+        const normalizedKey = originalKey.toLowerCase(); // Changed to lowercase for consistency
         normalizedAccessMap[normalizedKey] = value as string[];
         normalizedToOriginalKeyMap[normalizedKey] = originalKey;
       });
@@ -65,29 +67,25 @@ export default function AccessList() {
       setMenuItems(menuMap);
 
       // Format data for the table with case-insensitive key handling
-      const formatted = listData.map((row: any) => {
+      const formatted = listData.map((row: any, index: number) => {
         // Create a normalized key for lookup
         const normalizedKey =
-          `${row.branchRef}.${row.department}.${row.role}`.toUpperCase();
-
-        // For debugging
-        if (row.no <= 3) {
-          console.log({
-            normalizedKey,
-            hasMatch: normalizedKey in normalizedAccessMap,
-            paths: normalizedAccessMap[normalizedKey] || [],
-          });
-        }
+          `${row.branchRef}.${row.department}.${row.role}`.toLowerCase(); // Changed to lowercase
 
         // Get access paths using the normalized key
         const paths = normalizedAccessMap[normalizedKey] || [];
         const displayKey = `${row.branchRef}.${row.department}.${row.role}`;
+        
+        // Store the original key from the access_control.json
+        const originalKey = normalizedToOriginalKeyMap[normalizedKey] || displayKey;
 
         return {
           ...row,
-          key: normalizedKey, // Use normalized key for consistency
-          originalKey: normalizedToOriginalKeyMap[normalizedKey] || displayKey, // Store original key if it exists
-          accessPath: paths.join(","),
+          no: index + 1, // Ensure we have a sequential number
+          key: normalizedKey,
+          originalKey: originalKey,
+          accessPath: paths.join(", "), // Changed comma format for better readability
+          id: originalKey, // Using originalKey as the id for edit purposes
         };
       });
 
@@ -121,7 +119,7 @@ export default function AccessList() {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Access List" />
-      {loading && <div className="p-4">Loading Access List...</div>}
+      {loading && <div className="flex justify-center p-4">Loading Access List...</div>}
       {error && <div className="p-4 text-red-500">Error: {error}</div>}
       {!loading && !error && (
         <Tables
@@ -129,6 +127,7 @@ export default function AccessList() {
           data={data}
           filterKeys={["branch", "department", "role"]}
           createLink="/admin/scopes_access/update"
+          idParam="key" // Changed to use "key" for ID parameter
         />
       )}
     </DefaultLayout>
