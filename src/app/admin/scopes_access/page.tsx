@@ -119,15 +119,16 @@ export default function AccessList() {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Access List" />
-      {loading && <div className="flex justify-center p-4">Loading Access List...</div>}
+      {loading && <div className="p-4">Loading Access List...</div>}
       {error && <div className="p-4 text-red-500">Error: {error}</div>}
       {!loading && !error && (
         <Tables
           columns={columns}
           data={data}
           filterKeys={["branch", "department", "role"]}
-          createLink="/admin/scopes_access/update"
+          createLink="/admin/scopes_access/update" 
           idParam="key" // Changed to use "key" for ID parameter
+          showCreateButton={false} // Set to false to hide the create button
         />
       )}
     </DefaultLayout>
