@@ -9,6 +9,7 @@ interface TableProps {
   createLink?: string;
   filterKeys: string[]; // Keys to filter the data (e.g., ["country", "status"])
   idParam?: string; // For specifying id parameter name (default: "id")
+  showCreateButton?: boolean; // New prop to control button visibility
 }
 
 export default function Tables({
@@ -17,6 +18,7 @@ export default function Tables({
   createLink,
   filterKeys = [],
   idParam = "id",
+  showCreateButton = true, // Default to true for backward compatibility
 }: TableProps) {
   const [tableData, setTableData] = useState(data);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
@@ -153,8 +155,8 @@ export default function Tables({
           ))}
         </div>
 
-        {/* Create Button */}
-        {createLink && (
+        {/* Create Button - Only render if showCreateButton is true and createLink exists */}
+        {showCreateButton && createLink && (
           <div className="w-full sm:w-auto">
             <Link
               href={createLink}
