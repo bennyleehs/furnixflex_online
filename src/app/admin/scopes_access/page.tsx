@@ -128,7 +128,7 @@ export default function AccessList() {
           columns={columns}
           data={data}
           filterKeys={["branch", "department", "role"]}
-          createLink="#"
+          createLink="/admin/scopes_access/update"
         />
       )}
     </DefaultLayout>
