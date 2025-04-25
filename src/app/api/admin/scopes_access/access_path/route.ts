@@ -1,5 +1,4 @@
 // api/admin/scopes_access/access_path/route.ts
-//2nd ver
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
@@ -15,28 +14,37 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to read access control file" }, { status: 500 });
   }
 }
-// -- update the JSON
-// export async function PUT(req: NextRequest) {
-//   try {
-//     const { key, accessPath } = await req.json();
+
+export async function PUT(req: NextRequest) {
+  try {
+    const { key, accessPath } = await req.json();
     
-//     if (!key) {
-//       return NextResponse.json({ error: "Key is required" }, { status: 400 });
-//     }
+    if (!key) {
+      return NextResponse.json({ error: "Key is required" }, { status: 400 });
+    }
     
-//     // Read existing data
-//     const fileContent = await fs.readFile(filePath, "utf-8");
-//     const accessControlData = JSON.parse(fileContent);
+    // Read existing data
+    const fileContent = await fs.readFile(filePath, "utf-8");
+    const accessControlData = JSON.parse(fileContent);
     
-//     // Update specific entry
-//     accessControlData[key] = accessPath;
+    // Find the original key with correct casing
+    const originalKey = Object.keys(accessControlData).find(
+      k => k.toUpperCase() === key.toUpperCase()
+    );
     
-//     // Write back to file
-//     await fs.writeFile(filePath, JSON.stringify(accessControlData, null, 2));
+    if (!originalKey) {
+      return NextResponse.json({ error: `Key "${key}" not found in access control data` }, { status: 404 });
+    }
     
-//     return NextResponse.json({ success: true, key, accessPath });
-//   } catch (err) {
-//     console.error("Error updating access path:", err);
-//     return NextResponse.json({ error: "Failed to update access path" }, { status: 500 });
-//   }
-// }
+    // Update specific entry (preserving original key casing)
+    accessControlData[originalKey] = accessPath;
+    
+    // Write back to file
+    await fs.writeFile(filePath, JSON.stringify(accessControlData, null, 2));
+    
+    return NextResponse.json({ success: true, key: originalKey, accessPath });
+  } catch (err) {
+    console.error("Error updating access path:", err);
+    return NextResponse.json({ error: "Failed to update access path" }, { status: 500 });
+  }
+}
