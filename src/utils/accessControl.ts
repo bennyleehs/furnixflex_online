@@ -2,15 +2,9 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import sidebarData from "@/data/sidebar_menu.json";
+import { DEFAULT_ACCESS_SECTIONS } from "./defaultAccess";
 
 export const runtime = "nodejs"; // Ensure it runs in Node.js
-
-// Define sections that should be available to all users
-const DEFAULT_ACCESS_SECTIONS = [
-  "Dashboard",
-  "Country & Currency",
-  "Settings"
-];
 
 // Get routes for default access sections
 function getDefaultAccessRoutes(): string[] {
