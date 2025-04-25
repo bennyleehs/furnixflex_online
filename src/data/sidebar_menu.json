@@ -69,7 +69,7 @@
               {
                 "label": "Scopes",
                 "id": "2.2.5",
-                "route": "",
+                "route": "/admin/scopes",
                 "children": [
                   {
                     "label": "Access List",

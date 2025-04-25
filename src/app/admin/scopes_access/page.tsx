@@ -1,6 +1,6 @@
 // src/app/admin/scopes_access/page.tsx
 "use client";
-
+// 5th-3rd ver
 import { useState, useEffect, useRef } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
@@ -8,12 +8,12 @@ import Tables from "@/components/Tables";
 
 interface AccessRow {
   no: number;
-  id: string; // This will be the key for routing
   branchRef: string;
   branch: string;
   department: string;
   role: string;
   accessPath: string;
+  key: string;
 }
 
 export default function AccessList() {
@@ -70,23 +70,24 @@ export default function AccessList() {
         const normalizedKey =
           `${row.branchRef}.${row.department}.${row.role}`.toUpperCase();
 
+        // For debugging
+        if (row.no <= 3) {
+          console.log({
+            normalizedKey,
+            hasMatch: normalizedKey in normalizedAccessMap,
+            paths: normalizedAccessMap[normalizedKey] || [],
+          });
+        }
+
         // Get access paths using the normalized key
         const paths = normalizedAccessMap[normalizedKey] || [];
         const displayKey = `${row.branchRef}.${row.department}.${row.role}`;
-        const originalKey = normalizedToOriginalKeyMap[normalizedKey] || displayKey;
-
-        // Format the access paths for display - show menu path when available
-        const formattedPaths = paths.map((path: string) => {
-          if (menuMap[path]) {
-            return `${path} (${menuMap[path]})`;
-          }
-          return path;
-        }).join(", ");
 
         return {
           ...row,
-          id: originalKey, // Use original key for routing
-          accessPath: formattedPaths || "No access paths",
+          key: normalizedKey, // Use normalized key for consistency
+          originalKey: normalizedToOriginalKeyMap[normalizedKey] || displayKey, // Store original key if it exists
+          accessPath: paths.join(","),
         };
       });
 
@@ -127,7 +128,7 @@ export default function AccessList() {
           columns={columns}
           data={data}
           filterKeys={["branch", "department", "role"]}
-          createLink="/admin/scopes_access/update"
+          createLink="#"
         />
       )}
     </DefaultLayout>
