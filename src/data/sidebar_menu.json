@@ -237,44 +237,44 @@
       },
       {
         "label": "Production",
-        "id": "6",
+        "id": "4",
         "route": "#",
         "children": [
           {
             "label": "Commissioning Rules",
-            "id": "6.1",
+            "id": "4.1",
             "route": "#",
             "children": [
               {
                 "label": "Sales",
-                "id": "6.1.1",
+                "id": "4.1.1",
                 "route": "#",
                 "children": [
                   {
                     "label": "Indoor",
-                    "id": "6.1.1.1",
+                    "id": "4.1.1.1",
                     "route": "#"
                   },
                   {
                     "label": "Measurement",
-                    "id": "6.1.1.2",
+                    "id": "4.1.1.2",
                     "route": "#"
                   }
                 ]
               },
               {
                 "label": "Dealer",
-                "id": "6.1.2",
+                "id": "4.1.2",
                 "route": "#",
                 "children": [
                   {
                     "label": "Indoor",
-                    "id": "6.1.2.1",
+                    "id": "4.1.2.1",
                     "route": "#"
                   },
                   {
                     "label": "Measurement",
-                    "id": "6.1.2.2",
+                    "id": "4.1.2.2",
                     "route": "#"
                   }
                 ]
@@ -298,27 +298,27 @@
       },
       {
         "label": "History",
-        "id": "7",
+        "id": "5",
         "route": "#",
         "children": [
           {
             "label": "Customer",
-            "id": "7.1",
+            "id": "5.1",
             "route": "#"
           },
           {
             "label": "Task",
-            "id": "7.2",
+            "id": "5.2",
             "route": "#"
           },
           {
             "label": "Job",
-            "id": "7.3",
+            "id": "5.3",
             "route": "#"
           },
           {
             "label": "Promotion Code",
-            "id": "7.4",
+            "id": "5.4",
             "route": "#"
           }
         ]
