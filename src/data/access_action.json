@@ -2,7 +2,7 @@
   "action": [
     {
       "name": "All Access",
-      "description": "Full Administrative Control",
+      "description": "Administrative Priviliges",
       "type": "0"
     },
     {
