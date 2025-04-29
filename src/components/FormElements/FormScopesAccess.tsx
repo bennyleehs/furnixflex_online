@@ -112,7 +112,7 @@ const FormScopesAccess = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-6 grid grid-cols-12 gap-4">
             <div className="col-span-12 md:col-span-6">
-              <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              <label className="mb-3 block font-medium text-black dark:text-white">
                 Key : Branch.Department.Role
               </label>
               <input
@@ -123,14 +123,14 @@ const FormScopesAccess = () => {
               />
             </div>
             <div className="col-span-12 md:col-span-6">
-              <label className="mb-2.5 block font-medium text-black dark:text-white">
+              <label className="mb-3 block font-medium text-black dark:text-white">
                 Access Paths (comma separated IDs)
               </label>
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Example: 1,2,3,4"
-                  className="border-stroke focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-lg border bg-transparent py-2 pr-10 pl-6 text-black outline-hidden focus-visible:shadow-none dark:text-white"
+                  className="border-stroke focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-lg border bg-transparent py-3 pr-10 pl-6 text-black outline-hidden focus-visible:shadow-none dark:text-white"
                   value={accessPaths}
                   onChange={(e) => setAccessPaths(e.target.value)}
                   required
