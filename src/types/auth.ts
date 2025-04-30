@@ -4,6 +4,9 @@ export interface AuthToken {
     role: number;
     department: number;
     branch: number;
+    // role: string;
+    // department: string;
+    // branch: string;
     iat: number;
     exp: number;
   }
