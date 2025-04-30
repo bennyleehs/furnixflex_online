@@ -51,7 +51,7 @@ const FormScopes2Access = () => {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3">
+        <div className="my-6 grid grid-cols-3">
           <div className="grid">
             <label className="mb-3 block font-bold text-black dark:text-white">
               Menu 1
