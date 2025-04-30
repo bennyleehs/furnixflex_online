@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   const [branches] = await db.execute("SELECT name,ref FROM branches2");
   const [departments] = await db.execute("SELECT name FROM departments");
-  const [roles] = await db.execute("SELECT name FROM roles1");
+  const [roles] = await db.execute("SELECT name FROM roles1 ORDER BY id");
 
   // Skip the first role only
   const slicedRoles = (roles as any[]).slice(1);
