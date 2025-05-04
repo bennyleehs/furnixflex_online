@@ -3,16 +3,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-// export const metadata: Metadata = {
-//   title: "Next.js SignIn Page | Classy Pro System",
-//   description: "This is Next.js Signin Page TailAdmin Dashboard Template",
-// };
-
 const SignIn = () => {
   const [uid, setUid] = useState("");
   const [password, setPwd] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Track password visibility
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,7 +28,6 @@ const SignIn = () => {
       }
 
       const data = await response.json();
-
       if (response.ok) {
         setMessage(data.message || "Sign-in successful");
         setIsError(false);
@@ -48,10 +43,13 @@ const SignIn = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="container mx-auto sm:mx-40 md:mx-65 2xl:mx-180">
-        {/* <div className="rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"> */}
         <div className="w-full max-w-full md:max-w-4xl">
           <div className="flex justify-center p-4 sm:p-8 xl:p-6">
             <Image
@@ -70,14 +68,14 @@ const SignIn = () => {
                 <input
                   type="text"
                   placeholder="UID"
-                  className="w-full rounded-lg border border-neutral-300 bg-transparent py-2 pl-10 pr-10 uppercase text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  className="focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-lg border border-neutral-300 bg-transparent py-2 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none dark:text-white"
                   disabled={false}
                   value={uid}
                   onChange={(e) => setUid(e.target.value)}
                   required
                 />
 
-                <span className="absolute left-2 top-2">
+                <span className="absolute top-2 left-2">
                   <svg
                     className="fill-current"
                     width="28"
@@ -99,16 +97,15 @@ const SignIn = () => {
               </label>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Use state for type
                   placeholder="Password@1234"
-                  className="w-full rounded-lg border border-neutral-300 bg-transparent py-2 pl-10 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  className="focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-lg border border-neutral-300 bg-transparent py-2 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none dark:text-white"
                   disabled={false}
                   value={password}
                   onChange={(e) => setPwd(e.target.value)}
                   required
                 />
-
-                <span className="absolute left-3 top-2">
+                <span className="absolute top-2 left-3">
                   <svg
                     className="fill-current"
                     width="22"
@@ -129,17 +126,50 @@ const SignIn = () => {
                     </g>
                   </svg>
                 </span>
+                {/* Show/Hide Password Icon */}
+                <span
+                  className="absolute top-2 right-3 cursor-pointer"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? (
+                    // "eye closed" icon
+                    <svg
+                      width="22"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M22 12C22 12 21.3082 13.3317 20 14.8335M10 5.23552C10.3244 5.15822 10.6578 5.09828 11 5.05822C11.3254 5.02013 11.6588 5 12 5C14.8779 5 17.198 6.43162 18.8762 8M12 9C12.3506 9 12.6872 9.06015 13 9.17071C13.8524 9.47199 14.528 10.1476 14.8293 11C14.9398 11.3128 15 11.6494 15 12M3 3L21 21M12 15C11.6494 15 11.3128 14.9398 11 14.8293C10.1476 14.528 9.47202 13.8524 9.17073 13C9.11389 12.8392 9.07037 12.6721 9.0415 12.5M4.14701 9C3.83877 9.34451 3.56234 9.68241 3.31864 10C2.45286 11.1282 2 12 2 12C2 12 5.63636 19 12 19C12.3412 19 12.6746 18.9799 13 18.9418"
+                        stroke="currentColor"
+                      />
+                    </svg>
+                  ) : (
+                    // "eye open" icon
+                    <svg
+                      width="22"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M22 12C22 12 18.3636 19 12 19C5.63636 19 2 12 2 12C2 12 5.63636 5 12 5C14.8779 5 17.198 6.43162 18.8762 8M9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9"
+                        stroke="currentColor"
+                      />
+                    </svg>
+                  )}
+                </span>
               </div>
             </div>
-
             <div className="mb-1">
               <input
                 type="submit"
                 value="LOG IN"
-                className="w-full cursor-pointer rounded-lg border bg-primary p-4 font-semibold text-white transition hover:bg-primarydark hover:text-white"
+                className="bg-primary hover:bg-primarydark w-full cursor-pointer rounded-lg border p-4 font-semibold text-white transition hover:text-white"
               />
             </div>
-
             <div className="mt-2 text-center">
               {message && (
                 <p
@@ -150,19 +180,15 @@ const SignIn = () => {
                   {message}
                 </p>
               )}
-
               {/* <!-- Footer --> */}
-
               <p className="mt-auto py-4 text-center text-sm text-gray-400">
-                &copy; {new Date().getFullYear()} - Classy Project 
-                Marketing Sdn. Bhd.
+                &copy; {new Date().getFullYear()} - Classy Project Marketing
+                Sdn. Bhd.
               </p>
-
               {/* <!-- Footer --> */}
             </div>
           </form>
         </div>
-        {/* </div> */}
       </div>
     </div>
   );

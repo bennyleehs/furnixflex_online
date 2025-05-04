@@ -1,5 +1,6 @@
 // components/PermissionGuard.tsx
 import { ReactNode, useEffect, useState } from "react";
+import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 interface PermissionGuardProps {
   permissionValue: string;
@@ -14,13 +15,6 @@ const PermissionGuard = ({
 }: PermissionGuardProps) => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Define sections that should be available to all users
-  const DEFAULT_ACCESS_SECTIONS = [
-    "Dashboard",
-    "Country & Currency",
-    "Settings"
-  ];
 
   // Function to check if this permission is part of a default access section
   const isDefaultSection = async () => {

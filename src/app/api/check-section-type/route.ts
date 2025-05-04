@@ -1,13 +1,7 @@
 // app/api/check-section-type/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import sidebarData from "@/data/sidebar_menu.json";
-
-// Define sections that should be available to all users
-const DEFAULT_ACCESS_SECTIONS = [
-  "Dashboard",
-  "Country & Currency",
-  "Settings"
-];
+import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 // Extract all menu items with their IDs and section names
 function extractMenuItems(items: any[]): { id: string, sectionName: string }[] {

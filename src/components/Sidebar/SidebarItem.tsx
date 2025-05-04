@@ -4,13 +4,7 @@ import Link from "next/link";
 import SidebarDropdown from "@/components/Sidebar/SidebarDropdown";
 import { usePathname } from "next/navigation";
 import PermissionGuard from "../PermissionGuard";
-
-// Define sections that should be available to all users
-const DEFAULT_ACCESS_SECTIONS = [
-  "Dashboard",
-  "Country & Currency",
-  "Settings"
-];
+import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 const SidebarItem = ({ item, pageName, setPageName }: any) => {
   const handleClick = () => {

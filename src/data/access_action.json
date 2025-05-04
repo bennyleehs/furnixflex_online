@@ -1,0 +1,29 @@
+{
+  "action": [
+    {
+      "name": "All Access",
+      "description": "Administrative Priviliges",
+      "type": "0"
+    },
+    {
+      "name": "Mark As History",
+      "description": "Delete",
+      "type": "1"
+    },
+    {
+      "name": "Edit",
+      "description": "Update",
+      "type": "2"
+    },
+    {
+      "name": "Add",
+      "description": "Create",
+      "type": "3"
+    },
+    {
+      "name": "Monitor Only",
+      "description": "Read",
+      "type": "4"
+    }
+  ]
+}

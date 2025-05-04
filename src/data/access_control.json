@@ -1,5 +1,7 @@
 {
-  "JB.Office.Managing Director": ["2","3","4","5","8"],
+  "JB.Office.Managing Director": [
+    "1.0.0"
+  ],
   "JB.Office.Director": [],
   "JB.Office.Chief Officer": [],
   "JB.Office.Manager": [],
@@ -53,7 +55,6 @@
   "JB.Technology.Staff": [],
   "JB.Technology.Partner": [],
   "JB.Technology.Non-Executive Director": [],
-
   "SK.Office.Managing Director": [],
   "SK.Office.Director": [],
   "SK.Office.Chief Officer": [],
@@ -108,7 +109,6 @@
   "SK.Technology.Staff": [],
   "SK.Technology.Partner": [],
   "SK.Technology.Non-Executive Director": [],
-
   "SA.Office.Managing Director": [],
   "SA.Office.Director": [],
   "SA.Office.Chief Officer": [],

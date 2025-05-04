@@ -4,13 +4,12 @@ import { RowDataPacket } from "mysql2/promise";
 import { cache } from "react";
 import sidebarData from "@/data/sidebar_menu.json"; 
 
-// Extract all menu items and routes (same as in accessControl.ts)
 function extractMenuItems(items: any[]): { value: number | string, route: string }[] {
   let result: { value: number | string, route: string }[] = [];
   
   for (const item of items) {
-    // Extract the item's value and route
-    const itemValue = item.value || item.sub1_value || item.sub2_value || item.sub3_value;
+    // Extract the item's id and route - Updated to use id instead of value
+    const itemValue = item.id;
     const itemRoute = item.route;
     
     if (itemValue && itemRoute && itemRoute !== '#') {
