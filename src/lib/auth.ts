@@ -2,8 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { createPool } from "./db";
-import { AuthToken } from "@/types/auth";
-import { SignJWT, jwtVerify } from "jose";
+import jwt from 'jsonwebtoken';
 import { RowDataPacket } from "mysql2/promise";
 
 const db = createPool();
@@ -38,50 +37,25 @@ export async function verifyPassword(
   return bcrypt.compare(inputPassword, normalizedHash);
 }
 
+export interface AuthToken {
+  userId: number;
+  role: number;
+  department: number;
+  branch: number;
+  iat?: number;
+  exp?: number;
+}
+
 // function verify token
-export async function verifyToken(
-  token: string,
-): Promise<AuthToken | null | { expired: true }> {
+export async function verifyToken(token: string): Promise<AuthToken | { expired: true }> {
   try {
-    if (!secretKey) {
-      console.error("❌ JWT secret key is missing");
-      return null;
-    }
-
-    const { payload } = await jwtVerify(token, secretKey, {
-      algorithms: ["HS256"],
-    });
-
-    const { id, role, department, branch, iat, exp } = payload as {
-      id?: number;
-      role?: number;
-      department?: number;
-      branch?: number;
-      iat?: number;
-      exp?: number;
-    };
-
-    if (
-      typeof id !== "number" ||
-      typeof role !== "number" ||
-      typeof department !== "number" ||
-      typeof branch !== "number" ||
-      typeof iat !== "number" ||
-      typeof exp !== "number"
-    ) {
-      console.error("❌ Invalid token structure:", payload);
-      return null;
-    }
-
-    return { id, role, department, branch, iat, exp };
-  } catch (err: any) {
-    if (err.code === "ERR_JWT_EXPIRED") {
-      console.warn("⚠️ Token expired, but structurally valid.");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as AuthToken;
+    return decoded;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
       return { expired: true };
     }
-
-    console.error("❌ Invalid or expired token:", err);
-    return null;
+    throw error;
   }
 }
 
@@ -90,16 +64,13 @@ export async function generateToken(
   userId: number,
   role: number,
   department: number,
-  branch: number,
-) {
-  if (!secretKey) throw new Error("JWT secret key is missing");
-
-  const now = Math.floor(Date.now() / 1000); // iat
-
-  return new SignJWT({ id: userId, role, department, branch, iat: now })
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("1d") // "1days" is invalid, use "1d"
-    .sign(secretKey);
+  branch: number
+): Promise<string> {
+  return jwt.sign(
+    { userId, role, department, branch },
+    process.env.JWT_SECRET || 'your-secret-key',
+    { expiresIn: '24h' }
+  );
 }
 
 //db query for user's token {id, role, department, branch}
