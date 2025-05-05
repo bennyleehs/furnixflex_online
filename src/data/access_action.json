@@ -1,22 +1,17 @@
 {
   "action": [
     {
-      "name": "All Access",
-      "description": "Administrative Priviliges",
-      "type": "0"
-    },
-    {
       "name": "Mark As History",
       "description": "Delete",
       "type": "1"
     },
     {
-      "name": "Edit",
+      "name": "Make Changes",
       "description": "Update",
       "type": "2"
     },
     {
-      "name": "Add",
+      "name": "New Entry",
       "description": "Create",
       "type": "3"
     },
