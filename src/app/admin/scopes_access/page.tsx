@@ -81,10 +81,10 @@ export default function AccessList() {
 
         return {
           ...row,
-          no: index + 1, // Ensure we have a sequential number
+          no: index + 1,
           key: normalizedKey,
           originalKey: originalKey,
-          accessPath: paths.join(", "), // Changed comma format for better readability
+          accessPath: paths.join(", "),
           id: originalKey, // Using originalKey as the id for edit purposes
         };
       });
