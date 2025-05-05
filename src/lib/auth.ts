@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { createPool } from "./db";
 import { AuthToken } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
-import { RowDataPacket } from "mysql2/promise";
+import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
 const db = createPool();
 
@@ -22,7 +22,7 @@ export async function verifyPassword1(
 
 // function to handle $2y$ and $2b$ hash formats [$2y$ format, convert to $2b$ for bcrypt compatibility]
 function normalizeHash(hash: string): string {
-  // Check if hash - 
+  // Check if hash -
   if (hash.startsWith("$2y$")) {
     return hash.replace("$2y$", "$2b$");
   }
@@ -52,20 +52,30 @@ export async function verifyToken(
       algorithms: ["HS256"],
     });
 
-    const { id, role, department, branch, iat, exp } = payload as {
+    const {
+      id,
+      roleName,
+      departmentName,
+      branchRef,
+      permissions,
+      iat,
+      exp,
+    } = payload as {
       id?: number;
-      role?: number;
-      department?: number;
-      branch?: number;
+      roleName?: string;
+      departmentName?: string;
+      branchRef?: string;
+      permissions?: string[];
       iat?: number;
       exp?: number;
     };
 
     if (
       typeof id !== "number" ||
-      typeof role !== "number" ||
-      typeof department !== "number" ||
-      typeof branch !== "number" ||
+      typeof roleName !== "string" ||
+      typeof departmentName !== "string" ||
+      typeof branchRef !== "string" ||
+      !Array.isArray(permissions) ||
       typeof iat !== "number" ||
       typeof exp !== "number"
     ) {
@@ -73,7 +83,15 @@ export async function verifyToken(
       return null;
     }
 
-    return { id, role, department, branch, iat, exp };
+    return {
+      id,
+      roleName,
+      departmentName,
+      branchRef,
+      permissions,
+      iat,
+      exp,
+    };
   } catch (err: any) {
     if (err.code === "ERR_JWT_EXPIRED") {
       console.warn("⚠️ Token expired, but structurally valid.");
@@ -85,35 +103,33 @@ export async function verifyToken(
   }
 }
 
-//function generate token v0.0.2
+//function generate token with permissions
 export async function generateToken(
   userId: number,
-  role: number,
-  department: number,
-  branch: number,
+  roleName: string,
+  departmentName: string,
+  branchRef: string,
 ) {
   if (!secretKey) throw new Error("JWT secret key is missing");
 
+  // Get permissions based on branch, department, and role
+  const permissions = getPermissionsForRole(
+    branchRef, // Branch code (e.g., 'JB', 'SK')
+    departmentName, // Department name (e.g., 'Technology')
+    roleName, // Role title (e.g., 'Supervisor')
+  );
+
   const now = Math.floor(Date.now() / 1000); // iat
 
-  return new SignJWT({ id: userId, role, department, branch, iat: now })
+  return new SignJWT({
+    id: userId,
+    roleName,
+    departmentName,
+    branchRef,
+    permissions, // Include permissions array in the token
+    iat: now,
+  })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("1d") // "1days" is invalid, use "1d"
+    .setExpirationTime("1d")
     .sign(secretKey);
-}
-
-//db query for user's token {id, role, department, branch}
-export async function getUserDetailsFromDatabase(
-  userId: number,
-): Promise<{ role: number; department: number; branch: number } | null> {
-  const query =
-    "SELECT role_id, department_id, branch_id FROM users1 WHERE id = ?";
-    // "SELECT role_id, department_id, branch_id FROM users1 WHERE id = ?";
-  const [rows] = await db.query<RowDataPacket[]>(query, [userId]);
-
-  if (rows.length > 0) {
-    return rows[0] as { role: number; department: number; branch: number };
-  }
-
-  return null;
 }
