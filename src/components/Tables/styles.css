@@ -1,4 +1,17 @@
 .break-on-slash {
     white-space: pre-wrap; /* Preserve line breaks and wrap text */
     word-break: break-word; /* Break long words if necessary */
-  }
+}
+
+.inline-breadcrumb nav ol {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.inline-breadcrumb a,
+.inline-breadcrumb li {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

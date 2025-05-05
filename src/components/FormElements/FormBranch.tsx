@@ -181,11 +181,11 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
       {/* Success Message Modal */}
       {showSuccess && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-sm shadow-md">
+          <div className="bg-white p-6 rounded shadow-md">
             <p className="text-lg font-semibold">Form submitted successfully!</p>
             <button
               onClick={handleCloseSuccess}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600"
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               OK
             </button>
@@ -194,7 +194,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="p-4 bg-white rounded-sm shadow-md dark:bg-boxdark">
+      <form onSubmit={handleSubmit} className="p-4 bg-white rounded shadow-md dark:bg-boxdark">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {columns.map((column, index) => (
             <div key={index}>
@@ -208,7 +208,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
                   name={column.valueKey || column.title}
                   value={formData[column.valueKey || column.title] || ""}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-sm solid-black-text"
+                  className="w-full p-2 border rounded solid-black-text"
                 />
               ) : column.inputType === "time" ? (
                 <input
@@ -217,7 +217,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
                   name={column.valueKey || column.title}
                   value={formData[column.valueKey || column.title] || ""}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-sm solid-black-text"
+                  className="w-full p-2 border rounded solid-black-text"
                 />
               ) : column.inputType === "number" ? (
                 <input
@@ -229,7 +229,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
                   step={1}
                   value={formData[column.valueKey || column.title] || ""}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-sm solid-black-text"
+                  className="w-full p-2 border rounded solid-black-text"
                   placeholder="Enter minutes"
                 />
               ) : (
@@ -238,7 +238,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
                   name={column.valueKey || column.title}
                   value={formData[column.valueKey || column.title] || ""}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-sm solid-black-text"
+                  className="w-full p-2 border rounded solid-black-text"
                   disabled={loading && column.inputType === "select"}
                 >
                   <option value="">Select an option</option>
@@ -254,7 +254,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
         </div>
         <button
           type="submit"
-          className={`px-4 py-2 text-white rounded-sm hover:bg-opacity-90 ${data.length > 0 ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-500 hover:bg-blue-600"}`}
+          className={`px-4 py-2 text-white rounded hover:bg-opacity-90 ${data.length > 0 ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-500 hover:bg-blue-600"}`}
         >
           {data.length > 0 ? "Update" : "Submit"}
         </button>

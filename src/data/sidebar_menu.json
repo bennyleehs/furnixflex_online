@@ -4,69 +4,76 @@
     "menuItems": [
       {
         "label": "Dashboard",
+        "id": "1",
         "route": "#",
         "children": [
           {
             "label": "Sales",
+            "id": "1.1",
             "route": "/dashboard/jobsReport"
           },
           {
             "label": "Finance",
+            "id": "1.2",
             "route": "/dashboard/finance"
           },
           {
             "label": "Admin",
+            "id": "1.3",
             "route": "/dashboard/admin"
           }
         ]
       },
       {
         "label": "Administration",
-        "id": "1",
+        "id": "2",
         "route": "#",
         "children": [
           {
             "label": "Branches",
-            "id": "1.1",
+            "id": "2.1",
             "route": "/admin/branch"
           },
           {
             "label": "Human Resources",
+            "id": "2.2",
             "route": "#",
             "children": [
               {
                 "label": "Departments",
-                "id": "1.2",
+                "id": "2.2.1",
                 "route": "/admin/department"
               },
               {
                 "label": "Roles",
-                "id": "1.3",
+                "id": "2.2.2",
                 "route": "/admin/role"
               },
               {
                 "label": "Employees",
-                "id": "1.4",
+                "id": "2.2.3",
                 "route": "/admin/employee"
               },
               {
                 "label": "Rules",
+                "id": "2.2.4",
                 "route": "",
                 "children": [
                   {
                     "label": "Clocks",
-                    "id": "1.5",
+                    "id": "2.2.4.1",
                     "route": "/admin/clock"
                   }
                 ]
               },
               {
                 "label": "Scopes",
-                "route": "",
+                "id": "2.2.5",
+                "route": "/admin/scopes",
                 "children": [
                   {
                     "label": "Access List",
-                    "id": "1.6",
+                    "id": "2.2.5.1",
                     "route": "/admin/scopes_access"
                   }
                 ]
@@ -75,120 +82,158 @@
           },
           {
             "label": "Assets",
+            "id": "2.3",
             "route": "",
             "children": [
               {
                 "label": "Properties",
-                "id": "1.7",
+                "id": "2.3.1",
                 "route": "/admin/property"
               },
               {
                 "label": "Equipment",
-                "id": "1.8",
+                "id": "2.3.2",
                 "route": "/admin/equipment"
               },
               {
                 "label": "Inventory",
-                "id": "1.9",
+                "id": "2.3.3",
                 "route": "/admin/stock"
               }
             ]
           },
           {
             "label": "Partners",
-            "id": "1.10",
-            "route": "#"
+            "id": "2.4",
+            "route": "#",
+            "children": [
+              {
+                "label": "Dealers",
+                "id": "2.4.1",
+                "route": ""
+              },
+              {
+                "label": "Designers",
+                "id": "2.4.2",
+                "route": ""
+              },
+              {
+                "label": "Contractors",
+                "id": "2.4.3",
+                "route": ""
+              },
+              {
+                "label": "Referrals",
+                "id": "2.4.4",
+                "route": ""
+              }
+            ]
           }
         ]
       },
       {
         "label": "Sales",
-        "id": "2",
+        "id": "3",
         "route": "#",
         "children": [
           {
             "label": "Lead",
-            "id": "2.1",
+            "id": "3.1",
             "route": "/sales/lead"
           },
           {
             "label": "Task",
-            "id": "2.2",
+            "id": "3.2",
             "route": "/sales/task"
           },
           {
             "label": "Quotation",
-            "id": "2.3",
+            "id": "3.3",
             "route": "/sales/quotation"
           },
           {
             "label": "Invoices",
-            "id": "2.4",
+            "id": "3.4",
             "route": "/sales/invoice"
           },
           {
+            "label": "CRM",
+            "id": "3.5",
+            "route": "/sales/crm"
+          },
+          {
             "label": "Customer",
-            "id": "2.5",
+            "id": "3.6",
             "route": "/sales/customer"
           },
           {
             "label": "Products",
+            "id": "3.7",
             "route": "#",
             "children": [
               {
                 "label": "Packages",
-                "id": "2.6",
+                "id": "3.7.1",
                 "route": "/sales/packages"
               },
-              { "label": "Option", "id": "2.7", "route": "/sales/option" },
+              { "label": "Colors", "id": "3.7.2", "route": "/sales/colors" },
               {
                 "label": "Appliances",
-                "id": "2.8",
+                "id": "3.7.3",
                 "route": "/sales/appliances"
               },
               {
                 "label": "Promotion Code",
-                "id": "2.9",
+                "id": "3.7.4",
                 "route": "/sales/promotion"
               }
             ]
-          },
-          {
-            "label": "CRM",
-            "id": "2.10",
-            "route": "/sales/crm"
           }
         ]
       },
       {
         "label": "Finance",
-        "id": "3",
+        "id": "4",
         "route": "#",
         "children": [
           {
             "label": "Commissioning Rules",
+            "id": "4.1",
             "route": "#",
             "children": [
               {
                 "label": "Sales",
+                "id": "4.1.1",
                 "route": "#",
                 "children": [
                   {
                     "label": "Indoor",
-                    "id": "3.1",
+                    "id": "4.1.1.1",
                     "route": "#"
                   },
                   {
                     "label": "Measurement",
-                    "id": "3.2",
+                    "id": "4.1.1.2",
                     "route": "#"
                   }
                 ]
               },
               {
                 "label": "Dealer",
-                "id": "3.3",
-                "route": "#"
+                "id": "4.1.2",
+                "route": "#",
+                "children": [
+                  {
+                    "label": "Indoor",
+                    "id": "4.1.2.1",
+                    "route": "#"
+                  },
+                  {
+                    "label": "Measurement",
+                    "id": "4.1.2.2",
+                    "route": "#"
+                  }
+                ]
               }
             ]
           }
@@ -196,13 +241,49 @@
       },
       {
         "label": "Production",
-        "id": "4",
+        "id": "5",
         "route": "#",
         "children": [
           {
-            "label": "ERP",
-            "id": "4.1",
-            "route": "#"
+            "label": "Commissioning Rules",
+            "id": "5.1",
+            "route": "#",
+            "children": [
+              {
+                "label": "Sales",
+                "id": "5.1.1",
+                "route": "#",
+                "children": [
+                  {
+                    "label": "Indoor",
+                    "id": "5.1.1.1",
+                    "route": "#"
+                  },
+                  {
+                    "label": "Measurement",
+                    "id": "5.1.1.2",
+                    "route": "#"
+                  }
+                ]
+              },
+              {
+                "label": "Dealer",
+                "id": "5.1.2",
+                "route": "#",
+                "children": [
+                  {
+                    "label": "Indoor",
+                    "id": "5.1.2.1",
+                    "route": "#"
+                  },
+                  {
+                    "label": "Measurement",
+                    "id": "5.1.2.2",
+                    "route": "#"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -213,35 +294,37 @@
     "menuItems": [
       {
         "label": "Country & Currency",
+        "id": "6",
         "route": "#"
       },
       {
         "label": "Settings",
-        "route": "/forms/form-elements"
+        "id": "7",
+        "route": "#"
       },
       {
         "label": "History",
-        "id": "5",
+        "id": "8",
         "route": "#",
         "children": [
           {
             "label": "Customer",
-            "id": "5.1",
+            "id": "8.1",
             "route": "#"
           },
           {
             "label": "Task",
-            "id": "5.2",
+            "id": "8.2",
             "route": "#"
           },
           {
             "label": "Job",
-            "id": "5.3",
+            "id": "8.3",
             "route": "#"
           },
           {
             "label": "Promotion Code",
-            "id": "5.4",
+            "id": "8.4",
             "route": "#"
           }
         ]

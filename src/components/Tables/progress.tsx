@@ -1,330 +1,16 @@
-// import React, { useMemo, useState } from 'react';
-// import Link from 'next/link';
-
-// interface ProgressTableProps {
-//   data: any[];
-//   statusCounts: Record<string, number>;
-//   totalItems: number;
-// }
-
-// export default function ProgressTable({ data, statusCounts, totalItems }: ProgressTableProps) {
-//   // Define the sales pipeline stages in order
-//   const pipelineStages = [
-//     "Assign PIC",
-//     "Follow Up", 
-//     "Visit Showroom", 
-//     "Quotation", 
-//     "Deposit", 
-//     "Production", 
-//     "Installation", 
-//     "Job Done"
-//   ];
-  
-//   // State for task filtering
-//   const [selectedStage, setSelectedStage] = useState<string | null>(null);
-//   // Add a new state for PIC filtering
-//   const [selectedPIC, setSelectedPIC] = useState<string | null>(null);
-  
-//   // Extract unique PICs from the data
-//   const uniquePICs = useMemo(() => {
-//     const picSet = new Set<string>();
-    
-//     data.forEach(task => {
-//       // Extract just the name part from the PIC field if it contains "/"
-//       const picName = task.pic ? task.pic.split('/')[0].trim() : 'Unassigned';
-//       picSet.add(picName);
-//     });
-    
-//     return Array.from(picSet).sort();
-//   }, [data]);
-  
-//   // Calculate stage percentages and prepare data
-//   const stageData = useMemo(() => {
-//     // Initialize with zeros
-//     const counts = pipelineStages.reduce((acc, stage) => {
-//       acc[stage] = 0;
-//       return acc;
-//     }, {} as Record<string, number>);
-    
-//     // Count tasks in each stage
-//     data.forEach(task => {
-//       const status = task.status;
-//       if (pipelineStages.includes(status)) {
-//         counts[status]++;
-//       }
-//     });
-    
-//     // Calculate relative position in pipeline for each task
-//     let totalTasks = 0;
-//     const stageInfo = pipelineStages.map((stage, index) => {
-//       const count = counts[stage] || 0;
-//       totalTasks += count;
-      
-//       // Percentage of tasks at this stage
-//       const percentage = totalItems > 0 ? (count / totalItems) * 100 : 0;
-      
-//       // Progress weighting: earlier stages have less weight in overall progress
-//       const progressWeight = (index + 1) / pipelineStages.length;
-//       const weightedProgress = count * progressWeight;
-      
-//       return {
-//         stage,
-//         count,
-//         percentage,
-//         progressWeight,
-//         weightedProgress
-//       };
-//     });
-    
-//     // Calculate overall pipeline progress
-//     const totalWeightedProgress = stageInfo.reduce((sum, info) => sum + info.weightedProgress, 0);
-//     const maxPossibleProgress = totalTasks * 1; // 1 = maximum stage weight
-//     const overallProgress = maxPossibleProgress > 0 
-//       ? (totalWeightedProgress / maxPossibleProgress) * 100 
-//       : 0;
-    
-//     return {
-//       stageInfo,
-//       overallProgress: Math.round(overallProgress)
-//     };
-//   }, [data, totalItems, pipelineStages]);
-  
-//   // Process individual tasks with progress percentage
-//   const tasksWithProgress = useMemo(() => {
-//     return data.map(task => {
-//       const stageIndex = pipelineStages.indexOf(task.status);
-//       const progressPercentage = stageIndex >= 0 
-//         ? Math.round(((stageIndex + 1) / pipelineStages.length) * 100) 
-//         : 0;
-        
-//       return {
-//         ...task,
-//         progressPercentage,
-//         stageIndex
-//       };
-//     }).sort((a, b) => b.progressPercentage - a.progressPercentage); // Sort by progress descending
-//   }, [data, pipelineStages]);
-  
-//   // Update the displayedTasks logic to filter by both stage and PIC
-//   const displayedTasks = useMemo(() => {
-//     let filtered = tasksWithProgress;
-    
-//     // Apply stage filter if selected
-//     if (selectedStage) {
-//       filtered = filtered.filter(task => task.status === selectedStage);
-//     }
-    
-//     // Apply PIC filter if selected
-//     if (selectedPIC) {
-//       filtered = filtered.filter(task => {
-//         const picName = task.pic ? task.pic.split('/')[0].trim() : 'Unassigned';
-//         return picName === selectedPIC;
-//       });
-//     }
-    
-//     // Limit results if no filters are applied
-//     if (!selectedStage && !selectedPIC) {
-//       filtered = filtered.slice(0, 12);
-//     }
-    
-//     return filtered;
-//   }, [tasksWithProgress, selectedStage, selectedPIC]);
-  
-//   return (
-//     <div className="rounded-lg border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark mb-5">
-//       {/* <h3 className="text-xl font-semibold mb-4">Sales Pipeline Progress</h3> */}
-      
-//       {/* Pipeline flow visualization */}
-//       <div className="mb-6">
-//         <h4 className="text-md font-medium mb-1">Pipeline Flow</h4>
-//         <div className="flex items-end relative h-40 border-b border-stroke dark:border-strokedark mb-1">
-//           {stageData.stageInfo.map((info, index) => {
-//             const barHeight = info.percentage > 0 ? Math.max(15, info.percentage) : 3;
-//             let colorClass = "bg-primary/20 border-primary";
-            
-//             if (info.stage === "Job Done") colorClass = "bg-success/20 border-success";
-//             else if (["Deposit", "Production", "Installation"].includes(info.stage)) {
-//               colorClass = "bg-warning/20 border-warning";
-//             }
-            
-//             return (
-//               <div 
-//                 key={info.stage} 
-//                 className="flex-1 flex flex-col items-center text-center px-1 cursor-pointer"
-//                 onClick={() => setSelectedStage(selectedStage === info.stage ? null : info.stage)}
-//               >
-//                 {/* Bar column */}
-//                 <div className={`relative w-full group ${selectedStage === info.stage ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
-//                   <div 
-//                     className={`w-full rounded-t border-t-2 border-l-2 border-r-2 ${colorClass}`}
-//                     style={{ height: `${barHeight}%` }}
-//                   >
-//                     <div className="invisible group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs rounded-sm px-2 py-1 whitespace-nowrap z-10">
-//                       {info.stage}: {info.count}
-//                     </div>
-//                   </div>
-                  
-//                   {/* Flow arrows */}
-//                   {index < stageData.stageInfo.length - 1 && (
-//                     <div className="absolute -right-1.5 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
-//                       <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-//                         <path d="M8 5v14l11-7z" />
-//                       </svg>
-//                     </div>
-//                   )}
-//                 </div>
-                
-//                 {/* Stage label */}
-//                 <span className="text-xs overflow-hidden text-ellipsis w-full mt-1">
-//                   {index + 1}
-//                 </span>
-//               </div>
-//             );
-//           })}
-//         </div>
-        
-//         {/* Stage number legend */}
-//         <div className="flex justify-between mt-1 text-xs text-gray-500">
-//           {pipelineStages.map((stage, index) => (
-//             <div key={stage} className="text-center hidden md:block">
-//               {index + 1}. {stage.split(' ')[0]}
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-      
-
-//       {/* PIC filter buttons */}
-//       <div className="mb-4">
-//         {/* <h5 className="text-sm font-medium mb-2">Filter by Sales Rep:</h5> */}
-//         <div className="flex flex-wrap gap-2">
-//           <button 
-//             className={`px-3 py-1 text-xs rounded-full ${!selectedPIC ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-//             onClick={() => setSelectedPIC(null)}
-//           >
-//             All Sales Reps
-//           </button>
-//           {uniquePICs.map(pic => (
-//             <button 
-//               key={pic}
-//               className={`px-3 py-1 text-xs rounded-full ${selectedPIC === pic ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-//               onClick={() => setSelectedPIC(selectedPIC === pic ? null : pic)}
-//             >
-//               {pic}
-//             </button>
-//           ))}
-//         </div>
-//       </div>
-      
-//       {/* Individual task progress */}
-//       <h4 className="text-md font-medium mb-3">
-//         {selectedStage && selectedPIC 
-//           ? `Tasks for ${selectedPIC} in ${selectedStage} Stage`
-//           : selectedStage 
-//             ? `Tasks in ${selectedStage} Stage` 
-//             : selectedPIC
-//               ? `Tasks for ${selectedPIC}`
-//               : 'Recent Tasks Progress'
-//         }
-//         <span className="ml-2 text-sm text-gray-500">({displayedTasks.length} tasks)</span>
-//       </h4>
-      
-//       <div className="space-y-3">
-//         {displayedTasks.map((task) => {
-//           // Determine color based on progress
-//           let colorClass = "bg-primary";
-//           if (task.progressPercentage >= 100) colorClass = "bg-success";
-//           else if (task.progressPercentage >= 50) colorClass = "bg-warning";
-          
-//           return (
-//             <div key={task.id} className="bg-white dark:bg-boxdark border border-stroke dark:border-strokedark rounded-md p-3">
-//               {/* Header with name, ID and status */}
-//               <div className="flex justify-between items-start mb-2">
-//                 <div>
-//                   <h5 className="font-medium">{task.name}</h5>
-//                   <div className="flex items-center text-xs text-gray-500 mt-0.5">
-//                     <span className="mr-2">ID: {task.id}</span>
-//                     <span>Date: {task.date}</span>
-//                   </div>
-//                 </div>
-//                 <span className="text-xs bg-gray-100 dark:bg-meta-4 rounded-sm px-2 py-1 shrink-0 ml-2">{task.status}</span>
-//               </div>
-              
-//               {/* Task details */}
-//               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 mb-3 text-xs">
-//                 <div className="flex">
-//                   <span className="font-medium w-20">PIC:</span>
-//                   <span className="truncate">{task.pic || 'Unassigned'}</span>
-//                 </div>
-//                 <div className="flex">
-//                   <span className="font-medium w-20">Source:</span>
-//                   <span className="truncate">{task.source || '-'}</span>
-//                 </div>
-//                 <div className="flex">
-//                   <span className="font-medium w-20">Contact:</span>
-//                   <span className="truncate">{task.contact || '-'}</span>
-//                 </div>
-//                 <div className="flex">
-//                   <span className="font-medium w-20">Address:</span>
-//                   <span className="truncate">{task.address || '-'}</span>
-//                 </div>
-//               </div>
-              
-//               {/* Progress section */}
-//               <div className="flex justify-between items-center mb-1">
-//                 <span className="text-xs">Progress</span>
-//                 <span className="text-xs font-medium">{task.progressPercentage}%</span>
-//               </div>
-              
-//               <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-//                 <div 
-//                   className={`h-full ${colorClass} rounded-full transition-all duration-300`}
-//                   style={{ width: `${task.progressPercentage}%` }} 
-//                 />
-//               </div>
-              
-//               {/* Pipeline position indicator */}
-//               <div className="flex items-center justify-between mt-2">
-//                 {pipelineStages.map((stage, index) => (
-//                   <div 
-//                     key={stage}
-//                     className={`h-1.5 w-1.5 rounded-full ${index <= task.stageIndex ? colorClass : 'bg-gray-200'}`}
-//                   />
-//                 ))}
-//               </div>
-//             </div>
-//           );
-//         })}
-        
-//         {displayedTasks.length === 0 && (
-//           <div className="text-center py-8 text-gray-500">
-//             No tasks found in this stage.
-//           </div>
-//         )}
-//       </div>
-      
-//       {/* Show more link */}
-//       {!selectedStage && tasksWithProgress.length > 12 && (
-//         <div className="text-center mt-4">
-//           <Link href="/sales/task" className="text-primary hover:underline">
-//             View all {tasksWithProgress.length} tasks
-//           </Link>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+// import "./styles.css"; // Import the CSS file
 
 interface ProgressTableProps {
   data: any[];
   statusCounts: Record<string, number>;
   totalItems: number;
+  pageName: string;
 }
 
-export default function ProgressTable({ data, statusCounts, totalItems }: ProgressTableProps) {
+export default function ProgressTable({ data, statusCounts, totalItems, pageName }: ProgressTableProps) {
   // Define the sales pipeline stages in order
   const pipelineStages = [
     "Assign PIC",
@@ -467,11 +153,21 @@ export default function ProgressTable({ data, statusCounts, totalItems }: Progre
   
   return (
     <div className="rounded-lg border border-stroke bg-gray-50 p-5 shadow-default dark:border-strokedark dark:bg-meta-4 mb-5">
-      {/* <h3 className="text-xl font-semibold mb-4">Sales Pipeline Progress</h3> */}
+      {/* Header with Pipeline Flow title and breadcrumb on right */}
+      <div className="flex flex-wrap justify-between items-center mb-4">
+        {/* Title on left */}
+        <h4 className="text-md font-medium">Pipeline Flow</h4>
+        
+        {/* Breadcrumb on right */}
+        <div className="text-sm">
+          <Breadcrumb pageName={pageName} noHeader={true} />
+        </div>
+      </div>
       
       {/* Pipeline flow visualization with responsive layout */}
       <div className="mb-6">
-        <h4 className="text-md font-medium mb-2">Pipeline Flow</h4>
+        {/* Hidden the heading as we moved it to the top level */}
+        {/* <h4 className="text-md font-medium mb-2">Pipeline Flow</h4> */}
         
         {/* Desktop view - full pipeline */}
         <div className="hidden md:flex relative py-4 border-b border-stroke dark:border-strokedark mb-1">
@@ -616,7 +312,7 @@ export default function ProgressTable({ data, statusCounts, totalItems }: Progre
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-hidden focus:border-primary dark:bg-meta-4 dark:text-white"
+              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-none focus:border-primary dark:bg-meta-4 dark:text-white"
             />
             {searchQuery && (
               <button 
@@ -675,7 +371,7 @@ export default function ProgressTable({ data, statusCounts, totalItems }: Progre
                   <div className="flex items-center gap-2 flex-wrap">
                     <h5 className="font-medium text-black dark:text-white">{name}</h5>
                     {nric && (
-                      <span className="text-xs bg-gray-50 dark:bg-meta-4 px-1.5 py-0.5 rounded-sm border border-stroke dark:border-strokedark">
+                      <span className="text-xs bg-gray-50 dark:bg-meta-4 px-1.5 py-0.5 rounded border border-stroke dark:border-strokedark">
                         {nric}
                       </span>
                     )}
@@ -712,7 +408,7 @@ export default function ProgressTable({ data, statusCounts, totalItems }: Progre
                   {/* Full address on its own row */}
                   {task.address && (
                     <div className="flex items-start mt-1.5 text-xs">
-                      <svg className="h-3.5 w-3.5 text-red-500 mt-0.5 mr-1.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="h-3.5 w-3.5 text-red-500 mt-0.5 mr-1.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
                       <span className="text-gray-600 dark:text-gray-300 break-words">{task.address}</span>
@@ -739,7 +435,7 @@ export default function ProgressTable({ data, statusCounts, totalItems }: Progre
               </div>
               
               {/* Source Info - horizontal and inline layout */}
-              <div className="pt-0.5 pb-2.5 px-3 bg-gray-50 dark:bg-meta-4 rounded-sm">
+              <div className="pt-0.5 pb-2.5 px-3 bg-gray-50 dark:bg-meta-4 rounded">
                 <div className="flex flex-wrap gap-x-3 gap-y-1 items-center">
                   <span className="font-medium text-sm">Source Info: </span>
                   {sourceName && <span className="text-gray-700 dark:text-gray-300">{sourceName} /</span>}
@@ -781,7 +477,7 @@ export default function ProgressTable({ data, statusCounts, totalItems }: Progre
                   </div>
                  <div className="flex items-center">
                     <svg className="h-3 w-3 text-gray-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                     </svg>
                     <span className="font-medium">PIC:</span>
                     <span className="ml-1">{salesName || 'Unassigned'}</span>

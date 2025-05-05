@@ -10,7 +10,7 @@ const SignUp: React.FC = () => {
     <DefaultLayout>
       <Breadcrumb pageName="Sign Up" />
 
-      <div className="rounded-xs border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-wrap items-center">
           <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
             <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
@@ -26,7 +26,7 @@ const SignUp: React.FC = () => {
                   <input
                     type="text"
                     placeholder="UID provided"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
 
                   <span className="absolute right-4 top-4">
@@ -54,7 +54,7 @@ const SignUp: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Enter full name"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
 
                   <span className="absolute right-4 top-4">
@@ -89,7 +89,7 @@ const SignUp: React.FC = () => {
                   <input
                     type="email"
                     placeholder="Enter email"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
 
                   <span className="absolute right-4 top-4">
@@ -120,7 +120,7 @@ const SignUp: React.FC = () => {
                   <input
                     type="password"
                     placeholder="Enter password"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
 
                   <span className="absolute right-4 top-4">
@@ -155,7 +155,7 @@ const SignUp: React.FC = () => {
                   <input
                     type="password"
                     placeholder="Re-enter password"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
 
                   <span className="absolute right-4 top-4">

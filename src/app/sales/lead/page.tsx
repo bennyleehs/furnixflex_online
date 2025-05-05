@@ -90,7 +90,7 @@ export default function LeadPage() {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName={`${capitalizedTitle} List`} />
+      <Breadcrumb noHeader={true} pageName={`${capitalizedTitle} List`} />
       <Tables 
         columns={columns} 
         data={data} 

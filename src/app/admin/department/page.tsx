@@ -13,33 +13,35 @@ export default function DepartmentPage() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch("/api/admin/department");
-      if (!res.ok) throw new Error("Failed to fetch departments");
+        const res = await fetch("/api/admin/department");
+        if (!res.ok) throw new Error("Failed to fetch departments");
 
-      const data = await res.json();
-      // Format rows to combine data
-      const formattedRows = data.listDepartment.map((department: any) => ({
-        ...department,
-        name: `${department.name} `,
-        ref: `${department.ref} `,
-        status: `${department.status} `,
-      }));
-      setData(formattedRows); // Assign the formatted rows
-    } catch (err) {
-      setError("Error fetching data");
-      console.error(err);
-    } finally {
-      setLoading(false);
+        const data = await res.json();
+        // Format rows to combine data
+        const formattedRows = data.listDepartment.map((department: any) => ({
+          ...department,
+          name: `${department.name} `,
+          ref: `${department.ref} `,
+          status: `${department.status} `,
+        }));
+        setData(formattedRows); // Assign the formatted rows
+  
+  
+      } catch (err) {
+        setError("Error fetching data");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
 
-  useEffect(() => {
-    if (!hasFetchedData.current) {
-      fetchData();
-      hasFetchedData.current = true;
-    }
-  }, []);
-
+    useEffect(() => {
+      if (!hasFetchedData.current) {
+        fetchData();
+        hasFetchedData.current = true;
+      }
+    }, []);
+  
   const columns = [
     { key: "id", title: "ID" },
     { key: "name", title: "Name" },
@@ -47,18 +49,18 @@ export default function DepartmentPage() {
     { key: "status", title: "Status" },
   ];
 
+  if (loading) return <p>Loading departments...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Department List" />
-      {loading && <div className="p-4">Loading Departments...</div>}
-      {error && <div className="p-4 text-red-500">Error: {error}</div>}
-      {!loading && !error && (
-      <Tables
-        columns={columns}
-        data={data}
+      <Tables 
+        columns={columns} 
+        data={data} 
         filterKeys={["status"]}
         createLink="/admin/department/create"
-      />)}
+      />
     </DefaultLayout>
   );
 }

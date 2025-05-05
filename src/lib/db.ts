@@ -24,3 +24,11 @@ export function createPool() {
   }
   return pool;
 }
+
+export function connect() {
+  throw new Error('Function not implemented.');
+}
+
+export function execute(arg0: string, arg1: string[]): [any] | PromiseLike<[any]> {
+  throw new Error('Function not implemented.');
+}

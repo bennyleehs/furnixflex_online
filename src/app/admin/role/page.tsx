@@ -45,19 +45,19 @@ export default function RolePage() {
     { key: "name", title: "Name" },
     { key: "status", title: "Status" },
   ];
-  
+
+  if (loading) return <p>Loading departments...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Role List" />
-      {loading && <div className="p-4">Loading Roles...</div>}
-      {error && <div className="p-4 text-red-500">Error: {error}</div>}
-      {!loading && !error && (
       <Tables 
         columns={columns} 
         data={data} 
         filterKeys={["status"]}
         createLink="/admin/role/create"
-      />)}
+      />
     </DefaultLayout>
   );
 }
