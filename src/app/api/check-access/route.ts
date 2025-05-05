@@ -1,50 +1,34 @@
 // app/api/check-access/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
-import { getUserRole, getRolePermissions, checkPermissionForPath } from "@/lib/permissionCache";
-
-export const runtime = "nodejs"; // Explicitly use nodejs runtime for database operations
+import { verifyToken } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+import { checkUserAccess } from "@/utils/accessControlUtils";
 
 export async function POST(req: NextRequest) {
   try {
     const { path } = await req.json();
     
-    // Get token from cookies
-    const token = (await cookies()).get("authToken")?.value;
-
-    if (!token) {
-      return NextResponse.json({ hasAccess: false, error: "No auth token" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (!decoded || "expired" in decoded) {
-      return NextResponse.json({ hasAccess: false, error: "Invalid token" }, { status: 401 });
-    }
-
-    // Get user's role directly
-    const role = await getUserRole(decoded.id);
+    // Get the auth token from cookies
+    const cookieStore = await cookies();
+    const authToken = cookieStore.get("authToken");
     
-    if (!role) {
-      return NextResponse.json({ hasAccess: false, error: "User role not found" }, { status: 403 });
+    if (!authToken?.value) {
+      return NextResponse.json({ hasAccess: false }, { status: 401 });
     }
     
-    // Get permissions for this role
-    const permissions = await getRolePermissions(role);
+    // Verify the token
+    const tokenData = await verifyToken(authToken.value);
     
-    // Check if any permission grants access to this path
-    let hasAccess = false;
-    for (const permValue of permissions) {
-      if (checkPermissionForPath(permValue, path)) {
-        hasAccess = true;
-        break;
-      }
+    if (!tokenData || "expired" in tokenData) {
+      return NextResponse.json({ hasAccess: false }, { status: 401 });
     }
-
+    
+    // Use permissions from token to check access
+    const hasAccess = checkUserAccess(tokenData.permissions || [], path);
+    
     return NextResponse.json({ hasAccess });
   } catch (error) {
     console.error("Error checking access:", error);
-    return NextResponse.json({ hasAccess: false, error: "Server error" }, { status: 500 });
+    return NextResponse.json({ hasAccess: false }, { status: 500 });
   }
 }

@@ -9,10 +9,9 @@ export async function POST(req: NextRequest) {
   const db = createPool();
 
   const { uid, password } = await req.json();
-  // query from input to the db
-  // const [rows] = await db.query("SELECT id, uid, role FROM users1 WHERE uid = ?", [uid]);
+  // query from input to the db - only get necessary user info
   const [rows] = await db.query(
-    "SELECT id, uid, role_id AS role, department_id AS department, branch_id AS branch, email, password FROM users1 WHERE uid = ?",
+    "SELECT id, uid, roleName, deptName as departmentName, branchRef, email, password FROM users1 WHERE uid = ?",
     [uid]
   );
   
@@ -20,9 +19,9 @@ export async function POST(req: NextRequest) {
   const user = (
     rows as (IUser & {
       id: number;
-      role: number;
-      department: number;
-      branch: number;
+      roleName: string;
+      departmentName: string;
+      branchRef: string;
     })[]
   )[0];
 
@@ -31,23 +30,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  // token
+  // Generate token with permissions based on user's branch, department, and role
   const token = await generateToken(
     user.id,
-    user.role,
-    user.department,
-    user.branch,
+    user.roleName,
+    user.departmentName,
+    user.branchRef,
   );
 
   const res = NextResponse.json({ success: true });
   res.headers.set(
     "Set-Cookie",
-    // `authToken=${token}; Path=/; HttpOnly; Secure=${process.env.NODE_ENV === "production" ? "false" : "false"}; SameSite=Lax`,
-    // `authToken=${token}; Path=/; HttpOnly; Secure=false; SameSite=Lax, Max-Age=3600` //local
     `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,
   );
 
-  console.log("✅ Token set successfully:", token);
+  console.log("✅ Token set successfully");
 
   return res;
 }
