@@ -96,3 +96,15 @@ primarydark: #E89F30
 reddark: #C62A2F
 bluedark: #358CE3
 greendark: #219754
+
+
+--
+case: access_control.json = "JB.TECHNOLOGY.Supervisor": ["1.0.0"]
+after update, everything is same: access_control.json = "JB.TECHNOLOGY.Supervisor": ["1.0.0", "1.0.1"]
+expected update case:
+
+Administration and its sub-menu has access_action (all value 1), Sales and its sub-menu has action (all value 3), History and its sub-menu has access_action (5.1, 5.2, 5.3 has value 3) (5.4 has value 1) = "JB.TECHNOLOGY.Supervisor": ["1.0.1", "2.0.3", "5.1.3", "5.2.3", "5.3.3", "5.4.1"]
+
+1st digit indicates parent menu
+2nd digit indicates the second decimal of children menu (sub menu). if all the sub-menu has action, put 0 to indicates has access. if the 3rd digit is different, make it like the exanple of History & its sub-menu.
+3rd digit indicates actions.
