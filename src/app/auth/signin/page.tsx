@@ -8,7 +8,7 @@ const SignIn = () => {
   const [password, setPwd] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Track password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +31,7 @@ const SignIn = () => {
       if (response.ok) {
         setMessage(data.message || "Sign-in successful");
         setIsError(false);
-        router.push("/"); //push home
+        router.push("/");
       } else {
         setMessage(data.error || "Sign-in failed.");
         setIsError(true);
@@ -61,14 +61,14 @@ const SignIn = () => {
           </div>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="mb-2.5 block font-medium text-black dark:text-white">
+              <label className="mb-2.5 block font-medium text-black">
                 User ID
               </label>
               <div className="relative">
                 <input
                   type="text"
                   placeholder="UID"
-                  className="focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-lg border border-neutral-300 bg-transparent py-2 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none dark:text-white"
+                  className="bg-white focus:border-primary w-full rounded-lg border border-neutral-300 py-2 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none"
                   disabled={false}
                   value={uid}
                   onChange={(e) => setUid(e.target.value)}
@@ -92,14 +92,14 @@ const SignIn = () => {
               </div>
             </div>
             <div className="mb-6">
-              <label className="mb-2.5 block font-medium text-black dark:text-white">
+              <label className="mb-2.5 block font-medium text-black">
                 Password
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"} // Use state for type
                   placeholder="Password@1234"
-                  className="focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-lg border border-neutral-300 bg-transparent py-2 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none dark:text-white"
+                  className="bg-white focus:border-primary w-full rounded-lg border border-neutral-300 py-2 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none"
                   disabled={false}
                   value={password}
                   onChange={(e) => setPwd(e.target.value)}
@@ -132,7 +132,7 @@ const SignIn = () => {
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
-                    // "eye closed" icon
+                    // "eye closed"
                     <svg
                       width="22"
                       height="26"
@@ -146,7 +146,7 @@ const SignIn = () => {
                       />
                     </svg>
                   ) : (
-                    // "eye open" icon
+                    // "eye open"
                     <svg
                       width="22"
                       height="26"
