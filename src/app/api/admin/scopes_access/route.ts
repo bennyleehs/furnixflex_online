@@ -1,13 +1,12 @@
 // api/admin/scopes_access/route.ts
 import { createPool } from "@/lib/db";
-import { RowDataPacket } from "mysql2";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const db = createPool();
 
   const [branches] = await db.execute("SELECT name,ref FROM branches2");
-  const [departments] = await db.execute("SELECT name FROM departments");
+  const [departments] = await db.execute("SELECT name FROM departments ORDER BY id");
   const [roles] = await db.execute("SELECT name FROM roles1 ORDER BY id");
 
   // Skip the first role only
@@ -32,4 +31,3 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(result, { status: 200 });
 }
-// role (roles1), branch (branches2), department (departments)
