@@ -8,6 +8,7 @@ type Action = {
 };
 
 type SelectDropdownProps = {
+  subSectionId: string;
   path?: string;
   section?: string;
   id: string; // Add id to uniquely identify this dropdown
@@ -15,12 +16,13 @@ type SelectDropdownProps = {
   initialValue?: string; // Add initial value prop
 };
 
-const SelectDropdown = ({ 
-  path, 
-  section, 
-  id, 
-  onChange, 
-  initialValue = "" 
+const SelectDropdown = ({
+  subSectionId,
+  path,
+  section,
+  id,
+  onChange,
+  initialValue = "",
 }: SelectDropdownProps) => {
   const [selectedActions, setSelectedActions] = useState(initialValue);
   const [options, setOptions] = useState<
@@ -48,13 +50,13 @@ const SelectDropdown = ({
 
   const formatPath = (path: string, section: string) => {
     if (!path) return "Sub-menu:";
-    
+
     if (path.startsWith(section)) {
       // Only add slash if there's something after the section
       const remaining = path.substring(section.length);
-      return remaining.startsWith('/') ? remaining.substring(1) : remaining;
+      return remaining.startsWith("/") ? remaining.substring(1) : remaining;
     }
-    
+
     return path;
   };
 
@@ -66,28 +68,28 @@ const SelectDropdown = ({
         console.log("Fetching actions...");
         // Updated API endpoint to fetch from access_action.json
         const response = await fetch("/api/admin/scopes_access/access_action");
-        
+
         console.log("Response status:", response.status);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log("Fetched data:", data);
-        
+
         if (data && Array.isArray(data.action)) {
           const formattedOptions = data.action.map((action: Action) => ({
             value: action.type,
             label: `${action.type} - ${action.name} (${action.description})`,
           }));
-          
+
           setOptions([
             { value: "", label: "Assign action", disabled: true },
             { value: "0", label: "0 - Clear Access" },
-            ...formattedOptions
+            ...formattedOptions,
           ]);
-          
+
           console.log("Options set:", formattedOptions);
         } else {
           console.error("Invalid data format:", data);
@@ -96,7 +98,7 @@ const SelectDropdown = ({
       } catch (error) {
         console.error("Failed to fetch actions:", error);
         setError(error instanceof Error ? error.message : "Unknown error");
-        
+
         // Fallback to static options if API fails
         setOptions([
           { value: "", label: "Assign action", disabled: true },
@@ -122,51 +124,57 @@ const SelectDropdown = ({
   }, [initialValue]);
 
   return (
-    <div>
-      <label className="mb-3 block font-medium text-black dark:text-white">
-        {section && path ? formatPath(path, section) : (path || "Sub-menu:")}
-        <div className="relative ml-4 inline-block">
-          <select
-            className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[200px] cursor-pointer appearance-none rounded-lg border bg-transparent py-2 pr-8 pl-3 outline-none"
-            value={selectedActions}
-            onChange={handleChange}
-            id={id}
-            disabled={loading}
-          >
-            {options.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                disabled={option.disabled}
-              >
-                {formatOptionLabel(option.label)}
-              </option>
-            ))}
-          </select>
-
-          <div className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 transform">
-            {loading ? (
-              <span className="text-xs text-gray-500">Loading...</span>
-            ) : (
-              <svg
-                className="fill-current h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            )}
-          </div>
-        </div>
+    <div className="grid md:grid-cols-2 my-2">
+      <label className="block font-medium text-black dark:text-white mr-4">
+        {subSectionId && section && path
+          ? `${subSectionId}. ${formatPath(path, section)}`
+          : path || "Sub-menu:"}
       </label>
-      {error && <div className="ml-4 text-sm text-red-500">Error loading actions: Using fallback options</div>}
+      <div className="relative inline-block">
+        <select
+          className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[200px] cursor-pointer appearance-none rounded-lg border bg-transparent py-2 pr-8 pl-3 outline-none"
+          value={selectedActions}
+          onChange={handleChange}
+          id={id}
+          disabled={loading}
+        >
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              disabled={option.disabled}
+            >
+              {formatOptionLabel(option.label)}
+            </option>
+          ))}
+        </select>
+
+        <div className="pointer-events-none absolute top-1/2 right-16 -translate-y-1/2 transform">
+          {loading ? (
+            <span className="text-xs text-gray-500">Loading...</span>
+          ) : (
+            <svg
+              className="h-4 w-4 fill-current"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          )}
+        </div>
+      </div>
+      {error && (
+        <div className="ml-4 text-sm text-red-500">
+          Error loading actions: Using fallback options
+        </div>
+      )}
     </div>
   );
 };

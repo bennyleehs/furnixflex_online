@@ -16,16 +16,20 @@ const FormScopes2Access = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  
+
   // Store the selected action values for each menu item
-  const [selectedActions, setSelectedActions] = useState<Record<string, string>>({});
-  
+  const [selectedActions, setSelectedActions] = useState<
+    Record<string, string>
+  >({});
+
   // Parse the access control codes from the current format
   const [accessControlCodes, setAccessControlCodes] = useState<string[]>([]);
-  
+
   // Store the three-digit codes for each menu section
   // Format: [first digit].[second digit].[third digit]
-  const [sectionCodes, setSectionCodes] = useState<Record<string, string[]>>({});
+  const [sectionCodes, setSectionCodes] = useState<Record<string, string[]>>(
+    {},
+  );
 
   // Fetch current access paths when component mounts
   useEffect(() => {
@@ -53,39 +57,41 @@ const FormScopes2Access = () => {
 
         setAccessPaths(foundPaths.join(","));
         setAccessControlCodes(foundPaths);
-        
+
         // Initialize the selectedActions state with the parsed values
         // This will be used to set initial values for the dropdowns
         const initialSelectedActions: Record<string, string> = {};
         const initialSectionCodes: Record<string, string[]> = {};
-        
-        foundPaths.forEach(path => {
+
+        foundPaths.forEach((path) => {
           // Parse the three-digit code
-          const [firstDigit, secondDigit, thirdDigit] = parseThreeDigitCode(path);
-          
+          const [firstDigit, secondDigit, thirdDigit] =
+            parseThreeDigitCode(path);
+
           // Extract the section from the path format
           // We need to map this to a menu item ID
-          const section = path.split('.')[0]; // Assume first part is the section
-          
+          const section = path.split(".")[0]; // Assume first part is the section
+
           if (!initialSectionCodes[section]) {
             initialSectionCodes[section] = [];
           }
-          
+
           initialSectionCodes[section].push(path);
-          
+
           // For the menu item selection, we need to create a proper menuId
           // This is a simplified approach - you may need to adjust based on your data structure
           const menuId = `${section}.${firstDigit}`;
-          
+
           // Set the third digit as the action value
-          if (thirdDigit && thirdDigit !== "0") { // Only set non-zero values
+          if (thirdDigit && thirdDigit !== "0") {
+            // Only set non-zero values
             initialSelectedActions[menuId] = thirdDigit;
           }
         });
-        
+
         setSelectedActions(initialSelectedActions);
         setSectionCodes(initialSectionCodes);
-        
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching access paths:", error);
@@ -114,7 +120,7 @@ const FormScopes2Access = () => {
     }
     return ["", ""];
   };
-  
+
   // Parse three-digit codes into their components
   const parseThreeDigitCode = (code: string): [string, string, string] => {
     const parts = code.split(".");
@@ -126,9 +132,9 @@ const FormScopes2Access = () => {
 
   // Handler for dropdown value changes
   const handleDropdownChange = (id: string, value: string) => {
-    setSelectedActions(prev => ({
+    setSelectedActions((prev) => ({
       ...prev,
-      [id]: value
+      [id]: value,
     }));
   };
 
@@ -145,49 +151,50 @@ const FormScopes2Access = () => {
     try {
       // Convert selectedActions object to the format expected by the API
       const updatedPaths: string[] = [];
-      
+
       // Group menu items by parent section
       const menuGroups: Record<string, { id: string; action: string }[]> = {};
-      
+
       // First, group all selectedActions by their parent menu (first digit)
       // Format of id is typically like "1.1" where first digit is the parent menu
       Object.entries(selectedActions).forEach(([id, action]) => {
-        if (action && action !== "0") { // Skip items with no action or "clear access"
-          const parentMenu = id.split('.')[0]; // Get the parent menu number
-          
+        if (action && action !== "0") {
+          // Skip items with no action or "clear access"
+          const parentMenu = id.split(".")[0]; // Get the parent menu number
+
           if (!menuGroups[parentMenu]) {
             menuGroups[parentMenu] = [];
           }
-          
+
           menuGroups[parentMenu].push({
-            id: id.split('.')[1] || "0", // Get submenu number or default to "0"
-            action
+            id: id.split(".")[1] || "0", // Get submenu number or default to "0"
+            action,
           });
         }
       });
-      
+
       // Now process each parent menu group
       Object.entries(menuGroups).forEach(([parentMenu, items]) => {
         // Group by submenu to check if they all have the same action
         const submenuGroups: Record<string, string[]> = {};
-        items.forEach(item => {
+        items.forEach((item) => {
           if (!submenuGroups[item.id]) {
             submenuGroups[item.id] = [];
           }
           submenuGroups[item.id].push(item.action);
         });
-        
+
         // Check if all submenus have the same action
-        const allSameAction = Object.values(submenuGroups).every(actions => {
+        const allSameAction = Object.values(submenuGroups).every((actions) => {
           // All actions in this submenu must be identical
-          return actions.every(a => a === actions[0]);
+          return actions.every((a) => a === actions[0]);
         });
-        
+
         // Check if there's only one unique action across all submenus
-        const allActions = items.map(item => item.action);
+        const allActions = items.map((item) => item.action);
         const uniqueActions = [...new Set(allActions)];
         const onlyOneAction = uniqueActions.length === 1;
-        
+
         if (onlyOneAction && allSameAction) {
           // If all submenus have the same action, use format: parentMenu.0.action
           updatedPaths.push(`${parentMenu}.0.${uniqueActions[0]}`);
@@ -195,8 +202,8 @@ const FormScopes2Access = () => {
           // If different actions, add individual entries for each submenu
           Object.entries(submenuGroups).forEach(([submenu, actions]) => {
             // If this submenu has different actions, add each one
-            if (actions.length > 1 && !actions.every(a => a === actions[0])) {
-              actions.forEach(action => {
+            if (actions.length > 1 && !actions.every((a) => a === actions[0])) {
+              actions.forEach((action) => {
                 updatedPaths.push(`${parentMenu}.${submenu}.${action}`);
               });
             } else {
@@ -252,15 +259,13 @@ const FormScopes2Access = () => {
 
     const processMenuItem = (
       item: any,
-      parentPath: string = "",
+      // parentPath: string = "",
       section: string,
     ) => {
       // Skip if item doesn't have a label
       if (!item.label) return;
 
-      const currentPath = parentPath
-        ? `${parentPath}/${item.label}`
-        : item.label;
+      const currentPath = item.label;
 
       // Only add items with IDs
       if (item.id && item.id.trim() !== "") {
@@ -275,7 +280,7 @@ const FormScopes2Access = () => {
       // Process children recursively
       if (item.children && item.children.length > 0) {
         item.children.forEach((child: any) => {
-          processMenuItem(child, currentPath, section);
+          processMenuItem(child, section);
         });
       }
     };
@@ -294,7 +299,7 @@ const FormScopes2Access = () => {
           // Skip the top-level menu item itself, only process its children
           if (menuItem.children && menuItem.children.length > 0) {
             menuItem.children.forEach((child) => {
-              processMenuItem(child, "", menuItem.label);
+              processMenuItem(child, menuItem.label);
             });
           } else if (menuItem.id && menuItem.id.trim() !== "") {
             // If the top-level item has an ID but no children, include it
@@ -344,36 +349,50 @@ const FormScopes2Access = () => {
               className="border-primary active:border-primary disabled:bg-whiter dark:bg-form-input w-full rounded-lg border-[1.5px] bg-transparent px-5 py-3 text-black outline-hidden transition disabled:cursor-default md:w-80 dark:text-white"
               value={key || ""}
             />
-          </div>          
+          </div>
         </div>
 
         {/* Display status message if there is one */}
         {message && (
-          <div className={`my-4 p-4 rounded-lg ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div
+            className={`my-4 rounded-lg p-4 ${isError ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
+          >
             {message}
           </div>
         )}
 
         {/* Display sections and their menu items */}
         <div className="grid gap-x-4 md:grid-cols-3">
-          {Object.entries(groupedMenuItems).map(([section, items]) => (
-            <div key={section} className="mb-8">
-              <h3 className="mb-4 text-xl font-bold text-black dark:text-white">
-                {section}
-              </h3>
-              {items.map((item) => (
-                <div key={item.id}>
-                  <SelectDropdown
-                    path={item.path}
-                    section={item.section}
-                    id={item.id}
-                    onChange={handleDropdownChange}
-                    initialValue={getInitialValue(item.id)}
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
+          {Object.entries(groupedMenuItems).map(([sectionLabel, items]) => {
+            // Find the original menu item to get its ID
+            const sectionItem = typedSidebarMenu
+              .flatMap((s) => s.menuItems)
+              .find((item) => item.label === sectionLabel);
+            const sectionId = sectionItem?.id;
+
+            return (
+              <div key={sectionLabel} className="mb-8">
+                <h3 className="mb-4 text-xl font-bold text-black dark:text-white">
+                  {/* {sectionLabel} */}
+                  {/* Display the ID if available, otherwise just the label */}
+                  {sectionId && `${sectionId}. `}
+                  {sectionLabel}
+                </h3>
+                {items.map((item) => (
+                  <div key={item.id}>
+                    <SelectDropdown
+                      subSectionId={item.id}
+                      path={item.path}
+                      section={item.section}
+                      id={item.id}
+                      onChange={handleDropdownChange}
+                      initialValue={getInitialValue(item.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
         <div className="mb-1 flex space-x-4">
           <input

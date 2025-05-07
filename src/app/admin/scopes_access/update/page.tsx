@@ -1,7 +1,7 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import FormScopes2 from "@/components/FormElements/FormScopes2";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import FormScopes2 from "@/components/FormElements/FormScopes2";
 import { useSearchParams } from "next/navigation";
 
 export default function Update_Scopes() {
