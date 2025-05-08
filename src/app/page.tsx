@@ -19,7 +19,7 @@ export default function Home() {
       status: "completed",
       startDate: "2025-05-01",
       endDate: "2025-06-30",
-      progress: 100,
+      progress: 73,
       tasks: [
         { name: "API Endpoint Integration", status: "completed", dueDate: "2025-05-15" },
         { name: "Quotation System Refinements", status: "completed", dueDate: "2025-05-30" },
@@ -27,39 +27,39 @@ export default function Home() {
       ]
     },
     {
-      name: "Phase 2: Inventory & Customer Management",
+      name: "Phase 2: Products & Quotation Management",
       status: "in-progress",
-      startDate: "2025-07-01",
-      endDate: "2025-08-31",
+      startDate: "2025-05-6",
+      endDate: "2025-05-9",
       progress: 60,
       tasks: [
-        { name: "Inventory Management System", status: "in-progress", dueDate: "2025-07-31" },
-        { name: "Customer Management Module", status: "in-progress", dueDate: "2025-08-15" },
-        { name: "Basic Reporting Functionality", status: "pending", dueDate: "2025-08-31" }
+        { name: "Products Management System", status: "in-progress", dueDate: "2025-05-9" },
+        { name: "Quotation Management Module", status: "in-progress", dueDate: "2025-05-9" },
+        { name: "Basic Reporting Functionality", status: "pending", dueDate: "2025-05-9" }
       ]
     },
     {
-      name: "Phase 3: Advanced Features",
+      name: "Phase 3: Account Features",
       status: "pending",
-      startDate: "2025-09-01",
-      endDate: "2025-10-31",
+      startDate: "2025-06-01",
+      endDate: "2025-06-15",
       progress: 0,
       tasks: [
-        { name: "Advanced Reporting", status: "pending", dueDate: "2025-09-30" },
-        { name: "Mobile Optimizations", status: "pending", dueDate: "2025-10-15" },
-        { name: "Integration Capabilities", status: "pending", dueDate: "2025-10-31" }
+        { name: "Account Reporting", status: "pending", dueDate: "2025-06-5" },
+        { name: "Statement Optimizations", status: "pending", dueDate: "2025-06-10" },
+        { name: "Integration Capabilities", status: "pending", dueDate: "2025-06-15" }
       ]
     },
     {
       name: "Phase 4: Deployment",
       status: "pending",
-      startDate: "2025-11-01",
-      endDate: "2025-12-31",
+      startDate: "2025-06-15",
+      endDate: "2025-06-25",
       progress: 0,
       tasks: [
-        { name: "Testing & QA", status: "pending", dueDate: "2025-11-30" },
-        { name: "Documentation & Training", status: "pending", dueDate: "2025-12-15" },
-        { name: "Production Deployment", status: "pending", dueDate: "2025-12-31" }
+        { name: "Testing & QA", status: "pending", dueDate: "2025-06-15" },
+        { name: "Documentation & Training", status: "pending", dueDate: "2025-06-20" },
+        { name: "Production Deployment", status: "pending", dueDate: "2025-06-25" }
       ]
     }
   ]);
@@ -399,26 +399,27 @@ export default function Home() {
           {/* Outstanding Tasks */}
           <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-              Outstanding Tasks & Schedule
+              Outstanding Tasks & Development Schedule
             </h4>
             
             <div className="mb-6">
               <h5 className="text-lg font-medium text-black dark:text-white mb-3">High Priority (Immediate)</h5>
               <ul className="list-disc list-inside space-y-2 pl-2">
-                <li>API Endpoint Integration
-                  <ul className="list-circle list-inside ml-6 text-sm text-gray-6 dark:text-gray-4">
+                <li className="font-medium">API Endpoint Integration
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
                     <li>Fix missing /api/sales/quotation/list endpoint</li>
-                    <li>Implement /api/sales/quotation/status endpoint</li>
+                    <li>Implement /api/sales/quotation/status endpoint for status updates</li>
                   </ul>
                 </li>
-                <li>Quotation System Refinements
-                  <ul className="list-circle list-inside ml-6 text-sm text-gray-6 dark:text-gray-4">
+                <li className="font-medium">Quotation System Refinements
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
                     <li>Fix issue with quotation numbers not displaying</li>
-                    <li>Resolve data inconsistency between snake_case and camelCase</li>
+                    <li>Resolve data inconsistency between snake_case and camelCase properties</li>
+                    <li>Complete PDF generation functionality</li>
                   </ul>
                 </li>
-                <li>Transaction Flow Implementation
-                  <ul className="list-circle list-inside ml-6 text-sm text-gray-6 dark:text-gray-4">
+                <li className="font-medium">Transaction Flow Implementation
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
                     <li>Create invoice generation from accepted quotations</li>
                     <li>Implement payment tracking system</li>
                   </ul>
@@ -429,14 +430,98 @@ export default function Home() {
             <div className="mb-6">
               <h5 className="text-lg font-medium text-black dark:text-white mb-3">Medium Priority (Next Phase)</h5>
               <ul className="list-disc list-inside space-y-2 pl-2">
-                <li>Inventory Management</li>
-                <li>Customer Management</li>
-                <li>Reporting System</li>
+                <li className="font-medium">Inventory Management
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
+                    <li>Stock level tracking when products are ordered</li>
+                    <li>Low stock alerts</li>
+                    <li>Inventory adjustment interface</li>
+                  </ul>
+                </li>
+                <li className="font-medium">Customer Management
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
+                    <li>Customer database with history</li>
+                    <li>Customer portal access</li>
+                  </ul>
+                </li>
+                <li className="font-medium">Reporting System
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
+                    <li>Sales performance reports</li>
+                    <li>Product performance analytics</li>
+                    <li>Financial reporting</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mb-6">
+              <h5 className="text-lg font-medium text-black dark:text-white mb-3">Future Enhancements</h5>
+              <ul className="list-disc list-inside space-y-2 pl-2">
+                <li className="font-medium">Mobile Optimization
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
+                    <li>Touch-friendly interfaces for field staff</li>
+                    <li>Responsive design improvements</li>
+                  </ul>
+                </li>
+                <li className="font-medium">Integration Capabilities
+                  <ul className="list-circle list-inside ml-6 text-sm text-gray-600 dark:text-gray-400 font-normal mt-1 mb-2">
+                    <li>Accounting software integration</li>
+                    <li>CRM synchronization</li>
+                    <li>Email marketing integration</li>
+                  </ul>
+                </li>
               </ul>
             </div>
             
+            <div className="mb-6">
+              <h5 className="text-lg font-medium text-black dark:text-white mb-3">Development Schedule</h5>
+              <div className="grid grid-cols-1 gap-y-4 px-2">
+                <div className="border-l-2 border-primary pl-4 relative">
+                  <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
+                  <h6 className="font-medium text-black dark:text-white">Phase 1 (May-June 2025)</h6>
+                  <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <li>Complete all high-priority tasks</li>
+                    <li>Fix existing bugs in quotation system</li>
+                    <li>Implement core transaction flow</li>
+                  </ul>
+                </div>
+                
+                <div className="border-l-2 border-primary pl-4 relative">
+                  <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
+                  <h6 className="font-medium text-black dark:text-white">Phase 2 (July-August 2025)</h6>
+                  <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <li>Develop inventory management system</li>
+                    <li>Create customer management module</li>
+                    <li>Build basic reporting functionality</li>
+                  </ul>
+                </div>
+                
+                <div className="border-l-2 border-primary pl-4 relative">
+                  <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
+                  <h6 className="font-medium text-black dark:text-white">Phase 3 (September-October 2025)</h6>
+                  <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <li>Advanced reporting and analytics</li>
+                    <li>Mobile optimizations</li>
+                    <li>Integration capabilities</li>
+                    <li>User experience refinements</li>
+                  </ul>
+                </div>
+                
+                <div className="border-l-2 border-primary pl-4 relative">
+                  <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
+                  <h6 className="font-medium text-black dark:text-white">Phase 4 (November-December 2025)</h6>
+                  <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <li>Comprehensive testing</li>
+                    <li>Performance optimization</li>
+                    <li>Documentation</li>
+                    <li>Staff training</li>
+                    <li>Full production deployment</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
             <div>
-              <h5 className="text-lg font-medium text-black dark:text-white mb-3">Weekly Milestones</h5>
+              <h5 className="text-lg font-medium text-black dark:text-white mb-3">Weekly Milestones (Immediate Plan)</h5>
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <thead>
@@ -450,7 +535,7 @@ export default function Home() {
                     <tr className="border-b border-stroke dark:border-strokedark">
                       <td className="py-3 px-4 text-black dark:text-white">Week 1</td>
                       <td className="py-3 px-4">API Endpoints</td>
-                      <td className="py-3 px-4">Fix quotation list and status endpoints</td>
+                      <td className="py-3 px-4">Fix API endpoints and quotation display issues</td>
                     </tr>
                     <tr className="border-b border-stroke dark:border-strokedark">
                       <td className="py-3 px-4 text-black dark:text-white">Week 2</td>
@@ -460,7 +545,7 @@ export default function Home() {
                     <tr className="border-b border-stroke dark:border-strokedark">
                       <td className="py-3 px-4 text-black dark:text-white">Week 3</td>
                       <td className="py-3 px-4">Invoice Generation</td>
-                      <td className="py-3 px-4">Create invoices from accepted quotations</td>
+                      <td className="py-3 px-4">Implement invoice generation from quotations</td>
                     </tr>
                     <tr className="border-b border-stroke dark:border-strokedark">
                       <td className="py-3 px-4 text-black dark:text-white">Week 4</td>
