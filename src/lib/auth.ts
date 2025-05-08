@@ -2,7 +2,6 @@
 
 import bcrypt from "bcryptjs";
 import { createPool } from "./db";
-import jwt from 'jsonwebtoken';
 import { RowDataPacket } from "mysql2/promise";
 
 const db = createPool();
@@ -46,31 +45,104 @@ export interface AuthToken {
   exp?: number;
 }
 
-// function verify token
+// Function to encode text to base64url
+function base64UrlEncode(str: string): string {
+  return btoa(str)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
+
+// Function to decode base64url to text
+function base64UrlDecode(str: string): string {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  return atob(str);
+}
+
+// Function to verify token using Web Crypto API
 export async function verifyToken(token: string): Promise<AuthToken | { expired: true }> {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as AuthToken;
-    return decoded;
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
+    const [headerB64, payloadB64, signatureB64] = token.split(".");
+    
+    // Decode payload
+    const payload = JSON.parse(base64UrlDecode(payloadB64));
+    
+    // Check expiration
+    if (payload.exp && payload.exp < Date.now() / 1000) {
       return { expired: true };
     }
-    throw error;
+
+    // Verify signature
+    const encoder = new TextEncoder();
+    const data = encoder.encode(`${headerB64}.${payloadB64}`);
+    const signature = base64UrlDecode(signatureB64);
+    
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(process.env.JWT_SECRET || "your-secret-key"),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const isValid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      new Uint8Array(Array.from(signature).map(c => c.charCodeAt(0))),
+      data
+    );
+
+    if (!isValid) {
+      throw new Error("Invalid signature");
+    }
+
+    return payload as AuthToken;
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return { expired: true };
   }
 }
 
-//function generate token v0.0.2
+// Function to generate token using Web Crypto API
 export async function generateToken(
   userId: number,
   role: number,
   department: number,
   branch: number
 ): Promise<string> {
-  return jwt.sign(
-    { userId, role, department, branch },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '24h' }
+  const header = {
+    alg: "HS256",
+    typ: "JWT"
+  };
+
+  const payload = {
+    userId,
+    role,
+    department,
+    branch,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+  };
+
+  const encoder = new TextEncoder();
+  const headerB64 = base64UrlEncode(JSON.stringify(header));
+  const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+  
+  const data = encoder.encode(`${headerB64}.${payloadB64}`);
+  
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(process.env.JWT_SECRET || "your-secret-key"),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
   );
+
+  const signature = await crypto.subtle.sign("HMAC", key, data);
+  const signatureB64 = base64UrlEncode(String.fromCharCode(...new Uint8Array(signature)));
+
+  return `${headerB64}.${payloadB64}.${signatureB64}`;
 }
 
 //db query for user's token {id, role, department, branch}
