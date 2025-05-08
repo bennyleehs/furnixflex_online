@@ -16,10 +16,13 @@ export async function GET() {
     const subcategories: Record<string, string[]> = {};
     const products: Record<string, Record<string, any[]>> = {};
     
-    // Process products into organized structure
+    // Process products into organized structure with string cleaning
     productRows.forEach(product => {
-      const category = product.category;
-      const subcategory = product.subcategory;
+      // Normalize strings by trimming whitespace
+      const category = (product.category || '').trim();
+      const subcategory = (product.subcategory || '').trim();
+      
+      if (!category) return; // Skip products with empty categories
       
       // Add category if not exists
       if (!categories.includes(category)) {
@@ -38,32 +41,33 @@ export async function GET() {
       if (!products[category]) {
         products[category] = {};
       }
+      
       if (!products[category][subcategory]) {
         products[category][subcategory] = [];
       }
       
+      // Add the product with consistent ID format
       products[category][subcategory].push({
-        id: product.id,
-        name: product.name,
-        price: parseFloat(product.price),
-        discount: parseFloat(product.discount || 0),
-        unit: product.unit,
-        description: product.description
+        id: String(product.id), // Ensure ID is always a string
+        name: product.name || '',
+        description: product.description || '',
+        price: parseFloat(product.price || 0),
+        unit: product.unit || 'unit'
       });
     });
     
+    // Log the structure (helpful for debugging)
+    console.log(`Found ${categories.length} categories, ${Object.keys(subcategories).reduce((sum, cat) => sum + subcategories[cat].length, 0)} subcategories, and ${productRows.length} products`);
+    
     return NextResponse.json({
-      categories: categories.sort(),
+      categories,
       subcategories,
-      products,
-      allProducts: productRows
+      products
     });
+    
   } catch (error) {
     console.error('Error fetching products:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch products' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
 

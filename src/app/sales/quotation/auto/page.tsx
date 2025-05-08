@@ -120,6 +120,10 @@ export default function QuotationPage() {
   const [products, setProducts] = useState<Record<string, Record<string, Product[]>>>({});
   const [loadingProducts, setLoadingProducts] = useState(false);
 
+  // Cache for product lookup
+  const [productLookup, setProductLookup] = useState<Record<string, Product>>({});
+  const [productsError, setProductsError] = useState<string | null>(null);
+
   // Calculate dates
   const today = new Date().toISOString().split('T')[0];
   const validUntil = new Date();
@@ -145,14 +149,13 @@ export default function QuotationPage() {
           const taskData = responseData.listTask[0];
           
           // Make sure property and guard are set from database values
-          // In case fields have different names in the database
           setTask({
             ...taskData,
             property: taskData.property,
             guard: taskData.guard
           });
           
-          // Try to fetch existing quotation for this task
+          // Try to fetch existing quotation for this task using the standardized endpoint
           fetchQuotation(taskId);
         } else {
           throw new Error('No task data found');
@@ -170,28 +173,66 @@ export default function QuotationPage() {
     }
   }, [taskId]);
 
-  // Function to fetch existing quotation
+  // Function to fetch existing quotation - update this function
   const fetchQuotation = async (taskId: string) => {
     try {
-      // This would need to be implemented in your /api/sales/lead API
-      const response = await fetch(`/api/sales/lead?taskId=${taskId}`);
+      setLoading(true);
+      // Use the correct API endpoint for fetching quotations by taskId
+      const response = await fetch(`/api/sales/quotation?taskId=${taskId}`);
       
       if (response.ok) {
         const data = await response.json();
         if (data.quotation) {
+          // Found existing quotation in database - load it into state
           setQuotation(data.quotation);
           
           // Populate form with existing data
-          setItems(data.quotation.items);
-          setNotes(data.quotation.notes);
-          setTerms(data.quotation.terms);
-          setDiscount(data.quotation.discount);
-          setTax(data.quotation.tax);
+          setItems(data.quotation.items || []);
+          setNotes(data.quotation.notes || '');
+          setTerms(data.quotation.terms || terms);
+          setTax(data.quotation.tax || 0);
+          
+          // Show success notification
+          console.log('Loaded existing quotation:', data.quotation.quotation_number);
+          
+          // No need to generate a new number since we have an existing one
+          if (data.quotation.quotation_number) {
+            setGeneratedQuotationNumber('');
+          }
+          
+          // Show notification based on quotation status
+          if (data.quotation.status === 'draft') {
+            alert(`Loaded existing draft quotation #${data.quotation.quotation_number}`);
+          } else if (data.quotation.status === 'sent') {
+            alert(`This quotation #${data.quotation.quotation_number} has already been sent to the customer.`);
+          } else if (data.quotation.status === 'accepted') {
+            alert(`This quotation #${data.quotation.quotation_number} has been accepted by the customer.`);
+          }
+        } else {
+          // No existing quotation found, generate a new one
+          generateNewQuotationNumber();
         }
+      } else {
+        // API error handling
+        console.error('Failed to check for existing quotation');
+        // Still generate a number since we couldn't verify if one exists
+        generateNewQuotationNumber();
       }
     } catch (error) {
       console.error('Error fetching quotation:', error);
+      // Generate a number in case of error
+      generateNewQuotationNumber();
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Function to generate a new quotation number
+  const generateNewQuotationNumber = async () => {
+    if (!task?.sales_uid) return;
+    
+    const number = await generateQuotationNumber();
+    setGeneratedQuotationNumber(number);
   };
 
   // Function to generate a quotation number
@@ -231,7 +272,7 @@ export default function QuotationPage() {
     }
   }, [quotation?.id, task?.sales_uid]);
 
-  // Fetch products when component mounts
+  // Improve product fetching with better category structure
   useEffect(() => {
     const fetchProducts = async () => {
       setLoadingProducts(true);
@@ -241,12 +282,66 @@ export default function QuotationPage() {
         
         const data = await response.json();
         
+        // Debug the structure
+        console.log('API response categories:', data.categories);
+        
+        // Clean up categories by trimming whitespace
+        const cleanCategories = (data.categories || []).map((c: string) => c.trim());
+        
         // Organize data by category and subcategory
-        setCategories(data.categories || []);
-        setSubcategories(data.subcategories || {});
-        setProducts(data.products || {});
+        setCategories(cleanCategories);
+        
+        // Clean up subcategories
+        const cleanSubcategories: Record<string, string[]> = {};
+        Object.keys(data.subcategories || {}).forEach(category => {
+          const cleanCategory = category.trim();
+          // Make sure we're not storing empty arrays
+          const categorySubcats = ((data.subcategories as Record<string, string[]>)[category] || [])
+            .map(s => s.trim())
+            .filter(s => s); // Filter out empty strings
+            
+          if (categorySubcats.length > 0) {
+            cleanSubcategories[cleanCategory] = categorySubcats;
+          }
+        });
+        console.log('Processed subcategories:', cleanSubcategories);
+        setSubcategories(cleanSubcategories);
+        
+        // Clean up products
+        const cleanProducts: Record<string, Record<string, Product[]>> = {};
+        Object.keys(data.products || {}).forEach(category => {
+          const cleanCategory = category.trim();
+          cleanProducts[cleanCategory] = {};
+          
+          Object.keys(data.products[category] || {}).forEach(subcategory => {
+            const cleanSubcategory = subcategory.trim();
+            cleanProducts[cleanCategory][cleanSubcategory] = data.products[category][subcategory];
+          });
+        });
+        setProducts(cleanProducts);
+        
+        // Cache product data for quick lookup with clean keys
+        const productMap: Record<string, Product & { category: string; subcategory: string }> = {};
+        Object.keys(data.products || {}).forEach(category => {
+          const cleanCategory = category.trim();
+          Object.keys(data.products[category] || {}).forEach(subcategory => {
+            const cleanSubcategory = subcategory.trim();
+            (data.products[category][subcategory] || []).forEach((product: Product) => {
+              // Always store product IDs as strings
+              productMap[String(product.id)] = {
+                ...product,
+                id: String(product.id), // Ensure ID is string in the product object too
+                category: cleanCategory,
+                subcategory: cleanSubcategory
+              };
+            });
+          });
+        });
+        setProductLookup(productMap);
+        
       } catch (error) {
         console.error('Error fetching products:', error);
+        setProductsError('Failed to load products from database. Please refresh and try again.');
       } finally {
         setLoadingProducts(false);
       }
@@ -254,6 +349,27 @@ export default function QuotationPage() {
     
     fetchProducts();
   }, []);
+
+  // Add a useEffect to log product categories and subcategories
+  useEffect(() => {
+    // Log the first few keys of products to debug
+    console.log('Product categories:', Object.keys(products).slice(0, 3));
+    console.log('First category subcategories:', 
+      Object.keys(products)[0] ? 
+      Object.keys(products[Object.keys(products)[0]]) : 
+      'No categories'
+    );
+  }, [products]);
+
+  // Enhanced logging for subcategories
+  useEffect(() => {
+    if (Object.keys(subcategories).length > 0) {
+      console.log('Subcategories data loaded:');
+      Object.keys(subcategories).forEach(cat => {
+        console.log(`  - ${cat}: ${subcategories[cat]?.length || 0} subcategories`);
+      });
+    }
+  }, [subcategories]);
 
   // Add a new item to the quotation
   const addItem = () => {
@@ -265,11 +381,11 @@ export default function QuotationPage() {
         subcategory: '',
         productId: '',
         description: '',
-        quantity: 1,
-        unit: 'unit',
-        unitPrice: 0,
-        total: 0,
-        note: '' // Initialize with empty note
+        quantity: 1, // Not undefined
+        unit: 'unit', // Not undefined
+        unitPrice: 0, // Not undefined 
+        total: 0, // Not undefined
+        note: ''
       }
     ]);
   };
@@ -513,6 +629,43 @@ export default function QuotationPage() {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF');
     }
+  };
+
+  // Log items changes
+  useEffect(() => {
+    console.log('Items updated:', items);
+  }, [items]);
+
+  // Add after category selection
+  const logSubcategorySelection = (category: string) => {
+    console.log({
+      selectedCategory: category,
+      subcategoriesExist: Boolean(subcategories[category]),
+      availableSubcategories: subcategories[category],
+      allSubcategories: subcategories
+    });
+  };
+
+  // Add this somewhere in your component
+  const debugProductStructure = (category: string, subcategory: string) => {
+    console.log('Debug product structure:');
+    console.log(`- Selected category: "${category}"`);
+    console.log(`- Selected subcategory: "${subcategory}"`);
+    console.log(`- Category exists in products: ${Boolean(products[category])}`);
+    console.log(`- Subcategory exists in category: ${Boolean(products[category]?.[subcategory])}`);
+    console.log(`- Products in this subcategory: ${products[category]?.[subcategory]?.length || 0}`);
+    
+    if (products[category]?.[subcategory]?.length > 0) {
+      console.log('- First product sample:', products[category][subcategory][0]);
+    } else {
+      console.log('- No products found in this category/subcategory');
+    }
+    
+    // Check product lookup
+    const productsByCategory = Object.values(productLookup).filter(
+      p => p.category === category && p.subcategory === subcategory
+    );
+    console.log(`- Products in lookup for this category/subcategory: ${productsByCategory.length}`);
   };
 
   if (loading) {
@@ -872,9 +1025,40 @@ export default function QuotationPage() {
             {/* Quotation Number Display */}
             <div className="flex items-center bg-gray-50 dark:bg-meta-4 rounded-md px-3 py-2">
               <span className="text-sm font-medium text-gray-600 dark:text-gray-400 mr-2">Quotation #:</span>
-              <span className="bg-transparent py-1 px-2 text-sm font-medium">
-                {quotation?.quotation_number || 'Auto-generated (will appear after saving)'}
-              </span>
+              {quotation?.quotation_number ? (
+                <div className="flex items-center">
+                  <span className="py-1 px-2 text-sm font-medium bg-primary/10 text-primary rounded">
+                    {quotation.quotation_number}
+                  </span>
+                  {quotation.status && (
+                    <span className={`ml-2 text-xs font-medium px-2 py-1 rounded-full ${
+                      quotation.status === 'draft' ? 'bg-gray-200 text-gray-800' :
+                      quotation.status === 'sent' ? 'bg-blue-100 text-blue-800' :
+                      quotation.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {quotation.status.toUpperCase()}
+                    </span>
+                  )}
+                  <button 
+                    onClick={() => navigator.clipboard.writeText(quotation.quotation_number || '')}
+                    className="ml-2 text-gray-500 hover:text-primary"
+                    title="Copy to clipboard"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <span className="py-1 px-2 text-sm">
+                  {generatedQuotationNumber ? (
+                    <span className="text-gray-500">{generatedQuotationNumber} (Draft)</span>
+                  ) : (
+                    <span className="text-gray-500 italic">Auto-generated (will appear after saving)</span>
+                  )}
+                </span>
+              )}
             </div>
           </div>
           
@@ -1015,20 +1199,34 @@ export default function QuotationPage() {
                       </td>
                       <td className="py-2 px-3">
                         <div className="grid grid-cols-3 gap-2">
-                          {/* Category Dropdown */}
+                          {/* Category Dropdown - Fixed Version */}
                           <select
-                            value={item.category}
+                            value={item.category || ''}
                             onChange={(e) => {
+                              e.stopPropagation();
                               const category = e.target.value;
-                              // Reset dependent fields when category changes
-                              updateItem(item.id, 'category', category);
-                              updateItem(item.id, 'subcategory', '');
-                              updateItem(item.id, 'productId', '');
-                              updateItem(item.id, 'description', '');
-                              updateItem(item.id, 'unitPrice', 0);
-                              updateItem(item.id, 'unit', 'unit');
+                              console.log('Selected category:', category);
+                              
+                              // Create a new complete object rather than multiple updates
+                              const updatedItem = {
+                                ...item,
+                                category,
+                                subcategory: '',
+                                productId: '',
+                                description: '',
+                                unitPrice: 0,
+                                unit: 'unit',
+                                total: 0
+                              };
+                              
+                              // Replace just this one item in the items array
+                              const newItems = items.map(i => i.id === item.id ? updatedItem : i);
+                              setItems(newItems);
+                              
+                              // Add logging for subcategory selection
+                              logSubcategorySelection(category);
                             }}
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary"
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary relative z-10"
                           >
                             <option value="">Select Category</option>
                             {categories.map((category) => (
@@ -1038,61 +1236,106 @@ export default function QuotationPage() {
                             ))}
                           </select>
                           
-                          {/* Subcategory Dropdown */}
+                          {/* Subcategory Dropdown - Fixed Version */}
                           <select
-                            value={item.subcategory}
+                            value={item.subcategory || ''}
                             onChange={(e) => {
+                              e.stopPropagation();
                               const subcategory = e.target.value;
-                              // Reset product when subcategory changes
-                              updateItem(item.id, 'subcategory', subcategory);
-                              updateItem(item.id, 'productId', '');
-                              updateItem(item.id, 'description', '');
-                              updateItem(item.id, 'unitPrice', 0);
-                              updateItem(item.id, 'unit', 'unit');
+                              console.log('Selected subcategory:', subcategory);
+                              
+                              // Add this line:
+                              if (subcategory) debugProductStructure(item.category, subcategory);
+                              
+                              // Update all dependent fields in one go
+                              const updatedItem = {
+                                ...item,
+                                subcategory,
+                                productId: '',
+                                description: '',
+                                unitPrice: 0,
+                                unit: 'unit',
+                                total: 0
+                              };
+                              
+                              // Replace just this one item in the items array
+                              const newItems = items.map(i => i.id === item.id ? updatedItem : i);
+                              setItems(newItems);
                             }}
-                            disabled={!item.category || !subcategories[item.category]}
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary"
+                            disabled={!item.category || !subcategories[item.category]?.length}
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary relative z-10"
                           >
                             <option value="">Select Subcategory</option>
-                            {item.category && 
-                              subcategories[item.category]?.map((subcat) => (
+                            {(item.category && subcategories[item.category]?.length > 0) ? (
+                              subcategories[item.category].map((subcat) => (
                                 <option key={subcat} value={subcat}>
                                   {subcat}
                                 </option>
-                              ))}
+                              ))
+                            ) : (
+                              <option value="" disabled>No subcategories available</option>
+                            )}
                           </select>
                           
-                          {/* Product Dropdown */}
+                          {/* Product Dropdown - Fixed Version */}
                           <select
-                            value={item.productId}
+                            value={item.productId || ''}
                             onChange={(e) => {
+                              e.stopPropagation();
                               const productId = e.target.value;
-                              updateItem(item.id, 'productId', productId);
+                              console.log('Selected product ID:', productId);
+                              
+                              // Update all product-related fields in one atomic operation
+                              const updatedItem = { ...item, productId };
                               
                               // If a product is selected, populate other fields
                               if (productId && item.category && item.subcategory) {
-                                const selectedProduct = products[item.category][item.subcategory]?.find(
-                                  (p) => p.id === productId
+                                console.log('Looking for product in:', 
+                                  item.category, item.subcategory, 
+                                  'Available products:', products[item.category]?.[item.subcategory]?.length || 0
                                 );
                                 
+                                // First try finding the product in the specified category/subcategory
+                                let selectedProduct = products[item.category]?.[item.subcategory]?.find(
+                                  p => String(p.id) === String(productId)
+                                );
+                                
+                                // If not found, try the lookup cache as fallback
+                                if (!selectedProduct && productLookup[productId]) {
+                                  selectedProduct = productLookup[productId];
+                                  console.log('Product found in lookup cache instead');
+                                }
+                                
                                 if (selectedProduct) {
-                                  updateItem(item.id, 'description', selectedProduct.name);
-                                  updateItem(item.id, 'unitPrice', selectedProduct.price);
-                                  updateItem(item.id, 'unit', selectedProduct.unit || 'unit');
+                                  console.log('Product found:', selectedProduct);
+                                  updatedItem.description = selectedProduct.name || selectedProduct.description || '';
+                                  updatedItem.unitPrice = selectedProduct.price || 0;
+                                  updatedItem.unit = selectedProduct.unit || 'unit';
+                                  updatedItem.total = (updatedItem.quantity || 1) * (selectedProduct.price || 0);
+                                } else {
+                                  console.error('Product not found in either location');
                                 }
                               }
+                              
+                              // Update state with the complete item in one operation
+                              const newItems = items.map(i => i.id === item.id ? updatedItem : i);
+                              setItems(newItems);
                             }}
-                            disabled={!item.category || !item.subcategory || !products[item.category]?.[item.subcategory]}
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary"
+                            disabled={!item.category || !item.subcategory || !(products[item.category]?.[item.subcategory]?.length > 0)}
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary relative z-10"
                           >
                             <option value="">Select Product</option>
                             {item.category && 
                               item.subcategory &&
-                              products[item.category]?.[item.subcategory]?.map((product) => (
-                                <option key={product.id} value={product.id}>
-                                  {product.name}
-                                </option>
-                              ))}
+                              products[item.category]?.[item.subcategory]?.length > 0 ? (
+                                products[item.category][item.subcategory].map((product) => (
+                                  <option key={product.id} value={String(product.id)}>
+                                    {product.name || product.description} ({parseFloat(product.price || 0).toFixed(2)})
+                                  </option>
+                                ))
+                              ) : (
+                                <option value="" disabled>No products available</option>
+                              )}
                           </select>
                         </div>
                         
@@ -1106,7 +1349,7 @@ export default function QuotationPage() {
                       <td className="py-2 px-3">
                         <input
                           type="number"
-                          value={item.quantity}
+                          value={item.quantity !== undefined ? item.quantity : 0}
                           onChange={e => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
                           min="1"
                           step="1"
@@ -1116,7 +1359,7 @@ export default function QuotationPage() {
                       <td className="py-2 px-3">
                         <input
                           type="text"
-                          value={item.unit}
+                          value={item.unit || ''}
                           onChange={e => updateItem(item.id, 'unit', e.target.value)}
                           placeholder="unit"
                           className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary"
@@ -1125,7 +1368,7 @@ export default function QuotationPage() {
                       <td className="py-2 px-3">
                         <input
                           type="number"
-                          value={item.unitPrice}
+                          value={item.unitPrice !== undefined ? item.unitPrice : 0}
                           onChange={e => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
                           min="0"
                           step="0.01"
@@ -1134,7 +1377,7 @@ export default function QuotationPage() {
                       </td>
                       <td className="py-2 px-3">
                         <div className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm text-right font-medium">
-                          {(parseFloat(item.total as any) || 0).toFixed(2)}
+                          {parseFloat(String(item.total || 0)).toFixed(2)}
                         </div>
                       </td>
                       <td className="py-2 px-3 text-center">
