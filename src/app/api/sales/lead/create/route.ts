@@ -47,16 +47,17 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const url = new URL(request.url); // Parse the request URL
-    const id = url.searchParams.get('id'); // Extract the `id` from the query parameters
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'Employee ID is required for update' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Lead is required for update' }, { status: 400 });
     }
 
-    const formData = await request.json(); // Parse the JSON body
+    const formData = await request.json();
     const db = createPool();
 
+    // Update SQL query to include property_type and security_access fields
     const sql = `
       UPDATE customers1
       SET
@@ -65,28 +66,38 @@ export async function PUT(request: Request) {
         phone1 = ?, phone2 = ?, email = ?,
         address_line1 = ?, address_line2 = ?,
         postcode = ?, city = ?, state = ?, country = ?,
+        property = ?, guard = ?,
         status = ?, sales_id = ?,
         updated_at = NOW()
       WHERE id = ?
     `;
 
+    // Update values array to include property_type and security_access values
     const values = [
       formData['source'], formData['interested'], formData['add_info'],
       formData['name'], formData['nric'],
       formData['phone1'], formData['phone2'], formData['email'],
       formData['address_line1'], formData['address_line2'],
       formData['postcode'], formData['city'], formData['state'], formData['country'],
+      formData['property'], formData['guard'],
       formData['status'], formData['sales_id'],
-      id // Use the `id` from the URL
+      id
     ];
 
     const [result] = await db.query<ResultSetHeader>(sql, values);
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ success: false, error: 'Branch not found or no changes made' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Lead not found or no changes made' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, message: 'Branch updated successfully' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Customer updated successfully',
+      data: {
+        id,
+        ...formData
+      }
+    });
   } catch (error) {
     console.error('Error processing request:', error);
     return NextResponse.json({ success: false, error: 'Failed to process request' }, { status: 500 });

@@ -1,282 +1,351 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createPool } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { NextResponse } from 'next/server';
+import { createPool } from '@/lib/db'; 
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const taskId = url.searchParams.get('taskId');
+  const quotationId = url.searchParams.get('id');
+  
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const taskId = searchParams.get('taskId');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = (page - 1) * limit;
-    const status = searchParams.get('status');
-    const search = searchParams.get('search');
-    const db = createPool();
-
-    // If a specific quotation ID is requested
-    if (id) {
-      const quotation = await db.query(`
-        SELECT * FROM quotations WHERE id = ? LIMIT 1
-      `, [id]);
-
-      if (!quotation || (quotation as any[]).length === 0) {
-        return NextResponse.json({ error: "Quotation not found" }, { status: 404 });
+    const pool = createPool();
+    let quotation = null;
+    let items = [];
+    
+    if (quotationId) {
+      // Fetch quotation by ID
+      const [quotationRows] = await pool.query(
+        'SELECT * FROM quotations WHERE id = ?',
+        [quotationId]
+      ) as [any[], any];
+      
+      if (quotationRows.length > 0) {
+        quotation = quotationRows[0];
+        
+        // Fetch related items
+        const [itemRows] = await pool.query(
+          'SELECT * FROM quotation_items WHERE quotation_id = ?',
+          [quotationId]
+        ) as [any[], any];
+        
+        items = itemRows;
       }
-
-      return NextResponse.json({ quotation: quotation[0] });
-    }
-
-    // If quotations for a specific task are requested
-    if (taskId) {
-      const quotations = await db.query(`
-        SELECT * FROM quotations WHERE task_id = ? ORDER BY created_at DESC
-      `, [taskId]);
-
-      return NextResponse.json({ quotation: quotations[0] || null });
-    }
-
-    // Query to get filtered quotations with pagination
-    let countQuery = `SELECT COUNT(*) as total FROM quotations`;
-    let dataQuery = `
-      SELECT 
-        q.*,
-        t.name, t.nric, t.phone1, t.phone2, t.email,
-        t.address_line1, t.address_line2, t.city, t.state, t.country,
-        t.source, t.interested, t.add_info,
-        t.sales_name, t.sales_uid
-      FROM quotations q
-      LEFT JOIN tasks t ON q.task_id = t.id
-    `;
-    
-    // Build WHERE clause for filtering
-    const whereConditions = [];
-    const queryParams = [];
-    
-    if (status && status !== 'All') {
-      whereConditions.push('q.status = ?');
-      queryParams.push(status);
-    }
-    
-    if (search) {
-      whereConditions.push(`(
-        t.name LIKE ? OR 
-        t.nric LIKE ? OR 
-        t.phone1 LIKE ? OR 
-        t.email LIKE ? OR
-        q.reference_number LIKE ?
-      )`);
-      const searchTerm = `%${search}%`;
-      queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
-    }
-    
-    // Apply WHERE clause if needed
-    if (whereConditions.length > 0) {
-      const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
-      countQuery += ` ${whereClause}`;
-      dataQuery += ` ${whereClause}`;
-    }
-    
-    // Apply sorting and pagination
-    dataQuery += ` ORDER BY q.created_at DESC LIMIT ? OFFSET ?`;
-    queryParams.push(limit, offset);
-    
-    // Get total count for pagination
-    const countResult = await db.query(countQuery, queryParams.slice(0, queryParams.length - 2));
-    const totalCount = countResult[0].total;
-    
-    // Get actual data with pagination
-    const quotations = await db.query(dataQuery, queryParams);
-    
-    // Get status counts for filtering UI
-    const statusCountsResult = await db.query(`
-      SELECT status, COUNT(*) as count
-      FROM quotations
-      GROUP BY status
-    `);
-    
-    const statusCounts = statusCountsResult.reduce((acc, item) => {
-      acc[item.status] = item.count;
-      return acc;
-    }, {});
-    
-    return NextResponse.json({
-      listQuotation: quotations,
-      totalCount,
-      statusCounts
-    });
-  } catch (error) {
-    console.error('Error fetching quotations:', error);
-    return NextResponse.json({ error: 'Failed to fetch quotations' }, { status: 500 });
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const user = await auth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const db = createPool();
-
-    const data = await request.json();
-    
-    // Validate required fields
-    if (!data.taskId) {
-      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
-    }
-    
-    // Generate a reference number if not provided
-    if (!data.id) {
-      data.id = crypto.randomUUID();
-    }
-    
-    // Check if updating an existing quotation
-    const existingQuotation = await db.query(`
-      SELECT * FROM quotations WHERE id = ? LIMIT 1
-    `, [data.id]);
-    
-    if (existingQuotation && existingQuotation.length > 0) {
-      // Update existing quotation
-      await db.query(`
-        UPDATE quotations SET
-          task_id = ?,
-          customer_name = ?,
-          customer_contact = ?,
-          customer_address = ?,
-          quotation_date = ?,
-          valid_until = ?,
-          items = ?,
-          subtotal = ?,
-          discount = ?,
-          tax = ?,
-          total = ?,
-          notes = ?,
-          terms = ?,
-          status = ?,
-          updated_at = NOW(),
-          updated_by = ?
-        WHERE id = ?
-      `, [
-        data.taskId,
-        data.customerName,
-        data.customerContact,
-        data.customerAddress,
-        data.quotationDate,
-        data.validUntil,
-        JSON.stringify(data.items),
-        data.subtotal,
-        data.discount,
-        data.tax,
-        data.total,
-        data.notes,
-        data.terms,
-        data.status,
-        user.id,
-        data.id
-      ]);
+    } else if (taskId) {
+      // Fetch quotation by taskId
+      const [quotationRows] = await pool.query(
+        'SELECT * FROM quotations WHERE task_id = ? ORDER BY created_at DESC LIMIT 1',
+        [taskId]
+      ) as [any[], any];
       
-      // Fetch the updated quotation
-      const updatedQuotation = await db.query(`
-        SELECT * FROM quotations WHERE id = ? LIMIT 1
-      `, [data.id]);
-      
-      return NextResponse.json({ 
-        message: 'Quotation updated successfully',
-        quotation: updatedQuotation[0]
-      });
+      if (quotationRows.length > 0) {
+        quotation = quotationRows[0];
+        
+        // Fetch related items
+        const [itemRows] = await pool.query(
+          'SELECT * FROM quotation_items WHERE quotation_id = ?',
+          [quotation.id]
+        ) as [any[], any];
+        
+        items = itemRows;
+      }
     } else {
-      // Insert new quotation
-      await db.query(`
-        INSERT INTO quotations (
-          id,
-          task_id,
-          customer_name,
-          customer_contact,
-          customer_address,
-          quotation_date,
-          valid_until,
-          items,
-          subtotal,
-          discount,
-          tax,
-          total,
-          notes,
-          terms,
-          status,
-          created_at,
-          created_by,
-          updated_at,
-          updated_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?)
-      `, [
-        data.id,
-        data.taskId,
-        data.customerName,
-        data.customerContact,
-        data.customerAddress,
-        data.quotationDate,
-        data.validUntil,
-        JSON.stringify(data.items),
-        data.subtotal,
-        data.discount,
-        data.tax,
-        data.total,
-        data.notes,
-        data.terms,
-        data.status,
-        user.id,
-        user.id
-      ]);
-      
-      // Fetch the created quotation
-      const createdQuotation = await db.query(`
-        SELECT * FROM quotations WHERE id = ? LIMIT 1
-      `, [data.id]);
-      
-      return NextResponse.json({ 
-        message: 'Quotation created successfully',
-        quotation: createdQuotation[0]
-      });
+      return NextResponse.json(
+        { error: 'Missing taskId or quotation id parameter' },
+        { status: 400 }
+      );
     }
+    
+    if (!quotation) {
+      return NextResponse.json(
+        { message: 'No quotation found' },
+        { status: 404 }
+      );
+    }
+    
+    // Attach items to quotation
+    quotation.items = items;
+    
+    return NextResponse.json({ quotation });
   } catch (error) {
-    console.error('Error creating/updating quotation:', error);
-    return NextResponse.json({ error: 'Failed to save quotation' }, { status: 500 });
+    console.error('Error fetching quotation:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch quotation' },
+      { status: 500 }
+    );
   }
 }
-export async function DELETE(request: NextRequest) {
-  try {
-    const user = await auth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const db = createPool();
-    }
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+export async function POST(request: Request) {
+  try {
+    const pool = createPool();
+    const body = await request.json();
+    const {
+      task_id,
+      customerName,
+      customerContact,
+      customerAddress,
+      quotationDate,
+      validUntil,
+      salesRepresentative,
+      salesUID,
+      items,
+      subtotal,
+      discount,
+      tax,
+      total,
+      notes,
+      terms,
+      status,
+      quote_ref,
+      quotation_number  // Add this field
+    } = body;
     
-    if (!id) {
-      return NextResponse.json({ error: 'Quotation ID is required' }, { status: 400 });
+    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    
+    // Create new quotation with quotation_number
+    const [result] = await pool.query(
+      `INSERT INTO quotations (
+        task_id, customer_name, customer_contact, customer_address, 
+        quotation_date, valid_until, sales_representative, sales_uid, 
+        subtotal, discount, tax, total, notes, terms, status, quote_ref, quotation_number, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        task_id,
+        customerName,
+        customerContact,
+        customerAddress,
+        quotationDate,
+        validUntil,
+        salesRepresentative,
+        salesUID,
+        subtotal,
+        discount,
+        tax,
+        total,
+        notes,
+        terms,
+        status,
+        quote_ref,
+        quotation_number,  // Pass the generated value
+        now,
+        now
+      ]
+    ) as [{ insertId: number }, any];
+    
+    const quotationId = result.insertId;
+    
+    // Insert quotation items
+    for (const item of items) {
+      await pool.query(
+        `INSERT INTO quotation_items (
+          quotation_id, category, subcategory, product_id, description,
+          quantity, unit, unit_price, discount, total, note
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          quotationId,
+          item.category,
+          item.subcategory,
+          item.productId,
+          item.description,
+          item.quantity,
+          item.unit,
+          item.unitPrice,
+          item.discount,
+          item.total,
+          item.note || ''
+        ]
+      );
     }
     
-    // Check if quotation exists
-    const existingQuotation = await db.query(`
-      SELECT * FROM quotations WHERE id = ? LIMIT 1
-    `, [id]);
+    // Fetch the created quotation with its items
+    const [quotationRows] = await pool.query(
+      'SELECT * FROM quotations WHERE id = ?',
+      [quotationId]
+    ) as [any[], any];
     
-    if (!existingQuotation || existingQuotation.length === 0) {
-      return NextResponse.json({ error: 'Quotation not found' }, { status: 404 });
-    }
+    const [itemRows] = await pool.query(
+      'SELECT * FROM quotation_items WHERE quotation_id = ?',
+      [quotationId]
+    ) as [any[], any];
     
-    // Delete the quotation (or mark as deleted)
-    await db.query(`
-      DELETE FROM quotations WHERE id = ?
-    `, [id]);
+    const createdQuotation = quotationRows[0];
+    createdQuotation.items = itemRows;
     
-    return NextResponse.json({ message: 'Quotation deleted successfully' });
+    return NextResponse.json({ quotation: createdQuotation });
   } catch (error) {
-    console.error('Error deleting quotation:', error);
-    return NextResponse.json({ error: 'Failed to delete quotation' }, { status: 500 });
+    console.error('Error saving quotation:', error);
+    return NextResponse.json(
+      { error: 'Failed to save quotation' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  // Get the quotation ID from the query string
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+  
+  if (!id) {
+    return NextResponse.json(
+      { error: 'Missing quotation ID' },
+      { status: 400 }
+    );
+  }
+  
+  try {
+    const pool = createPool();
+    const body = await request.json();
+    
+    // Extract fields from the request body
+    const {
+      task_id,
+      customerName,
+      customerContact,
+      customerAddress,
+      quotationDate,
+      validUntil,
+      salesRepresentative,
+      salesUID,
+      items,
+      subtotal,
+      discount,
+      tax,
+      total,
+      notes,
+      terms,
+      status,
+      quote_ref,
+      quotation_number
+    } = body;
+    
+    // Update the quotation in the database
+    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    
+    await pool.query(
+      `UPDATE quotations SET 
+       task_id = ?, 
+       customer_name = ?, 
+       customer_contact = ?, 
+       customer_address = ?, 
+       quotation_date = ?, 
+       valid_until = ?, 
+       sales_representative = ?, 
+       sales_uid = ?, 
+       subtotal = ?, 
+       discount = ?, 
+       tax = ?, 
+       total = ?, 
+       notes = ?, 
+       terms = ?, 
+       status = ?, 
+       updated_at = ? 
+       WHERE id = ?`,
+      [
+        task_id,
+        customerName,
+        customerContact,
+        customerAddress,
+        quotationDate,
+        validUntil,
+        salesRepresentative,
+        salesUID,
+        subtotal,
+        discount,
+        tax,
+        total,
+        notes,
+        terms,
+        status,
+        now,
+        id
+      ]
+    );
+    
+    // Delete existing items and insert new ones
+    await pool.query('DELETE FROM quotation_items WHERE quotation_id = ?', [id]);
+    
+    // Insert updated items
+    for (const item of items) {
+      await pool.query(
+        `INSERT INTO quotation_items (
+          quotation_id, category, subcategory, product_id, description,
+          quantity, unit, unit_price, total, note
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          item.category,
+          item.subcategory,
+          item.productId,
+          item.description,
+          item.quantity,
+          item.unit,
+          item.unitPrice,
+          item.total,
+          item.note || ''
+        ]
+      );
+    }
+    
+    // Fetch the updated quotation with its items
+    const [quotationRows] = await pool.query(
+      'SELECT * FROM quotations WHERE id = ?',
+      [id]
+    ) as [any[], any];
+    
+    if (quotationRows.length === 0) {
+      return NextResponse.json(
+        { error: 'Quotation not found after update' },
+        { status: 404 }
+      );
+    }
+    
+    const [itemRows] = await pool.query(
+      'SELECT * FROM quotation_items WHERE quotation_id = ?',
+      [id]
+    ) as [any[], any];
+    
+    // Map column names to camelCase for frontend compatibility
+    const updatedQuotation = {
+      id: quotationRows[0].id,
+      task_id: quotationRows[0].task_id,
+      customerName: quotationRows[0].customer_name,
+      customerContact: quotationRows[0].customer_contact,
+      customerAddress: quotationRows[0].customer_address,
+      quotationDate: quotationRows[0].quotation_date,
+      validUntil: quotationRows[0].valid_until,
+      salesRepresentative: quotationRows[0].sales_representative,
+      salesUID: quotationRows[0].sales_uid,
+      subtotal: parseFloat(quotationRows[0].subtotal),
+      discount: parseFloat(quotationRows[0].discount),
+      tax: parseFloat(quotationRows[0].tax),
+      total: parseFloat(quotationRows[0].total),
+      notes: quotationRows[0].notes,
+      terms: quotationRows[0].terms,
+      status: quotationRows[0].status,
+      quote_ref: quotationRows[0].quote_ref,
+      quotation_number: quotationRows[0].quotation_number,
+      createdAt: quotationRows[0].created_at,
+      updatedAt: quotationRows[0].updated_at,
+      items: itemRows.map(item => ({
+        id: item.id,
+        category: item.category,
+        subcategory: item.subcategory,
+        productId: item.product_id,
+        description: item.description,
+        quantity: parseFloat(item.quantity),
+        unit: item.unit,
+        unitPrice: parseFloat(item.unit_price),
+        total: parseFloat(item.total),
+        note: item.note
+      }))
+    };
+    
+    return NextResponse.json({ quotation: updatedQuotation });
+  } catch (error) {
+    console.error('Error updating quotation:', error);
+    return NextResponse.json(
+      { error: 'Failed to update quotation', details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }

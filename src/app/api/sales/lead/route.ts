@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         const searchFields = [
           'c.name', 'c.nric', 'c.phone1', 'c.phone2', 'c.email',
           'c.address_line1', 'c.address_line2', 'c.city', 'c.state',
+          'c.propety', 'c.guard',
           'c.interested', 'c.add_info', 'c.country', 'c.source', 'c.created_at'
         ];
         

@@ -124,20 +124,13 @@ const menuGroups = [
         ),
         label: "Sales", route: "#",
         children: [
+          { label: "Products", route: "/sales/products" },
           { label: "Lead", route: "/sales/lead" },
           { label: "Task", route: "/sales/task" },
           { label: "Quotation", route: "/sales/quotation" },
           { label: "Invoices", route: "/sales/invoice" },
           { label: "CRM", route: "/sales/crm" },
           { label: "Customer", route: "/sales/customer" },
-          { label: "Products", route: "",
-            children: [
-              { label: "Packages", route: "/sales/packages" },
-              { label: "Colors", route: "/sales/colors" },
-              { label: "Appliances", route: "/sales/appliances" },
-              { label: "Promotion Code", route: "/sales/promotion" },
-            ],
-          },
         ],
       },
       {

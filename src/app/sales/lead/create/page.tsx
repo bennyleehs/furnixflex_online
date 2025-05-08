@@ -237,6 +237,26 @@ export default function Page() {
       { 
         title: "Postcode", inputType: "text", valueKey: "postcode",
       },
+      {
+        title: "Property Type",
+        inputType: "select",
+        valueKey: "property",
+        defaultValue: "High-Rise",
+        options: [
+          { value: "Landed", label: "Landed" },
+          { value: "High-Rise", label: "High-Rise" },
+        ],
+      },
+      {
+        title: "Gated Guarded",
+        inputType: "select",
+        valueKey: "guard",
+        defaultValue: "Guarded",
+        options: [
+          { value: "Guarded", label: "Guarded" },
+          { value: "No-Guard", label: "No-Guard" },
+        ],
+      },
       { 
         title: "Country",
         inputType: "select",

@@ -35,6 +35,7 @@ export default function LeadPage() {
         contact: `${item.phone1} / ${item.phone2} / ${item.email}`,
         address: `${item.address_line1}, ${item.address_line2}, 
                   ${item.city}, ${item.state}, ${item.country}`,
+        type: `${item.property} / ${item.guard}`,
         date: new Date(item.created_at).toLocaleDateString(), // Format date as needed
         status: `${item.status}`, 
         pic: `${item.sales_name} / ${item.sales_uid}`, // Assuming sales_id and sales_name are available
@@ -80,6 +81,7 @@ export default function LeadPage() {
     { key: "name", title: "Name / NRIC" },
     { key: "contact", title: "Contact" },
     { key: "address", title: "Address" },
+    { key: "type", title: "Type" },
     { key: "date", title: "Date" },
     { key: "status", title: "Status" },
     { key: "pic", title: "PIC" },
