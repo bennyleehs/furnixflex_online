@@ -1,42 +1,64 @@
 // // middleware.ts
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  // Allow public routes
-  if (
-    pathname.startsWith("/auth/signin") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/images") ||
-    pathname.startsWith("/favicon.ico")
-  ) {
-    return NextResponse.next();
-  }
-
-  const token = (await cookies()).get("authToken")?.value;
-
-  if (!token) {
-    return NextResponse.redirect(new URL("/auth/signin", req.url));
-  }
-
-  const decoded = await verifyToken(token);
-
-  if (!decoded || "expired" in decoded) {
-    return NextResponse.redirect(new URL("/auth/signin", req.url));
-  }
-
-  // If user is authenticated, allow access to home page
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
-  
-  return NextResponse.next();
-}
+// Define paths that don't require authentication
+const publicPaths = [
+  "/auth/signin",
+  "/auth/signup",
+  "/api/auth/signin",
+  "/api/auth/signup",
+];
 
 export const config = {
-  matcher: "/((?!auth/signin|_next|api|images|favicon.ico).*)",
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (auth API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
+  ],
 };
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Allow public paths
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Check for auth token
+  const token = request.cookies.get("authToken")?.value;
+
+  if (!token) {
+    // Redirect to login if no token
+    const url = new URL("/auth/signin", request.url);
+    url.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  try {
+    // Verify token using Web Crypto API
+    const [headerB64, payloadB64, signatureB64] = token.split(".");
+    
+    // Decode payload
+    const payload = JSON.parse(atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/")));
+    
+    // Check expiration
+    if (payload.exp && payload.exp < Date.now() / 1000) {
+      throw new Error("Token expired");
+    }
+
+    // Continue if token is valid
+    return NextResponse.next();
+  } catch (error) {
+    // Redirect to login if token is invalid
+    const url = new URL("/auth/signin", request.url);
+    url.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(url);
+  }
+}

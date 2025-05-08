@@ -145,13 +145,11 @@ export async function generateToken(
   return `${headerB64}.${payloadB64}.${signatureB64}`;
 }
 
-//db query for user's token {id, role, department, branch}
+// Database query for user's token details
 export async function getUserDetailsFromDatabase(
   userId: number,
 ): Promise<{ role: number; department: number; branch: number } | null> {
-  const query =
-    "SELECT role_id, department_id, branch_id FROM users1 WHERE id = ?";
-    // "SELECT role_id, department_id, branch_id FROM users1 WHERE id = ?";
+  const query = "SELECT role_id, department_id, branch_id FROM users1 WHERE id = ?";
   const [rows] = await db.query<RowDataPacket[]>(query, [userId]);
 
   if (rows.length > 0) {
