@@ -1,12 +1,6 @@
 {
-  "JB.OFFICE.Managing Director": [
-    "1.0.0"
-  ],
-  "JB.OFFICE.Director": [
-    "3.0.2",
-    "4.0.3",
-    "5.0.2"
-  ],
+  "JB.OFFICE.Managing Director": [],
+  "JB.OFFICE.Director": [],
   "JB.OFFICE.Chief Officer": [],
   "JB.OFFICE.Manager": [],
   "JB.OFFICE.Assistant Manager": [],
@@ -20,9 +14,7 @@
   "JB.SALES.Manager": [],
   "JB.SALES.Assistant Manager": [],
   "JB.SALES.Supervisor": [],
-  "JB.SALES.Staff": [
-    "2.0.3"
-  ],
+  "JB.SALES.Staff": [],
   "JB.SALES.Partner": [],
   "JB.SALES.Non-Executive Director": [],
   "JB.FINANCE.Managing Director": [],
@@ -35,9 +27,7 @@
   "JB.FINANCE.Partner": [],
   "JB.FINANCE.Non-Executive Director": [],
   "JB.PRODUCTION.Managing Director": [],
-  "JB.PRODUCTION.Director": [
-    "4.0.2"
-  ],
+  "JB.PRODUCTION.Director": [],
   "JB.PRODUCTION.Chief Officer": [],
   "JB.PRODUCTION.Manager": [],
   "JB.PRODUCTION.Assistant Manager": [],
@@ -59,11 +49,7 @@
   "JB.TECHNOLOGY.Chief Officer": [],
   "JB.TECHNOLOGY.Manager": [],
   "JB.TECHNOLOGY.Assistant Manager": [],
-  "JB.TECHNOLOGY.Supervisor": [
-    "1.0.1",
-    "2.0.1",
-    "4.0.1"
-  ],
+  "JB.TECHNOLOGY.Supervisor": ["1.0.1", "5.0.1"],
   "JB.TECHNOLOGY.Staff": [],
   "JB.TECHNOLOGY.Partner": [],
   "JB.TECHNOLOGY.Non-Executive Director": [],

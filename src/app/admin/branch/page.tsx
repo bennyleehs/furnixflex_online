@@ -64,6 +64,7 @@ export default function BranchPage() {
         data={branches}
         createLink="/admin/branch/create"
         filterKeys={["country", "status"]}
+        showCreateButton={false}
       />
     </DefaultLayout>
   );
