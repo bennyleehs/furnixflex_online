@@ -40,7 +40,7 @@ rm -rf node_modules .next package-lock.json yarn.lock bun.lockb
 ### 📄 License
 TailAdmin Next.js Free is 100% free and open-source; feel free to use it with your personal and commercial projects.
 
-## Development Logs (Not finalilze)
+## Development Logs (Not finalize)
 
 ### Version 1.0.0-alpha
 
