@@ -1,3 +1,4 @@
+// src/lib/authMiddleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, AuthToken } from "./auth";
 import { checkAccess } from "@/utils/accessControl";
@@ -6,11 +7,11 @@ export interface AuthenticatedRequest extends NextRequest {
   user: AuthToken;
 }
 
-export async function withAuth(
+export function withAuth(
   handler: (req: AuthenticatedRequest) => Promise<NextResponse>,
   path: string
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest) => { // Return the async function directly
     // Extract authToken from cookies
     const authToken = req.cookies.get("authToken")?.value;
     if (!authToken) {
@@ -44,4 +45,4 @@ export async function withAuth(
       );
     }
   };
-} 
+}
