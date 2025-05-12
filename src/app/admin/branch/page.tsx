@@ -1,3 +1,4 @@
+//src/app/admin/branch/page.tsx
 "use client";
 import { useEffect, useState, useRef } from "react";
 import Tables from "@/components/Tables";
@@ -64,7 +65,7 @@ export default function BranchPage() {
         data={branches}
         createLink="/admin/branch/create"
         filterKeys={["country", "status"]}
-        showCreateButton={false}
+        showCreateButton={true}
       />
     </DefaultLayout>
   );

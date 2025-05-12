@@ -1,3 +1,4 @@
+//src/components/Tables/index.tsx
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -46,11 +47,9 @@ export default function Tables({
       data.forEach((row) => {
         const cellValue = row[col.key]?.toString() || "";
         const segments = cellValue.split(/[/,]/); // Split by '/' or ','
-        segments.forEach(
-          (segment: string) => {
-            maxLength = Math.max(maxLength, segment.trim().length); // Find the longest segment
-          },
-        );
+        segments.forEach((segment: string) => {
+          maxLength = Math.max(maxLength, segment.trim().length); // Find the longest segment
+        });
       });
       return maxLength * 8; // Approximate width in pixels (8px per character)
     });
@@ -107,7 +106,7 @@ export default function Tables({
   const handleEdit = (row: Record<string, any>) => {
     // Determine the appropriate ID to use for the URL
     const idToUse = row.originalKey || row[idParam] || row.id;
-    
+
     if (idToUse) {
       // Since we're using the key as the id parameter, we should encode it
       const encodedId = encodeURIComponent(idToUse);
@@ -203,7 +202,9 @@ export default function Tables({
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((row, rowIndex) => (
-                <tr key={`row-${rowIndex}-${row.id || row.originalKey || row.key || rowIndex}`}>
+                <tr
+                  key={`row-${rowIndex}-${row.id || row.originalKey || row.key || rowIndex}`}
+                >
                   {columns.map((col, colIndex) => (
                     <td
                       key={`cell-${rowIndex}-${col.key}-${colIndex}`}
@@ -234,10 +235,26 @@ export default function Tables({
                           />
                         </svg>
                       </button>
-                      <button 
+                      <button
                         className="hover:text-primary"
-                        title="Info"
+                        title="Mark as History"
                       >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </button>
+                      <button className="hover:text-primary" title="Info">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -246,7 +263,6 @@ export default function Tables({
                           viewBox="0 0 24 24"
                           stroke="currentColor"
                           strokeLinecap="round"
-                          strokeLinejoin="round"
                           strokeWidth="2"
                         >
                           <path d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -258,8 +274,8 @@ export default function Tables({
               ))
             ) : (
               <tr>
-                <td 
-                  colSpan={columns.length + 1} 
+                <td
+                  colSpan={columns.length + 1}
                   className="dark:border-strokedark border-b border-[#eee] px-2 py-5 text-center xl:pl-6"
                 >
                   No data available
