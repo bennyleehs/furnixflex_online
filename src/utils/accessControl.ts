@@ -131,33 +131,32 @@ async function getRolePermissions(roleId: number): Promise<string[]> {
 
 // Function to check if a specific permission value grants access to a path
 function checkPermissionForPath(permissionId: string, path: string): boolean {
-  // For default access routes
+  console.log(`Checking permissionId: ${permissionId} for path: ${path}`);
+
   if (DEFAULT_ACCESS_ROUTES.some(route => route === path || path.startsWith(route + "/"))) {
+    console.log(`Path ${path} is a default access route.`);
     return true;
   }
-  
-  // For exact match - check if the permission ID directly maps to this path
-  const exactMatch = allMenuItems.find(item => 
-    item.id === permissionId && 
-    (item.route === path || path.startsWith(item.route + "/") || item.route === "#")
+
+  const exactMatch = allMenuItems.find(item =>
+    item.id === permissionId &&
+    (item.route === path || path.startsWith(item.route + "/") || item.route === "#" ||
+     (path.startsWith("/api") && `/${path.split("/").slice(2).join("/")}` === item.route)) // New API route check
   );
-  
   if (exactMatch) return true;
-  
-  // For hierarchical permissions:
-  // Check if any menu item has an ID that starts with the same prefix as the permission
-  // or if the permission ID is a parent of any menu item ID
-  return allMenuItems.some(item => {
-    // If permission is parent of item (e.g., perm="1" and item="1.2")
-    const isParentOf = item.id && item.id.startsWith(permissionId + "."); 
-                       
-    // If item route matches the requested path
-    const routeMatches = item.route === path || 
-                         path.startsWith(item.route + "/") || 
-                         item.route === "#";
-                         
+
+  const hierarchicalMatch = allMenuItems.some(item => {
+    const isParentOf = item.id && item.id.startsWith(permissionId + ".");
+    const routeMatches = item.route === path ||
+                         path.startsWith(item.route + "/") ||
+                         item.route === "#" ||
+                         (path.startsWith("/api") && `/${path.split("/").slice(2).join("/")}` === item.route); // New API route check
     return isParentOf && routeMatches;
   });
+
+  if (hierarchicalMatch) return true;
+
+  return false;
 }
 
 /**
@@ -170,33 +169,28 @@ export async function checkAccess(
   userId: number,
   path: string,
 ): Promise<boolean> {
-  try {
-    // First check if this is a default access route
-    if (DEFAULT_ACCESS_ROUTES.some(route => route === path || path.startsWith(route + "/"))) {
-      return true;
-    }
-    
-    const db = createPool();
+  console.log(`Checking access for userId: ${userId}, path: ${path}`);
+  if (DEFAULT_ACCESS_ROUTES.some(route => route === path || path.startsWith(route + "/"))) {
+    console.log(`Access granted via default access routes.`);
+    return true;
+  }
 
-    // Get user's role from database
-    const [rows] = await db.query<RowDataPacket[]>(
-      "SELECT role_id FROM users1 WHERE id = ?",
-      [userId],
-    );
-
-    if (!rows.length) return false;
-
-    const roleId = rows[0].role_id;
-
-    // Get permissions for this role
-    const permissionValues = await getCachedRolePermissions(roleId);
-
-    // Check if any permission grants access to this path
-    return permissionValues.some(permValue => checkPermissionForPath(permValue, path));
-  } catch (error) {
-    console.error("Error checking access:", error);
+  const db = createPool();
+  const [rows] = await db.query<RowDataPacket[]>("SELECT role_id FROM users1 WHERE id = ?", [userId]);
+  if (!rows.length) {
+    console.log(`User ${userId} not found.`);
     return false;
   }
+
+  const roleId = rows[0].role_id;
+  console.log(`User ${userId} has roleId: ${roleId}`);
+
+  const permissionValues = await getCachedRolePermissions(roleId);
+  console.log(`Role ${roleId} has permissions:`, permissionValues);
+
+  const hasPermission = permissionValues.some(permValue => checkPermissionForPath(permValue, path));
+  console.log(`Access to ${path} for user ${userId}: ${hasPermission}`);
+  return hasPermission;
 }
 
 /**

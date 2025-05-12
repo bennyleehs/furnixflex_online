@@ -1,8 +1,9 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
 
-export async function GET(req: NextRequest) {
+async function handler(req: AuthenticatedRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
@@ -53,3 +54,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+// Export the route handler with authentication middleware
+export const GET = withAuth(handler, "/api/admin/branch");
