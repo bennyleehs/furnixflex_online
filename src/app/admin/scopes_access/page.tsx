@@ -75,16 +75,17 @@ export default function AccessList() {
         // Get access paths using the normalized key
         const paths = normalizedAccessMap[normalizedKey] || [];
         const displayKey = `${row.branchRef}.${row.department}.${row.role}`;
-        
+
         // Store the original key from the access_control.json
-        const originalKey = normalizedToOriginalKeyMap[normalizedKey] || displayKey;
+        const originalKey =
+          normalizedToOriginalKeyMap[normalizedKey] || displayKey;
 
         return {
           ...row,
-          no: index + 1, // Ensure we have a sequential number
+          no: index + 1,
           key: normalizedKey,
           originalKey: originalKey,
-          accessPath: paths.join(", "), // Changed comma format for better readability
+          accessPath: paths.join(", "),
           id: originalKey, // Using originalKey as the id for edit purposes
         };
       });
@@ -126,7 +127,7 @@ export default function AccessList() {
           columns={columns}
           data={data}
           filterKeys={["branch", "department", "role"]}
-          createLink="/admin/scopes_access/update" 
+          createLink="/admin/scopes_access/update"
           idParam="key" // Changed to use "key" for ID parameter
           showCreateButton={false} // Set to false to hide the create button
         />
