@@ -1,6 +1,7 @@
 // src/lib/authMiddleware.ts
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, AuthToken } from "./auth";
+import { verifyToken} from "./auth";
+import { AuthToken } from "@/types/auth";
 
 export interface AuthenticatedRequest extends NextRequest {
   user: AuthToken;
@@ -22,7 +23,7 @@ export function withAuth(
     try {
       // Decode token to get user info
       const decoded = await verifyToken(authToken);
-      if ('expired' in decoded) {
+      if (!decoded || 'expired' in decoded) {
         return NextResponse.json({ error: "Token expired" }, { status: 401 });
       }
 
