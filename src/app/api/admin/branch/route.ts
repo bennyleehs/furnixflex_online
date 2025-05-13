@@ -56,4 +56,4 @@ async function handler(req: AuthenticatedRequest) {
 }
 
 // Export the route handler with authentication middleware
-export const GET = withAuth(handler, "/api/admin/branch");
+export const GET = withAuth(handler, ["1.0.1","1.0.2","1.0.3","1.0.4"]);
