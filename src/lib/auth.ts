@@ -114,9 +114,9 @@ export async function generateToken(
 
   // Get permissions based on branch, department, and role
   const permissions = getPermissionsForRole(
-    branchRef, // Branch code (e.g., 'JB', 'SK')
-    departmentName, // Department name (e.g., 'Technology')
-    roleName, // Role title (e.g., 'Supervisor')
+    branchRef, 
+    departmentName, 
+    roleName,
   );
 
   const now = Math.floor(Date.now() / 1000); // iat

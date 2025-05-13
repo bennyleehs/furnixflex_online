@@ -2,13 +2,13 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import "./styles.css"; // Import the CSS file
+import "./styles.css";
 
 interface TableProps {
-  columns: { key: string; title: string }[]; // Defines column keys & titles
+  columns: { key: string; title: string }[];
   data: Record<string, any>[]; // Rows of data
   createLink?: string;
-  filterKeys: string[]; // Keys to filter the data (e.g., ["country", "status"])
+  filterKeys: string[];
   idParam?: string; // For specifying id parameter name (default: "id")
   showCreateButton?: boolean; // New prop to control button visibility
 }
@@ -58,7 +58,7 @@ export default function Tables({
 
   useEffect(() => {
     // Apply filters to get filtered data
-    let filteredData = [...data]; // Create a copy to avoid modifying original
+    let filteredData = [...data];
 
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (value !== "All") {
@@ -74,7 +74,7 @@ export default function Tables({
 
     filterKeys.forEach((currentKey) => {
       // For each filter key, apply all OTHER filters first
-      let dataForThisFilter = [...data]; // Create a copy to avoid modifying original
+      let dataForThisFilter = [...data];
 
       Object.entries(selectedFilters).forEach(([key, value]) => {
         // Skip the current filter key we're calculating counts for
@@ -108,7 +108,7 @@ export default function Tables({
     const idToUse = row.originalKey || row[idParam] || row.id;
 
     if (idToUse) {
-      // Since we're using the key as the id parameter, we should encode it
+      // using the key as the id parameter => encode it
       const encodedId = encodeURIComponent(idToUse);
       router.push(`${createLink}?${idParam}=${encodedId}`);
     } else {
@@ -188,7 +188,7 @@ export default function Tables({
               {columns.map((col, index) => (
                 <th
                   key={col.key}
-                  style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
+                  style={{ minWidth: `${columnWidths[index]}px` }}
                   className="px-2 py-4 font-medium text-black xl:pl-6 dark:text-white"
                 >
                   {col.title}
@@ -208,7 +208,7 @@ export default function Tables({
                   {columns.map((col, colIndex) => (
                     <td
                       key={`cell-${rowIndex}-${col.key}-${colIndex}`}
-                      style={{ minWidth: `${columnWidths[colIndex]}px` }} // Apply calculated width
+                      style={{ minWidth: `${columnWidths[colIndex]}px` }}
                       className="dark:border-strokedark break-on-slash border-b border-[#eee] px-2 py-5 xl:pl-6"
                     >
                       {row[col.key]}
