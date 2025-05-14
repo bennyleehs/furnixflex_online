@@ -1,20 +1,29 @@
-//src/app/admin/branch/page.tsx
-"use client";
-import { useEffect, useState, useRef } from "react";
-import Tables from "@/components/Tables";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+// src/app/admin/branch/page.tsx
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import Tables from '@/components/Tables';
+import DefaultLayout from '@/components/Layouts/DefaultLayout';
+import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
+import usePermissions from '@/hooks/usePermissions'; //custom hook
+
+const BRANCH_MENU = '1'; // Define the menu code for Branch
+const BRANCH_LIST_SUBMENU = '0'; // Define the submenu code for the Branch list (adjust as needed)
 
 export default function BranchPage() {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false);
+  const { canCreate, loadingPermissions } = usePermissions(); // Use the custom hook
+  const canCreateButton = canCreate(BRANCH_MENU, BRANCH_LIST_SUBMENU);
+
+  console.log('Checking canCreate with menu:', BRANCH_MENU, 'and submenu:', BRANCH_LIST_SUBMENU);
 
   const fetchData = async () => {
     try {
-      const res = await fetch("/api/admin/branch");
-      if (!res.ok) throw new Error("Failed to fetch branches");
+      const res = await fetch('/api/admin/branch');
+      if (!res.ok) throw new Error('Failed to fetch branches');
 
       const data = await res.json();
       // Format rows to combine data
@@ -30,7 +39,7 @@ export default function BranchPage() {
       }));
       setBranches(formattedRows); // Assign the formatted rows
     } catch (err) {
-      setError("Error fetching data");
+      setError('Error fetching data');
       console.error(err);
     } finally {
       setLoading(false);
@@ -38,21 +47,22 @@ export default function BranchPage() {
   };
 
   useEffect(() => {
+    console.log('BranchPage: canCreateButton value:', canCreateButton, 'loadingPermissions:', loadingPermissions);
     if (!hasFetchedData.current) {
       fetchData();
       hasFetchedData.current = true;
     }
-  }, []);
+  }, [canCreateButton, loadingPermissions]);
 
   const columns = [
-    { key: "id", title: "ID" },
-    { key: "name", title: "Name / REF" }, // Use combined name and ref
-    { key: "contact", title: "Contact" }, // Use combined contact
-    { key: "address", title: "Address" }, // Use combined address
-    { key: "company", title: "Company / REG" }, // Use combined company
-    { key: "bank", title: "Bank / Account / Swift" }, // Use combined bank details
-    { key: "time_zone", title: "Time / Currencies" }, // Use combined time zone and currency
-    { key: "status", title: "Status" },
+    { key: 'id', title: 'ID' },
+    { key: 'name', title: 'Name / REF' }, // Use combined name and ref
+    { key: 'contact', title: 'Contact' }, // Use combined contact
+    { key: 'address', title: 'Address' }, // Use combined address
+    { key: 'company', title: 'Company / REG' }, // Use combined company
+    { key: 'bank', title: 'Bank / Account / Swift' }, // Use combined bank details
+    { key: 'time_zone', title: 'Time / Currencies' }, // Use combined time zone and currency
+    { key: 'status', title: 'Status' },
   ];
 
   return (
@@ -64,8 +74,8 @@ export default function BranchPage() {
         columns={columns}
         data={branches}
         createLink="/admin/branch/create"
-        filterKeys={["country", "status"]}
-        showCreateButton={true}
+        filterKeys={['country', 'status']}
+        showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton
       />
     </DefaultLayout>
   );

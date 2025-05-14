@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ success: true });
   res.headers.set(
     "Set-Cookie",
-    `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,
+    // `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,
+    `authToken=${token}; Path=/; SameSite=Lax, Max-Age=3600`,
   );
 
   console.log("✅ Token set successfully");
