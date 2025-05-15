@@ -7,8 +7,10 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import usePermissions from '@/hooks/usePermissions'; //custom hook
 
-const BRANCH_MENU = '1'; // Define the menu code for Branch
-const BRANCH_LIST_SUBMENU = '0'; // Define the submenu code for the Branch list (adjust as needed)
+const BRANCH_MENU = '1';
+const BRANCH_LIST_SUBMENU = '0';
+const BRANCH_PERMISSION_PREFIX = `${BRANCH_MENU}.${BRANCH_LIST_SUBMENU}`;
+
 
 export default function BranchPage() {
   const [branches, setBranches] = useState([]);
@@ -76,6 +78,11 @@ export default function BranchPage() {
         createLink="/admin/branch/create"
         filterKeys={['country', 'status']}
         showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton
+        createPermissionPrefix={BRANCH_PERMISSION_PREFIX}
+        editPermissionPrefix={BRANCH_PERMISSION_PREFIX}
+        deletePermissionPrefix={BRANCH_PERMISSION_PREFIX}
+        monitorPermissionPrefix={BRANCH_PERMISSION_PREFIX}
+
       />
     </DefaultLayout>
   );

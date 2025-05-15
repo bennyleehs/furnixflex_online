@@ -9,7 +9,7 @@ const usePermissions = () => {
   useEffect(() => {
     const fetchTokenAndPermissions = async () => {
       setLoadingPermissions(true);
-      const tokenString = await getCookie('authToken'); // Use await
+      const tokenString = await getCookie('authToken');
 
       console.log('usePermissions useEffect: Token from cookie:', tokenString);
 
@@ -41,38 +41,40 @@ const usePermissions = () => {
       }
     };
 
-    fetchTokenAndPermissions(); // Call the async function
+    fetchTokenAndPermissions();
   }, []);
 
-  const canCreate = (menu: string, submenu: string): boolean => {
-    console.log('canCreate: Loading permissions?', loadingPermissions);
-    console.log('canCreate: Current permissions state:', permissions);
-    console.log('canCreate: Checking prefix:', `${menu}.${submenu}.`);
-
-    if (loadingPermissions) {
-      console.log('canCreate: Permissions are still loading, returning false.');
+  const checkPermissionByAction = (menu: string, submenu: string, actionCodes: number[]): boolean => {
+    if (loadingPermissions || !permissions || !Array.isArray(permissions)) {
       return false;
     }
 
-    if (!permissions || !Array.isArray(permissions)) {
-      console.log('canCreate: Permissions not available or not array.');
+    return permissions.some((perm) => {
+      if (perm.startsWith(`${menu}.${submenu}.`)) {
+        const actionDigit = parseInt(perm.split('.')[2], 10);
+        return actionCodes.includes(actionDigit);
+      }
       return false;
-    }
-
-    const relevantPermissions = permissions.filter((perm) =>
-      perm.startsWith(`${menu}.${submenu}.`)
-    );
-
-    console.log('canCreate: Relevant permissions after filter:', relevantPermissions);
-
-    return relevantPermissions.some((perm) => {
-      const actionDigit = parseInt(perm.split('.')[2], 10);
-      console.log(`canCreate: Checking perm ${perm}: action digit ${actionDigit}`);
-      return actionDigit >= 1 && actionDigit <= 3;
     });
   };
 
-  return { canCreate, loadingPermissions };
+  const canFullAccess = (menu: string, submenu: string): boolean => {
+    return checkPermissionByAction(menu, submenu, [1]);
+  };
+
+  const canEdit = (menu: string, submenu: string): boolean => {
+    return checkPermissionByAction(menu, submenu, [1, 2]);
+  };
+
+  const canCreate = (menu: string, submenu: string): boolean => {
+    return checkPermissionByAction(menu, submenu, [1, 2, 3]);
+  };
+
+  const canMonitor = (menu: string, submenu: string): boolean => {
+    return checkPermissionByAction(menu, submenu, [4]);
+  };
+
+  return { canFullAccess, canEdit, canCreate, canMonitor, loadingPermissions };
 };
 
 export default usePermissions;
