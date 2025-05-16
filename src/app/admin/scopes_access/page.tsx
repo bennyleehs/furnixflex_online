@@ -6,6 +6,10 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Tables from "@/components/Tables";
 
+const MENU = "1";
+const SUBMENU = "0";
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+
 interface AccessRow {
   no: number;
   branchRef: string;
@@ -130,6 +134,10 @@ export default function AccessList() {
           createLink="/admin/scopes_access/update"
           idParam="key" // Changed to use "key" for ID parameter
           showCreateButton={false} // Set to false to hide the create button
+          createPermissionPrefix={PERMISSION_PREFIX}
+          editPermissionPrefix={PERMISSION_PREFIX}
+          deletePermissionPrefix={PERMISSION_PREFIX}
+          monitorPermissionPrefix={PERMISSION_PREFIX}
         />
       )}
     </DefaultLayout>

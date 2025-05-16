@@ -7,10 +7,9 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import usePermissions from '@/hooks/usePermissions'; //custom hook
 
-const BRANCH_MENU = '1';
-const BRANCH_LIST_SUBMENU = '0';
-const BRANCH_PERMISSION_PREFIX = `${BRANCH_MENU}.${BRANCH_LIST_SUBMENU}`;
-
+const MENU = '1';
+const SUBMENU = '0';
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function BranchPage() {
   const [branches, setBranches] = useState([]);
@@ -18,9 +17,9 @@ export default function BranchPage() {
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false);
   const { canCreate, loadingPermissions } = usePermissions(); // Use the custom hook
-  const canCreateButton = canCreate(BRANCH_MENU, BRANCH_LIST_SUBMENU);
+  const canCreateButton = canCreate(MENU, SUBMENU);
 
-  console.log('Checking canCreate with menu:', BRANCH_MENU, 'and submenu:', BRANCH_LIST_SUBMENU);
+  console.log('Checking canCreate with menu:', MENU, 'and submenu:', SUBMENU);
 
   const fetchData = async () => {
     try {
@@ -78,10 +77,10 @@ export default function BranchPage() {
         createLink="/admin/branch/create"
         filterKeys={['country', 'status']}
         showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton
-        createPermissionPrefix={BRANCH_PERMISSION_PREFIX}
-        editPermissionPrefix={BRANCH_PERMISSION_PREFIX}
-        deletePermissionPrefix={BRANCH_PERMISSION_PREFIX}
-        monitorPermissionPrefix={BRANCH_PERMISSION_PREFIX}
+        createPermissionPrefix={PERMISSION_PREFIX}
+        editPermissionPrefix={PERMISSION_PREFIX}
+        deletePermissionPrefix={PERMISSION_PREFIX}
+        monitorPermissionPrefix={PERMISSION_PREFIX}
 
       />
     </DefaultLayout>
