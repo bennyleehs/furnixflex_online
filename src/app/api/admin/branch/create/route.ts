@@ -1,10 +1,11 @@
 import { createPool } from "@/lib/db";
 import { NextResponse } from 'next/server';
 import { ResultSetHeader } from 'mysql2/promise'; // Import from mysql2/promise
+import { withAuth, AuthenticatedRequest } from '@/lib/authMiddleware';
 
-export async function POST(request: Request) {
+async function handlePost(req: AuthenticatedRequest) {
   try {
-    const formData = await request.json(); // Parse the JSON body
+    const formData = await req.json(); // Parse the JSON body
     const db = createPool();
 
     const sql = `
@@ -51,16 +52,16 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
+async function handlePut(req: AuthenticatedRequest) {
   try {
-    const url = new URL(request.url); // Parse the request URL
+    const url = new URL(req.url); // Parse the request URL
     const id = url.searchParams.get('id'); // Extract the `id` from the query parameters
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Branch ID is required for update' }, { status: 400 });
     }
 
-    const formData = await request.json(); // Parse the JSON body
+    const formData = await req.json(); // Parse the JSON body
     const db = createPool();
 
     const sql = `
@@ -102,3 +103,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: false, error: 'Failed to process request' }, { status: 500 });
   }
 }
+
+// Export the route handlers with authentication and required permissions
+export const POST = withAuth(handlePost,  ["1.0.1","1.0.2"]);
+export const PUT = withAuth(handlePut,  ["1.0.1","1.0.3"]);
