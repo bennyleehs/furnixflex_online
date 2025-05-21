@@ -4,12 +4,19 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Tables from "@/components/Tables";
 import React, { useEffect, useState, useRef } from "react";
+import usePermissions from "@/hooks/usePermissions"; //custom hook
+
+const MENU = "1";
+const SUBMENU = "0";
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function DepartmentPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false); // Track if data has been fetched
+  const { canCreate, loadingPermissions } = usePermissions(); // Use the custom hook
+  const canCreateButton = canCreate(MENU, SUBMENU);
 
   const fetchData = async () => {
     try {
@@ -55,12 +62,21 @@ export default function DepartmentPage() {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Department List" />
-      <Tables 
-        columns={columns} 
-        data={data} 
-        filterKeys={["status"]}
-        createLink="/admin/department/create"
-      />
+      {loading && <div className="p-4">Loading Departments...</div>}
+      {error && <div className="p-4 text-red-500">Error: {error}</div>}
+      {!loading && !error && (
+        <Tables
+          columns={columns}
+          data={data}
+          filterKeys={["status"]}
+          createLink="/admin/department/create"
+          showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton
+          createPermissionPrefix={PERMISSION_PREFIX}
+          editPermissionPrefix={PERMISSION_PREFIX}
+          deletePermissionPrefix={PERMISSION_PREFIX}
+          monitorPermissionPrefix={PERMISSION_PREFIX}
+        />
+      )}
     </DefaultLayout>
   );
 }

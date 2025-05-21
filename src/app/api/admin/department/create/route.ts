@@ -1,10 +1,12 @@
 import { createPool } from "@/lib/db";
-import { NextResponse } from 'next/server';
-import { ResultSetHeader } from 'mysql2/promise'; // Import from mysql2/promise
+import { NextResponse } from "next/server";
+import { ResultSetHeader } from "mysql2/promise"; // Import from mysql2/promise
+import { regenerateAccessControl } from "@/lib/regenAccessControl";
+import { withAuth, AuthenticatedRequest } from '@/lib/authMiddleware';
 
-export async function POST(request: Request) {
+async function handlePost(req: AuthenticatedRequest){
   try {
-    const formData = await request.json(); // Parse the JSON body
+    const formData = await req.json(); // Parse the JSON body
     const db = createPool();
 
     const sql = `
@@ -17,29 +19,38 @@ export async function POST(request: Request) {
         NOW(), NOW()
       )`;
 
-    const values = [
-      formData['name'], formData['ref'], formData['status']
-    ];
+    const values = [formData["name"], formData["ref"], formData["status"]];
 
     await db.query(sql, values);
+    //regenerate the access_control.json
+    await regenerateAccessControl();
 
-    return NextResponse.json({ success: true, message: 'Department created successfully' });
+    return NextResponse.json({
+      success: true,
+      message: "Department created successfully",
+    });
   } catch (error) {
-    console.error('Error processing request:', error);
-    return NextResponse.json({ success: false, error: 'Failed to process request' }, { status: 500 });
+    console.error("Error processing request:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to process request" },
+      { status: 500 },
+    );
   }
 }
 
-export async function PUT(request: Request) {
+async function handlePut(req: AuthenticatedRequest) {
   try {
-    const url = new URL(request.url); // Parse the request URL
-    const id = url.searchParams.get('id'); // Extract the `id` from the query parameters
+    const url = new URL(req.url); // Parse the request URL
+    const id = url.searchParams.get("id"); // Extract the `id` from the query parameters
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'Department ID is required for update' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Department ID is required for update" },
+        { status: 400 },
+      );
     }
 
-    const formData = await request.json(); // Parse the JSON body
+    const formData = await req.json(); // Parse the JSON body
     const db = createPool();
 
     const sql = `
@@ -51,19 +62,37 @@ export async function PUT(request: Request) {
     `;
 
     const values = [
-      formData['name'], formData['ref'], formData['status'],
-      id // Use the `id` from the URL
+      formData["name"],
+      formData["ref"],
+      formData["status"],
+      id, // Use the `id` from the URL
     ];
 
     const [result] = await db.query<ResultSetHeader>(sql, values);
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ success: false, error: 'Branch not found or no changes made' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Branch not found or no changes made" },
+        { status: 404 },
+      );
     }
 
-    return NextResponse.json({ success: true, message: 'Branch updated successfully' });
+    //regenerate the access_control.json
+    await regenerateAccessControl();
+
+    return NextResponse.json({
+      success: true,
+      message: "Branch updated successfully",
+    });
   } catch (error) {
-    console.error('Error processing request:', error);
-    return NextResponse.json({ success: false, error: 'Failed to process request' }, { status: 500 });
+    console.error("Error processing request:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to process request" },
+      { status: 500 },
+    );
   }
 }
+
+// Export the route handlers with authentication and required permissions
+export const POST = withAuth(handlePost,  ["1.0.1","1.0.2"]);
+export const PUT = withAuth(handlePut,  ["1.0.1","1.0.3"]);

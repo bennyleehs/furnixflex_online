@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
+import { createPool } from "./db";
 import { AuthToken } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
+import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
 //secret key
 const secretKey = process.env.JWT_SECRET
@@ -47,21 +49,30 @@ export async function verifyToken(
       algorithms: ["HS256"],
     });
 
-    console.log(
-      "🔍 Raw Decoded Payload:",
-      process.env.NODE_ENV === "development" ? payload : "Hidden",
-    ); // Log only in dev mode
-
-    // Extract required fields and validate them
-    // retrieve from AuthToken interface
-    const { id, iat, exp } = payload as {
+    const {
+      id,
+      roleName,
+      departmentName,
+      branchRef,
+      permissions,
+      iat,
+      exp,
+    } = payload as {
       id?: number;
+      roleName?: string;
+      departmentName?: string;
+      branchRef?: string;
+      permissions?: string[];
       iat?: number;
       exp?: number;
     };
 
     if (
       typeof id !== "number" ||
+      typeof roleName !== "string" ||
+      typeof departmentName !== "string" ||
+      typeof branchRef !== "string" ||
+      !Array.isArray(permissions) ||
       typeof iat !== "number" ||
       typeof exp !== "number"
     ) {
@@ -69,12 +80,19 @@ export async function verifyToken(
       return null;
     }
 
-    // Token is valid
-    return { id, iat, exp };
+    return {
+      id,
+      roleName,
+      departmentName,
+      branchRef,
+      permissions,
+      iat,
+      exp,
+    };
   } catch (err: any) {
     if (err.code === "ERR_JWT_EXPIRED") {
       console.warn("⚠️ Token expired, but structurally valid.");
-      return { expired: true }; // Middleware can use this to trigger refresh
+      return { expired: true };
     }
 
     console.error("❌ Invalid or expired token:", err);
@@ -82,14 +100,33 @@ export async function verifyToken(
   }
 }
 
-//function generate token v0.0.2
-export async function generateToken(userId: number) {
+//function generate token with permissions
+export async function generateToken(
+  userId: number,
+  roleName: string,
+  departmentName: string,
+  branchRef: string,
+) {
   if (!secretKey) throw new Error("JWT secret key is missing");
 
-  const now = Math.floor(Date.now() / 1000); // Get current timestamp
+  // Get permissions based on branch, department, and role
+  const permissions = getPermissionsForRole(
+    branchRef, 
+    departmentName, 
+    roleName,
+  );
 
-  return new SignJWT({ id: userId, iat: now }) // Explicitly include `iat`
+  const now = Math.floor(Date.now() / 1000); // iat
+
+  return new SignJWT({
+    id: userId,
+    roleName,
+    departmentName,
+    branchRef,
+    permissions, // Include permissions array in the token
+    iat: now,
+  })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("1days") //expiring time
+    .setExpirationTime("1d")
     .sign(secretKey);
 }

@@ -1,64 +1,65 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
-import { cookies } from "next/headers";
+// // middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export const runtime = "nodejs"; // Ensure it runs in Node.js
+// Define paths that don't require authentication
+const publicPaths = [
+  "/auth/signin",
+  "/auth/signup",
+  "/api/auth/signin",
+  "/api/auth/signup",
+];
 
-export async function middleware(req: NextRequest) {
-  console.log("✅ Middleware triggered for:", req.nextUrl.pathname);
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (auth API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - images (assets)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api/auth|_next/static|_next/image|images|favicon.ico).*)",
+  ],
+};
 
-  const { pathname } = req.nextUrl;
-  //   Allow access to authentication routes and static assets
-  if (
-    pathname.startsWith("/auth1/signin") || // Allow access to signin page
-    pathname.startsWith("/api/auth") || // Allow API auth routes if needed
-    pathname.startsWith("/_next") || // Allow Next.js static files
-    pathname.startsWith("/images") || //Allow public asset (images)
-    pathname.startsWith("/favicon.ico") // Allow favicon
-  ) {
-    console.log("🔓 Skipping middleware for:", pathname);
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Allow public paths
+  if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
 
-  /// production (dev)
-  // const token = req.cookies.get("authToken")?.value;
-
-  /// deploy (start)
-  const cookieHeader = req.headers.get("cookie") || "";
-  console.log("📌 Raw Cookie Header:", cookieHeader); // Debugging
-
-  /// ✅ Use Next.js cookies API to retrieve the token
-  const token = (await cookies()).get("authToken")?.value;
-  console.log("🔍 Next.js Cookie API Token:", token || "No token found");
+  // Check for auth token
+  const token = request.cookies.get("authToken")?.value;
 
   if (!token) {
-    /// update ver
-    console.log("⛔ No token. Waiting before redirect...");
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Small delay
-    return NextResponse.redirect(new URL("/auth1/signin", req.url));
+    // Redirect to login if no token
+    const url = new URL("/auth/signin", request.url);
+    url.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(url);
   }
 
-  const decodedToken = await verifyToken(token); // ✅ Ensure token is awaited
-  console.log("🔑 Decoded token:", decodedToken);
+  try {
+    // Verify token using Web Crypto API
+    const [headerB64, payloadB64, signatureB64] = token.split(".");
+    
+    // Decode payload
+    const payload = JSON.parse(atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/")));
+    
+    // Check expiration
+    if (payload.exp && payload.exp < Date.now() / 1000) {
+      throw new Error("Token expired");
+    }
 
-  if (!decodedToken) {
-    console.log("⛔ Invalid token. Redirecting to /auth1/signin.");
-    return NextResponse.redirect(new URL("/auth1/signin", req.url));
+    // Continue if token is valid
+    return NextResponse.next();
+  } catch (error) {
+    // Redirect to login if token is invalid
+    const url = new URL("/auth/signin", request.url);
+    url.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(url);
   }
-
-  if (!decodedToken || ("expired" in decodedToken && decodedToken.expired)) {
-    console.warn("⏳ Token expired. Redirecting to signin.");
-    return NextResponse.redirect(new URL("/auth1/signin", req.url));
-  }
-
-  console.log("✅ Authentication passed. Granting access.", decodedToken);
-  return NextResponse.next();
 }
-
-//  Apply middleware to all routes except explicitly allowed ones
-export const config = {
-  matcher: "/((?!auth1/signin|_next|api/auth|images|favicon.ico).*)",
-  // runtime: "edge", /// production (dev)
-  runtime: "nodejs", /// deploy (start)
-  // unstable_allowDynamic: ["**/node_modules/lodash/**/*.js"],
-};

@@ -1,18 +1,21 @@
+// src/lib/authMiddleware.ts
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, AuthToken } from "./auth";
-import { checkAccess } from "@/utils/accessControl";
+import { verifyToken} from "./auth";
+import { AuthToken } from "@/types/auth";
 
 export interface AuthenticatedRequest extends NextRequest {
   user: AuthToken;
 }
 
-export async function withAuth(
+export function withAuth(
   handler: (req: AuthenticatedRequest) => Promise<NextResponse>,
-  path: string
+  requiredPermissions: string[]
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest) => { // Return the async function directly
     // Extract authToken from cookies
     const authToken = req.cookies.get("authToken")?.value;
+
+    console.log(authToken);
     if (!authToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -20,13 +23,16 @@ export async function withAuth(
     try {
       // Decode token to get user info
       const decoded = await verifyToken(authToken);
-      if ('expired' in decoded) {
+      if (!decoded || 'expired' in decoded) {
         return NextResponse.json({ error: "Token expired" }, { status: 401 });
       }
 
-      // Check if user has permission to access this endpoint
-      const hasAccess = await checkAccess(decoded.userId, path);
-      if (!hasAccess) {
+      console.log(decoded);
+      // Ensure the decoded token's permissions include at least one required permission
+      const userPermissions: string[] = decoded.permissions || [];
+      // Check if any required permission exists in the user's permissions array
+      const hasPermission = requiredPermissions.some(p => userPermissions.includes(p));
+      if (!hasPermission) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
@@ -44,4 +50,4 @@ export async function withAuth(
       );
     }
   };
-} 
+}
