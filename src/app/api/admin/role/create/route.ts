@@ -74,6 +74,9 @@ export async function PUT(request: Request) {
         { status: 404 },
       );
     }
+    
+    //regenerate the access_control.json
+    await regenerateAccessControl();
 
     return NextResponse.json({
       success: true,

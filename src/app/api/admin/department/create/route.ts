@@ -76,6 +76,9 @@ export async function PUT(request: Request) {
       );
     }
 
+    //regenerate the access_control.json
+    await regenerateAccessControl();
+
     return NextResponse.json({
       success: true,
       message: "Branch updated successfully",
