@@ -164,7 +164,7 @@ export default function QuotationListPage() {
       </div>
       
       {/* Search and Filters */}
-      <div className="mb-6 rounded-sm border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="mb-6 rounded-xs border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark">
         <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div>
@@ -174,7 +174,7 @@ export default function QuotationListPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by quote #, customer..."
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             />
           </div>
           
@@ -185,7 +185,7 @@ export default function QuotationListPage() {
               type="date"
               value={dateRange.from}
               onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             />
           </div>
           
@@ -196,7 +196,7 @@ export default function QuotationListPage() {
               type="date"
               value={dateRange.to}
               onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             />
           </div>
           
@@ -206,7 +206,7 @@ export default function QuotationListPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             >
               <option value="all">All Statuses</option>
               <option value="draft">Draft</option>
@@ -222,7 +222,7 @@ export default function QuotationListPage() {
             <select
               value={salesRepFilter}
               onChange={(e) => setSalesRepFilter(e.target.value)}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             >
               <option value="">All Representatives</option>
               {salesReps.map((rep) => (
@@ -252,7 +252,7 @@ export default function QuotationListPage() {
       </div>
       
       {/* Quotations Table */}
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="rounded-xs border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>

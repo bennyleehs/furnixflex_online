@@ -6,11 +6,11 @@ export default function Update_Scopes() {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Update Scopes2 Access" />
-      <div className="mb-4 rounded border border-blue-200 bg-blue-50 p-4">
+      <div className="mb-4 rounded-sm border border-blue-200 bg-blue-50 p-4">
         <h2 className="mb-2 text-lg dark:text-black font-semibold">Instructions</h2>
         <p className="dark:text-black">
             {/* based on access_action.json */}
-          {/* <span key={id} className="inline-block rounded bg-gray-100 px-2 py-1">
+          {/* <span key={id} className="inline-block rounded-sm bg-gray-100 px-2 py-1">
             {id}: {name}
           </span> */}
           The first and second digit represent the Menu Section.

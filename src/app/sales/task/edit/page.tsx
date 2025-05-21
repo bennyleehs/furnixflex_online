@@ -436,14 +436,14 @@ export default function TaskEditPage() {
                   <div className="max-h-64 overflow-y-auto">
                     {/* Uploaded files - with image thumbnails */}
                     {taskFiles.map((file) => (
-                      <div key={file.name} className="flex items-center py-1 px-1 hover:bg-gray-50 dark:hover:bg-meta-4 rounded">
+                      <div key={file.name} className="flex items-center py-1 px-1 hover:bg-gray-50 dark:hover:bg-meta-4 rounded-sm">
                         <div 
                           className="flex items-center cursor-pointer w-full" 
                           onClick={() => handleFilePreview(file)}
                         >
-                          <div className="mr-1.5 flex-shrink-0">
+                          <div className="mr-1.5 shrink-0">
                             {file.name.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                              <div className="w-5 h-5 rounded overflow-hidden border border-stroke dark:border-strokedark">
+                              <div className="w-5 h-5 rounded-sm overflow-hidden border border-stroke dark:border-strokedark">
                                 <img 
                                   src={`/api/sales/task/download?id=${taskId}&file=${file.name}`} 
                                   alt={file.name}
@@ -478,14 +478,14 @@ export default function TaskEditPage() {
                     
                     {/* Pending upload files - with image previews */}
                     {files.map((file, index) => (
-                      <div key={`pending-${index}`} className="flex items-center py-1 px-1 hover:bg-gray-50 dark:hover:bg-meta-4 rounded">
+                      <div key={`pending-${index}`} className="flex items-center py-1 px-1 hover:bg-gray-50 dark:hover:bg-meta-4 rounded-sm">
                         <div 
                           className="flex items-center cursor-pointer w-full" 
                           onClick={() => handleFilePreview(file, true)}
                         >
-                          <div className="mr-1.5 flex-shrink-0">
+                          <div className="mr-1.5 shrink-0">
                             {file.type.startsWith('image/') ? (
-                              <div className="w-5 h-5 rounded overflow-hidden border border-stroke dark:border-strokedark">
+                              <div className="w-5 h-5 rounded-sm overflow-hidden border border-stroke dark:border-strokedark">
                                 <img 
                                   src={URL.createObjectURL(file)} 
                                   alt={file.name}
@@ -504,7 +504,7 @@ export default function TaskEditPage() {
                           </div>
                           <div className="flex items-center flex-1 min-w-0">
                             <span className="text-xs truncate max-w-[150px]">{file.name}</span>
-                            <span className="ml-1 px-1 py-0 text-[9px] bg-warning/20 text-warning rounded flex-shrink-0">New</span>
+                            <span className="ml-1 px-1 py-0 text-[9px] bg-warning/20 text-warning rounded-sm shrink-0">New</span>
                           </div>
                         </div>
                       </div>
@@ -527,7 +527,7 @@ export default function TaskEditPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Left column - Task details with vertical flex layout */}
         <div className="md:col-span-2">
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             {/* Customer header section */}
             <div className="border-b border-stroke pb-5 dark:border-strokedark">
               <div className="flex flex-col gap-3">
@@ -551,7 +551,7 @@ export default function TaskEditPage() {
                 {/* Contact information as flex-column on mobile, flex-row on larger screens */}
                 <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                   {nric && (
-                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-stroke dark:bg-meta-4 dark:text-gray-300 dark:border-strokedark font-normal inline-flex items-center">
+                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-sm border border-stroke dark:bg-meta-4 dark:text-gray-300 dark:border-strokedark font-normal inline-flex items-center">
                       <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
                       </svg>
@@ -628,7 +628,7 @@ export default function TaskEditPage() {
                 </label>
                 <div className="relative z-20 bg-transparent">
                   <select 
-                    className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    className="relative z-20 w-full appearance-none rounded-sm border border-stroke bg-transparent py-3 px-5 outline-hidden transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
                   >
@@ -661,7 +661,7 @@ export default function TaskEditPage() {
                 <textarea
                   rows={4}
                   placeholder="Add notes about this update..."
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   value={updateNote}
                   onChange={(e) => setUpdateNote(e.target.value)}
                 ></textarea>
@@ -712,7 +712,7 @@ export default function TaskEditPage() {
                           className="flex items-center gap-2 bg-gray-50 dark:bg-meta-4 p-2 rounded-md group relative"
                         >
                           {file.type.startsWith('image/') ? (
-                            <div className="w-10 h-10 rounded overflow-hidden border border-stroke dark:border-strokedark flex-shrink-0">
+                            <div className="w-10 h-10 rounded-sm overflow-hidden border border-stroke dark:border-strokedark shrink-0">
                               <img 
                                 src={URL.createObjectURL(file)} 
                                 alt={file.name}
@@ -720,7 +720,7 @@ export default function TaskEditPage() {
                               />
                             </div>
                           ) : (
-                            <div className="w-10 h-10 rounded bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 rounded-sm bg-primary/10 dark:bg-primary/20 flex items-center justify-center shrink-0">
                               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                               </svg>
@@ -750,7 +750,7 @@ export default function TaskEditPage() {
               <button
                 type="button"
                 onClick={() => handleStatusUpdate(selectedStatus)}
-                className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white hover:bg-opacity-90"
+                className="flex w-full justify-center rounded-sm bg-primary p-3 font-medium text-white hover:bg-opacity-90"
               >
                 Update Task
               </button>
@@ -760,7 +760,7 @@ export default function TaskEditPage() {
         
         {/* Right column - Event log */}
         <div className="col-span-1">
-          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark h-full">
+          <div className="rounded-xs border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark h-full">
             <div className="border-b border-stroke px-4 py-4 dark:border-strokedark flex justify-between items-center">
               <h5 className="font-medium text-black dark:text-white">
                 Event Log
@@ -792,7 +792,7 @@ export default function TaskEditPage() {
                 ) : (
                   <div className="relative">
                     {/* Fade indicator at the bottom when scrollable */}
-                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-boxdark to-transparent pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white dark:from-boxdark to-transparent pointer-events-none"></div>
                     
                     {/* Timeline line */}
                     <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200 dark:bg-gray-700"></div>
@@ -831,7 +831,7 @@ export default function TaskEditPage() {
                             
                             {/* 4. File Attachments - Using the new filesName property */}
                             {log.filesName && log.filesName.length > 0 && (
-                              <div className="mt-2 bg-gray-100 dark:bg-meta-4/50 rounded p-2 text-xs">
+                              <div className="mt-2 bg-gray-100 dark:bg-meta-4/50 rounded-sm p-2 text-xs">
                                 <div className="flex items-center text-gray-600 dark:text-gray-300 mb-1.5">
                                   <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
@@ -861,18 +861,18 @@ export default function TaskEditPage() {
                                 <div className="flex items-center gap-2">
                                   {log.oldValue !== log.newValue ? (
                                     <>
-                                      <span className="line-through bg-gray-100 dark:bg-meta-4 px-2 py-1 rounded">
+                                      <span className="line-through bg-gray-100 dark:bg-meta-4 px-2 py-1 rounded-sm">
                                         {log.oldValue}
                                       </span>
                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                       </svg>
-                                      <span className="font-medium bg-success/10 text-success px-2 py-1 rounded">
+                                      <span className="font-medium bg-success/10 text-success px-2 py-1 rounded-sm">
                                         {log.newValue}
                                       </span>
                                     </>
                                   ) : (
-                                    <span className="font-medium bg-gray-100 dark:bg-meta-4 px-2 py-1 rounded">
+                                    <span className="font-medium bg-gray-100 dark:bg-meta-4 px-2 py-1 rounded-sm">
                                       {log.newValue}
                                     </span>
                                   )}
@@ -882,9 +882,9 @@ export default function TaskEditPage() {
                             
                             {/* 5. Legacy File Display (fallback if filesName not available) */}
                             {!log.filesName && (log.action?.includes('File Upload') || log.action?.includes('Attachments')) && (
-                              <div className="mt-2 bg-gray-100 dark:bg-meta-4/50 rounded p-2 text-xs">
+                              <div className="mt-2 bg-gray-100 dark:bg-meta-4/50 rounded-sm p-2 text-xs">
                                 <div className="flex items-center text-success">
-                                  <svg className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-3.5 h-3.5 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                                   </svg>
                                   <span>

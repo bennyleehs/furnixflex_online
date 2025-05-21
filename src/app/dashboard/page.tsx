@@ -143,7 +143,7 @@ export default function Home() {
         <meta name="description" content="Project progress and sales dashboard for ClassyPro" />
       </Head>
       <DefaultLayout>
-        <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 2xl:p-10">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-black dark:text-white">Dashboard</h2>
           </div>
@@ -151,7 +151,7 @@ export default function Home() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-6">
             {/* Overall Progress */}
-            <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="rounded-xs border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xl font-bold text-black dark:text-white">
@@ -169,7 +169,7 @@ export default function Home() {
             </div>
 
             {/* Days Remaining */}
-            <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="rounded-xs border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xl font-bold text-black dark:text-white">
@@ -186,7 +186,7 @@ export default function Home() {
             </div>
 
             {/* Quotations */}
-            <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="rounded-xs border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xl font-bold text-black dark:text-white">
@@ -211,7 +211,7 @@ export default function Home() {
             </div>
 
             {/* Jobs */}
-            <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="rounded-xs border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xl font-bold text-black dark:text-white">
@@ -245,7 +245,7 @@ export default function Home() {
           {/* Charts Row */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 mb-6">
             {/* Project Progress Chart */}
-            <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
               <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
                 Project Progress by Phase
               </h4>
@@ -272,7 +272,7 @@ export default function Home() {
             {/* Status Charts */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Job Status Chart */}
-              <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <h4 className="mb-2 text-lg font-semibold text-black dark:text-white">
                   Job Status
                 </h4>
@@ -297,7 +297,7 @@ export default function Home() {
               </div>
               
               {/* Sales Status Chart */}
-              <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <h4 className="mb-2 text-lg font-semibold text-black dark:text-white">
                   Quotation Status
                 </h4>
@@ -324,7 +324,7 @@ export default function Home() {
           </div>
           
           {/* Project Timeline */}
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
               Project Timeline
             </h4>
@@ -397,7 +397,7 @@ export default function Home() {
           </div>
 
           {/* Outstanding Tasks */}
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
               Outstanding Tasks & Development Schedule
             </h4>

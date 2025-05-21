@@ -711,7 +711,7 @@ export default function QuotationPage() {
       <div className="grid grid-cols-1 gap-8">
         {/* Customer Information */}
         {task && (
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-black dark:text-white">Customer Information</h2>
               <button 
@@ -751,7 +751,7 @@ export default function QuotationPage() {
                           type="text"
                           value={task.name}
                           onChange={(e) => setTask({...task, name: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         />
                       </div>
                       <div className="mb-2">
@@ -760,7 +760,7 @@ export default function QuotationPage() {
                           type="text"
                           value={task.nric || ''}
                           onChange={(e) => setTask({...task, nric: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         />
                       </div>
 
@@ -771,7 +771,7 @@ export default function QuotationPage() {
                           type="text"
                           value={task.phone1 || ''}
                           onChange={(e) => setTask({...task, phone1: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         />
                       </div>
                       <div className="mb-2">
@@ -780,7 +780,7 @@ export default function QuotationPage() {
                           type="email"
                           value={task.email || ''}
                           onChange={(e) => setTask({...task, email: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         />
                       </div>
                     </>
@@ -810,7 +810,7 @@ export default function QuotationPage() {
                           type="text"
                           value={task.address_line1 || ''}
                           onChange={(e) => setTask({...task, address_line1: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         />
                       </div>
                       <div className="mb-2">
@@ -819,7 +819,7 @@ export default function QuotationPage() {
                           type="text"
                           value={task.address_line2 || ''}
                           onChange={(e) => setTask({...task, address_line2: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-2 mb-2">
@@ -829,7 +829,7 @@ export default function QuotationPage() {
                             type="text"
                             value={task.city || ''}
                             onChange={(e) => setTask({...task, city: e.target.value})}
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                            className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                           />
                         </div>
                         <div>
@@ -838,7 +838,7 @@ export default function QuotationPage() {
                             type="text"
                             value={task.postcode || ''}
                             onChange={(e) => setTask({...task, postcode: e.target.value})}
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                            className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                           />
                         </div>
                       </div>
@@ -849,7 +849,7 @@ export default function QuotationPage() {
                             type="text"
                             value={task.state || ''}
                             onChange={(e) => setTask({...task, state: e.target.value})}
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                            className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                           />
                         </div>
                         <div>
@@ -858,7 +858,7 @@ export default function QuotationPage() {
                             type="text"
                             value={task.country || ''}
                             onChange={(e) => setTask({...task, country: e.target.value})}
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                            className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                           />
                         </div>
                       </div>
@@ -899,7 +899,7 @@ export default function QuotationPage() {
                         <select
                           value={task.property || ''}
                           onChange={(e) => setTask({...task, property: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         >
                           <option value="Landed">Landed</option>
                           <option value="High-Rise">High-Rise</option>
@@ -910,7 +910,7 @@ export default function QuotationPage() {
                         <select
                           value={task.guard || ''}
                           onChange={(e) => setTask({...task, guard: e.target.value})}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                          className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                         >
                           <option value="Guarded">Guarded</option>
                           <option value="No-Guard">No-Guard</option>
@@ -1017,7 +1017,7 @@ export default function QuotationPage() {
         )}
         
         {/* Quotation Details */}
-        <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h2 className="text-xl font-semibold text-black dark:text-white">Quotation Details</h2>
@@ -1027,7 +1027,7 @@ export default function QuotationPage() {
               <span className="text-sm font-medium text-gray-600 dark:text-gray-400 mr-2">Quotation #:</span>
               {quotation?.quotation_number ? (
                 <div className="flex items-center">
-                  <span className="py-1 px-2 text-sm font-medium bg-primary/10 text-primary rounded">
+                  <span className="py-1 px-2 text-sm font-medium bg-primary/10 text-primary rounded-sm">
                     {quotation.quotation_number}
                   </span>
                   {quotation.status && (
@@ -1076,7 +1076,7 @@ export default function QuotationPage() {
                     type="date"
                     value={today}
                     disabled
-                    className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none transition disabled:cursor-default"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden transition disabled:cursor-default"
                   />
                 </div>
                 
@@ -1090,7 +1090,7 @@ export default function QuotationPage() {
                     onChange={e => setValidDays(parseInt(e.target.value) || 14)}
                     min="1"
                     max="90"
-                    className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary"
                   />
                 </div>
                 
@@ -1102,7 +1102,7 @@ export default function QuotationPage() {
                     type="date"
                     value={validUntilString}
                     disabled
-                    className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none transition disabled:cursor-default"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden transition disabled:cursor-default"
                   />
                 </div>
               </div>
@@ -1123,7 +1123,7 @@ export default function QuotationPage() {
                       ...quotation, 
                       salesRepresentative: e.target.value
                     })}
-                    className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary"
                     placeholder="Sales representative name"
                   />
                 </div>
@@ -1139,7 +1139,7 @@ export default function QuotationPage() {
                       ...quotation, 
                       salesUID: e.target.value
                     })}
-                    className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none transition focus:border-primary active:border-primary"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden transition focus:border-primary active:border-primary"
                     placeholder="Sales representative ID"
                   />
                 </div>
@@ -1226,7 +1226,7 @@ export default function QuotationPage() {
                               // Add logging for subcategory selection
                               logSubcategorySelection(category);
                             }}
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary relative z-10"
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-hidden focus:border-primary relative z-10"
                           >
                             <option value="">Select Category</option>
                             {categories.map((category) => (
@@ -1263,7 +1263,7 @@ export default function QuotationPage() {
                               setItems(newItems);
                             }}
                             disabled={!item.category || !subcategories[item.category]?.length}
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary relative z-10"
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-hidden focus:border-primary relative z-10"
                           >
                             <option value="">Select Subcategory</option>
                             {(item.category && subcategories[item.category]?.length > 0) ? (
@@ -1322,7 +1322,7 @@ export default function QuotationPage() {
                               setItems(newItems);
                             }}
                             disabled={!item.category || !item.subcategory || !(products[item.category]?.[item.subcategory]?.length > 0)}
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary relative z-10"
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-hidden focus:border-primary relative z-10"
                           >
                             <option value="">Select Product</option>
                             {item.category && 
@@ -1353,7 +1353,7 @@ export default function QuotationPage() {
                           onChange={e => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
                           min="1"
                           step="1"
-                          className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm text-right outline-none focus:border-primary"
+                          className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm text-right outline-hidden focus:border-primary"
                         />
                       </td>
                       <td className="py-2 px-3">
@@ -1362,7 +1362,7 @@ export default function QuotationPage() {
                           value={item.unit || ''}
                           onChange={e => updateItem(item.id, 'unit', e.target.value)}
                           placeholder="unit"
-                          className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-none focus:border-primary"
+                          className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm outline-hidden focus:border-primary"
                         />
                       </td>
                       <td className="py-2 px-3">
@@ -1372,7 +1372,7 @@ export default function QuotationPage() {
                           onChange={e => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
                           min="0"
                           step="0.01"
-                          className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm text-right outline-none focus:border-primary"
+                          className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 py-1 px-1 text-sm text-right outline-hidden focus:border-primary"
                         />
                       </td>
                       <td className="py-2 px-3">
@@ -1413,7 +1413,7 @@ export default function QuotationPage() {
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   placeholder="Additional notes to customer..."
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                 ></textarea>
               </div>
               
@@ -1427,7 +1427,7 @@ export default function QuotationPage() {
                   value={terms}
                   onChange={e => setTerms(e.target.value)}
                   placeholder="Terms and conditions..."
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                 ></textarea>
               </div>
             </div>
@@ -1453,7 +1453,7 @@ export default function QuotationPage() {
                         min="0"
                         max="100"
                         step="0.1"
-                        className="w-16 rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1 px-2 text-sm outline-none transition focus:border-primary"
+                        className="w-16 rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1 px-2 text-sm outline-hidden transition focus:border-primary"
                       />
                     </div>
                     <span className="font-medium">

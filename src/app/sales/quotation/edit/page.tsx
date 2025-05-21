@@ -346,7 +346,7 @@ export default function QuotationEditPage() {
           </div>
         </div>
       ) : error ? (
-        <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="bg-danger/10 text-danger px-4 py-3 rounded-md">
             {error}
           </div>
@@ -368,7 +368,7 @@ export default function QuotationEditPage() {
           )}
           
           {/* Quotation Header */}
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h2 className="text-xl font-semibold text-black dark:text-white">Quotation Information</h2>
               
@@ -394,7 +394,7 @@ export default function QuotationEditPage() {
                       name="customerName"
                       value={quotation.customerName || ''}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                       required
                     />
                   </div>
@@ -408,7 +408,7 @@ export default function QuotationEditPage() {
                       name="customerContact"
                       value={quotation.customerContact || ''}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                     />
                   </div>
                   
@@ -421,7 +421,7 @@ export default function QuotationEditPage() {
                       value={quotation.customerAddress || ''}
                       onChange={handleChange}
                       rows={3}
-                      className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                     ></textarea>
                   </div>
                 </div>
@@ -441,7 +441,7 @@ export default function QuotationEditPage() {
                         name="quotationDate"
                         value={quotation.quotationDate || ''}
                         onChange={handleChange}
-                        className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                        className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                         required
                       />
                     </div>
@@ -455,7 +455,7 @@ export default function QuotationEditPage() {
                         name="validUntil"
                         value={quotation.validUntil || ''}
                         onChange={handleChange}
-                        className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                        className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                         required
                       />
                     </div>
@@ -470,7 +470,7 @@ export default function QuotationEditPage() {
                       name="salesRepresentative"
                       value={quotation.salesRepresentative || ''}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                     />
                   </div>
                   
@@ -482,7 +482,7 @@ export default function QuotationEditPage() {
                       name="status"
                       value={quotation.status || 'draft'}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                     >
                       <option value="draft">Draft</option>
                       <option value="sent">Sent</option>
@@ -496,7 +496,7 @@ export default function QuotationEditPage() {
           </div>
           
           {/* Items Section */}
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-black dark:text-white">
                 Quotation Items
@@ -567,7 +567,7 @@ export default function QuotationEditPage() {
                                   handleItemChange(index, 'subcategory', newSubcategory);
                                   handleItemChange(index, 'product_id', null);
                                 }}
-                                className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary"
+                                className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary"
                               >
                                 <option value="">Select Category</option>
                                 {categories.map((category) => (
@@ -584,7 +584,7 @@ export default function QuotationEditPage() {
                                   handleItemChange(index, 'product_id', null);
                                 }}
                                 disabled={!item.category}
-                                className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed"
                               >
                                 <option value="">Select Subcategory</option>
                                 {item.category && subcategories[item.category]?.map((subcategory) => (
@@ -601,7 +601,7 @@ export default function QuotationEditPage() {
                                 value={item.product_id || ''}
                                 onChange={(e) => handleItemChange(index, 'product_id', e.target.value ? parseInt(e.target.value) : null)}
                                 disabled={!item.subcategory}
-                                className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed"
                               >
                                 <option value="">Select Product</option>
                                 {item.category && item.subcategory && products[item.category]?.[item.subcategory]?.map((product) => (
@@ -616,7 +616,7 @@ export default function QuotationEditPage() {
                                 value={item.description || ''}
                                 onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                                 placeholder="Description"
-                                className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary"
+                                className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary"
                               />
                             </div>
                           </td>
@@ -627,14 +627,14 @@ export default function QuotationEditPage() {
                               onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
                               min="0.01"
                               step="0.01"
-                              className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary"
+                              className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary"
                             />
                           </td>
                           <td className="p-3">
                             <select
                               value={item.unit || 'unit'}
                               onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                              className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary"
+                              className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary"
                             >
                               <option value="unit">Unit</option>
                               <option value="meter">Meter</option>
@@ -654,7 +654,7 @@ export default function QuotationEditPage() {
                               onChange={(e) => handleItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
-                              className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-none focus:border-primary text-right"
+                              className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1.5 px-2 text-sm outline-hidden focus:border-primary text-right"
                             />
                           </td>
                           <td className="p-3 text-right font-medium">
@@ -698,7 +698,7 @@ export default function QuotationEditPage() {
                             min="0"
                             max="100"
                             step="0.01"
-                            className="w-16 rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1 px-2 text-sm outline-none focus:border-primary text-right"
+                            className="w-16 rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1 px-2 text-sm outline-hidden focus:border-primary text-right"
                           />
                         </div>
                       </td>
@@ -720,7 +720,7 @@ export default function QuotationEditPage() {
                             min="0"
                             max="100"
                             step="0.01"
-                            className="w-16 rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1 px-2 text-sm outline-none focus:border-primary text-right"
+                            className="w-16 rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-1 px-2 text-sm outline-hidden focus:border-primary text-right"
                           />
                         </div>
                       </td>
@@ -747,7 +747,7 @@ export default function QuotationEditPage() {
           </div>
           
           {/* Notes & Terms */}
-          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
+          <div className="rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
@@ -758,7 +758,7 @@ export default function QuotationEditPage() {
                   value={quotation.notes || ''}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                   placeholder="Additional notes for the customer"
                 ></textarea>
               </div>
@@ -772,7 +772,7 @@ export default function QuotationEditPage() {
                   value={quotation.terms || ''}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full rounded border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-white dark:bg-boxdark py-2 px-3 text-sm outline-hidden focus:border-primary"
                   placeholder="Standard terms and conditions"
                 ></textarea>
               </div>

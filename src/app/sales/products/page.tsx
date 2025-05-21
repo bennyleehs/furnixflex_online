@@ -218,7 +218,7 @@ export default function ProductsPage() {
       
       {/* Product Form */}
       {showForm && (
-        <div className="mb-8 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="mb-8 rounded-xs border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
           <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">
             {isEditing ? 'Edit Product' : 'Add New Product'}
           </h4>
@@ -234,7 +234,7 @@ export default function ProductsPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                   placeholder="Enter product name"
                   required
                 />
@@ -260,7 +260,7 @@ export default function ProductsPage() {
                  }}
                   // Removed min="0" to allow negative values
                   step="0.01"
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                   placeholder="0.00"
                   required
                 />
@@ -278,7 +278,7 @@ export default function ProductsPage() {
                   min="0"
                   max="100"
                   step="0.1"
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                   placeholder="0.0"
                 />
               </div>
@@ -294,14 +294,14 @@ export default function ProductsPage() {
                       type="text"
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                       placeholder="Enter new category"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewCategory(false)}
-                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded"
+                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded-sm"
                     >
                       Cancel
                     </button>
@@ -317,7 +317,7 @@ export default function ProductsPage() {
                           subcategory: '' // Reset subcategory when category changes
                         });
                       }}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                       required
                     >
                       <option value="">Select Category</option>
@@ -330,7 +330,7 @@ export default function ProductsPage() {
                     <button
                       type="button"
                       onClick={() => setShowNewCategory(true)}
-                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded"
+                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded-sm"
                     >
                       New
                     </button>
@@ -349,14 +349,14 @@ export default function ProductsPage() {
                       type="text"
                       value={newSubcategory}
                       onChange={(e) => setNewSubcategory(e.target.value)}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                       placeholder="Enter new subcategory"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewSubcategory(false)}
-                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded"
+                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded-sm"
                     >
                       Cancel
                     </button>
@@ -366,7 +366,7 @@ export default function ProductsPage() {
                     <select
                       value={formData.subcategory}
                       onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                      className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                       disabled={!formData.category}
                       required
                     >
@@ -380,7 +380,7 @@ export default function ProductsPage() {
                     <button
                       type="button"
                       onClick={() => setShowNewSubcategory(true)}
-                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded"
+                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:hover:bg-meta-3 rounded-sm"
                       disabled={!formData.category && !showNewCategory}
                     >
                       New
@@ -397,7 +397,7 @@ export default function ProductsPage() {
                 <select
                   value={formData.unit}
                   onChange={(e) => setFormData({...formData, unit: e.target.value})}
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                 >
                   <option value="unit">Unit</option>
                   <option value="meter">Meter</option>
@@ -420,7 +420,7 @@ export default function ProductsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   rows={3}
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                  className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
                   placeholder="Enter product description"
                 ></textarea>
               </div>
@@ -450,7 +450,7 @@ export default function ProductsPage() {
       )}
       
       {/* Search and Filter */}
-      <div className="mb-6 rounded-sm border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="mb-6 rounded-xs border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Search</label>
@@ -459,7 +459,7 @@ export default function ProductsPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search products..."
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             />
           </div>
           
@@ -471,7 +471,7 @@ export default function ProductsPage() {
                 setFilterCategory(e.target.value);
                 setFilterSubcategory(''); // Reset subcategory filter when category changes
               }}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
             >
               <option value="">All Categories</option>
               {categories.map((category) => (
@@ -485,7 +485,7 @@ export default function ProductsPage() {
             <select
               value={filterSubcategory}
               onChange={(e) => setFilterSubcategory(e.target.value)}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+              className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent py-2 px-4 text-sm outline-hidden transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
               disabled={!filterCategory}
             >
               <option value="">All Subcategories</option>
@@ -511,7 +511,7 @@ export default function ProductsPage() {
       </div>
       
       {/* Products Table */}
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="rounded-xs border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>

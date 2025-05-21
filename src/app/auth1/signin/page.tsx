@@ -77,7 +77,7 @@ const SignIn = () => {
                   <input
                     type="text"
                     placeholder="UID"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-2 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary uppercase"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-2 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary uppercase"
                     disabled={false}
                     value={uid}
                     onChange={(e) => setUid(e.target.value)}
@@ -85,7 +85,7 @@ const SignIn = () => {
                   />
                   {/* <input
                     type="text"
-                    className="peer w-full rounded-lg border border-stroke bg-transparent py-2 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" // Added peer class
+                    className="peer w-full rounded-lg border border-stroke bg-transparent py-2 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" // Added peer class
                     disabled={false}
                     value={uid}
                     onChange={(e) => setUid(e.target.value)}
@@ -119,7 +119,7 @@ const SignIn = () => {
 
               {/* <div>
                 <input
-                  className="bg- white peer w-full select-all rounded-md border border-gray-800 px-5 py-3 text-lg text-gray-600 outline-none transition-all"
+                  className="bg- white peer w-full select-all rounded-md border border-gray-800 px-5 py-3 text-lg text-gray-600 outline-hidden transition-all"
                   type="text"
                   placeholder=" "
                 />
@@ -136,7 +136,7 @@ const SignIn = () => {
                   <input
                     type="password"
                     placeholder="6+ Characters, 1 Capital 1 Symbol"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-2 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-lg border border-stroke bg-transparent py-2 pl-6 pr-10 text-black outline-hidden focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     disabled={false}
                     value={password}
                     onChange={(e) => setPwd(e.target.value)}
