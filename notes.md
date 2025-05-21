@@ -11,24 +11,28 @@
 9. Partner
 10. Non-executive Director
 
-___
+---
+
 **IGNORE [LATER WILL UPDATE]**
 **Role_permissions**
 
-Roles   |  Role_permissions
-1. |  `["1", "1.1", "1.2", "1.3", "2", "2.1", "2.2", "2.2.1", "2.2.2", "2.2.3", "2.2.4", "2.2.4.1", "2.2.5", "2.3", "2.3.1", "2.3.2", "2.3.3", "2.4", "2.4.1", "2.4.2", "2.4.3", "2.4.4", "3", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.7.1", "3.7.2", "3.7.3", "3.7.4", "4", "4.1", "4.1.1", "4.1.1.1", "4.1.1.2", "4.1.2", "4.1.2.1", "4.1.2.2", "5", "5.1", "5.1.1", "5.1.1.1", "5.1.1.2", "5.1.2", "5.1.2.1", "5.1.2.2", "6", "7", "8", "8.1", "8.2", "8.3", "8.4"]`
+Roles | Role_permissions
 
-___
+1. | `["1", "1.1", "1.2", "1.3", "2", "2.1", "2.2", "2.2.1", "2.2.2", "2.2.3", "2.2.4", "2.2.4.1", "2.2.5", "2.3", "2.3.1", "2.3.2", "2.3.3", "2.4", "2.4.1", "2.4.2", "2.4.3", "2.4.4", "3", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.7.1", "3.7.2", "3.7.3", "3.7.4", "4", "4.1", "4.1.1", "4.1.1.1", "4.1.1.2", "4.1.2", "4.1.2.1", "4.1.2.2", "5", "5.1", "5.1.1", "5.1.1.1", "5.1.1.2", "5.1.2", "5.1.2.1", "5.1.2.2", "6", "7", "8", "8.1", "8.2", "8.3", "8.4"]`
+
+---
 
 **NOTE: EXAMPLE**
-___
+
+---
+
 -- PostgreSQL/MySQL with native JSON support
 
 `INSERT INTO role_permissions (role_id, permissions)
 VALUES 
 (1, '["2.1", "2.2", "2.2.1", "2.2.2", "2.2.3", "2.2.4", "2.2.4.1", "2.2.5", "2.3", "2.3.1", "2.3.2", "2.3.3", "2.4", "2.4.1", "2.4.2", "2.4.3", "2.4.4"]');`
 
---  also structure the permissions in more complex ways
+-- also structure the permissions in more complex ways
 
 `INSERT INTO role_permissions (role_id, permissions)
 VALUES 
@@ -45,17 +49,20 @@ VALUES
   }
 }');`
 
+---
 
-___
 table branch
+
 - branch jb
 - branch kl
 
 table department
+
 - sales
 - production
 
 table role
+
 - manager
 - supervisor
 - staff
@@ -76,15 +83,8 @@ No. | Branch | Dept | Role
 11 | KL | Production | Supervisor
 12 | KL | Production | Staff
 
-Access Path: 1,6,7 is Default (Public)
+---
 
-                    *Branch(JB)
-       |           |*Roles
-       |           |Manager          |Supervisor     |Staff
-*Dept  |Sales      |AccessPath: 2,3,5|AccessPath: 2,3|AccessPath: 3
-       |Production |AccessPath: 2,3,5|AccessPath: 2,5|AccessPath: 5
-
-___
 light mode:
 primary: #FFBC57
 red (warn): #E53935
@@ -96,7 +96,6 @@ primarydark: #E89F30
 reddark: #C62A2F
 bluedark: #358CE3
 greendark: #219754
-
 
 --
 case: access_control.json = "JB.TECHNOLOGY.Supervisor": ["1.0.0"]
