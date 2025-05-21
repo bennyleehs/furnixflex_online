@@ -9,7 +9,7 @@ const SelectDropdown = () => {
         Sub-menu:
         <div className="relative ml-4 inline-block">
           <select
-            className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[120px] cursor-pointer appearance-none rounded-lg border bg-transparent py-2 pr-8 pl-3 outline-none"
+            className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[120px] cursor-pointer appearance-none rounded-lg border bg-transparent py-2 pr-8 pl-3 outline-hidden"
             value={selectedActions}
             onChange={(e) => setSelectedActions(e.target.value)}
           >

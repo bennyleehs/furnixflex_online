@@ -94,7 +94,7 @@ const FormClock = <T extends Record<string, any>>({ columns, data, loading }: Fo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-white rounded shadow-md">
+    <form onSubmit={handleSubmit} className="p-4 bg-white rounded-sm shadow-md">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         {columns.map((column, index) => (
           <div key={index}>
@@ -108,7 +108,7 @@ const FormClock = <T extends Record<string, any>>({ columns, data, loading }: Fo
                 name={column.title}
                 value={formData[column.title] || ""}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded-sm"
                 disabled={loading}
               />
             ) : column.inputType === "number" ? (
@@ -121,7 +121,7 @@ const FormClock = <T extends Record<string, any>>({ columns, data, loading }: Fo
                 step={1}
                 value={formData[column.title] || ""}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded-sm"
                 placeholder="Enter minutes"
                 disabled={loading}
               />
@@ -131,7 +131,7 @@ const FormClock = <T extends Record<string, any>>({ columns, data, loading }: Fo
                 name={column.title}
                 value={formData[column.title] || ""}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded-sm"
                 disabled={loading}
               >
                 <option value="">Select an option</option>
@@ -147,7 +147,7 @@ const FormClock = <T extends Record<string, any>>({ columns, data, loading }: Fo
       </div>
       <button
         type="submit"
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-4 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600"
         disabled={loading}
       >
         Submit

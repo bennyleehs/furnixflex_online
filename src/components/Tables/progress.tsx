@@ -312,7 +312,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-none focus:border-primary dark:bg-meta-4 dark:text-white"
+              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-hidden focus:border-primary dark:bg-meta-4 dark:text-white"
             />
             {searchQuery && (
               <button 
@@ -371,7 +371,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
                   <div className="flex items-center gap-2 flex-wrap">
                     <h5 className="font-medium text-black dark:text-white">{name}</h5>
                     {nric && (
-                      <span className="text-xs bg-gray-50 dark:bg-meta-4 px-1.5 py-0.5 rounded border border-stroke dark:border-strokedark">
+                      <span className="text-xs bg-gray-50 dark:bg-meta-4 px-1.5 py-0.5 rounded-sm border border-stroke dark:border-strokedark">
                         {nric}
                       </span>
                     )}
@@ -408,7 +408,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
                   {/* Full address on its own row */}
                   {task.address && (
                     <div className="flex items-start mt-1.5 text-xs">
-                      <svg className="h-3.5 w-3.5 text-red-500 mt-0.5 mr-1.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="h-3.5 w-3.5 text-red-500 mt-0.5 mr-1.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
                       <span className="text-gray-600 dark:text-gray-300 break-words">{task.address}</span>
@@ -435,7 +435,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
               </div>
               
               {/* Source Info - horizontal and inline layout */}
-              <div className="pt-0.5 pb-2.5 px-3 bg-gray-50 dark:bg-meta-4 rounded">
+              <div className="pt-0.5 pb-2.5 px-3 bg-gray-50 dark:bg-meta-4 rounded-sm">
                 <div className="flex flex-wrap gap-x-3 gap-y-1 items-center">
                   <span className="font-medium text-sm">Source Info: </span>
                   {sourceName && <span className="text-gray-700 dark:text-gray-300">{sourceName} /</span>}

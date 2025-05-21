@@ -17,7 +17,7 @@ const RulesForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-white rounded shadow-md">
+    <form onSubmit={handleSubmit} className="p-4 bg-white rounded-sm shadow-md">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <label htmlFor="dropdown1" className="block mb-2 font-semibold">
@@ -27,7 +27,7 @@ const RulesForm: React.FC = () => {
             id="dropdown1"
             value={dropdown1}
             onChange={(e) => setDropdown1(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded-sm"
           >
             <option value="">Select an option</option>
             <option value="option1">Option 1</option>
@@ -43,7 +43,7 @@ const RulesForm: React.FC = () => {
             id="dropdown2"
             value={dropdown2}
             onChange={(e) => setDropdown2(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded-sm"
           >
             <option value="">Select an option</option>
             <option value="option1">Option 1</option>
@@ -59,7 +59,7 @@ const RulesForm: React.FC = () => {
             id="dropdown3"
             value={dropdown3}
             onChange={(e) => setDropdown3(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded-sm"
           >
             <option value="">Select an option</option>
             <option value="option1">Option 1</option>
@@ -76,13 +76,13 @@ const RulesForm: React.FC = () => {
           id="message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded-sm"
           rows={4}
         />
       </div>
       <button
         type="submit"
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-4 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-600"
       >
         Submit
       </button>

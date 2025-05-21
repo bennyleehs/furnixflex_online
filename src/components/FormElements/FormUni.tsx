@@ -176,7 +176,7 @@ const FormUni = <T extends Record<string, any>>({
   // Update the form container and elements with dark mode styling
   return (
     <div>
-      <form onSubmit={handleSubmit} className="p-4 bg-white rounded shadow-md dark:bg-boxdark dark:border-strokedark">
+      <form onSubmit={handleSubmit} className="p-4 bg-white rounded-sm shadow-md dark:bg-boxdark dark:border-strokedark">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {columns.map((column, index) => {
             const currentValue = formData?.[column.valueKey] || "";
@@ -206,7 +206,7 @@ const FormUni = <T extends Record<string, any>>({
                     value={currentValue || column.defaultValue || ""}
                     onChange={handleChange}
                     required={column.required}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   >
                     <option value="">Select an option</option>
                     {column.options?.map((option, idx) => (
@@ -226,7 +226,7 @@ const FormUni = <T extends Record<string, any>>({
                     // onChange={handleChange}
                     rows={4}
                     required={column.required}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 ) : (
                   <input
@@ -237,7 +237,7 @@ const FormUni = <T extends Record<string, any>>({
                     onChange={handleChange}
                     readOnly={column.readOnly}
                     required={column.required}
-                    className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${
+                    className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${
                       column.readOnly 
                         ? "bg-gray-100 dark:bg-form-input cursor-not-allowed opacity-70" 
                         : ""
@@ -253,7 +253,7 @@ const FormUni = <T extends Record<string, any>>({
           <button
             type="button"
             onClick={() => router.push(redirectUrl)}
-            className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+            className="flex justify-center rounded-sm border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           >
             Cancel
           </button>

@@ -158,14 +158,14 @@ export default function Tables({
           <button
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
-            className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            className="px-3 py-1 rounded-sm bg-gray-200 disabled:opacity-50"
           >
             First
           </button>
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            className="px-3 py-1 rounded-sm bg-gray-200 disabled:opacity-50"
           >
             Prev
           </button>
@@ -185,14 +185,14 @@ export default function Tables({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            className="px-3 py-1 rounded-sm bg-gray-200 disabled:opacity-50"
           >
             Next
           </button>
           <button
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            className="px-3 py-1 rounded-sm bg-gray-200 disabled:opacity-50"
           >
             Last
           </button>
@@ -255,7 +255,7 @@ export default function Tables({
           id={`filter-${key}`}
           value={selectedFilters[key] || "All"}
           onChange={(e) => handleFilterChange(key, e.target.value)}
-          className="p-2 border rounded min-w-[130px]"
+          className="p-2 border rounded-sm min-w-[130px]"
         >
           {options.map((option, index) => (
             <option key={`${key}-${option.value}-${index}`} value={option.value}>
@@ -287,7 +287,7 @@ export default function Tables({
               <input
                 type="text"
                 placeholder={`Search in ${selectedFilters['status'] || 'All'}...`}
-                className="border border-stroke dark:border-strokedark px-8 py-2 rounded text-sm w-full"
+                className="border border-stroke dark:border-strokedark px-8 py-2 rounded-sm text-sm w-full"
                 value={searchQuery}
                 onChange={(e) => {
                   const newQuery = e.target.value;
@@ -363,7 +363,7 @@ export default function Tables({
         </div>
 
         {/* Create Button */}
-        <div className="flex-shrink-0 ml-3">
+        <div className="shrink-0 ml-3">
           <Link
             href={createLink || "/"}
             className="flex items-center justify-center rounded-md bg-white dark:bg-boxdark border border-stroke px-4 py-2 hover:bg-gray-100"
