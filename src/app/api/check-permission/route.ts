@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +24,12 @@ export async function POST(req: NextRequest) {
     }
     
     // Check if the user has this specific permission
-    const userPermissions = tokenData.permissions || [];
+    // const userPermissions = tokenData.permissions || [];
+    const userPermissions = getPermissionsForRole(
+            tokenData.branchRef,
+            tokenData.departmentName,
+            tokenData.roleName
+        );
     const hasPermission = userPermissions.includes(permissionValue);
     
     // Also check if user has any parent permission that covers this one

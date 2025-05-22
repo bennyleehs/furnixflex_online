@@ -1,10 +1,9 @@
 // lib/auth.ts
-
 import bcrypt from "bcryptjs";
 import { createPool } from "./db";
 import { AuthToken } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
-import { getPermissionsForRole } from "@/utils/accessControlUtils";
+// import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
 const db = createPool();
 
@@ -57,7 +56,7 @@ export async function verifyToken(
       roleName,
       departmentName,
       branchRef,
-      permissions,
+      // permissions,
       iat,
       exp,
     } = payload as {
@@ -65,7 +64,7 @@ export async function verifyToken(
       roleName?: string;
       departmentName?: string;
       branchRef?: string;
-      permissions?: string[];
+      // permissions?: string[];
       iat?: number;
       exp?: number;
     };
@@ -75,7 +74,7 @@ export async function verifyToken(
       typeof roleName !== "string" ||
       typeof departmentName !== "string" ||
       typeof branchRef !== "string" ||
-      !Array.isArray(permissions) ||
+      // !Array.isArray(permissions) ||
       typeof iat !== "number" ||
       typeof exp !== "number"
     ) {
@@ -88,7 +87,7 @@ export async function verifyToken(
       roleName,
       departmentName,
       branchRef,
-      permissions,
+      // permissions,
       iat,
       exp,
     };
@@ -113,11 +112,11 @@ export async function generateToken(
   if (!secretKey) throw new Error("JWT secret key is missing");
 
   // Get permissions based on branch, department, and role
-  const permissions = getPermissionsForRole(
-    branchRef, 
-    departmentName, 
-    roleName,
-  );
+  // const permissions = getPermissionsForRole(
+  //   branchRef, 
+  //   departmentName, 
+  //   roleName,
+  // );
 
   const now = Math.floor(Date.now() / 1000); // iat
 
@@ -126,7 +125,7 @@ export async function generateToken(
     roleName,
     departmentName,
     branchRef,
-    permissions, // Include permissions array in the token
+    // permissions, // Include permissions array in the token
     iat: now,
   })
     .setProtectedHeader({ alg: "HS256" })

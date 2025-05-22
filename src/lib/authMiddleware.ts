@@ -2,9 +2,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken} from "./auth";
 import { AuthToken } from "@/types/auth";
+import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
 export interface AuthenticatedRequest extends NextRequest {
-  user: AuthToken;
+  user: AuthToken & { permissions: string[] };
 }
 
 export function withAuth(
@@ -29,7 +30,12 @@ export function withAuth(
 
       console.log(decoded);
       // Ensure the decoded token's permissions include at least one required permission
-      const userPermissions: string[] = decoded.permissions || [];
+      // const userPermissions: string[] = decoded.permissions || [];
+      const userPermissions: string[] = getPermissionsForRole(
+                decoded.branchRef,
+                decoded.departmentName,
+                decoded.roleName
+            );
       // Check if any required permission exists in the user's permissions array
       const hasPermission = requiredPermissions.some(p => userPermissions.includes(p));
       if (!hasPermission) {
@@ -38,7 +44,11 @@ export function withAuth(
 
       // Add user info to request
       const authenticatedReq = req as AuthenticatedRequest;
-      authenticatedReq.user = decoded;
+      // authenticatedReq.user = decoded;
+      authenticatedReq.user = {
+                ...decoded, // Spread the existing decoded properties (id, roleName, etc.)
+                permissions: userPermissions // Add the dynamically fetched permissions
+            };
 
       // Call the handler with the authenticated request
       return handler(authenticatedReq);
