@@ -4,6 +4,8 @@ import { IUser } from "@/interface/app_interface";
 import { verifyPassword, generateToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "nodejs"; // Ensure it runs in Node.js
+
 export async function POST(req: NextRequest) {
   const db = createPool();
 
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
   );
 
   const res = NextResponse.json({ success: true });
-    res.headers.set(
+  res.headers.set(
     "Set-Cookie",
     // `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,
     `authToken=${token}; Path=/; SameSite=Lax, Max-Age=3600`,

@@ -1,15 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-// import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
-
-// export const metadata: Metadata = {
-//   title: "Next.js SignIn Page | Classy Pro System",
-//   description: "This is Next.js Signin Page TailAdmin Dashboard Template",
-// };
+import Image from "next/image";
 
 const SignIn = () => {
   const [uid, setUid] = useState("");
@@ -23,20 +15,25 @@ const SignIn = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/auth/signin-copy", { 
+      const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid, password }),
       });
 
-      const data = await response.json();
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response from server");
+      }
 
-      if (response.status === 200) {
-        setMessage(data.message);
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message || "Sign-in successful");
         setIsError(false);
         router.push("/");
       } else {
-        setMessage(data.error || "Sign In failed.");
+        setMessage(data.error || "Sign-in failed.");
         setIsError(true);
       }
     } catch (error) {
@@ -44,6 +41,10 @@ const SignIn = () => {
       setIsError(true);
       console.error(error);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -161,37 +162,35 @@ const SignIn = () => {
                   )}
                 </span>
               </div>
-
-              <div className="mb-5">
-                <input
-                  type="submit"
-                  value="SIGN IN"
-                  className="w-full cursor-pointer rounded-lg border-2 border-primary p-4 font-semibold text-primary transition hover:bg-primary hover:text-white"
-                />
-              </div>
-
-              <div className="mt-6 text-center">
-                <p>
-                  Don’t have any account?{" "}
-                  <Link href="/auth/signup" className="text-primary">
-                    Sign Up
-                  </Link>
+            </div>
+            <div className="mb-1">
+              <input
+                type="submit"
+                value="LOG IN"
+                className="bg-primary hover:bg-primarydark w-full cursor-pointer rounded-lg border p-4 font-semibold text-white transition hover:text-white"
+              />
+            </div>
+            <div className="mt-2 text-center">
+              {message && (
+                <p
+                  className={`mt-2 ${
+                    isError ? "text-center text-red-500" : "text-green-500"
+                  }`}
+                >
+                  {message}
                 </p>
-                {message && (
-                  <p
-                    className={`mt-2 ${
-                      isError ? "text-center text-red-500" : "text-green-500"
-                    }`}
-                  >
-                    {message}
-                  </p>
-                )}
-              </div>
-            </form>
-          </div>
+              )}
+              {/* <!-- Footer --> */}
+              <p className="mt-auto py-4 text-center text-sm text-gray-400">
+                &copy; {new Date().getFullYear()} - Classy Project Marketing
+                Sdn. Bhd.
+              </p>
+              {/* <!-- Footer --> */}
+            </div>
+          </form>
         </div>
       </div>
-    </DefaultLayout>
+    </div>
   );
 };
 
