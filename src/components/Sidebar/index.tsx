@@ -32,20 +32,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [menuGroups, setMenuGroups] = useState<MenuGroup[]>([]);
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "ui elements");
 
-  // useEffect(() => {
-  //   const fetchMenu = async () => {
-  //     try {
-  //       const response = await fetch("@/sidebar_menu.json");
-  //       const data = await response.json();
-  //       setMenuGroups(data);
-  //     } catch (error) {
-  //       console.error("Failed to load sidebar menu:", error);
-  //     }
-  //   };
-
-  //   fetchMenu();
-  // }, []);
-
   useEffect(() => {
     const loadMenu = async () => {
       const data = await import("@/data/sidebar_menu.json");
