@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { checkUserAccess } from "@/utils/accessControlUtils";
+import { checkUserAccess, getPermissionsForRole } from "@/utils/accessControlUtils"
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,9 +22,17 @@ export async function POST(req: NextRequest) {
     if (!tokenData || "expired" in tokenData) {
       return NextResponse.json({ hasAccess: false }, { status: 401 });
     }
+
+    const userPermissions = getPermissionsForRole(
+            tokenData.branchRef,
+            tokenData.departmentName,
+            tokenData.roleName
+        );
     
     // Use permissions from token to check access
-    const hasAccess = checkUserAccess(tokenData.permissions || [], path);
+    // const hasAccess = checkUserAccess(tokenData.permissions || [], path);
+    // Use the fetched permissions to check access
+        const hasAccess = checkUserAccess(userPermissions, path);
     
     return NextResponse.json({ hasAccess });
   } catch (error) {
