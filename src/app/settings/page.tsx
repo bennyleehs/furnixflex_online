@@ -19,6 +19,9 @@ const Settings = () => {
           <div className="col-span-5 xl:col-span-3">
             <div className="rounded-xs border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                <h3 className="font-extrabold text-black dark:text-white">
+                  NEED TO BE UPDATE AND MAKE CHANGES
+                </h3>
                 <h3 className="font-medium text-black dark:text-white">
                   Personal Information
                 </h3>

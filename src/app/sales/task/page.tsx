@@ -86,13 +86,12 @@ export default function Page() {
     { key: "status", title: "Status" },
     { key: "pic", title: "PIC" },
   ];
-
-  if (loading) return <p>Loading {title}s...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
+  
   return (
     <DefaultLayout>
       {/* <Breadcrumb pageName={`${capitalizedTitle} List`} /> */}
+      {loading && <p>Loading {title}s...</p>}
+      {error && <p className="text-red-500">{error}</p>}
       <Tables
         data={data}
         statusCounts={statusCounts} 

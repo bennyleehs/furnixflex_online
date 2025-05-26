@@ -87,12 +87,12 @@ export default function LeadPage() {
     { key: "pic", title: "PIC" },
   ];
 
-  if (loading) return <p>Loading {title}s...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
   return (
     <DefaultLayout>
-      <Breadcrumb noHeader={true} pageName={`${capitalizedTitle} List`} />
+      {/* <Breadcrumb noHeader={true} pageName={`${capitalizedTitle} List`} /> */}
+      <Breadcrumb pageName={`${capitalizedTitle} List`} />
+      {loading && <p>Loading Leads...</p>}
+      {error && <p className="text-red-500">{error}</p>}
       <Tables 
         columns={columns} 
         data={data} 
