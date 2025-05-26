@@ -31,7 +31,7 @@ const Breadcrumb = ({ pageName, noHeader }: BreadcrumbProps) => {
                     {decodeURIComponent(segment)}
                   </Link>
                 ) : (
-                  <span className="font-medium text-blue-500 capitalize">{pageName}</span>
+                  <span className="font-medium text-primary capitalize">{pageName}</span>
                 )}
                 {!isLast && <span className="mx-2">/</span>}
               </li>

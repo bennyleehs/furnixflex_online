@@ -160,7 +160,7 @@ export default function Tables({
             >
               <label
                 htmlFor={`filter-dropdown-${key}`}
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 dark:text-white"
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}:
               </label>
@@ -186,7 +186,7 @@ export default function Tables({
         </div>
 
         {/* Create Button - Controlled by showCreateButton prop and canCreate */}
-        {showCreateButton && // This prop is passed from BranchPage.tsx (showCreateButton={!loadingPermissions && canCreateButton})
+        {showCreateButton && 
           createLink &&
           createMenuSubmenu &&
           !loadingPermissions &&
@@ -285,7 +285,7 @@ export default function Tables({
                               deleteMenuSubmenu.submenu,
                             ) && (
                               <button
-                                className="hover:text-primary"
+                                className="hover:text-red"
                                 title="Mark as History"
                               >
                                 <svg
