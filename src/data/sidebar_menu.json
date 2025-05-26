@@ -80,24 +80,24 @@
               {
                 "label": "Properties",
                 "id": "1.7",
-                "route": "/admin/property"
+                "route": "/admin/properties"
               },
               {
-                "label": "Equipment",
+                "label": "Equipments",
                 "id": "1.8",
-                "route": "/admin/equipment"
+                "route": "/admin/equipments"
               },
               {
                 "label": "Inventory",
                 "id": "1.9",
-                "route": "/admin/stock"
+                "route": "/admin/inventory"
               }
             ]
           },
           {
             "label": "Partners",
             "id": "1.10",
-            "route": "#"
+            "route": "/admin/partners"
           }
         ]
       },
@@ -124,7 +124,7 @@
           {
             "label": "Invoices",
             "id": "2.4",
-            "route": "/sales/invoice"
+            "route": "/sales/invoices"
           },
           {
             "label": "Customer",
@@ -176,19 +176,19 @@
                   {
                     "label": "Indoor",
                     "id": "3.1",
-                    "route": "#"
+                    "route": "/finance/indoor"
                   },
                   {
                     "label": "Measurement",
                     "id": "3.2",
-                    "route": "#"
+                    "route": "/finance/measurement"
                   }
                 ]
               },
               {
                 "label": "Dealer",
                 "id": "3.3",
-                "route": "#"
+                "route": "/finance/dealer"
               }
             ]
           }
@@ -202,7 +202,7 @@
           {
             "label": "ERP",
             "id": "4.1",
-            "route": "#"
+            "route": "/production/erp"
           }
         ]
       }
@@ -213,11 +213,11 @@
     "menuItems": [
       {
         "label": "Country & Currency",
-        "route": "#"
+        "route": "/country-currency"
       },
       {
         "label": "Settings",
-        "route": "/forms/form-elements"
+        "route": "/settings"
       },
       {
         "label": "History",
@@ -227,22 +227,22 @@
           {
             "label": "Customer",
             "id": "5.1",
-            "route": "#"
+            "route": "/history/customer"
           },
           {
             "label": "Task",
             "id": "5.2",
-            "route": "#"
+            "route": "/history/task"
           },
           {
             "label": "Job",
             "id": "5.3",
-            "route": "#"
+            "route": "/history/job"
           },
           {
             "label": "Promotion Code",
             "id": "5.4",
-            "route": "#"
+            "route": "/history/promotion"
           }
         ]
       }
