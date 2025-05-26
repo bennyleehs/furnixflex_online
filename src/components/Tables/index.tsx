@@ -32,9 +32,9 @@ export default function Tables({
 }: TableProps) {
   const [tableData, setTableData] = useState(data);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>(
-    {}
-  );
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, string>
+  >({});
   const [filterOptions, setFilterOptions] = useState<
     Record<string, { label: string; count: number }[]>
   >({});
@@ -95,13 +95,13 @@ export default function Tables({
         filteredData = filteredData.filter((row) => row[key] === value);
       }
     });
-    
+
     // Update the tableData with filtered results
     setTableData(filteredData);
-    
+
     // Now recalculate filter options based on current filters
     const options: Record<string, { label: string; count: number }[]> = {};
-    
+
     filterKeys.forEach((currentKey) => {
       // For each filter key, apply all OTHER filters first
       let dataForThisFilter = [...data];
@@ -109,23 +109,27 @@ export default function Tables({
       Object.entries(selectedFilters).forEach(([key, value]) => {
         // Skip the current filter key we're calculating counts for
         if (key !== currentKey && value !== "All") {
-          dataForThisFilter = dataForThisFilter.filter((row) => row[key] === value);
+          dataForThisFilter = dataForThisFilter.filter(
+            (row) => row[key] === value,
+          );
         }
       });
-      
+
       // Now count options for the current filter based on the pre-filtered data
       const counts: Record<string, number> = {};
       dataForThisFilter.forEach((row) => {
         const value = row[currentKey] || "Unknown";
         counts[value] = (counts[value] || 0) + 1;
       });
-      
+
       options[currentKey] = [
         { label: "All", count: dataForThisFilter.length },
-        ...Object.entries(counts).map(([label, count]) => ({ label, count })),
+        ...Object.entries(counts)
+          .map(([label, count]) => ({ label, count }))
+          .sort((a, b) => a.label.localeCompare(b.label)), // Sort filter options alphabetically
       ];
     });
-    
+
     setFilterOptions(options);
   }, [selectedFilters, data, filterKeys]);
 
@@ -143,15 +147,15 @@ export default function Tables({
   };
 
   return (
-    <div className="rounded-lg border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-2">
+    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-2">
       {/* Table Header with Create Button */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         {/* Filter Dropdowns */}
-        <div className="flex flex-wrap gap-4 w-full">
+        <div className="flex w-full flex-wrap gap-4">
           {filterKeys.map((key) => (
             <div
               key={key}
-              className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto"
+              className="flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2"
             >
               <label
                 htmlFor={`filter-dropdown-${key}`}
@@ -161,17 +165,17 @@ export default function Tables({
               </label>
               <select
                 id={`filter-dropdown-${key}`}
-                value={selectedFilters[key]}
+                value={selectedFilters[key] || "All"}
                 onChange={(e) =>
                   setSelectedFilters((prev) => ({
                     ...prev,
                     [key]: e.target.value,
                   }))
                 }
-                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-xs focus:border-blue-500 focus:ring-3 focus:ring-blue-200"
+                className="focus:border-primary w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-xs"
               >
-                {filterOptions[key]?.map((option, index) => (
-                  <option key={index} value={option.label}>
+                {(filterOptions[key] || []).map((option, index) => (
+                  <option key={`${key}-${option.label}`} value={option.label}>
                     {option.label} ({option.count})
                   </option>
                 ))}
@@ -214,7 +218,7 @@ export default function Tables({
       <div className="max-w-full overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+            <tr className="bg-gray-2 dark:bg-meta-4 text-left">
               {columns.map((col, index) => (
                 <th
                   key={col.key}
@@ -224,8 +228,8 @@ export default function Tables({
                   {col.title}
                 </th>
               ))}
-              <th className="min-w-[140px] px-2 py-4 font-medium text-black dark:text-white xl:pl-6">
-                Overview/Options
+              <th className="min-w-[140px] px-2 py-4 font-medium text-black xl:pl-6 dark:text-white">
+                Actions
               </th>
             </tr>
           </thead>

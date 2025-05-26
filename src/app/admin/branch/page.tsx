@@ -39,7 +39,6 @@ export default function BranchPage() {
         time_zone: `${branch.time_zone} / ${branch.currencies_code} (${branch.currencies_symbol})`, // Combine time zone and currency
       }));
       setBranches(formattedRows); // Assign the formatted rows
-
     } catch (err) {
       setError('Error fetching data');
       console.error(err);
@@ -67,15 +66,14 @@ export default function BranchPage() {
     { key: 'status', title: 'Status' },
   ];
 
-  if (loading) return <p>Loading branches...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Branch List" />
-      <Tables 
-        columns={columns} 
-        data={branches} 
+      {loading && <p>Loading Branches...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      <Tables
+        columns={columns}
+        data={branches}
         createLink="/admin/branch/create"
         filterKeys={['country', 'status']}
         showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton

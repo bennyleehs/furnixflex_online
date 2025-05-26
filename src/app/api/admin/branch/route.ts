@@ -1,8 +1,9 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
 
-export async function GET(req: NextRequest) {
+async function handler(req: AuthenticatedRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
