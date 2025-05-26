@@ -1,6 +1,5 @@
 // src/app/admin/branch/page.tsx
 'use client';
-
 import { useEffect, useState, useRef } from 'react';
 import Tables from '@/components/Tables';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';

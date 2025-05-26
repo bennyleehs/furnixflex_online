@@ -1,4 +1,4 @@
-//src/components/Tables/index.tsx
+// src/components/Tables/index.tsx
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ interface TableProps {
   createLink?: string;
   filterKeys: string[];
   idParam?: string; // For specifying id parameter name (default: "id")
-  showCreateButton?: boolean; //prop to control button visibility
+  showCreateButton?: boolean; //prop to control button visibility (from parent)
   createPermissionPrefix?: string; // To control the create button
   editPermissionPrefix?: string; // To control the edit button
   deletePermissionPrefix?: string; // To control the delete button
@@ -32,15 +32,15 @@ export default function Tables({
 }: TableProps) {
   const [tableData, setTableData] = useState(data);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const [selectedFilters, setSelectedFilters] = useState<
-    Record<string, string>
-  >({});
+  const [selectedFilters, setSelectedFilters] =
+    useState<Record<string, string>>({});
   const [filterOptions, setFilterOptions] = useState<
     Record<string, { label: string; count: number }[]>
   >({});
   const router = useRouter();
 
-  const { canFullAccess, canEdit, canCreate, canMonitor, loadingPermissions } =
+  // FIX 1: Added 'canDelete' to the destructuring here
+  const { canFullAccess, canEdit, canCreate, canDelete, canMonitor, loadingPermissions } =
     usePermissions();
 
   const getMenuSubmenu = (
@@ -60,6 +60,7 @@ export default function Tables({
   const editMenuSubmenu = getMenuSubmenu(editPermissionPrefix);
   const deleteMenuSubmenu = getMenuSubmenu(deletePermissionPrefix);
   const monitorMenuSubmenu = getMenuSubmenu(monitorPermissionPrefix);
+
 
   useEffect(() => {
     // Initialize selected filters with "All" for each filterKey (only on first load)
@@ -184,8 +185,8 @@ export default function Tables({
           ))}
         </div>
 
-        {/* Create Button */}
-        {showCreateButton &&
+        {/* Create Button - Controlled by showCreateButton prop and canCreate */}
+        {showCreateButton && // This prop is passed from BranchPage.tsx (showCreateButton={!loadingPermissions && canCreateButton})
           createLink &&
           createMenuSubmenu &&
           !loadingPermissions &&
@@ -251,74 +252,71 @@ export default function Tables({
                   {/* Action buttons */}
                   <td className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6">
                     <div className="flex items-center space-x-6">
-                      {!loadingPermissions &&
-                        (monitorMenuSubmenu === null || // Render buttons if no monitor permission is specified
-                          !canMonitor(
-                            monitorMenuSubmenu.menu,
-                            monitorMenuSubmenu.submenu,
-                          )) && (
-                          <>
-                            {editMenuSubmenu &&
-                              canEdit(
-                                editMenuSubmenu.menu,
-                                editMenuSubmenu.submenu,
-                              ) && (
-                                <button
-                                  className="hover:text-primary"
-                                  onClick={() => handleEdit(row)}
-                                  title="Edit"
+                      {!loadingPermissions && ( // Only render buttons if permissions are loaded
+                        <>
+                          {/* Edit Button */}
+                          {editMenuSubmenu &&
+                            canEdit(
+                              editMenuSubmenu.menu,
+                              editMenuSubmenu.submenu,
+                            ) && (
+                              <button
+                                className="hover:text-primary"
+                                onClick={() => handleEdit(row)}
+                                title="Edit"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="fill-current"
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 576 512"
                                 >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="fill-current"
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 576 512"
-                                  >
-                                    <path
-                                      d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
-                                      fill=""
-                                    />
-                                  </svg>
-                                </button>
-                              )}
-                            {deleteMenuSubmenu &&
-                              canFullAccess(
-                                deleteMenuSubmenu.menu,
-                                deleteMenuSubmenu.submenu,
-                              ) && (
-                                <button
-                                  className="hover:text-primary"
-                                  title="Mark as History"
+                                  <path d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
+                                    fill=""
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                          {/* Delete Button */}
+                          {deleteMenuSubmenu &&
+                            canDelete( // FIX 2: Changed from canFullAccess to canDelete here
+                              deleteMenuSubmenu.menu,
+                              deleteMenuSubmenu.submenu,
+                            ) && (
+                              <button
+                                className="hover:text-primary"
+                                title="Mark as History"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
                                 >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                    <line
-                                      x1="10"
-                                      y1="11"
-                                      x2="10"
-                                      y2="17"
-                                    ></line>
-                                    <line
-                                      x1="14"
-                                      y1="11"
-                                      x2="14"
-                                      y2="17"
-                                    ></line>
-                                  </svg>
-                                </button>
-                              )}
-                          </>
-                        )}
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  <line
+                                    x1="10"
+                                    y1="11"
+                                    x2="10"
+                                    y2="17"
+                                  ></line>
+                                  <line
+                                    x1="14"
+                                    y1="11"
+                                    x2="14"
+                                    y2="17"
+                                  ></line>
+                                </svg>
+                              </button>
+                            )}
+                        </>
+                      )}
+                      {/* Info Button (always visible, or controlled by its own permission if desired) */}
                       <button className="hover:text-primary" title="Info">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
