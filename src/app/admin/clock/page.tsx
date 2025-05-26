@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Tables from "@/components/Tables";
+import ComingSoon from "@/components/DisplayPage/ComingSoon";
 
 const ClockPage = () => {
   const [data, setData] = useState([]);
@@ -49,15 +50,16 @@ const ClockPage = () => {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Clocks Fetch" />
-      <Tables
+      {/* <Tables
         columns={columns}
         data={data}
         detailTitle="Clock Details"
         createLink="/admin/clock/create"
         deleteLink="/api/admin/clock/delete"
         fetchData={fetchData}
-      />
-    </DefaultLayout>
+      /> */}
+      <ComingSoon/>
+      </DefaultLayout>
   );
 };
 
