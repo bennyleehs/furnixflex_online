@@ -6,6 +6,7 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import usePermissions from '@/hooks/usePermissions'; //custom hook
 
+const title="Branch"
 const MENU = '1';
 const SUBMENU = '0';
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
@@ -29,13 +30,13 @@ export default function BranchPage() {
       // Format rows to combine data
       const formattedRows = data.listBranch.map((branch: any) => ({
         ...branch,
-        name: `${branch.name} / ${branch.ref}`, // Combine name and ref
-        contact: `${branch.idd} / ${branch.phone} / ${branch.email}`, // Combine phone and email
-        address: `${branch.address_line1}, ${branch.address_line2}, ${branch.city}, ${branch.state}, ${branch.country}`, // Combine address fields
-        country: branch.country, // Keep country as a separate field for filtering
-        company: `${branch.company_name} / ${branch.company_reg}`, // Combine company name and registration
-        bank: `${branch.bank_name} / ${branch.bank_account} / ${branch.bank_swift}`, // Combine bank details
-        time_zone: `${branch.time_zone} / ${branch.currencies_code} (${branch.currencies_symbol})`, // Combine time zone and currency
+        name: `${branch.name} / ${branch.ref}`,
+        contact: `${branch.idd} / ${branch.phone} / ${branch.email}`,
+        address: `${branch.address_line1}, ${branch.address_line2}, ${branch.city}, ${branch.state}, ${branch.country}`,
+        country: branch.country, 
+        company: `${branch.company_name} / ${branch.company_reg}`,
+        bank: `${branch.bank_name} / ${branch.bank_account} / ${branch.bank_swift}`,
+        time_zone: `${branch.time_zone} / ${branch.currencies_code} (${branch.currencies_symbol})`,
       }));
       setBranches(formattedRows); // Assign the formatted rows
     } catch (err) {
@@ -67,7 +68,7 @@ export default function BranchPage() {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Branch List" />
+      <Breadcrumb pageName={title} />
       {loading && <p>Loading Branches...</p>}
       {error && <p className="text-red-500">{error}</p>}
       <Tables
