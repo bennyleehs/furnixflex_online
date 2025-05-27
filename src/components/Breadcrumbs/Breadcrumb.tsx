@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,7 +18,7 @@ const Breadcrumb = ({ pageName, noHeader }: BreadcrumbProps) => {
       </h2>}
       
       <nav>
-        <ol className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+        <ol className="flex items-center text-gray-600 dark:text-gray-300">
           {pathSegments.map((segment, index) => {
             const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
             const isLast = index === pathSegments.length - 1;

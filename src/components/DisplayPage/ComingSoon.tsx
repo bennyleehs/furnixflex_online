@@ -44,9 +44,12 @@ const ComingSoon = () => {
           <h1 className="mb-4 text-4xl font-bold text-primary">
             Coming Soon
           </h1>
-          <p className="mb-8 text-white">
-            This page section under construction! Thank you for waiting.
+          <p className="mb-4 text-white">
+            This page section is under construction! Thank you for waiting.
           </p>
+          <p className="text-center text-sm text-gray-400">
+          &copy; {new Date().getFullYear()} - Classy Project Marketing Sdn. Bhd.
+        </p>
         </div>
       </div>
     // </DefaultLayout>

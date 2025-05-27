@@ -176,7 +176,7 @@ const FormUni = <T extends Record<string, any>>({
   // Update the form container and elements with dark mode styling
   return (
     <div>
-      <form onSubmit={handleSubmit} className="p-4 bg-white rounded-sm shadow-md dark:bg-boxdark dark:border-strokedark">
+      <form onSubmit={handleSubmit} className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark dark:border-strokedark">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {columns.map((column, index) => {
             const currentValue = formData?.[column.valueKey] || "";
