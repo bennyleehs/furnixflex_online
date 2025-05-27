@@ -65,7 +65,7 @@
                 "route": "",
                 "children": [
                   {
-                    "label": "Access List",
+                    "label": "Access",
                     "id": "1.6",
                     "route": "/admin/scopes_access"
                   }
@@ -122,9 +122,9 @@
             "route": "/sales/quotation"
           },
           {
-            "label": "Invoices",
+            "label": "Products",
             "id": "2.4",
-            "route": "/sales/invoices"
+            "route": "/sales/products"
           },
           {
             "label": "Customer",
@@ -132,26 +132,9 @@
             "route": "/sales/customer"
           },
           {
-            "label": "Products",
-            "route": "#",
-            "children": [
-              {
-                "label": "Packages",
-                "id": "2.6",
-                "route": "/sales/packages"
-              },
-              { "label": "Option", "id": "2.7", "route": "/sales/option" },
-              {
-                "label": "Appliances",
-                "id": "2.8",
-                "route": "/sales/appliances"
-              },
-              {
-                "label": "Promotion Code",
-                "id": "2.9",
-                "route": "/sales/promotion"
-              }
-            ]
+            "label": "Invoices",
+            "id": "2.6",
+            "route": "/sales/invoices"
           },
           {
             "label": "CRM",
@@ -238,11 +221,6 @@
             "label": "Job",
             "id": "5.3",
             "route": "/history/job"
-          },
-          {
-            "label": "Promotion Code",
-            "id": "5.4",
-            "route": "/history/promotion"
           }
         ]
       }
