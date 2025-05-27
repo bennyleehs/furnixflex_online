@@ -25,7 +25,7 @@ interface OptionItem {
   meta?: Record<string, any>; // Store additional data here
 }
 
-export default function BranchPage() {
+export default function CreateEmployeePage() {
   const [branches, setBranches] = useState<{ id: string; name: string; ref: string }[]>([]);
   const [departments, setDepartments] = useState<{ id: string; name: string; ref: string }[]>([]);
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);

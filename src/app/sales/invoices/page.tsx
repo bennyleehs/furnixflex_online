@@ -3,10 +3,10 @@ import ComingSoon from "@/components/DisplayPage/ComingSoon";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export default function Invoices() {
-    return (
-        <DefaultLayout>
-        <Breadcrumb pageName="Invoices"/>
-        <ComingSoon/>
-        </DefaultLayout>
-    );
+  return (
+    <DefaultLayout>
+      <Breadcrumb pageName="Invoices" />
+      <ComingSoon />
+    </DefaultLayout>
+  );
 }

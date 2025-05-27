@@ -5,7 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 export default function HistoryCustomer() {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="History Cust" />
+      <Breadcrumb pageName="Customer" />
       <ComingSoon />
     </DefaultLayout>
   );

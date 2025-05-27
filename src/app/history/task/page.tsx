@@ -5,7 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 export default function HistoryTask() {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="History Task" />
+      <Breadcrumb pageName="Task" />
       <ComingSoon />
     </DefaultLayout>
   );
