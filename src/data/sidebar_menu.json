@@ -107,25 +107,26 @@
         "route": "#",
         "children": [
           {
-            "label": "Lead",
+            "label": "Products",
             "id": "2.1",
+            "route": "/sales/products"
+          },
+          {
+            "label": "Lead",
+            "id": "2.2",
             "route": "/sales/lead"
           },
           {
             "label": "Task",
-            "id": "2.2",
+            "id": "2.3",
             "route": "/sales/task"
           },
           {
             "label": "Quotation",
-            "id": "2.3",
+            "id": "2.4",
             "route": "/sales/quotation"
           },
-          {
-            "label": "Products",
-            "id": "2.4",
-            "route": "/sales/products"
-          },
+
           {
             "label": "Customer",
             "id": "2.5",

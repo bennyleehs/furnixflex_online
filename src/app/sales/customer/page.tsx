@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Tables from "@/components/Tables";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import ComingSoon from "@/components/DisplayPage/ComingSoon";
 
 interface Customers {
   cust_id: number;
@@ -54,12 +55,13 @@ export default function CustomerPage() {
     <DefaultLayout>
       <Breadcrumb pageName="Customer" />
       {/* <h1 className="mb-4 text-xl font-bold">Branches</h1> */}
-      <Tables 
+      {/* <Tables 
         columns={columns} 
         data={custs} 
         createLink={`/sales/customer/create`}
         filterKeys={["status"]}
-      />
+      /> */}
+      <ComingSoon/>
     </DefaultLayout>
   );
 }
