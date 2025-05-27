@@ -2,10 +2,10 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import ComingSoon from "@/components/DisplayPage/ComingSoon";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
-export default function HistoryPromotion() {
+export default function CRM() {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="History Promo" />
+      <Breadcrumb pageName="CRM" />
       <ComingSoon />
     </DefaultLayout>
   );
