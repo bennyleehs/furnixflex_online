@@ -49,7 +49,7 @@ const ClockPage = () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Clocks Fetch" />
+      <Breadcrumb pageName="Clocks" />
       {/* <Tables
         columns={columns}
         data={data}
@@ -58,8 +58,8 @@ const ClockPage = () => {
         deleteLink="/api/admin/clock/delete"
         fetchData={fetchData}
       /> */}
-      <ComingSoon/>
-      </DefaultLayout>
+      <ComingSoon />
+    </DefaultLayout>
   );
 };
 
