@@ -20,24 +20,24 @@ export default function CustomerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchCustomer() {
-      try {
-        const res = await fetch("/api/sales/customer");
-        if (!res.ok) throw new Error("Failed to fetch customers");
+  // useEffect(() => {
+  //   async function fetchCustomer() {
+  //     try {
+  //       const res = await fetch("/api/sales/customer");
+  //       if (!res.ok) throw new Error("Failed to fetch customers");
 
-        const data = await res.json();
-        setCusts(data.listCust); // Assign the fetched list
-      } catch (err) {
-        setError("Error fetching data");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  //       const data = await res.json();
+  //       setCusts(data.listCust); // Assign the fetched list
+  //     } catch (err) {
+  //       setError("Error fetching data");
+  //       console.error(err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
-    fetchCustomer();
-  }, []);
+  //   fetchCustomer();
+  // }, []);
 
   const columns = [
     { key: "cust_id", title: "ID" },
@@ -47,9 +47,6 @@ export default function CustomerPage() {
     { key: "cust_phone", title: "Phone" },
     { key: "cust_email", title: "Email" },
   ];
-
-  // if (loading) return <p>Loading branches...</p>;
-  // if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <DefaultLayout>
@@ -61,7 +58,7 @@ export default function CustomerPage() {
         createLink={`/sales/customer/create`}
         filterKeys={["status"]}
       /> */}
-      <ComingSoon/>
+      <ComingSoon />
     </DefaultLayout>
   );
 }
