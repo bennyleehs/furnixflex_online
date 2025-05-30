@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
         d.name as department_name,
         (
           SELECT COUNT(*) 
-          FROM customers1 
+          FROM customers 
           WHERE sales_id = u.id AND status NOT IN ('Job Done', 'Over Budget', 'Drop Interest')
         ) as task_count
       FROM users u

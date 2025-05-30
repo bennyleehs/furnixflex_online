@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const db = createPool();
 
     const sql = `
-      INSERT INTO customers1 (
+      INSERT INTO customers (
         source, interested, add_info, 
         name, nric,
         phone1, phone2, email,
@@ -59,7 +59,7 @@ export async function PUT(request: Request) {
 
     // Update SQL query to include property_type and security_access fields
     const sql = `
-      UPDATE customers1
+      UPDATE customers
       SET
         source = ?, interested = ?, add_info = ?, 
         name = ?, nric = ?,

@@ -230,7 +230,7 @@ async function updateTaskInDatabase(taskId: string, newStatus: string) {
     
     // Update the task status in the customer1 table
     const [result] = await conn.execute(
-      'UPDATE customers1 SET status = ? WHERE id = ?',
+      'UPDATE customers SET status = ? WHERE id = ?',
       [newStatus, taskId]
     );
     

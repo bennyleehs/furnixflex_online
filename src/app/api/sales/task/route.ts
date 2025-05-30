@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         c.*,
         e.name AS sales_name,
         e.uid AS sales_uid
-      FROM customers1 c
+      FROM customers c
       LEFT JOIN users e ON c.sales_id = e.id
       ${whereClause}
       ORDER BY c.id DESC 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     // Query to get total count of records with the same filters
     const countSql = `
       SELECT COUNT(*) AS total
-      FROM customers1 c
+      FROM customers c
       LEFT JOIN users e ON c.sales_id = e.id
       ${whereClause};
     `;
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     // Status counts query stays the same
     const statusCountSql = `
       SELECT c.status, COUNT(*) as count
-      FROM customers1 c
+      FROM customers c
       GROUP BY c.status;
     `;
 

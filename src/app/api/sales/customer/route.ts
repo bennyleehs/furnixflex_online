@@ -15,7 +15,7 @@ export async function GET() {
     const db = createPool();
 
     const sql = `
-      SELECT  customers1.id AS cust_id,
+      SELECT  customers.id AS cust_id,
               CONCAT_WS(', ',
                 branches.branch_code, 
                 CONCAT('(DL)', COALESCE(dealer.name, '')),
@@ -23,17 +23,17 @@ export async function GET() {
                 CONCAT('(CTR)', COALESCE(contractor.name, '')),
                 CONCAT('(REF)', COALESCE(referral.name, ''))
               )AS cust_base,
-              customers1.customer_name AS cust_name,
-              customers1.customer_address AS cust_address,
-              customers1.customer_phone AS cust_phone,
-              customers1.customer_email AS cust_email
-      FROM customers1
-      JOIN branches ON customers1.branch_id = branches.id
-      LEFT JOIN partners AS dealer ON customers1.dealer_id = dealer.id
-      LEFT JOIN partners AS designer ON customers1.designer_id = designer.id
-      LEFT JOIN partners AS contractor ON customers1.contractor_id = contractor.id
-      LEFT JOIN partners AS referral ON customers1.referral_id = referral.id
-      ORDER BY customers1.id DESC LIMIT 100;
+              customers.customer_name AS cust_name,
+              customers.customer_address AS cust_address,
+              customers.customer_phone AS cust_phone,
+              customers.customer_email AS cust_email
+      FROM customers
+      JOIN branches ON customers.branch_id = branches.id
+      LEFT JOIN partners AS dealer ON customers.dealer_id = dealer.id
+      LEFT JOIN partners AS designer ON customers.designer_id = designer.id
+      LEFT JOIN partners AS contractor ON customers.contractor_id = contractor.id
+      LEFT JOIN partners AS referral ON customers.referral_id = referral.id
+      ORDER BY customers.id DESC LIMIT 100;
     `;  
 
 // proper typing with RowDataPacket
