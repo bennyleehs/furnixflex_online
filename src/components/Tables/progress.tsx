@@ -11,8 +11,8 @@ interface ProgressTableProps {
 }
 
 export default function ProgressTable({ data, statusCounts, totalItems, pageName }: ProgressTableProps) {
-  // Define the sales pipeline stages in order
-  const pipelineStages = [
+  // Memoize the pipeline stages array
+  const pipelineStages = useMemo(() => [
     "Assign PIC",
     "Follow Up", 
     "Visit Showroom", 
@@ -21,7 +21,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
     "Production", 
     "Installation", 
     "Job Done"
-  ];
+  ], []); // Empty dependency array since stages are static
   
   // State for task filtering
   const [selectedStage, setSelectedStage] = useState<string | null>(null);

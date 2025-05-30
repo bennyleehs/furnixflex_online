@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
@@ -167,18 +167,18 @@ export default function QuotationEditPage() {
     }
   };
   
-  // Calculate subtotal from items
-  const calculateSubtotal = () => {
+  // Wrap calculateSubtotal in useCallback
+  const calculateSubtotal = useCallback(() => {
     return items.reduce((sum, item) => sum + (item.total || 0), 0);
-  };
+  }, [items]);
   
-  // Calculate total after tax and discount
-  const calculateTotal = () => {
+  // Wrap calculateTotal in useCallback
+  const calculateTotal = useCallback(() => {
     const subtotal = calculateSubtotal();
     const discountAmount = subtotal * ((quotation.discount || 0) / 100);
     const taxAmount = (subtotal - discountAmount) * ((quotation.tax || 0) / 100);
     return subtotal - discountAmount + taxAmount;
-  };
+  }, [calculateSubtotal, quotation.discount, quotation.tax]);
   
   // Update totals when items change
   useEffect(() => {
@@ -190,7 +190,7 @@ export default function QuotationEditPage() {
       subtotal,
       total
     }));
-  }, [items, quotation.tax, quotation.discount]);
+  }, [items, quotation.tax, quotation.discount, calculateSubtotal, calculateTotal]);
   
   // Handle item changes
   const handleItemChange = (index: number, field: keyof QuotationItem, value: any) => {
@@ -548,7 +548,7 @@ export default function QuotationEditPage() {
                     {items.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                          No items added to this quotation yet. Click "Add Item" to begin.
+                          No items added to this quotation yet. Click &quot;Add Item&quot; to begin.
                         </td>
                       </tr>
                     ) : (

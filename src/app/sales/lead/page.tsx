@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Tables from "@/components/Tables/keywords";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -19,7 +19,7 @@ export default function LeadPage() {
   const [selectedStatus, setSelectedStatus] = useState("Assign PIC"); // Initialize with a proper default status
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const statusParam = selectedStatus !== "All" ? `&status=${selectedStatus}` : ''; // Add status filter to API request if not "All"
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''; // Add search query parameter
@@ -50,7 +50,7 @@ export default function LeadPage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[currentPage, itemsPerPage, selectedStatus, searchQuery, capitalizedTitle]);
 
   useEffect(() => {
     // Always fetch on first render or when filter parameters change
@@ -60,7 +60,7 @@ export default function LeadPage() {
     if (!hasFetchedData.current) {
       hasFetchedData.current = true;
     }
-  }, [currentPage, itemsPerPage, selectedStatus, searchQuery]);
+  }, [fetchData]);
 
   const handleFilterChange = (key: string, value: string) => {
     if (key === "status") {

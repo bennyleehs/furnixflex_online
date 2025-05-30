@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -6,6 +6,18 @@ const SidebarDropdown = ({ item }: any) => {
   const pathname = usePathname();
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>(
     {},
+  );
+
+  // Wrap isActive in useCallback
+  const isActive = useCallback(
+    (route: string, children?: any[]): boolean => {
+      if (pathname === route) return true;
+      if (children) {
+        return children.some((child) => isActive(child.route, child.children));
+      }
+      return false;
+    },
+    [pathname], // Add pathname as dependency
   );
 
   // Function to toggle submenu open/close
@@ -16,16 +28,7 @@ const SidebarDropdown = ({ item }: any) => {
     }));
   };
 
-  // Function to check if an item is active or has an active child
-  const isActive = (route: string, children?: any[]): boolean => {
-    if (pathname === route) return true;
-    if (children) {
-      return children.some((child) => isActive(child.route, child.children));
-    }
-    return false;
-  };
-
-  //Auto-open submenus if the current path matches any nested child
+  // Auto-open submenus if the current path matches any nested child
   useEffect(() => {
     const openMenus: { [key: string]: boolean } = {};
 
@@ -36,7 +39,7 @@ const SidebarDropdown = ({ item }: any) => {
     });
 
     setOpenSubmenus(openMenus);
-  }, [pathname, item]); // Runs when pathname changes
+  }, [pathname, item, isActive]); // Runs when pathname changes
 
   return (
     <ul className="flex flex-col pl-7">

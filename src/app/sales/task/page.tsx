@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 // import Tables from "@/components/Tables/keywords";
 import Tables from "@/components/Tables/progress";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
@@ -20,7 +20,7 @@ export default function Page() {
   const [selectedStatus, setSelectedStatus] = useState("All"); // Initialize with "All" to see all statuses
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const statusParam = selectedStatus !== "All" ? `&status=${selectedStatus}` : ''; // Add status filter to API request if not "All"
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''; // Add search query parameter
@@ -51,7 +51,7 @@ export default function Page() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage, selectedStatus, searchQuery, title, capitalizedTitle]);
 
   useEffect(() => {
     // Always fetch on first render or when filter parameters change
@@ -61,7 +61,7 @@ export default function Page() {
     if (!hasFetchedData.current) {
       hasFetchedData.current = true;
     }
-  }, [currentPage, itemsPerPage, selectedStatus, searchQuery]);
+  }, [fetchData]);
 
   const handleFilterChange = (key: string, value: string) => {
     if (key === "status") {

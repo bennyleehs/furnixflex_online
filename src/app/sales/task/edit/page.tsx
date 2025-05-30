@@ -1,21 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-
-// Define the event log interface
-interface EventLog {
-  id: string;
-  timestamp: string;
-  user: string;
-  action: string;
-  oldValue?: string;
-  newValue?: string;
-  notes?: string;
-  filesName?: string[]; // Array of file names attached to this log entry
-}
+import { EventLog } from '@/types/sales-task';
 
 // Update the Task interface to match the API response structure
 interface Task {
@@ -83,6 +72,53 @@ export default function TaskEditPage() {
     "Job Done"
   ];
   
+  // Wrap fetchFtpLogs and fetchTaskFiles in useCallback
+  const fetchFtpLogs = useCallback(async () => {
+    try {
+      if (!taskId) return;
+      
+      console.log('Fetching logs for task:', taskId);
+      
+      // Use the files endpoint with logs parameter
+      const response = await fetch(`/api/sales/task/update?id=${taskId}`);
+      if (!response.ok) throw new Error('Failed to fetch logs');
+      
+      const data = await response.json();
+      console.log('Logs data received:', data);
+      
+      if (data.logs) {
+        setEventLogs(data.logs);
+        console.log('Event logs updated:', data.logs.length);
+      }
+    } catch (error) {
+      console.error('Error fetching task logs:', error);
+    }
+  }, [taskId]);
+
+  const fetchTaskFiles = useCallback(async () => {
+    try {
+      if (!taskId) return;
+      
+      // Use the dedicated files API endpoint
+      const response = await fetch(`/api/sales/task/files?id=${taskId}`);
+      if (!response.ok) throw new Error('Failed to fetch files');
+      
+      const data = await response.json();
+      console.log('API response:', data);
+      
+      if (data.files) {
+        setTaskFiles(data.files);
+        console.log('Files fetched:', data.files.length, data.files);
+      } else {
+        console.log('No files property in response');
+        setTaskFiles([]);
+      }
+    } catch (error) {
+      console.error('Error fetching task files:', error);
+      setTaskFiles([]);
+    }
+  }, [taskId]);
+  
   // Call when the component loads
   useEffect(() => {
     async function fetchTask() {
@@ -103,10 +139,7 @@ export default function TaskEditPage() {
           throw new Error('No task data found');
         }
         
-        // Explicitly fetch logs from log.txt file
         await fetchFtpLogs();
-        
-        // Then fetch file list
         await fetchTaskFiles();
         
       } catch (error) {
@@ -120,7 +153,7 @@ export default function TaskEditPage() {
       fetchTask();
       hasFetchedData.current = true;
     }
-  }, [taskId]);
+  }, [taskId, fetchFtpLogs, fetchTaskFiles]);
   
   // Parse composite fields if needed
   const name = task?.name || '';
@@ -204,54 +237,6 @@ export default function TaskEditPage() {
     }
   };
 
-  // Add a function to fetch logs from FTP
-  const fetchFtpLogs = async () => {
-    try {
-      if (!taskId) return;
-      
-      console.log('Fetching logs for task:', taskId);
-      
-      // Use the files endpoint with logs parameter
-      const response = await fetch(`/api/sales/task/update?id=${taskId}`);
-      if (!response.ok) throw new Error('Failed to fetch logs');
-      
-      const data = await response.json();
-      console.log('Logs data received:', data);
-      
-      if (data.logs) {
-        setEventLogs(data.logs);
-        console.log('Event logs updated:', data.logs.length);
-      }
-    } catch (error) {
-      console.error('Error fetching task logs:', error);
-    }
-  };
-
-  // Add this function to your TaskEditPage component
-  const fetchTaskFiles = async () => {
-    try {
-      if (!taskId) return;
-      
-      // Use the dedicated files API endpoint
-      const response = await fetch(`/api/sales/task/files?id=${taskId}`);
-      if (!response.ok) throw new Error('Failed to fetch files');
-      
-      const data = await response.json();
-      console.log('API response:', data);
-      
-      if (data.files) {
-        setTaskFiles(data.files);
-        console.log('Files fetched:', data.files.length, data.files);
-      } else {
-        console.log('No files property in response');
-        setTaskFiles([]);
-      }
-    } catch (error) {
-      console.error('Error fetching task files:', error);
-      setTaskFiles([]);
-    }
-  };
-  
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;

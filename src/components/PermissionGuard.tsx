@@ -1,5 +1,5 @@
 // components/PermissionGuard.tsx
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useCallback } from "react";
 import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 interface PermissionGuardProps {
@@ -16,10 +16,8 @@ const PermissionGuard = ({
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to check if this permission is part of a default access section
-  const isDefaultSection = async () => {
-    // If you have a way to check if this permissionValue belongs to a default section
-    // This is a placeholder - you'll need to implement the actual logic
+  // Wrap isDefaultSection in useCallback
+  const isDefaultSection = useCallback(async () => {
     try {
       const response = await fetch('/api/check-section-type', {
         method: 'POST',
@@ -39,7 +37,7 @@ const PermissionGuard = ({
       console.error("Error checking section type:", error);
       return false;
     }
-  };
+  }, [permissionValue]);
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -77,7 +75,7 @@ const PermissionGuard = ({
     };
 
     checkPermission();
-  }, [permissionValue]);
+  }, [permissionValue, isDefaultSection]); // Add isDefaultSection to dependencies
 
   if (loading) {
     // While checking permission, you can show a loading state or nothing
