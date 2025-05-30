@@ -29,9 +29,9 @@ export async function regenerateAccessControl() {
     }
 
     // 2. Fetch current combinations from the database - ORDER BY id
-    const [branches] = await connection.execute("SELECT name, ref FROM branches2 ORDER BY id");
+    const [branches] = await connection.execute("SELECT name, ref FROM branches ORDER BY id");
     const [departments] = await connection.execute("SELECT name FROM departments ORDER BY id");
-    const [roles] = await connection.execute("SELECT name FROM roles1 ORDER BY id");
+    const [roles] = await connection.execute("SELECT name FROM roles ORDER BY id");
     const slicedRoles = (roles as any[]).slice(1);
 
     // 3. Create a map of current database keys (normalized for comparison)
