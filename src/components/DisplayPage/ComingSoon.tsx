@@ -3,9 +3,9 @@ import Image from "next/image";
 
 const ComingSoon = () => {
   return (
-    <div className="shadow-default bg-white border-stroke dark:border-strokedark dark:bg-boxdark flex h-screen flex-col items-center justify-center rounded-lg border">
+    <div className="shadow-default border-stroke dark:border-strokedark dark:bg-boxdark flex flex-col items-center justify-center rounded-lg border bg-white">
       <div className="w-full text-center">
-        <div className="flex justify-center p-4 sm:p-8 xl:p-6">
+        <div className="mt-10 flex justify-center p-4 sm:p-8 xl:p-6">
           <Image
             width={280}
             height={100}
@@ -23,10 +23,10 @@ const ComingSoon = () => {
           />
         </div>
         <h1 className="text-primary mb-4 text-4xl font-bold">Coming Soon</h1>
-        <p className="mb-4 text-black dark:text-white">
+        <p className="mb-10 text-black dark:text-white">
           This page section is under construction! Thank you for waiting.
         </p>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="mb-20 text-center text-sm text-gray-600 dark:text-gray-400">
           &copy; {new Date().getFullYear()} - Classy Project Marketing Sdn. Bhd.
         </p>
       </div>

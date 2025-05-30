@@ -18,7 +18,7 @@ export default function Update_Scopes() {
         </h2>
         <p className="dark:text-black">
           The first and second digit represent the Menu Section. The second
-          digit "0" - All sub-menu enable. The third digit represent the access
+          digit &quot;0&quot; - All sub-menu enable. The third digit represent the access
           right.
         </p>
         <p className="dark:text-black">
