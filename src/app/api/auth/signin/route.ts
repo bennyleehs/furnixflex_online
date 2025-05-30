@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const { uid, password } = await req.json();
   // query from input to the db - only get necessary user info
   const [rows] = await db.query(
-    "SELECT id, uid, roleName, deptName as departmentName, branchRef, email, password FROM users1 WHERE uid = ?",
+    "SELECT id, uid, roleName, deptName as departmentName, branchRef, email, password FROM users WHERE uid = ?",
     [uid]
   );
   

@@ -176,7 +176,7 @@ export async function checkAccess(
   }
 
   const db = createPool();
-  const [rows] = await db.query<RowDataPacket[]>("SELECT role_id FROM users1 WHERE id = ?", [userId]);
+  const [rows] = await db.query<RowDataPacket[]>("SELECT role_id FROM users WHERE id = ?", [userId]);
   if (!rows.length) {
     console.log(`User ${userId} not found.`);
     return false;
@@ -209,7 +209,7 @@ export async function getUserAccessiblePaths(
 
     // Get user's role from database
     const [rows] = await db.query<RowDataPacket[]>(
-      "SELECT role_id FROM users1 WHERE id = ?",
+      "SELECT role_id FROM users WHERE id = ?",
       [userId],
     );
 

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const sql = `
       SELECT 
         COUNT(*) as count
-      FROM users1
+      FROM users
       WHERE branch_id = ? AND department_id = ?
     `;
     

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
           FROM customers1 
           WHERE sales_id = u.id AND status NOT IN ('Job Done', 'Over Budget', 'Drop Interest')
         ) as task_count
-      FROM users1 u
+      FROM users u
       LEFT JOIN departments d ON u.department_id = d.id
       WHERE d.name = 'Sales' AND u.status = "Active"
       ORDER BY task_count ASC

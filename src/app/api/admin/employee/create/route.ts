@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const db = createPool();
 
     const sql = `
-      INSERT INTO users1 (
+      INSERT INTO users (
         name, nric,
         phone, email,
         address_line1, address_line2,
@@ -65,7 +65,7 @@ export async function PUT(request: Request) {
     const db = createPool();
 
     const sql = `
-      UPDATE users1
+      UPDATE users
       SET
         name = ?, nric = ?,
         phone = ?, email = ?,

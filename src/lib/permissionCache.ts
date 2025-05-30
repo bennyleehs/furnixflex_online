@@ -46,7 +46,7 @@ export const getUserRole = cache(async (userId: number): Promise<number | null> 
   try {
     const db = createPool();
     const [rows] = await db.query<RowDataPacket[]>(
-      "SELECT role_id FROM users1 WHERE id = ?", 
+      "SELECT role_id FROM users WHERE id = ?", 
       [userId]
     );
     

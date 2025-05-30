@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
         e.name AS sales_name,
         e.uid AS sales_uid
       FROM customers1 c
-      LEFT JOIN users1 e ON c.sales_id = e.id
+      LEFT JOIN users e ON c.sales_id = e.id
       ${whereClause}
       ORDER BY c.id DESC 
       LIMIT ? OFFSET ?;
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     const countSql = `
       SELECT COUNT(*) AS total
       FROM customers1 c
-      LEFT JOIN users1 e ON c.sales_id = e.id
+      LEFT JOIN users e ON c.sales_id = e.id
       ${whereClause};
     `;
     
