@@ -12,7 +12,7 @@ const chatData: Chat[] = [
     dot: 3,
   },
   {
-    avatar: "/images/user/user-02.png",
+    avatar: "/images/user/user-01.png",
     name: "Henry Fisher",
     text: "Waiting for you!",
     time: 12,
@@ -20,7 +20,7 @@ const chatData: Chat[] = [
     dot: 1,
   },
   {
-    avatar: "/images/user/user-04.png",
+    avatar: "/images/user/user-01.png",
     name: "Jhon Doe",
     text: "What's up?",
     time: 32,
@@ -28,7 +28,7 @@ const chatData: Chat[] = [
     dot: 3,
   },
   {
-    avatar: "/images/user/user-05.png",
+    avatar: "/images/user/user-01.png",
     name: "Jane Doe",
     text: "Great",
     time: 32,
@@ -44,7 +44,7 @@ const chatData: Chat[] = [
     dot: 3,
   },
   {
-    avatar: "/images/user/user-03.png",
+    avatar: "/images/user/user-01.png",
     name: "Jhon Doe",
     text: "How are you?",
     time: 32,
@@ -55,7 +55,7 @@ const chatData: Chat[] = [
 
 const ChatCard = () => {
   return (
-    <div className="col-span-12 rounded-xs border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-12 rounded-xs border bg-white py-6 xl:col-span-4">
       <h4 className="mb-6 px-7.5 text-xl font-semibold text-black dark:text-white">
         Chats
       </h4>
@@ -64,7 +64,7 @@ const ChatCard = () => {
         {chatData.map((chat, key) => (
           <Link
             href="/"
-            className="flex items-center gap-5 px-7.5 py-3 hover:bg-gray-3 dark:hover:bg-meta-4"
+            className="hover:bg-gray-3 dark:hover:bg-meta-4 flex items-center gap-5 px-7.5 py-3"
             key={key}
           >
             <div className="relative h-14 w-14 rounded-full">
@@ -79,7 +79,7 @@ const ChatCard = () => {
                 }}
               />
               <span
-                className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${
+                className={`absolute right-0 bottom-0 h-3.5 w-3.5 rounded-full border-2 border-white ${
                   chat.dot === 6 ? "bg-meta-6" : `bg-meta-${chat.dot}`
                 } `}
               ></span>
@@ -98,7 +98,7 @@ const ChatCard = () => {
                 </p>
               </div>
               {chat.textCount !== 0 && (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
+                <div className="bg-primary flex h-6 w-6 items-center justify-center rounded-full">
                   <span className="text-sm font-medium text-white">
                     {" "}
                     {chat.textCount}
