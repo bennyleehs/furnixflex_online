@@ -314,7 +314,7 @@ const FormScopes2Access = () => {
     });
 
     return result;
-  }, []);
+  }, [typedSidebarMenu]);
 
   // Group menu items by section
   const groupedMenuItems = useMemo(() => {

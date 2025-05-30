@@ -6,28 +6,13 @@ import FormBranch from "@/components/FormElements/FormBranch";
 // import FormBranch from "@/components/FormElements/FormUni";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { Column } from '@/types/form';
 
 interface Country {
   name: string;
   callingCodes: string[];
   timezones: string[];
   currencies: { code: string; symbol: string }[];
-}
-
-interface Column {
-  title: string;
-  inputType?: string;
-  valueKey?: string;  // Key for display value
-  min?: number;
-  max?: number;
-  options?: { 
-    value?: string; 
-    label?: string; 
-    idd?: string[]; 
-    timezones?: string[]; 
-    currencies_code?: string; 
-    currencies_symbol?: string 
-  }[];
 }
 
 export default function BranchPage() {
@@ -80,15 +65,19 @@ export default function BranchPage() {
   }, [searchParams]);
 
   const columns: Column[] = [
-    { title: "Country", inputType: "select", valueKey: "country", 
-        options: countries.map(country => ({ 
-          value: country.name,
-          label: country.name, 
-          idd: country.callingCodes, 
-          timezones: country.timezones,
-          currencies_code: country.currencies?.[0]?.code || '',
-          currencies_symbol: country.currencies?.[0]?.symbol || ''      
-        })) 
+    { 
+      title: "Country", 
+      inputType: "select", 
+      valueKey: "country", 
+      options: countries.map(country => ({ 
+        id: country.name, // Add this line to provide required id
+        value: country.name,
+        label: country.name, 
+        idd: country.callingCodes, 
+        timezones: country.timezones,
+        currencies_code: country.currencies?.[0]?.code || '',
+        currencies_symbol: country.currencies?.[0]?.symbol || ''      
+      })) 
     },
     { title: "Time Zone", inputType: "text", valueKey: "time_zone" },
     { title: "Currency Code", inputType: "text", valueKey: "currencies_code" },
@@ -110,10 +99,10 @@ export default function BranchPage() {
     { title: "Swift", inputType: "text", valueKey: "bank_swift" },
     { title: "Status", inputType: "select", valueKey: "status",
         options: [
-        { value: "Active", label: "Active" },
-        { value: "Inactive", label: "Inactive" },
-        { value: "Pending", label: "Pending" },
-        { value: "History", label: "History" }
+        { id: "Active", value: "Active", label: "Active" },
+        { id: "Inactive", value: "Inactive", label: "Inactive" },
+        { id: "Pending", value: "Pending", label: "Pending" },
+        { id: "History", value: "History", label: "History" }
         ] 
     },
   ];

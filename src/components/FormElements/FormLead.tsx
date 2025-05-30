@@ -96,7 +96,7 @@ const FormUni = <T extends Record<string, any>>({
       initializedRef.current = true;
       setFormData(initialData);
     }
-  }, [data, loading, optionsLoaded, columns]);
+  }, [data, loading, optionsLoaded, columns, setFormData]);
 
   // Add after initializing formData
   useEffect(() => {
@@ -107,7 +107,7 @@ const FormUni = <T extends Record<string, any>>({
         original_sales_id: data[0].sales_id
       }));
     }
-  }, [data]);
+  }, [data, setFormData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;

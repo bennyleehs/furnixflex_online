@@ -64,7 +64,7 @@ export default function Tables({
       return maxLength * 8; // Approximate width in pixels (8px per character)
     });
     setColumnWidths(widths);
-  }, [data, columns, filterKeys, selectedStatus]);
+  }, [data, columns, filterKeys, selectedStatus, selectedFilters]);
 
   useEffect(() => {
     // Always start with the original data

@@ -2,22 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import './styles.css'; // Import the CSS file
-
-interface Column {
-  title: string;
-  inputType?: string;
-  valueKey?: string;  // Key for display value
-  min?: number;
-  max?: number;
-  options?: { 
-    value?: string; 
-    label?: string; 
-    idd?: string[]; 
-    timezones?: string[]; 
-    currencies_code?: string; 
-    currencies_symbol?: string 
-  }[];
-}
+import { Column, OptionItem } from '@/types/form';
 
 interface Props<T> {
   columns: Column[];
@@ -29,12 +14,13 @@ interface Props<T> {
 
 const FormBranch = <T extends Record<string, any>>({ columns, data, loading, submitUrl, redirectUrl }: Props<T>) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [filteredOptions, setFilteredOptions] = useState<Record<string, { id: string | number; value: string }[]>>({});
+  // Update the filteredOptions state type to use OptionItem
+  const [filteredOptions, setFilteredOptions] = useState<Record<string, OptionItem[]>>({});
   const [showSuccess, setShowSuccess] = useState(false); // State to control success message visibility
   const router = useRouter();
 
   useEffect(() => {
-    const newFilteredOptions: Record<string, { id: string | number; value: string }[]> = {};
+    const newFilteredOptions: Record<string, OptionItem[]> = {};
     
     // Process options for each column
     columns.forEach((column) => {
@@ -44,10 +30,13 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
           ? data
               .filter(item => column.idKey && column.valueKey && column.idKey in item && column.valueKey in item)
               .map(item => ({
-                id: item[column.idKey as keyof typeof item],
-                value: item[column.valueKey as keyof typeof item]
+                id: item[column.idKey as keyof typeof item] as string | number,
+                value: String(item[column.valueKey as keyof typeof item])  // Ensure value is string
               }))
-          : column.options || [];
+          : (column.options || []).map(opt => ({
+              id: opt.id || opt.value,  // Fallback to value if id is not present
+              value: opt.value
+            }));
         
         // Remove duplicates if any
         const uniqueOptions = Array.from(
@@ -56,7 +45,10 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
         
         newFilteredOptions[column.title] = uniqueOptions;
       } else {
-        newFilteredOptions[column.title] = column.options || [];
+        newFilteredOptions[column.title] = (column.options || []).map(opt => ({
+          id: opt.id || opt.value,
+          value: opt.value
+        }));
       }
     });
     
@@ -244,7 +236,7 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
                   <option value="">Select an option</option>
                   {filteredOptions[column.title]?.map((option, idx) => (
                     <option key={idx} value={option.value}>
-                      {option.label}
+                      {option.value}
                     </option>
                   ))}
                 </select>

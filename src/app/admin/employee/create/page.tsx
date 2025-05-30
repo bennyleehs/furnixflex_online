@@ -190,7 +190,7 @@ export default function CreateEmployeePage() {
 
       return () => clearTimeout(handler);
     }
-  }, [formData]);
+  }, [formData,initialDataLoaded]);
 
   const columns: Column[] = [
     { title: "Name", inputType: "text", valueKey: "name", required: true },

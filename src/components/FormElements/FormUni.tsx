@@ -96,7 +96,7 @@ const FormUni = <T extends Record<string, any>>({
       initializedRef.current = true;
       setFormData(initialData);
     }
-  }, [data, loading, optionsLoaded, columns]);
+  }, [data, loading, optionsLoaded, columns, setFormData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;

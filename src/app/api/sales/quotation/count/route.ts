@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createPool } from '@/lib/db';
+import { RowDataPacket } from 'mysql2/promise';
+
+interface CountResult extends RowDataPacket {
+  count: number;
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -16,7 +21,7 @@ export async function GET(request: Request) {
     const pool = createPool();
     
     // Count quotations with the same quote_ref
-    const [countRows] = await pool.query(
+    const [countRows] = await pool.query<CountResult[]>(
       'SELECT COUNT(*) as count FROM quotations WHERE quote_ref = ?',
       [quoteRef]
     );
