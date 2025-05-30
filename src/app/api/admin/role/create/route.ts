@@ -10,7 +10,7 @@ async function handlePost(req: AuthenticatedRequest) {
     const db = createPool();
 
     const sql = `
-      INSERT INTO roles1 (
+      INSERT INTO roles (
         name, status,
         created_at, updated_at
       )
@@ -54,7 +54,7 @@ async function handlePut(req: AuthenticatedRequest) {
     const db = createPool();
 
     const sql = `
-      UPDATE roles1
+      UPDATE roles
       SET
         name = ?, status = ?,
         updated_at = NOW()

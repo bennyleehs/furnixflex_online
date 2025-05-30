@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   const db = createPool();
 
-  const [branches] = await db.execute("SELECT name,ref FROM branches2");
+  const [branches] = await db.execute("SELECT name,ref FROM branches");
   const [departments] = await db.execute("SELECT name FROM departments ORDER BY id");
-  const [roles] = await db.execute("SELECT name FROM roles1 ORDER BY id");
+  const [roles] = await db.execute("SELECT name FROM roles ORDER BY id");
 
   // Skip the first role only
   const slicedRoles = (roles as any[]).slice(1);

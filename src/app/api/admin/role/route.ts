@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     let sql = `
         SELECT  
           id, name, status
-        FROM roles1
+        FROM roles
     `;
 
     // Add WHERE clause based on whether we have an ID

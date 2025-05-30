@@ -11,28 +11,28 @@ export async function GET(req: NextRequest) {
 
     let sql = `
       SELECT  
-        users1.id, users1.uid,
-        branches2.name as branch, 
+        users.id, users.uid,
+        branches.name as branch, 
         departments.name as department, 
-        roles1.name AS role,
-        users1.name, users1.nric,
-        users1.email, users1.phone,
-        users1.address_line1, users1.address_line2, users1.postcode,
-        users1.city, users1.state, users1.country,
-        users1.bank_name, users1.bank_account,
-        users1.status
-      FROM users1
-        LEFT JOIN branches2 ON branches2.ref = users1.branchRef
-        LEFT JOIN departments ON departments.name = users1.deptName
-        LEFT JOIN roles1 ON roles1.name = users1.roleName
+        roles.name AS role,
+        users.name, users.nric,
+        users.email, users.phone,
+        users.address_line1, users.address_line2, users.postcode,
+        users.city, users.state, users.country,
+        users.bank_name, users.bank_account,
+        users.status
+      FROM users
+        LEFT JOIN branches ON branches.ref = users.branchRef
+        LEFT JOIN departments ON departments.name = users.deptName
+        LEFT JOIN roles ON roles.name = users.roleName
     `;
 
     // Add WHERE clause based on whether we have an ID
     if (id) {
-      sql += ` WHERE users1.id = ?`;
+      sql += ` WHERE users.id = ?`;
     } else {
       // When listing all roles, exclude Superadmin
-      sql += ` WHERE users1.name != 'SUPERADMIN'`;
+      sql += ` WHERE users.name != 'SUPERADMIN'`;
     }
 
     // Execute the query

@@ -10,7 +10,7 @@ async function handlePost(req: AuthenticatedRequest) {
     const db = createPool();
 
     const sql = `
-      INSERT INTO branches2 (
+      INSERT INTO branches (
         name, ref,
         idd, phone, email,
         address_line1, address_line2,
@@ -89,7 +89,7 @@ async function handlePut(req: AuthenticatedRequest) {
     const db = createPool();
 
     const sql = `
-      UPDATE branches2
+      UPDATE branches
       SET
         name = ?, ref = ?,
         idd = ?, phone = ?, email = ?,

@@ -33,7 +33,7 @@ async function handler(req: AuthenticatedRequest) {
               currencies_code,
               currencies_symbol,
               status
-      FROM branches2
+      FROM branches
     `;
 
     if (id) {
