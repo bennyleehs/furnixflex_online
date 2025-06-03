@@ -16,7 +16,7 @@
           },
           {
             "label": "Admin",
-            "route": "/dashboard/admin"
+            "route": "/dashboard/administration"
           }
         ]
       },
@@ -139,7 +139,7 @@
           },
           {
             "label": "CRM",
-            "id": "2.10",
+            "id": "2.7",
             "route": "/sales/crm"
           }
         ]
