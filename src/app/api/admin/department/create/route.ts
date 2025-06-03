@@ -2,9 +2,9 @@ import { createPool } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { ResultSetHeader } from "mysql2/promise"; // Import from mysql2/promise
 import { regenerateAccessControl } from "@/lib/regenAccessControl";
-import { withAuth, AuthenticatedRequest } from '@/lib/authMiddleware';
+import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
 
-async function handlePost(req: AuthenticatedRequest){
+async function handlePost(req: AuthenticatedRequest) {
   try {
     const formData = await req.json(); // Parse the JSON body
     const db = createPool();
@@ -94,5 +94,12 @@ async function handlePut(req: AuthenticatedRequest) {
 }
 
 // Export the route handlers with authentication and required permissions
-export const POST = withAuth(handlePost,  ["1.0.1","1.0.2"]);
-export const PUT = withAuth(handlePut,  ["1.0.1","1.0.3"]);
+export const POST = withAuth(handlePost, [
+  "1.0.1",
+  "1.0.2",
+  "1.0.3",
+  "1.2.1",
+  "1.2.2",
+  "1.2.3"
+]);
+export const PUT = withAuth(handlePut, ["1.0.1", "1.0.2", "1.2.1", "1.2.2"]);

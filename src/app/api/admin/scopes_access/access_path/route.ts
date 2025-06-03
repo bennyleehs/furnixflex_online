@@ -1,11 +1,13 @@
 // api/admin/scopes_access/access_path/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
 
 const filePath = path.resolve("src/data/access_control.json");
 
-export async function GET() {
+// async function handler(req: AuthenticatedRequest) {
+async function handler() {
   try {
     const fileContent = await fs.readFile(filePath, "utf-8");
     return NextResponse.json(JSON.parse(fileContent));
@@ -15,7 +17,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(req: NextRequest) {
+async function handlePut(req: AuthenticatedRequest) {
   try {
     const { key, accessPath } = await req.json();
     
@@ -48,3 +50,13 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Failed to update access path" }, { status: 500 });
   }
 }
+
+// Export the route handlers with authentication and required permissions
+// Export the route handler with authentication middleware
+export const GET = withAuth(handler, [
+  "1.0.1",
+  "1.0.2",
+  "1.6.1",
+  "1.6.2",
+]);
+export const PUT = withAuth(handlePut, ["1.0.1","1.0.2", "1.6.1", "1.6.2"]);

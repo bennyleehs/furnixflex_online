@@ -93,5 +93,5 @@ async function handlePut(req: AuthenticatedRequest) {
 }
 
 // Export the route handlers with authentication and required permissions
-export const POST = withAuth(handlePost,  ["1.0.1","1.0.2"]);
-export const PUT = withAuth(handlePut,  ["1.0.1","1.0.3"]);
+export const POST = withAuth(handlePost,  ["1.0.1","1.0.2","1.0.3","1.3.1","1.3.2","1.3.3",]);
+export const PUT = withAuth(handlePut,  ["1.0.1","1.0.2","1.3.1","1.3.2"]);
