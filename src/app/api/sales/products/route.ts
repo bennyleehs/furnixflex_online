@@ -6,63 +6,59 @@ export async function GET() {
   try {
     const pool = createPool();
     
-    // Fetch all products
+    // Fetch all products with the new fields
     const [productRows] = await pool.query(
-      'SELECT * FROM products ORDER BY category, subcategory, name'
+      'SELECT id, name, description, category, subcategory, price, discount, unit, effective_start_date, effective_end_date, task_id, created_at, updated_at FROM products ORDER BY category, subcategory, name'
     ) as [any[], any];
     
     // Extract unique categories and subcategories
     const categories: string[] = [];
     const subcategories: Record<string, string[]> = {};
-    const products: Record<string, Record<string, any[]>> = {};
     
-    // Process products into organized structure with string cleaning
-    productRows.forEach(product => {
+    // Process products and format dates correctly
+    const formattedProducts = productRows.map(product => {
       // Normalize strings by trimming whitespace
       const category = (product.category || '').trim();
       const subcategory = (product.subcategory || '').trim();
       
-      if (!category) return; // Skip products with empty categories
-      
-      // Add category if not exists
-      if (!categories.includes(category)) {
+      if (category && !categories.includes(category)) {
         categories.push(category);
       }
       
       // Add subcategory if not exists
-      if (!subcategories[category]) {
-        subcategories[category] = [];
-      }
-      if (!subcategories[category].includes(subcategory)) {
-        subcategories[category].push(subcategory);
-      }
-      
-      // Add product to proper category and subcategory
-      if (!products[category]) {
-        products[category] = {};
+      if (category) {
+        if (!subcategories[category]) {
+          subcategories[category] = [];
+        }
+        if (subcategory && !subcategories[category].includes(subcategory)) {
+          subcategories[category].push(subcategory);
+        }
       }
       
-      if (!products[category][subcategory]) {
-        products[category][subcategory] = [];
-      }
-      
-      // Add the product with consistent ID format
-      products[category][subcategory].push({
-        id: String(product.id), // Ensure ID is always a string
+      // Format the product with proper date handling
+      return {
+        id: product.id,
         name: product.name || '',
         description: product.description || '',
+        category: category,
+        subcategory: subcategory,
         price: parseFloat(product.price || 0),
-        unit: product.unit || 'unit'
-      });
+        discount: parseFloat(product.discount || 0),
+        unit: product.unit || 'unit',
+        effective_start_date: product.effective_start_date ? new Date(product.effective_start_date).toISOString() : null,
+        effective_end_date: product.effective_end_date ? new Date(product.effective_end_date).toISOString() : null,
+        task_id: product.task_id || '',
+        created_at: product.created_at,
+        updated_at: product.updated_at
+      };
     });
     
-    // Log the structure (helpful for debugging)
     console.log(`Found ${categories.length} categories, ${Object.keys(subcategories).reduce((sum, cat) => sum + subcategories[cat].length, 0)} subcategories, and ${productRows.length} products`);
     
     return NextResponse.json({
-      categories,
-      subcategories,
-      products
+      allProducts: formattedProducts,
+      categories: categories,
+      subcategories: subcategories
     });
     
   } catch (error) {
@@ -84,7 +80,10 @@ export async function POST(request: Request) {
       subcategory,
       price,
       discount,
-      unit
+      unit,
+      effective_start_date,
+      effective_end_date,
+      task_id
     } = body;
     
     // Validate required fields
@@ -97,11 +96,16 @@ export async function POST(request: Request) {
     
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     
-    // Insert new product
+    // Format dates for MySQL
+    const startDate = effective_start_date ? new Date(effective_start_date).toISOString().slice(0, 19).replace('T', ' ') : null;
+    const endDate = effective_end_date ? new Date(effective_end_date).toISOString().slice(0, 19).replace('T', ' ') : null;
+    
+    // Insert new product with the new fields
     const [result] = await pool.query(
       `INSERT INTO products (
-        name, description, category, subcategory, price, discount, unit, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        name, description, category, subcategory, price, discount, unit, 
+        effective_start_date, effective_end_date, task_id, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         description || '',
@@ -110,6 +114,9 @@ export async function POST(request: Request) {
         price,
         discount || 0,
         unit || 'unit',
+        startDate,
+        endDate,
+        task_id || '',
         now,
         now
       ]
@@ -128,7 +135,12 @@ export async function POST(request: Request) {
       );
     }
     
-    return NextResponse.json({ product: productRows[0] });
+    // Format dates for response
+    const product = productRows[0];
+    product.effective_start_date = product.effective_start_date ? new Date(product.effective_start_date).toISOString() : null;
+    product.effective_end_date = product.effective_end_date ? new Date(product.effective_end_date).toISOString() : null;
+    
+    return NextResponse.json({ product });
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json(
@@ -161,7 +173,10 @@ export async function PUT(request: Request) {
       subcategory,
       price,
       discount,
-      unit
+      unit,
+      effective_start_date,
+      effective_end_date,
+      task_id
     } = body;
     
     // Validate required fields
@@ -174,7 +189,11 @@ export async function PUT(request: Request) {
     
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     
-    // Update product
+    // Format dates for MySQL
+    const startDate = effective_start_date ? new Date(effective_start_date).toISOString().slice(0, 19).replace('T', ' ') : null;
+    const endDate = effective_end_date ? new Date(effective_end_date).toISOString().slice(0, 19).replace('T', ' ') : null;
+    
+    // Update product with the new fields
     await pool.query(
       `UPDATE products SET 
         name = ?,
@@ -184,6 +203,9 @@ export async function PUT(request: Request) {
         price = ?,
         discount = ?,
         unit = ?,
+        effective_start_date = ?,
+        effective_end_date = ?,
+        task_id = ?,
         updated_at = ?
        WHERE id = ?`,
       [
@@ -194,6 +216,9 @@ export async function PUT(request: Request) {
         price,
         discount || 0,
         unit || 'unit',
+        startDate,
+        endDate,
+        task_id || '',
         now,
         id
       ]
@@ -212,7 +237,12 @@ export async function PUT(request: Request) {
       );
     }
     
-    return NextResponse.json({ product: productRows[0] });
+    // Format dates for response
+    const product = productRows[0];
+    product.effective_start_date = product.effective_start_date ? new Date(product.effective_start_date).toISOString() : null;
+    product.effective_end_date = product.effective_end_date ? new Date(product.effective_end_date).toISOString() : null;
+    
+    return NextResponse.json({ product });
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(
@@ -248,3 +278,6 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+// This code was for testing and is not needed
+// const filteredProducts = []; // Define properly if needed
