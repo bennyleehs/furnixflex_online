@@ -1,12 +1,15 @@
 // api/admin/scopes_access/route.ts
 import { createPool } from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
 
-export async function GET(req: NextRequest) {
+async function handler(req: AuthenticatedRequest) {
   const db = createPool();
 
   const [branches] = await db.execute("SELECT name,ref FROM branches");
-  const [departments] = await db.execute("SELECT name FROM departments ORDER BY id");
+  const [departments] = await db.execute(
+    "SELECT name FROM departments ORDER BY id",
+  );
   const [roles] = await db.execute("SELECT name FROM roles ORDER BY id");
 
   // Skip the first role only
@@ -31,3 +34,15 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(result, { status: 200 });
 }
+
+// Export the route handler with authentication middleware
+export const GET = withAuth(handler, [
+  "1.0.1",
+  "1.0.2",
+  "1.0.3",
+  "1.0.4",
+  "1.6.1",
+  "1.6.2",
+  "1.6.3",
+  "1.6.4",
+]);

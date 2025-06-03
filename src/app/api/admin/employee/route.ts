@@ -1,8 +1,9 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
 
-export async function GET(req: NextRequest) {
+async function handler(req: AuthenticatedRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
@@ -59,3 +60,15 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+// Export the route handler with authentication middleware
+export const GET = withAuth(handler, [
+  "1.0.1",
+  "1.0.2",
+  "1.0.3",
+  "1.0.4",
+  "1.4.1",
+  "1.4.2",
+  "1.4.3",
+  "1.4.4",
+]);
