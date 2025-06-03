@@ -200,7 +200,7 @@ export default function Tables({
             <div className="w-full sm:w-auto">
               <Link
                 href={createLink}
-                className="dark:border-strokedark dark:bg-primary flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
+                className="dark:border-strokedark dark:bg-primary dark:hover:bg-primarydark flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

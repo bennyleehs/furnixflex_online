@@ -93,7 +93,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         </div>
         {/* <!-- Footer --> */}
 
-        <p className="mt-auto py-4 text-center text-sm text-gray-400">
+        <p className="mt-auto py-4 text-center text-sm text-gray-400 dark:text-primary">
           &copy; {new Date().getFullYear()} - Classy Project <br />
           Marketing Sdn. Bhd.
         </p>
