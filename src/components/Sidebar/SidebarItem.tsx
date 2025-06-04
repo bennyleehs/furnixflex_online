@@ -1,5 +1,5 @@
 // src/components/Sidebar/SidebarItem.tsx
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import SidebarDropdown from "@/components/Sidebar/SidebarDropdown";
 import { usePathname } from "next/navigation";
@@ -7,13 +7,95 @@ import PermissionGuard from "../PermissionGuard";
 import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 const SidebarItem = ({ item, pageName, setPageName }: any) => {
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
+  const pathname = usePathname();
+
+  // Fetch user permissions
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const res = await fetch('/api/permissions');
+        if (res.ok) {
+          const data = await res.json();
+          setUserPermissions(data.permissions || []);
+        }
+      } catch (error) {
+        console.error("Error fetching permissions:", error);
+      } finally {
+        setPermissionsLoaded(true);
+      }
+    };
+
+    fetchPermissions();
+  }, []);
+
+  // Check if user has permission for a specific item
+  const hasPermissionForItem = useCallback((itemId: string): boolean => {
+    if (!itemId || !permissionsLoaded) return false;
+    
+    return userPermissions.some(perm => {
+      const permParts = perm.split('.');
+      const itemParts = itemId.split('.');
+      
+      // Direct match
+      if (perm === itemId) return true;
+      
+      // Hierarchical match - check if user permission covers this item
+      if (permParts.length >= itemParts.length) {
+        for (let i = 0; i < itemParts.length; i++) {
+          if (permParts[i] !== itemParts[i] && permParts[i] !== '0') {
+            return false;
+          }
+        }
+        return true;
+      }
+      
+      return false;
+    });
+  }, [userPermissions, permissionsLoaded]);
+
+  // Recursively check if any descendant has permission
+  const hasAnyDescendantPermission = useCallback((menuItem: any): boolean => {
+    // If item has an id and user has permission for it, return true
+    if (menuItem.id && hasPermissionForItem(menuItem.id)) {
+      return true;
+    }
+    
+    // If item has children, check recursively
+    if (menuItem.children && Array.isArray(menuItem.children)) {
+      return menuItem.children.some((child: any) => hasAnyDescendantPermission(child));
+    }
+    
+    return false;
+  }, [hasPermissionForItem]);
+
+  // Check if item should be shown
+  const shouldShowItem = useCallback((menuItem: any): boolean => {
+    // If it's in default access sections, always show
+    if (DEFAULT_ACCESS_SECTIONS.includes(menuItem.label)) {
+      return true;
+    }
+    
+    // If it has an id, check permission directly
+    if (menuItem.id) {
+      return hasPermissionForItem(menuItem.id);
+    }
+    
+    // If it doesn't have an id but has children, check if any descendant has permission
+    if (menuItem.children && Array.isArray(menuItem.children)) {
+      return hasAnyDescendantPermission(menuItem);
+    }
+    
+    // If no id and no children, show it (fallback)
+    return true;
+  }, [hasPermissionForItem, hasAnyDescendantPermission]);
+
   const handleClick = () => {
     const updatedPageName =
       pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
     return setPageName(updatedPageName);
   };
-
-  const pathname = usePathname();
 
   const isActive = (item: any) => {
     if (item.route === pathname) return true;
@@ -22,6 +104,16 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
     }
     return false;
   };
+
+  // Don't render if permissions are not loaded yet
+  if (!permissionsLoaded) {
+    return null;
+  }
+
+  // Don't render if user doesn't have permission
+  if (!shouldShowItem(item)) {
+    return null;
+  }
 
   const isItemActive = isActive(item);
 
@@ -62,7 +154,6 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
             pageName !== item.label.toLowerCase() && "hidden"
           }`}
         >
-          {/* Pass children through the PermissionGuard component if they have permission values */}
           <SidebarDropdown item={item.children} />
         </div>
       )}

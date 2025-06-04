@@ -7,9 +7,89 @@ import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 const SidebarDropdown = ({ item }: any) => {
   const pathname = usePathname();
-  const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>(
-    {},
-  );
+  const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
+
+  // Fetch user permissions
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const res = await fetch('/api/permissions');
+        if (res.ok) {
+          const data = await res.json();
+          setUserPermissions(data.permissions || []);
+        }
+      } catch (error) {
+        console.error("Error fetching permissions:", error);
+      } finally {
+        setPermissionsLoaded(true);
+      }
+    };
+
+    fetchPermissions();
+  }, []);
+
+  // Check if user has permission for a specific item
+  const hasPermissionForItem = useCallback((itemId: string): boolean => {
+    if (!itemId || !permissionsLoaded) return false;
+    
+    return userPermissions.some(perm => {
+      const permParts = perm.split('.');
+      const itemParts = itemId.split('.');
+      
+      // Direct match
+      if (perm === itemId) return true;
+      
+      // Hierarchical match - check if user permission covers this item
+      if (permParts.length >= itemParts.length) {
+        for (let i = 0; i < itemParts.length; i++) {
+          if (permParts[i] !== itemParts[i] && permParts[i] !== '0') {
+            return false;
+          }
+        }
+        return true;
+      }
+      
+      return false;
+    });
+  }, [userPermissions, permissionsLoaded]);
+
+  // Recursively check if any descendant has permission
+  const hasAnyDescendantPermission = useCallback((menuItem: any): boolean => {
+    // If item has an id and user has permission for it, return true
+    if (menuItem.id && hasPermissionForItem(menuItem.id)) {
+      return true;
+    }
+    
+    // If item has children, check recursively
+    if (menuItem.children && Array.isArray(menuItem.children)) {
+      return menuItem.children.some((child: any) => hasAnyDescendantPermission(child));
+    }
+    
+    return false;
+  }, [hasPermissionForItem]);
+
+  // Check if item should be shown
+  const shouldShowItem = useCallback((menuItem: any): boolean => {
+    // If it's in default access sections, always show
+    if (DEFAULT_ACCESS_SECTIONS.includes(menuItem.label)) {
+      return true;
+    }
+    
+    // If it has an id, check permission directly
+    if (menuItem.id) {
+      return hasPermissionForItem(menuItem.id);
+    }
+    
+    // If it doesn't have an id but has children, check if any descendant has permission
+    if (menuItem.children && Array.isArray(menuItem.children)) {
+      return hasAnyDescendantPermission(menuItem);
+    }
+    
+    // If no id and no children, show it (fallback)
+    return true;
+  }, [hasPermissionForItem, hasAnyDescendantPermission]);
 
   // Wrap isActive in useCallback
   const isActive = useCallback(
@@ -20,38 +100,49 @@ const SidebarDropdown = ({ item }: any) => {
       }
       return false;
     },
-    [pathname], // Add pathname as dependency
+    [pathname]
   );
 
   // Function to toggle submenu open/close
   const toggleSubmenu = (label: string) => {
     setOpenSubmenus((prev) => ({
       ...prev,
-      [label]: !prev[label], // Toggle open/close state
+      [label]: !prev[label],
     }));
   };
 
   // Auto-open submenus if the current path matches any nested child
   useEffect(() => {
+    if (!permissionsLoaded) return;
+    
     const openMenus: { [key: string]: boolean } = {};
 
     item.forEach((subItem: any) => {
-      if (isActive(subItem.route, subItem.children)) {
+      if (shouldShowItem(subItem) && isActive(subItem.route, subItem.children)) {
         openMenus[subItem.label] = true;
       }
     });
 
     setOpenSubmenus(openMenus);
-  }, [pathname, item, isActive]); // Runs when pathname changes
+  }, [pathname, item, isActive, shouldShowItem, permissionsLoaded]);
 
   const renderMenuItem = (subItem: any, index: number) => {
+    // Don't render if permissions are not loaded yet
+    if (!permissionsLoaded) {
+      return null;
+    }
+
+    // Don't render if user doesn't have permission
+    if (!shouldShowItem(subItem)) {
+      return null;
+    }
+
     const hasChildren = subItem.children && subItem.children.length > 0;
     const isOpen = openSubmenus[subItem.label];
     const activeClass = isActive(subItem.route) ? "text-primary" : "";
 
     const menuItemContent = (
       <li key={index} className="relative">
-        {/* Click anywhere (text or arrow) to toggle submenu */}
         <div
           className={`flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-primary ${activeClass}`}
           onClick={() => toggleSubmenu(subItem.label)}
@@ -60,7 +151,6 @@ const SidebarDropdown = ({ item }: any) => {
             {subItem.label}
           </Link>
 
-          {/* Show dropdown arrow if has children */}
           {hasChildren && (
             <span className="absolute right-4">
               <svg
@@ -84,14 +174,13 @@ const SidebarDropdown = ({ item }: any) => {
           )}
         </div>
 
-        {/* Render nested children when open */}
         {hasChildren && isOpen && (
           <SidebarDropdown item={subItem.children} />
         )}
       </li>
     );
 
-    // If the item is in DEFAULT_ACCESS_SECTIONS, show it without permission check
+    // If the item is in DEFAULT_ACCESS_SECTIONS, show it without additional permission check
     if (DEFAULT_ACCESS_SECTIONS.includes(subItem.label)) {
       return menuItemContent;
     }
@@ -105,9 +194,13 @@ const SidebarDropdown = ({ item }: any) => {
       );
     }
 
-    // If no id and not in default sections, show without permission check
+    // If no id but should be shown (has children with permissions), show it
     return menuItemContent;
   };
+
+  if (!permissionsLoaded) {
+    return null;
+  }
 
   return (
     <ul className="flex flex-col pl-7">
