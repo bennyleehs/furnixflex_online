@@ -8,22 +8,25 @@ import usePermissions from "@/hooks/usePermissions";
 
 const title = "Branch";
 const MENU = "1";
-const SUBMENUS = ["0", "1"];
+const SUBMENU = "1";
+// const SUBMENUS = ["0", "1"];
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function BranchPage() {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false);
-  const { canCreate, loadingPermissions, permissions } = usePermissions();
-
-  const canCreateButton =
-    !loadingPermissions && SUBMENUS.some((sub) => canCreate(MENU, sub));
-  console.log("USER PERMISSIONS:", permissions);
-  console.log("canCreate('1', '0') =", canCreate("1", "0"));
-  console.log("canCreate('1', '1') =", canCreate("1", "1"));
-  console.log("canCreateButton =", canCreateButton);
-  const PERMISSION_PREFIX = `${MENU}.0`;
+  const { canCreate, loadingPermissions } = usePermissions(); // Use the custom hook
+  const canCreateButton = canCreate(MENU, SUBMENU);
+  // const { canCreate, loadingPermissions, permissions } = usePermissions();
+  // const canCreateButton =
+  //   !loadingPermissions && SUBMENUS.some((sub) => canCreate(MENU, sub));
+  // console.log("USER PERMISSIONS:", permissions);
+  // console.log("canCreate('1', '0') =", canCreate("1", "0"));
+  // console.log("canCreate('1', '1') =", canCreate("1", "1"));
+  // console.log("canCreateButton =", canCreateButton);
+  // const PERMISSION_PREFIX = `${MENU}.0`;
 
   const fetchData = async () => {
     try {

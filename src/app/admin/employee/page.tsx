@@ -6,7 +6,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
 
 const MENU = "1";
-const SUBMENU = "0";
+const SUBMENU = "4";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function EmployeePage() {
