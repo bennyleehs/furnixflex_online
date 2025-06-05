@@ -1,5 +1,6 @@
 // src/hooks/usePermissions.ts
 import { useState, useEffect, useCallback } from "react";
+import { fetchPermissionsOnce } from "@/utils/permissionCache";
 
 // Define permission mapping based on your action numbers:
 // These map to the *specific* permission ID for that action type.
@@ -30,33 +31,18 @@ const usePermissions = (): UsePermissionsResult => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        setLoadingPermissions(true);
-        // Make the API call to your new endpoint to fetch permissions
-        const res = await fetch("/api/permissions");
-        if (!res.ok) {
-          if (res.status === 401) {
-            setError("Unauthorized: Please log in.");
-            // Optionally, redirect to login page if token is truly invalid/expired
-            // window.location.href = '/login';
-          } else {
-            throw new Error(`Failed to fetch permissions: ${res.statusText}`);
-          }
-        }
-        const data = await res.json();
-        setPermissions(data.permissions || []);
-      } catch (err: any) {
-        console.error("Error in usePermissions hook:", err);
-        setError(err.message || "Failed to load permissions.");
-        setPermissions([]); // Ensure permissions are empty on error
-      } finally {
-        setLoadingPermissions(false);
-      }
-    };
+  setLoadingPermissions(true);
+  fetchPermissionsOnce()
+    .then(setPermissions)
+    .catch((err: any) => {
+      console.error("Error in usePermissions hook:", err);
+      setError(err.message || "Failed to load permissions.");
+      setPermissions([]);
+    })
+    .finally(() => setLoadingPermissions(false));
+}, []);
 
-    fetchPermissions();
-  }, []); // Empty dependency array means this runs once on component mount
+  // Empty dependency array means this runs once on component mount
 
   /**
    * Helper to check if a required permission is granted by the user's permissions,
