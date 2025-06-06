@@ -3,6 +3,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Tables from "@/components/Tables/keywords";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import usePermissions from "@/hooks/usePermissions";
+
+// const title = "Lead List";
+const MENU = "2";
+const SUBMENU = "2";
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function LeadPage() {
   const [data, setData] = useState([]);
@@ -18,6 +24,8 @@ export default function LeadPage() {
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [selectedStatus, setSelectedStatus] = useState("Assign PIC"); // Initialize with a proper default status
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
+  const { canCreate, loadingPermissions } = usePermissions(); // Use the custom hook
+  const canCreateButton = canCreate(MENU, SUBMENU);
 
   const fetchData = useCallback(async () => {
     try {
@@ -60,7 +68,7 @@ export default function LeadPage() {
     if (!hasFetchedData.current) {
       hasFetchedData.current = true;
     }
-  }, [fetchData]);
+  }, [fetchData,canCreateButton, loadingPermissions]);
 
   const handleFilterChange = (key: string, value: string) => {
     if (key === "status") {
@@ -109,6 +117,11 @@ export default function LeadPage() {
         }}
         onFilterChange={handleFilterChange} // Add this prop
         onSearchChange={handleSearchChange} // Add search handler
+        showCreateButton={!loadingPermissions && canCreateButton}
+        createPermissionPrefix={PERMISSION_PREFIX}
+        editPermissionPrefix={PERMISSION_PREFIX}
+        deletePermissionPrefix={PERMISSION_PREFIX}
+        monitorPermissionPrefix={PERMISSION_PREFIX}
       />
     </DefaultLayout>
   );

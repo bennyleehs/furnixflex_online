@@ -5,6 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import usePermissions from "@/hooks/usePermissions";
 
 // Product interface
 interface Product {
@@ -22,6 +23,11 @@ interface Product {
   created_at?: string;
   updated_at?: string;
 }
+
+const title = "Products Management";
+const MENU = "2";
+const SUBMENU = "1";
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -65,6 +71,33 @@ export default function ProductsPage() {
   const [newSubcategory, setNewSubcategory] = useState("");
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [showNewSubcategory, setShowNewSubcategory] = useState(false);
+
+  const {
+    canFullAccess,
+    canEdit,
+    canCreate,
+    canDelete,
+    canMonitor,
+    loadingPermissions,
+  } = usePermissions();
+
+  const getMenuSubmenu = (
+    permissionPrefix?: string,
+  ): { menu: string; submenu: string } | null => {
+    if (!permissionPrefix) {
+      return null;
+    }
+    const parts = permissionPrefix.split(".");
+    if (parts.length >= 2) {
+      return { menu: parts[0], submenu: parts[1] };
+    }
+    return null;
+  };
+
+  const createMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
+  const editMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
+  const deleteMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
+  const monitorMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
 
   // Ref for the form
   const formRef = useRef<HTMLDivElement>(null);
@@ -275,19 +308,26 @@ export default function ProductsPage() {
   return (
     <DefaultLayout>
       <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
-        <Breadcrumb noHeader={true} pageName="Products Management" />
+        <Breadcrumb noHeader={true} pageName={title} />
 
         <div className="mt-3 md:mt-0">
           {/* Add New Product button */}
-          <button
-            onClick={() => {
-              resetForm();
-              setShowForm(!showForm);
-            }}
-            className="bg-primary hover:bg-primarydark  rounded-md px-4 py-2 text-white transition"
-          >
-            {showForm ? "Cancel" : "Add New Product"}
-          </button>
+          {!loadingPermissions && (
+            <>
+              {createMenuSubmenu &&
+                canCreate(createMenuSubmenu.menu, createMenuSubmenu.submenu) && (
+                  <button
+                    onClick={() => {
+                      resetForm();
+                      setShowForm(!showForm);
+                    }}
+                    className="bg-primary hover:bg-primarydark rounded-md px-4 py-2 text-white transition"
+                  >
+                    {showForm ? "Cancel" : "Add New Product"}
+                  </button>
+                )}
+            </>
+          )}
         </div>
       </div>
 
@@ -692,7 +732,7 @@ export default function ProductsPage() {
                 setFilterCategory("");
                 setFilterSubcategory("");
               }}
-              className="hover:bg-primary hover:text-white dark:bg-meta-4 dark:hover:bg-primarydark rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition dark:text-gray-300"
+              className="hover:bg-primary dark:bg-meta-4 dark:hover:bg-primarydark rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition hover:text-white dark:text-gray-300"
             >
               Clear Filters
             </button>
@@ -839,7 +879,13 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <div className="flex items-center justify-center space-x-3.5">
+                      <div className="flex items-center justify-center space-x-3.5">{!loadingPermissions && ( // Only render buttons if permissions are loaded
+                        <>
+                        {editMenuSubmenu &&
+                            canEdit(
+                              editMenuSubmenu.menu,
+                              editMenuSubmenu.submenu,
+                            ) && (
                         <button
                           onClick={() => handleEdit(product)}
                           className="text-primary hover:text-primary/80"
@@ -859,6 +905,12 @@ export default function ProductsPage() {
                             ></path>
                           </svg>
                         </button>
+                        )}
+                        {deleteMenuSubmenu &&
+                            canDelete(
+                              deleteMenuSubmenu.menu,
+                              deleteMenuSubmenu.submenu,
+                            ) && (
                         <button
                           onClick={() => handleDelete(product.id)}
                           className="text-danger hover:text-danger/80"
@@ -878,6 +930,9 @@ export default function ProductsPage() {
                             ></path>
                           </svg>
                         </button>
+                        )}
+                        </>
+                      )}
                       </div>
                     </td>
                   </tr>
