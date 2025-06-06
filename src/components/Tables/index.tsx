@@ -178,7 +178,7 @@ export default function Tables({
                     [key]: e.target.value,
                   }))
                 }
-                className="focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs dark:text-white"
+                className="outline-hidden transition focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs dark:text-white"
               >
                 {(filterOptions[key] || []).map((option, index) => (
                   <option key={`${key}-${option.label}`} value={option.label}>
