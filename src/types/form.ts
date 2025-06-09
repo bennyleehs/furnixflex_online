@@ -2,7 +2,7 @@ export interface OptionItem {
   id: string | number;  // Make id required, not optional
   value: string;
   label?: string;
-  idd?: string[];
+  idd?: string;
   timezones?: string[];
   currencies_code?: string;
   currencies_symbol?: string;
