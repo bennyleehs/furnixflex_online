@@ -694,7 +694,7 @@ export default function ProductsPage() {
                 setFilterCategory(e.target.value);
                 setFilterSubcategory(""); // Reset subcategory filter when category changes
               }}
-              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
+              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary dark:active:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
             >
               <option value="">All Categories</option>
               {categories.map((category) => (
@@ -712,7 +712,7 @@ export default function ProductsPage() {
             <select
               value={filterSubcategory}
               onChange={(e) => setFilterSubcategory(e.target.value)}
-              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
+              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary dark:active:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
               disabled={!filterCategory}
             >
               <option label="Choose category required" disabled></option>

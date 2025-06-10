@@ -124,51 +124,36 @@ const SelectDropdown = ({
   }, [initialValue]);
 
   return (
-    <div className="grid md:grid-cols-2 my-2">
-      <label className="block font-medium text-black dark:text-white mr-4">
+    <div className="mt-2 md:my-2 grid md:grid-cols-2">
+      <label className="mr-4 mb-2 block font-medium text-black dark:text-white">
         {subSectionId && section && path
           ? `${subSectionId}. ${formatPath(path, section)}`
           : path || "Sub-menu:"}
       </label>
       <div className="relative inline-block">
         <select
-          className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[200px] cursor-pointer appearance-none rounded-lg border bg-transparent py-2 pr-8 pl-3 outline-none"
-          value={selectedActions}
+          className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white"
+          value={loading ? "" : selectedActions} // 👈 key point
           onChange={handleChange}
           id={id}
           disabled={loading}
         >
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {formatOptionLabel(option.label)}
-            </option>
-          ))}
-        </select>
-
-        <div className="pointer-events-none absolute top-1/2 right-16 -translate-y-1/2 transform">
           {loading ? (
-            <span className="text-xs text-gray-500">Loading...</span>
+            <option value="" disabled>
+              Loading...
+            </option>
           ) : (
-            <svg
-              className="h-4 w-4 fill-current"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            options.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+              >
+                {formatOptionLabel(option.label)}
+              </option>
+            ))
           )}
-        </div>
+        </select>
       </div>
       {error && (
         <div className="ml-4 text-sm text-red-500">
