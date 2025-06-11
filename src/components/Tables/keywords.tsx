@@ -304,7 +304,7 @@ export default function Tables({
     options.unshift({ value: "All", label: "All", count: totalItems });
 
     return (
-      <div>
+      <div className="flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
         <select
           id={`filter-${key}`}
           value={selectedFilters[key] || "All"}
@@ -327,9 +327,9 @@ export default function Tables({
   return (
     <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-2">
       {/* Table Header with inline filters & search */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         {/* Filter area - make everything inline */}
-        <div className="flex flex-1 flex-wrap items-center gap-4">
+        <div className="flex w-full flex-wrap gap-4">
           {filterKeys.map((key) => (
             <div
               key={key}
@@ -346,19 +346,18 @@ export default function Tables({
           ))}
 
           {/* Search and Results Count Container */}
-          <div className="flex items-center space-x-2">
-            {/* Search Input */}
-            <div className="relative w-[200px]">
+          {/* Search Input */}
+          <div className="relative flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
+            <div className="relative w-full md:w-[200px]">
               <input
                 type="text"
                 placeholder={`Search in ${selectedFilters["status"] || "All"}...`}
-                className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary w-full rounded-sm border px-8 py-2 text-sm text-black outline-hidden transition dark:text-white"
+                className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
                 value={searchQuery}
                 onChange={(e) => {
                   const newQuery = e.target.value;
                   setSearchQuery(newQuery);
 
-                  // Debounce logic remains the same...
                   if (onSearchChange) {
                     if (searchTimeoutRef.current) {
                       clearTimeout(searchTimeoutRef.current);
@@ -372,7 +371,7 @@ export default function Tables({
                   }
                 }}
               />
-              <svg
+              {/* <svg
                 className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -385,10 +384,10 @@ export default function Tables({
                   strokeWidth={2}
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
-              </svg>
+              </svg> */}
               {searchQuery && (
                 <button
-                  className="absolute top-1/2 right-2.5 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 dark:text-gray-400"
                   onClick={() => {
                     setSearchQuery("");
                     if (onSearchChange) {
@@ -404,6 +403,7 @@ export default function Tables({
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    className="h-4 w-4"
                   >
                     <path
                       strokeLinecap="round"
@@ -415,16 +415,17 @@ export default function Tables({
                 </button>
               )}
             </div>
+          </div>
 
-            {/* Results count text */}
-            {/* <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+          {/* Results count text */}
+          {/* <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
               {searchQuery ? 
                 `Showing ${tableData.length} of ${totalItems} total results for "${searchQuery}"` : 
                 selectedFilters['status'] && selectedFilters['status'] !== 'All' ?
                   `Showing ${Math.min(tableData.length, totalItems)} of ${totalItems} ${selectedFilters['status']} records` :
                   `Showing ${Math.min(itemsPerPage, totalItems)} of ${totalItems} records`}
             </span> */}
-          </div>
+          {/* </div> */}
         </div>
 
         {/* Create Button */}
@@ -433,7 +434,7 @@ export default function Tables({
           createMenuSubmenu &&
           !loadingPermissions &&
           canCreate(createMenuSubmenu.menu, createMenuSubmenu.submenu) && (
-            <div className="ml-3 shrink-0">
+            <div className="w-full sm:w-auto">
               <Link
                 href={createLink || "/"}
                 className="dark:border-strokedark dark:bg-primary dark:hover:bg-primarydark flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
