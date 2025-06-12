@@ -2,7 +2,7 @@
   "JB.ADMINISTRATION.Assistant Manager": [],
   "JB.ADMINISTRATION.Chief Officer": [],
   "JB.ADMINISTRATION.Director": ["1.0.1", "2.0.1", "3.0.1", "4.0.1", "5.0.1"],
-  "JB.ADMINISTRATION.Manager": ["1.0.1", "2.0.2", "3.0.2", "4.0.2", "5.0.2"],
+  "JB.ADMINISTRATION.Manager": [],
   "JB.ADMINISTRATION.Managing Director": [
     "1.0.1",
     "2.0.1",
@@ -13,7 +13,7 @@
   "JB.ADMINISTRATION.Non-Executive Director": [],
   "JB.ADMINISTRATION.Partner": [],
   "JB.ADMINISTRATION.Staff": [],
-  "JB.ADMINISTRATION.Supervisor": [],
+  "JB.ADMINISTRATION.Supervisor": ["1.0.4", "2.0.2", "3.0.2", "4.0.2", "5.0.2"],
   "JB.ENGINEERING.Assistant Manager": [],
   "JB.ENGINEERING.Chief Officer": [],
   "JB.ENGINEERING.Director": [],
