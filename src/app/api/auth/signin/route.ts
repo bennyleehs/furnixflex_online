@@ -12,14 +12,16 @@ export async function POST(req: NextRequest) {
   const { uid, password } = await req.json();
   // query from input to the db - only get necessary user info
   const [rows] = await db.query(
-    "SELECT id, uid, roleName, deptName as departmentName, branchRef, email, password FROM users WHERE uid = ?",
-    [uid]
+    "SELECT id, uid, name, roleName, deptName as departmentName, branchRef, email, password FROM users WHERE uid = ?",
+    [uid],
   );
-  
+
   // fetch data
   const user = (
     rows as (IUser & {
-      id: number;
+      // id: number;
+      name: string;
+      uid: string;
       roleName: string;
       departmentName: string;
       branchRef: string;
@@ -33,13 +35,20 @@ export async function POST(req: NextRequest) {
 
   // Generate token with permissions based on user's branch, department, and role
   const token = await generateToken(
-    user.id,
+    user.uid,
+    // user.id,
     user.roleName,
     user.departmentName,
     user.branchRef,
   );
 
-  const res = NextResponse.json({ success: true });
+  const res = NextResponse.json({
+    success: true,
+    uid: user.uid,
+    name: user.name, // You might want to use a different field for name if available
+    // departmentName: user.departmentName,
+    // role: user.roleName
+  });
   res.headers.set(
     "Set-Cookie",
     // `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,

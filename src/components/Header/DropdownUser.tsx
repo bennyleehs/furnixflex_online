@@ -3,9 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import LogoutButton from "./LogOut";
+import { useAuth } from "@/context/AuthContext"; // You may need to create this hook
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { user } = useAuth(); // Get authenticated user from your auth context
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -16,9 +18,11 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Classy Pro
+            {user?.uid || "Not logged in"}
           </span>
-          <span className="block text-xs">Dev Team</span>
+          <span className="block text-xs"> 
+            {user?.name || "Guest User"}
+          </span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
@@ -55,13 +59,13 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
         <div
-          className={`border-stroke dark:border-strokedark dark:bg-boxdark absolute right-0 mt-5 flex w-62.5 flex-col rounded-lg border bg-white shadow-2xl dark:shadow-black`}
+          className={`absolute right-0 mt-5 flex w-62.5 flex-col rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}
         >
-          <ul className="border-stroke dark:border-strokedark flex flex-col gap-5 border-b px-6 py-7.5">
+          <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
             <li>
               <Link
                 href="/profile"
-                className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
                   className="fill-current"
@@ -86,7 +90,7 @@ const DropdownUser = () => {
             <li>
               <Link
                 href="/settings"
-                className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
                   className="fill-current"

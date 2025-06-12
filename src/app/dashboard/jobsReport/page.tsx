@@ -6,6 +6,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 // import { useJobCounts } from "@/context/JobContext";
 import JobLegend from "@/components/JobLegend";
+import ComingSoon from "@/components/DisplayPage/ComingSoon";
 
 interface Job {
   quotation_id: string;
@@ -79,9 +80,9 @@ export default function JobPage() {
     };
   }, []);
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
+  // if (error) {
+  //   return <p>Error: {error}</p>;
+  // }
 
   // const { expiredCount, nearExpiryCount, activeCount } = useJobCounts();
 
@@ -104,12 +105,13 @@ export default function JobPage() {
 
   return (
     <DefaultLayout>
-      <TablesTwo
+      {/* <TablesTwo
         columns={columns}
         data={jobs}
         rowClassName={getRowClassName}
         detailTitle={"Ongoing Jobs"}
-      />
+      /> */}
+      <ComingSoon/>
     </DefaultLayout>
   );
 }

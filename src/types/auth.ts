@@ -1,6 +1,7 @@
 // Define the structure of a JWT token payload
 export interface AuthToken {
-    id: number;
+    // id: number;
+    uid:string
     roleName: string;
     departmentName: string;
     branchRef: string;

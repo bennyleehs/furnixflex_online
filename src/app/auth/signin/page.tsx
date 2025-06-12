@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 const SignIn = () => {
   const [uid, setUid] = useState("");
@@ -10,6 +11,7 @@ const SignIn = () => {
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const {setUser} = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +31,12 @@ const SignIn = () => {
 
       const data = await response.json();
       if (response.ok) {
+        // Store user data on successful login
+        setUser({
+          uid: data.uid,
+          name: data.name || "User", // Assuming API returns user name or fallback
+        });
+        
         setMessage(data.message || "Sign-in successful");
         setIsError(false);
         router.push("/");
@@ -49,9 +57,9 @@ const SignIn = () => {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <div className="container mx-auto sm:mx-40 md:mx-65 2xl:mx-180">
+      <div className="container mx-auto sm:mx-40 md:mx-50 2xl:mx-180">
         <div className="w-full max-w-full md:max-w-4xl">
-          <div className="flex justify-center p-4 sm:p-8 xl:p-6">
+          <div className="flex justify-center sm:p-8 md:p-4 xl:p-6">
             <Image
               width={160}
               height={2}
@@ -59,7 +67,7 @@ const SignIn = () => {
               alt="Logo Classy Pro"
             />
           </div>
-          <form onSubmit={handleSubmit}>
+          <form className="p-4" onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="mb-2.5 block font-medium text-black">
                 User ID
@@ -68,7 +76,7 @@ const SignIn = () => {
                 <input
                   type="text"
                   placeholder="UID"
-                  className="bg-white focus:border-primary w-full rounded-lg border border-neutral-300 py-2 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none"
+                  className="focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-2 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none"
                   disabled={false}
                   value={uid}
                   onChange={(e) => setUid(e.target.value)}
@@ -99,7 +107,7 @@ const SignIn = () => {
                 <input
                   type={showPassword ? "text" : "password"} // Use state for type
                   placeholder="Password@1234"
-                  className="bg-white focus:border-primary w-full rounded-lg border border-neutral-300 py-2 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none"
+                  className="focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-2 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none"
                   disabled={false}
                   value={password}
                   onChange={(e) => setPwd(e.target.value)}
