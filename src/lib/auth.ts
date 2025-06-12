@@ -52,7 +52,7 @@ export async function verifyToken(
     });
 
     const {
-      id,
+      uid,
       roleName,
       departmentName,
       branchRef,
@@ -60,7 +60,7 @@ export async function verifyToken(
       iat,
       exp,
     } = payload as {
-      id?: number;
+      uid?: string;
       roleName?: string;
       departmentName?: string;
       branchRef?: string;
@@ -70,7 +70,7 @@ export async function verifyToken(
     };
 
     if (
-      typeof id !== "number" ||
+      typeof uid !== "string" ||
       typeof roleName !== "string" ||
       typeof departmentName !== "string" ||
       typeof branchRef !== "string" ||
@@ -83,7 +83,7 @@ export async function verifyToken(
     }
 
     return {
-      id,
+      uid,
       roleName,
       departmentName,
       branchRef,
@@ -104,7 +104,7 @@ export async function verifyToken(
 
 //function generate token with permissions
 export async function generateToken(
-  userId: number,
+  uid: string,
   roleName: string,
   departmentName: string,
   branchRef: string,
@@ -121,7 +121,7 @@ export async function generateToken(
   const now = Math.floor(Date.now() / 1000); // iat
 
   return new SignJWT({
-    id: userId,
+    uid,
     roleName,
     departmentName,
     branchRef,

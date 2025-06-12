@@ -336,9 +336,9 @@ const FormScopes2Access = () => {
   };
 
   return (
-    <div className="border-stroke dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-4 shadow-md">
+    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-2">
       <form onSubmit={handleSubmit}>
-        <div className="my-2 px-4 grid md:grid-cols-3">
+        <div className="my-2 grid md:grid-cols-3">
           <div className="my-2 md:grid md:grid-cols-2">
             <label className="my-auto font-medium text-black dark:text-white">
               Branch - Department - Role
@@ -346,7 +346,7 @@ const FormScopes2Access = () => {
             <input
               type="text"
               disabled
-              className="border-primary active:border-primary disabled:bg-whiter dark:bg-form-input w-full rounded-lg border-[1.5px] bg-transparent px-5 py-3 text-black text-center outline-hidden transition disabled:cursor-default md:w-80 dark:text-white"
+              className="border-primary active:border-primary disabled:bg-whiter dark:bg-form-input w-full rounded-lg border-[1.5px] bg-transparent px-5 py-3 text-black outline-hidden transition disabled:cursor-default md:w-80 dark:text-white"
               value={key || ""}
             />
           </div>
@@ -362,7 +362,7 @@ const FormScopes2Access = () => {
         )}
 
         {/* Display sections and their menu items */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-x-4 md:grid-cols-3">
           {Object.entries(groupedMenuItems).map(([sectionLabel, items]) => {
             // Find the original menu item to get its ID
             const sectionItem = typedSidebarMenu
@@ -371,8 +371,8 @@ const FormScopes2Access = () => {
             const sectionId = sectionItem?.id;
 
             return (
-              <div key={sectionLabel} className="md:px-2">
-                <h3 className="mb-4 mt-4 md:mt-6 text-xl font-bold text-black dark:text-white">
+              <div key={sectionLabel} className="mb-8">
+                <h3 className="mb-4 text-xl font-bold text-black dark:text-white">
                   {/* {sectionLabel} */}
                   {/* Display the ID if available, otherwise just the label */}
                   {sectionId && `${sectionId}. `}
@@ -394,19 +394,19 @@ const FormScopes2Access = () => {
             );
           })}
         </div>
-        <div className="mt-6 flex space-x-4">
+        <div className="mb-1 flex space-x-4">
           <input
             type="submit"
-            value="Update"
-            className="bg-primary hover:bg-primarydark border-stroke rounded-sm px-6 py-2 font-medium text-white transition hover:text-white"
+            value="UPDATE"
+            className="bg-primary hover:bg-primarydark cursor-pointer rounded-lg border p-4 font-semibold text-white transition hover:text-white"
             disabled={loading}
           />
           <button
             type="button"
             onClick={() => router.push("/admin/scopes_access")}
-            className="border-stroke dark:border-strokedark dark:hover:bg-form-strokedark flex justify-center rounded-sm border px-6 py-2 font-medium text-black hover:bg-gray-200 dark:bg-gray-500 dark:text-white"
+            className="rounded-lg border border-gray-300 bg-gray-100 p-4 font-semibold text-gray-700 transition hover:bg-gray-200"
           >
-            Cancel
+            CANCEL
           </button>
         </div>
       </form>

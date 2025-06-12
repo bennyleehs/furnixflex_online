@@ -1,7 +1,7 @@
-"use client";
+'use client';
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import "./styles.css"; // Import the CSS file
+import './styles.css'; // Import the CSS file
 
 interface OptionItem {
   value: string | number;
@@ -15,11 +15,7 @@ interface Column {
   valueKey: string;
   defaultValue?: string;
   options?: OptionItem[];
-  transform?: (
-    value: any,
-    allValues: Record<string, any>,
-    options?: any[],
-  ) => any;
+  transform?: (value: any, allValues: Record<string, any>, options?: any[]) => any;
   readOnly?: boolean;
   required?: boolean;
 }
@@ -35,19 +31,17 @@ interface Props<T> {
   formTitle?: string;
 }
 
-const FormUni = <T extends Record<string, any>>({
+const FormUni = <T extends Record<string, any>>({ 
   columns,
-  data,
+  data, 
   formData: externalFormData,
   setFormData: externalSetFormData,
-  loading = false,
-  submitUrl,
+  loading = false, 
+  submitUrl, 
   redirectUrl,
   formTitle = "item",
 }: Props<T>) => {
-  const [internalFormData, setInternalFormData] = useState<Record<string, any>>(
-    {},
-  );
+  const [internalFormData, setInternalFormData] = useState<Record<string, any>>({});
   const [filteredOptions, setFilteredOptions] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [optionsLoaded, setOptionsLoaded] = useState(false); // Track when options are loaded
@@ -72,109 +66,88 @@ const FormUni = <T extends Record<string, any>>({
 
   // IMPORTANT: Initialize form data when in edit mode (data exists)
   useEffect(() => {
-    if (!initializedRef.current && optionsLoaded && !loading) {
+    if ((!initializedRef.current) && optionsLoaded && !loading) {
       // Create initial data object - either from existing data or empty object
-      const initialData: Record<string, any> =
-        data.length > 0 ? { ...data[0] } : {};
-
+      const initialData: Record<string, any> = data.length > 0 ? { ...data[0] } : {};
+      
       // Apply default values for all fields that don't have values
-      columns.forEach((column) => {
+      columns.forEach(column => {
         const valueKey = column.valueKey;
         const currentValue = initialData[valueKey];
-
+        
         // Don't apply defaults to section headers
         if (column.inputType === "section") {
           return;
         }
-
+        
         // If field doesn't have a value but has a defaultValue, use the defaultValue
-        if (
-          (currentValue === undefined ||
-            currentValue === null ||
-            currentValue === "") &&
-          column.defaultValue !== undefined
-        ) {
+        if ((currentValue === undefined || currentValue === null || currentValue === "") 
+            && column.defaultValue !== undefined) {
           initialData[valueKey] = column.defaultValue;
         }
-
+        
         // Format dropdown values to strings
-        if (
-          column.inputType === "select" &&
-          initialData[valueKey] !== undefined
-        ) {
+        if (column.inputType === "select" && initialData[valueKey] !== undefined) {
           initialData[valueKey] = String(initialData[valueKey]);
         }
       });
-
+      
       // console.log("Initializing form with data:", initialData);
       initializedRef.current = true;
       setFormData(initialData);
     }
   }, [data, loading, optionsLoaded, columns, setFormData]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     // console.log("Field changed:", name, value);
-
+    
     const column = columns.find((col) => col.valueKey === name);
-
+    
     if (column?.transform) {
-      const transformedValues = column.transform(
-        value,
-        formData || {},
-        column.options,
-      );
-      setFormData((prevData) => ({
+      const transformedValues = column.transform(value, formData || {}, column.options);
+      setFormData(prevData => ({
         ...prevData,
         ...transformedValues,
-        [name]: value,
+        [name]: value
       }));
     } else {
-      setFormData((prevData) => ({
+      setFormData(prevData => ({
         ...prevData,
-        [name]: value,
+        [name]: value
       }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     // Check for required fields
     const missingRequiredFields = columns
-      .filter(
-        (col) =>
-          col.required &&
-          (!formData[col.valueKey] || formData[col.valueKey] === ""),
-      )
-      .map((col) => col.title);
-
+      .filter(col => col.required && (!formData[col.valueKey] || formData[col.valueKey] === ""))
+      .map(col => col.title);
+    
     if (missingRequiredFields.length > 0) {
-      alert(
-        `Please fill in the following required fields: ${missingRequiredFields.join(", ")}`,
-      );
+      alert(`Please fill in the following required fields: ${missingRequiredFields.join(", ")}`);
       return;
     }
-
+    
     setSubmitting(true);
-
+    
     try {
       // Show confirmation for updates
       if (data.length > 0) {
-        const confirmUpdate = window.confirm(
-          `Update ${formTitle} (${data[0]?.id})?`,
-        );
+        const confirmUpdate = window.confirm(`Update ${formTitle} (${data[0]?.id})?`);
         if (!confirmUpdate) {
           setSubmitting(false);
           return;
         }
       }
 
-      const url =
-        data.length > 0 ? `${submitUrl}?id=${data[0]?.id}` : submitUrl;
-
+      const url = data.length > 0 
+        ? `${submitUrl}?id=${data[0]?.id}` 
+        : submitUrl;
+      
       const method = data.length > 0 ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -203,19 +176,16 @@ const FormUni = <T extends Record<string, any>>({
   // Update the form container and elements with dark mode styling
   return (
     <div>
-      <form
-        onSubmit={handleSubmit}
-        className="dark:bg-boxdark dark:border-strokedark rounded-lg bg-white p-4 shadow-md"
-      >
-        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <form onSubmit={handleSubmit} className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark dark:border-strokedark">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {columns.map((column, index) => {
             const currentValue = formData?.[column.valueKey] || "";
-
+            
             // Skip rendering for section headers - they need special handling
             if (column.inputType === "section") {
               return (
-                <div key={index} className="col-span-full mt-2 mb-6">
-                  <h2 className="border-stroke dark:border-strokedark border-b pb-2 text-xl font-semibold text-black dark:text-white">
+                <div key={index} className="col-span-full mb-6 mt-2">
+                  <h2 className="text-xl font-semibold border-b pb-2 text-black dark:text-white border-stroke dark:border-strokedark">
                     {column.title}
                   </h2>
                 </div>
@@ -223,17 +193,12 @@ const FormUni = <T extends Record<string, any>>({
             }
 
             return (
-              <div key={index}>
-                <label
-                  htmlFor={column.valueKey}
-                  className="mb-2 block font-semibold text-black dark:text-white"
-                >
+              <div key={index} className="mb-4">
+                <label htmlFor={column.valueKey} className="block mb-2 font-semibold text-black dark:text-white">
                   {column.title}
-                  {column.required && (
-                    <span className="text-meta-1 ml-1">*</span>
-                  )}
+                  {column.required && <span className="text-meta-1 ml-1">*</span>}
                 </label>
-
+                
                 {column.inputType === "select" ? (
                   <select
                     id={column.valueKey}
@@ -241,11 +206,14 @@ const FormUni = <T extends Record<string, any>>({
                     value={currentValue || column.defaultValue || ""}
                     onChange={handleChange}
                     required={column.required}
-                    className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary h-[50px] w-full rounded-sm border-[1.5px] bg-transparent px-5 font-medium outline-hidden transition disabled:cursor-default dark:text-white"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   >
                     <option value="">Select an option</option>
                     {column.options?.map((option, idx) => (
-                      <option key={idx} value={option.value}>
+                      <option 
+                        key={idx} 
+                        value={option.value}
+                      >
                         {option.label}
                       </option>
                     ))}
@@ -258,7 +226,7 @@ const FormUni = <T extends Record<string, any>>({
                     // onChange={handleChange}
                     rows={4}
                     required={column.required}
-                    className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white"
+                    className="w-full rounded-sm border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 ) : (
                   <input
@@ -269,9 +237,9 @@ const FormUni = <T extends Record<string, any>>({
                     onChange={handleChange}
                     readOnly={column.readOnly}
                     required={column.required}
-                    className={`border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white ${
-                      column.readOnly
-                        ? "dark:bg-form-input cursor-not-allowed bg-gray-100 opacity-70"
+                    className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-hidden transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${
+                      column.readOnly 
+                        ? "bg-gray-100 dark:bg-form-input cursor-not-allowed opacity-70" 
                         : ""
                     }`}
                   />
@@ -280,34 +248,30 @@ const FormUni = <T extends Record<string, any>>({
             );
           })}
         </div>
-
-        <div className="mt-6 flex justify-start space-x-4">
-          <button
-            type="submit"
-            disabled={submitting}
-            className={`text-white hover:shadow-1 flex justify-center rounded px-6 py-2 font-medium ${
-              data.length > 0
-                ? "bg-[#88C9A1] hover:bg-[#6ba782]"
-                : "bg-primary hover:bg-primarydark"
-            }`}
-          >
-            {submitting
-              ? "Processing..."
-              : data.length > 0
-                ? "Update"
-                : "Submit"}
-          </button>
+        
+        <div className="flex justify-start space-x-4 mt-6">
           <button
             type="button"
             onClick={() => router.push(redirectUrl)}
-            className="border-stroke hover:bg-gray-200 dark:border-strokedark dark:bg-gray-500 dark:hover:bg-form-strokedark flex justify-center rounded-sm border px-6 py-2 font-medium text-black dark:text-white"
+            className="flex justify-center rounded-sm border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className={`flex justify-center rounded px-6 py-2 font-medium text-gray hover:opacity-90 hover:shadow-1 disabled:opacity-50 ${
+              data.length > 0 
+                ? "bg-warning" // Orange for edit/update
+                : "bg-blue-600 " // Blue for new/submit
+            }`}
+          >
+            {submitting ? "Processing..." : data.length > 0 ? "Update" : "Submit"}
           </button>
         </div>
       </form>
       <div className="mt-4">
-        <p className="text-bodydark2 dark:text-bodydark text-sm">
+        <p className="text-sm text-bodydark2 dark:text-bodydark">
           <span className="text-meta-1">*</span> Required fields
         </p>
       </div>

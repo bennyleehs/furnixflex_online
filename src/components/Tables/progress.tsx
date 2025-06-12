@@ -152,7 +152,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
   }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
   
   return (
-    <div className="rounded-lg border border-stroke bg-gray-50 p-5 shadow-default dark:border-strokedark dark:bg-boxdark mb-5">
+    <div className="rounded-lg border border-stroke bg-gray-50 p-5 shadow-default dark:border-strokedark dark:bg-meta-4 mb-5">
       {/* Header with Pipeline Flow title and breadcrumb on right */}
       <div className="flex flex-wrap justify-between items-center mb-4">
         {/* Title on left */}
@@ -312,7 +312,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
+              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-hidden focus:border-primary dark:bg-meta-4 dark:text-white"
             />
             {searchQuery && (
               <button 
@@ -363,7 +363,7 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
           const [salesName, salesUid] = (task.pic || '').split('/').map((s: string) => s.trim());
           
           return (
-            <div key={task.id} className="bg-white dark:bg-form-input border border-stroke dark:border-strokedark rounded-md p-3">
+            <div key={task.id} className="bg-white dark:bg-boxdark border border-stroke dark:border-strokedark rounded-md p-3">
               {/* Enhanced header with name, NRIC, and contact details inline */}
               <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
                 <div className="flex-1">
@@ -472,16 +472,16 @@ export default function ProgressTable({ data, statusCounts, totalItems, pageName
               <div className="text-xs mt-3 pt-3 border-t border-stroke dark:border-strokedark">
                 <div className="flex justify-between items-center">
                   {/* ID, date and UID line */}
-                  <div className="flex flex-wrap items-center text-sm text-black dark:text-white mt-1 gap-x-3">
+                  <div className="flex flex-wrap items-center text-xs text-gray-500 mt-1 gap-x-3">
                     <span>ID: {task.id}</span>
                   </div>
                  <div className="flex items-center">
                     <svg className="h-3 w-3 text-gray-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                     </svg>
-                    <span className="font-semibold text-black dark:text-white">PIC:</span>
-                    <span className="ml-1 text-black dark:text-white">{salesName || 'Unassigned'}</span>
-                    {salesUid && <span className="text-black dark:text-white">, {salesUid}</span>}
+                    <span className="font-medium">PIC:</span>
+                    <span className="ml-1">{salesName || 'Unassigned'}</span>
+                    {salesUid && <span className="text-gray-500">, {salesUid}</span>}
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
                     task.status === "Job Done" ? 'bg-success/10 text-success' :

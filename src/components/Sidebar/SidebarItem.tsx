@@ -7,15 +7,15 @@ import PermissionGuard from "../PermissionGuard";
 import { DEFAULT_ACCESS_SECTIONS } from "@/utils/defaultAccess";
 
 const SidebarItem = ({ item, pageName, setPageName }: any) => {
-  const pathname = usePathname();
-
   const handleClick = () => {
     const updatedPageName =
       pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
     return setPageName(updatedPageName);
   };
 
-  const isActive = (item: any): boolean => {
+  const pathname = usePathname();
+
+  const isActive = (item: any) => {
     if (item.route === pathname) return true;
     if (item.children) {
       return item.children.some((child: any) => isActive(child));
@@ -25,18 +25,21 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
 
   const isItemActive = isActive(item);
 
+  // Render the sidebar item with permission check if it has an id property
   const sidebarItemContent = (
     <li>
       <Link
         href={item.route}
         onClick={handleClick}
-        className={`${isItemActive ? "bg-graydark text-primary dark:bg-meta-4" : ""} group text-bodydark1 hover:bg-graydark hover:text-primary dark:hover:bg-meta-4 relative flex items-center gap-2.5 rounded-xs px-4 py-2 font-medium duration-300 ease-in-out`}
+        className={`${isItemActive ? "bg-graydark text-primary dark:bg-meta-4" : ""} group relative flex items-center gap-2.5 rounded-xs px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark hover:text-primary dark:hover:bg-meta-4`}
       >
         {item.icon}
         {item.label}
         {item.children && (
           <svg
-            className={`absolute top-1/2 right-4 -translate-y-1/2 fill-current ${pageName === item.label.toLowerCase() && "rotate-180"}`}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
+              pageName === item.label.toLowerCase() && "rotate-180"
+            }`}
             width="20"
             height="20"
             viewBox="0 0 20 20"
@@ -55,20 +58,23 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
 
       {item.children && (
         <div
-          className={`translate transform overflow-hidden ${pageName !== item.label.toLowerCase() && "hidden"}`}
+          className={`translate transform overflow-hidden ${
+            pageName !== item.label.toLowerCase() && "hidden"
+          }`}
         >
+          {/* Pass children through the PermissionGuard component if they have permission values */}
           <SidebarDropdown item={item.children} />
         </div>
       )}
     </li>
   );
 
-  // If default access, show directly
+  // If the item is in DEFAULT_ACCESS_SECTIONS, show it without permission check
   if (DEFAULT_ACCESS_SECTIONS.includes(item.label)) {
     return <>{sidebarItemContent}</>;
   }
 
-  // Otherwise, guard with permission check
+  // Otherwise, if the item has an id (which is used for permission checking), wrap it in a PermissionGuard
   return item.id ? (
     <PermissionGuard permissionValue={item.id}>
       {sidebarItemContent}

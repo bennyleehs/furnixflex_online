@@ -16,7 +16,7 @@ export function withAuth(
     // Extract authToken from cookies
     const authToken = req.cookies.get("authToken")?.value;
 
-    // console.log(authToken);
+    console.log(authToken);
     if (!authToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -28,7 +28,7 @@ export function withAuth(
         return NextResponse.json({ error: "Token expired" }, { status: 401 });
       }
 
-      // console.log(decoded);
+      console.log(decoded);
       // Ensure the decoded token's permissions include at least one required permission
       // const userPermissions: string[] = decoded.permissions || [];
       const userPermissions: string[] = getPermissionsForRole(

@@ -7,7 +7,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Tables from "@/components/Tables";
 
 const MENU = "1";
-const SUBMENU = "6";
+const SUBMENU = "0";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 interface AccessRow {

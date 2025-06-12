@@ -1,9 +1,8 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
-import { NextResponse } from "next/server";
-import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
+import { NextRequest, NextResponse } from "next/server";
 
-async function handler(req: AuthenticatedRequest) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
@@ -12,28 +11,22 @@ async function handler(req: AuthenticatedRequest) {
 
     let sql = `
       SELECT  
-        users.id, users.uid,
-        branches.name as branch, 
-        departments.name as department, 
-        roles.name AS role,
-        users.name, users.nric,
-        users.email, users.phone,
-        users.address_line1, users.address_line2, users.postcode,
-        users.city, users.state, users.country,
-        users.bank_name, users.bank_account,
-        users.status
+        id, uid, name, nric,
+        email, phone,
+        address_line1, address_line2, postcode,
+        city, state, country,
+        bank_name, bank_account,
+        branchName, deptName, roleName, 
+        status
       FROM users
-        LEFT JOIN branches ON branches.ref = users.branchRef
-        LEFT JOIN departments ON departments.name = users.deptName
-        LEFT JOIN roles ON roles.name = users.roleName
     `;
 
     // Add WHERE clause based on whether we have an ID
     if (id) {
-      sql += ` WHERE users.id = ?`;
+      sql += ` WHERE id = ?`;
     } else {
       // When listing all roles, exclude Superadmin
-      sql += ` WHERE users.name != 'SUPERADMIN'`;
+      sql += ` WHERE name != 'SUPERADMIN'`;
     }
 
     // Execute the query
@@ -61,14 +54,115 @@ async function handler(req: AuthenticatedRequest) {
   }
 }
 
-// Export the route handler with authentication middleware
-export const GET = withAuth(handler, [
-  "1.0.1",
-  "1.0.2",
-  "1.0.3",
-  "1.0.4",
-  "1.4.1",
-  "1.4.2",
-  "1.4.3",
-  "1.4.4",
-]);
+// PUT function with LEFT JOINs removed
+export async function PUT(req: NextRequest) {
+  try {
+    // Parse the request body
+    const data = await req.json();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "Employee ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate required fields
+    if (!data.uid || !data.name) {
+      return NextResponse.json(
+        { message: "UID and name are required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create the database connection
+    const db = createPool();
+
+    // Construct the SQL update statement
+    const sql = `
+      UPDATE users
+      SET 
+        uid = ?,
+        name = ?,
+        nric = ?,
+        phone = ?,
+        email = ?,
+        address_line1 = ?,
+        address_line2 = ?,
+        city = ?,
+        state = ?,
+        country = ?,
+        bank_name = ?,
+        bank_account = ?,
+        branchRef = ?,
+        branchName = ?,
+        deptName = ?,
+        roleName = ?,
+        status = ?,
+        updated_at = NOW()
+      WHERE id = ?
+    `;
+
+    // Execute the update query
+    const [result] = await db.query(sql, [
+      data.uid,
+      data.name,
+      data.nric || null,
+      data.phone || null,
+      data.email || null,
+      data.address_line1 || null,
+      data.address_line2 || null,
+      data.city || null,
+      data.state || null,
+      data.country || null,
+      data.bank_name || null,
+      data.bank_account || null,
+      data.branchRef || null,
+      data.branch || null,         // Changed from branchRef to data.branch directly
+      data.department || null,
+      data.role || null,
+      data.status || 'Active',
+      id
+    ]);
+
+    // Check if the employee was updated
+    const resultObj = result as any;
+    if (resultObj.affectedRows === 0) {
+      return NextResponse.json(
+        { message: "Employee not found or no changes made" },
+        { status: 404 }
+      );
+    }
+
+    // Fetch the updated employee to return - update column name to branchName
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT  
+        id, uid, name, nric,
+        email, phone,
+        address_line1, address_line2, postcode,
+        city, state, country,
+        bank_name, bank_account,
+        branchName, deptName, roleName, 
+        status
+      FROM users
+      WHERE id = ?`,
+      [id]
+    );
+
+    return NextResponse.json(
+      { 
+        message: "Employee updated successfully", 
+        employee: rows[0] 
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating employee:", error);
+    return NextResponse.json(
+      { message: "Failed to update employee", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}

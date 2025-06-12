@@ -40,6 +40,7 @@ export default function Tables({
   >({});
   const router = useRouter();
 
+  // FIX 1: Added 'canDelete' to the destructuring here
   const {
     canFullAccess,
     canEdit,
@@ -178,7 +179,7 @@ export default function Tables({
                     [key]: e.target.value,
                   }))
                 }
-                className="outline-hidden transition focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs dark:text-white"
+                className="focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs dark:text-white"
               >
                 {(filterOptions[key] || []).map((option, index) => (
                   <option key={`${key}-${option.label}`} value={option.label}>
@@ -199,7 +200,7 @@ export default function Tables({
             <div className="w-full sm:w-auto">
               <Link
                 href={createLink}
-                className="dark:border-strokedark dark:bg-primary dark:hover:bg-primarydark flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
+                className="dark:border-strokedark dark:bg-primary flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

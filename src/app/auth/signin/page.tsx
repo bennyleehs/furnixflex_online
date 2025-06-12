@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SignIn = () => {
   const [uid, setUid] = useState("");
@@ -10,6 +11,7 @@ const SignIn = () => {
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +31,12 @@ const SignIn = () => {
 
       const data = await response.json();
       if (response.ok) {
+        // Store user data on successful login
+        setUser({
+          uid: data.uid,
+          name: data.name || "User", // Assuming API returns user name or fallback
+        }); 
+
         setMessage(data.message || "Sign-in successful");
         setIsError(false);
         router.push("/");
@@ -53,10 +61,10 @@ const SignIn = () => {
         <div className="w-full max-w-full md:max-w-4xl">
           <div className="flex justify-center p-4 sm:p-8 xl:p-6">
             <Image
-              width={160}
-              height={2}
-              src={"/images/logo/classy_icon.svg"}
-              alt="Logo Classy Pro"
+              src="/images/logo/classy_icon.svg"
+              width={100}
+              height={50}
+              alt="Classy Logo"
             />
           </div>
           <form onSubmit={handleSubmit}>
