@@ -20,9 +20,7 @@ const DropdownUser = () => {
           <span className="block text-sm font-medium text-black dark:text-white">
             {user?.uid || "Not logged in"}
           </span>
-          <span className="block text-xs"> 
-            {user?.name || "Guest User"}
-          </span>
+          <span className="block text-xs">{user?.name || "Guest User"}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
@@ -59,13 +57,19 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
         <div
-          className={`absolute right-0 mt-5 flex w-62.5 flex-col rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}
+          className={`border-stroke shadow-default dark:border-strokedark dark:bg-boxdark absolute right-0 mt-5 flex w-62.5 flex-col rounded-lg border bg-white`}
         >
-          <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+          <span className="border-stroke dark:border-strokedark block items-center gap-3.5 border-b px-6 py-2 duration-300 ease-in-out lg:hidden lg:text-base">
+            <span className="block font-medium text-black dark:text-white">
+              {user?.uid || "Not logged in"}
+            </span>
+            <span className="block text-xs">{user?.name || "Guest User"}</span>
+          </span>
+          <ul className="border-stroke dark:border-strokedark flex flex-col gap-5 border-b px-6 py-7">
             <li>
               <Link
                 href="/profile"
-                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
               >
                 <svg
                   className="fill-current"
@@ -90,7 +94,7 @@ const DropdownUser = () => {
             <li>
               <Link
                 href="/settings"
-                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
               >
                 <svg
                   className="fill-current"

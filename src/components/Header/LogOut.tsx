@@ -3,7 +3,7 @@ export default function LogoutButton() {
     // Call the logout API to clear the authentication token
     await fetch("/api/auth/logout", { method: "POST" });
     // Redirect to login page
-    window.location.href = "/auth1/signin";
+    window.location.href = "/auth/signin";
   }
 
   return (
