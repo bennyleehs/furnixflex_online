@@ -142,7 +142,7 @@ export default function EmployeeDetailPage() {
       formData.append('employeeId', employee.id.toString());
       formData.append('employeeUid', employee.uid);
       
-      // Call API using the new combined endpoint
+      // Call API using the combined endpoint
       const response = await fetch('/api/admin/employee/upload', {
         method: 'POST',
         body: formData
@@ -161,22 +161,7 @@ export default function EmployeeDetailPage() {
         profilePhoto: data.photoUrl
       });
       
-      // When uploading a photo, also update the employee record in the database
-      const updateResponse = await fetch('/api/admin/employee/updatePhoto', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          employeeId: employee.id,
-          photoUrl: data.photoUrl
-        })
-      });
-      
-      if (!updateResponse.ok) {
-        const errorData = await updateResponse.json().catch(() => ({}));
-        throw new Error(`Failed to update employee photo in database: ${errorData.message || updateResponse.statusText}`);
-      }
+      // Removed the separate updatePhoto API call
       
       setSuccessMessage("Profile photo updated successfully");
       setTimeout(() => setSuccessMessage(null), 3000);
