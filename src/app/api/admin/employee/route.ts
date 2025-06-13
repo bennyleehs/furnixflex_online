@@ -70,12 +70,12 @@ export async function PUT(req: NextRequest) {
     }
 
     // Validate required fields
-    if (!data.uid || !data.name) {
-      return NextResponse.json(
-        { message: "UID and name are required fields" },
-        { status: 400 }
-      );
-    }
+    // if (!data.uid || !data.name) {
+    //   return NextResponse.json(
+    //     { message: "UID and name are required fields" },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Create the database connection
     const db = createPool();
@@ -162,6 +162,101 @@ export async function PUT(req: NextRequest) {
     console.error("Error updating employee:", error);
     return NextResponse.json(
       { message: "Failed to update employee", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    // Parse the request body
+    const data = await req.json();
+
+    // Validate required fields
+    if (!data.uid || !data.name) {
+      return NextResponse.json(
+        { message: "UID and name are required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create the database connection
+    const db = createPool();
+
+    // Check if employee with the same UID already exists
+    const [existingEmployees] = await db.query<RowDataPacket[]>(
+      "SELECT id FROM users WHERE uid = ?",
+      [data.uid]
+    );
+
+    if ((existingEmployees as RowDataPacket[]).length > 0) {
+      return NextResponse.json(
+        { message: "An employee with this UID already exists" },
+        { status: 409 }
+      );
+    }
+
+    // Construct the SQL insert statement
+    const sql = `
+      INSERT INTO users (
+        uid, name, nric, phone, email,
+        address_line1, address_line2, city, state, country,
+        bank_name, bank_account, branchRef, branchName, deptName, 
+        roleName, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `;
+
+    // Execute the insert query
+    const [result] = await db.query(sql, [
+      data.uid,
+      data.name,
+      data.nric || null,
+      data.phone || null,
+      data.email || null,
+      data.address_line1 || null,
+      data.address_line2 || null,
+      data.city || null,
+      data.state || null,
+      data.country || null,
+      data.bank_name || null,
+      data.bank_account || null,
+      data.branchRef || null,
+      data.branch || null,
+      data.department || null,
+      data.role || null,
+      data.status || 'Active'
+    ]);
+
+    // Get the inserted employee's ID
+    const resultObj = result as any;
+    const insertedId = resultObj.insertId;
+
+    // Fetch the newly created employee to return
+    const [rows] = await db.query<RowDataPacket[]>(
+      `SELECT
+        id, uid, name, nric,
+        email, phone,
+        address_line1, address_line2, postcode,
+        city, state, country,
+        bank_name, bank_account,
+        branchName, deptName, roleName, 
+        status
+      FROM users
+      WHERE id = ?`,
+      [insertedId]
+    );
+
+    return NextResponse.json(
+      { 
+        message: "Employee created successfully", 
+        employee: rows[0] 
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error creating employee:", error);
+    return NextResponse.json(
+      { message: "Failed to create employee", error: (error as Error).message },
       { status: 500 }
     );
   }

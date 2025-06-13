@@ -68,7 +68,7 @@ export default function EmployeePage() {
     branch: '',
     department: '',
     role: '',
-    status: 'Active',
+    status: '',
   });
   
   // Edit mode state
@@ -126,12 +126,21 @@ export default function EmployeePage() {
   
   // Initial data fetch
   useEffect(() => {
-    if (!hasFetchedData.current) {
+    // Remove the hasFetchedData.current check to allow reloading when page changes
+    fetchEmployees();
+    fetchOptionsData();
+    
+    // Add a router event listener for page changes
+    const handleRouteChange = () => {
       fetchEmployees();
-      fetchOptionsData(); // Add this call
-      hasFetchedData.current = true;
-    }
-  }, []);
+      fetchOptionsData();
+    };
+    
+    // Clean up event listener on component unmount
+    return () => {
+      // If using Next.js Router, you'd clean up the event listener here
+    };
+  }, []); // Keep the empty dependency array
   
   // Handle form input changes
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
@@ -185,7 +194,7 @@ export default function EmployeePage() {
       branch: '',
       department: '',
       role: '',
-      status: 'Active',
+      status: '',
     });
     setCurrentEmployee(null);
     setIsEditMode(false);
@@ -248,46 +257,21 @@ export default function EmployeePage() {
     }
   };
   
-  // Delete employee
-  const deleteEmployee = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this employee?")) {
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const employeeId = id.split(' / ')[0];
-      
-      const response = await fetch(`/api/admin/employee/${employeeId}`, {
-        method: "DELETE",
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to delete employee");
-      }
-      
-      // Refresh employee list
-      fetchEmployees();
-    } catch (err) {
-      setError("Error deleting employee: " + (err instanceof Error ? err.message : String(err)));
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Open modal to edit employee
   const formRef = useRef<HTMLFormElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Modify your openEditModal function to ensure all values are properly initialized
+  // Improved openEditModal function to ensure all data is loaded
   const openEditModal = (employee: Employee) => {
+    // Store the complete employee object for reference
     setCurrentEmployee(employee);
     
-    // Extract the real values from properties
+    // Log the employee data for debugging
     console.log("Opening edit modal for employee:", employee);
     
+    // Extract branch, department and role data with proper fallbacks
     const branchName = employee.branchName || employee.position?.split(' / ')[0] || '';
     const deptName = employee.deptName || employee.position?.split(' / ')[1] || '';
     const roleName = employee.roleName || employee.position?.split(' / ')[2] || '';
@@ -296,9 +280,13 @@ export default function EmployeePage() {
     const branch = branchesData.find(b => b.name === branchName);
     const branchRef = branch?.ref || null;
     
-    console.log("Extracted values:", { branchName, deptName, roleName, branchRef });
+    // Find the department reference that matches the department name
+    const dept = departmentsData.find(d => d.name === deptName);
+    const deptRef = dept?.ref || null;
     
-    // Make sure all form values are defined with empty strings as fallbacks
+    console.log("Extracted values:", { branchName, deptName, roleName, branchRef, deptRef });
+    
+    // Set all form values with proper fallbacks
     setFormData({
       uid: employee.uid || '',
       name: employee.name || '',
@@ -312,13 +300,27 @@ export default function EmployeePage() {
       country: employee.country || '',
       bank_name: employee.bank_name || '',
       bank_account: employee.bank_account || '',
-      branchRef: branchRef || '',
+      branchRef: branchRef || employee.branchRef || '',
       branch: branchName || '',
       department: deptName || '',
       role: roleName || '',
-      status: employee.status || 'Active',
+      status: employee.status || '',
     });
     
+    // Ensure options are available in dropdowns if they're not already in the lists
+    if (branchName && !branchOptions.includes(branchName)) {
+      setBranchOptions([...branchOptions, branchName]);
+    }
+    
+    if (deptName && !departmentOptions.includes(deptName)) {
+      setDepartmentOptions([...departmentOptions, deptName]);
+    }
+    
+    if (roleName && !roleOptions.includes(roleName)) {
+      setRoleOptions([...roleOptions, roleName]);
+    }
+    
+    // Enable edit mode and open the modal
     setIsEditMode(true);
     setIsModalOpen(true);
     
@@ -329,11 +331,11 @@ export default function EmployeePage() {
         formRef.current.scrollTop = 0;
       }
       
-      // Since UID is disabled in edit mode, focus on the name field instead
+      // Focus on the name field
       if (nameInputRef.current) {
         nameInputRef.current.focus();
       }
-    }, 150); // Slightly longer timeout to ensure DOM is ready
+    }, 150);
   };
 
   // Update employee
@@ -394,6 +396,92 @@ export default function EmployeePage() {
       setError(errorMessage);
       console.error("Update employee error:", err);
     } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add this function to mark an employee as history (reuses edit logic)
+  const markAsHistory = (employee: Employee) => {
+    if (!confirm("Are you sure you want to mark this employee as history?")) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Extract the real values just like in openEditModal
+      const branchName = employee.branchName || employee.position?.split(' / ')[0] || '';
+      const deptName = employee.deptName || employee.position?.split(' / ')[1] || '';
+      const roleName = employee.roleName || employee.position?.split(' / ')[2] || '';
+      
+      // Find the branch reference that matches the branch name
+      const branch = branchesData.find(b => b.name === branchName);
+      const branchRef = branch?.ref || null;
+      
+      // Set up form data with all existing values
+      const historyFormData = {
+        uid: employee.uid || '',
+        name: employee.name || '',
+        nric: employee.nric || '',
+        phone: employee.phone || '',
+        email: employee.email || '',
+        address_line1: employee.address_line1 || '',
+        address_line2: employee.address_line2 || '',
+        city: employee.city || '',
+        state: employee.state || '',
+        country: employee.country || '',
+        bank_name: employee.bank_name || '',
+        bank_account: employee.bank_account || '',
+        branchRef: branchRef || '',
+        branch: branchName || '',
+        department: deptName || '',
+        role: roleName || '',
+        status: 'History' // Set status to History
+      };
+      
+      // Use the existing update API endpoint
+      const employeeId = employee.id.split(' / ')[0];
+      
+      // Map form fields to match database column names (similar to updateEmployee)
+      const mappedData = {
+        ...historyFormData,
+        branchRef: historyFormData.branchRef,
+        branchName: historyFormData.branch,
+        deptName: historyFormData.department,
+        roleName: historyFormData.role
+      };
+      
+      // Call API to update employee status
+      fetch(`/api/admin/employee?id=${employeeId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mappedData),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.message || "Failed to mark employee as history");
+        }
+        
+        // Refresh employee list
+        fetchEmployees();
+        setError(null);
+      })
+      .catch(err => {
+        setError("Error marking employee as history: " + 
+          (err instanceof Error ? err.message : String(err)));
+        console.error(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+      
+    } catch (err) {
+      setError("Error preparing data: " + 
+        (err instanceof Error ? err.message : String(err)));
+      console.error(err);
       setLoading(false);
     }
   };
@@ -495,9 +583,19 @@ export default function EmployeePage() {
       setDepartmentsData(deptData.listDepartment || []);
       
       // Set the options arrays for dropdowns
-      setBranchOptions(branchData.listBranch.map((item: any) => item.name).filter(Boolean));
-      setDepartmentOptions(deptData.listDepartment.map((item: any) => item.name).filter(Boolean));
-      setRoleOptions(roleData.listRole.map((item: any) => item.name).filter(Boolean));
+      const branchOptions = branchData.listBranch.map((item: any) => item.name).filter(Boolean);
+      const deptOptions = deptData.listDepartment.map((item: any) => item.name).filter(Boolean);
+      const roleOptions = roleData.listRole.map((item: any) => item.name).filter(Boolean);
+      
+      setBranchOptions(branchOptions);
+      setDepartmentOptions(deptOptions);
+      setRoleOptions(roleOptions);
+      
+      console.log("Filter options loaded:", { 
+        branches: branchOptions.length, 
+        departments: deptOptions.length, 
+        roles: roleOptions.length 
+      });
     } catch (err) {
       console.error("Error fetching dropdown options:", err);
     }
@@ -733,7 +831,8 @@ export default function EmployeePage() {
                     >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
-                      <option value="Suspended">Suspended</option>
+                      {/* <option value="Suspended">Suspended</option> */}
+                      <option value="History">History</option>
                     </select>
                   </div>
                 </div>
@@ -961,12 +1060,11 @@ export default function EmployeePage() {
                   className="w-full rounded-lg border border-stroke bg-white dark:bg-boxdark py-2 px-4 outline-none focus:border-primary focus-visible:shadow-none dark:border-strokedark dark:text-white text-sm"
                 >
                   <option value="">All Branches</option>
-                  {employees
-                    .map(emp => emp.branchName)
-                    .filter((v, i, a) => v && a.indexOf(v) === i)
+                  {/* Use the branchOptions state directly instead of deriving from employees */}
+                  {branchOptions
                     .sort()
                     .map((branch, index) => (
-                      <option key={`branch-${index}`} value={branch}>{branch}</option>
+                      <option key={`branch-filter-${index}`} value={branch}>{branch}</option>
                     ))
                   }
                 </select>
@@ -1124,9 +1222,9 @@ export default function EmployeePage() {
                             
                             {/* Delete Button */}
                             <button
-                              onClick={() => deleteEmployee(employee.id)}
+                              onClick={() => markAsHistory(employee)}
                               className="text-danger hover:text-red-700"
-                              title="Delete employee"
+                              title="Mark as history"
                               disabled={!canDelete(MENU, SUBMENU)}
                             >
                               <svg
