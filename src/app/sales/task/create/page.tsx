@@ -190,7 +190,7 @@ export default function Page() {
         valueKey: "source",
         options: [
           { value: "FB", label: "FB" },
-          { value: "TicTok", label: "TicTok" },
+          { value: "TikTok", label: "TikTok" },
           { value: "小红书", label: "小红书" },
           { value: "Website", label: "Website" },
           { value: "Walk-in", label: "Walk-in" },

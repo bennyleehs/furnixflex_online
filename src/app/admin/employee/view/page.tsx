@@ -50,7 +50,8 @@ export default function EmployeeDetailPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -442,9 +443,15 @@ export default function EmployeeDetailPage() {
   //   }
   // };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  // const toggleNewPwdVisibility = () => {
+  //   setShowNewPwd(!showNewPwd);
+  // };
+  // const toggleConfirmPwdVisibility = () => {
+  //   setShowConfirmPwd(!showConfirmPwd);
+  // };
+
+  const toggleNewPwdVisibility = () => setShowNewPwd((prev) => !prev);
+  const toggleConfirmPwdVisibility = () => setShowConfirmPwd((prev) => !prev);
 
   // Enhanced handleChangePassword function for your page.tsx
   const handleChangePassword = async () => {
@@ -717,12 +724,12 @@ export default function EmployeeDetailPage() {
                       <span>
                         Status:
                         <span
-                          className={`ml-1 font-medium ${
+                          className={`ml-1 rounded-full px-2 py-1 font-medium ${
                             employee.status === "Active"
-                              ? "text-success"
+                              ? "text-success dark:bg-success/60 bg-green-200/60 dark:text-green-100"
                               : employee.status === "Inactive"
-                                ? "text-warning"
-                                : "text-danger"
+                                ? "text-warning bg-warning/20 dark:bg-warning/60 dark:text-yellow-100"
+                                : "text-danger bg-danger/20 dark:bg-danger/60 dark:text-red-200"
                           }`}
                         >
                           {employee.status}
@@ -761,12 +768,12 @@ export default function EmployeeDetailPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-start space-x-2">
+                  <div className="flex items-start place-content-evenly space-x-2">
                     <button
                       onClick={() =>
                         router.push(`/admin/employee/edit?id=${employee.id}`)
                       }
-                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:text-white dark:hover:text-white"
+                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:px-4 dark:text-white dark:hover:text-white"
                     >
                       <svg
                         className="mr-2 h-4 w-4"
@@ -786,7 +793,7 @@ export default function EmployeeDetailPage() {
 
                     <button
                       onClick={() => setIsChangePasswordModalOpen(true)}
-                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:text-white dark:hover:text-white"
+                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:px-4 dark:text-white dark:hover:text-white"
                     >
                       <svg
                         className="mr-2 h-4 w-4"
@@ -817,7 +824,7 @@ export default function EmployeeDetailPage() {
                           onClick={() => handleTabChange("details")}
                           className={`inline-block border-b-2 px-4 py-2 font-medium ${
                             activeTab === "details"
-                              ? "dark:border-primary dark:text-primary border-blue-600 text-blue-600"
+                              ? "border-primary text-primary"
                               : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                           }`}
                         >
@@ -829,7 +836,7 @@ export default function EmployeeDetailPage() {
                           onClick={() => handleTabChange("documents")}
                           className={`inline-block border-b-2 px-4 py-2 font-medium ${
                             activeTab === "documents"
-                              ? "dark:border-primary dark:text-primary border-blue-600 text-blue-600"
+                              ? "border-primary text-primary"
                               : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                           }`}
                         >
@@ -986,7 +993,7 @@ export default function EmployeeDetailPage() {
 
                     <button
                       onClick={handleDocumentUpload}
-                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:text-white dark:hover:text-white"
+                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:px-4 dark:text-white dark:hover:text-white"
                       disabled={uploading}
                     >
                       {uploading ? (
@@ -1230,7 +1237,7 @@ export default function EmployeeDetailPage() {
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? "text" : "password"} // Use state for type
+                    type={showNewPwd ? "text" : "password"} // Use state for type
                     id="newPassword"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -1239,9 +1246,9 @@ export default function EmployeeDetailPage() {
                   />
                   <span
                     className="absolute top-2 right-3 cursor-pointer"
-                    onClick={togglePasswordVisibility}
+                    onClick={toggleNewPwdVisibility}
                   >
-                    {showPassword ? (
+                    {showNewPwd ? (
                       // "eye closed"
                       <svg
                         width="22"
@@ -1283,7 +1290,7 @@ export default function EmployeeDetailPage() {
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? "text" : "password"} // Use state for type
+                    type={showConfirmPwd ? "text" : "password"} // Use state for type
                     id="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -1292,9 +1299,9 @@ export default function EmployeeDetailPage() {
                   />
                   <span
                     className="absolute top-2 right-3 cursor-pointer"
-                    onClick={togglePasswordVisibility}
+                    onClick={toggleConfirmPwdVisibility}
                   >
-                    {showPassword ? (
+                    {showConfirmPwd ? (
                       // "eye closed"
                       <svg
                         width="22"
