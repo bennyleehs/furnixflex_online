@@ -72,7 +72,11 @@
     "2.0.2"
   ],
   "JB.TECHNOLOGY.Assistant Manager": [],
-  "JB.TECHNOLOGY.Chief Officer": [],
+  "JB.TECHNOLOGY.Chief Officer": [
+    "1.0.1",
+    "4.0.1",
+    "5.0.1"
+  ],
   "JB.TECHNOLOGY.Director": [],
   "JB.TECHNOLOGY.Manager": [],
   "JB.TECHNOLOGY.Managing Director": [],
@@ -348,7 +352,9 @@
   "SK.SALES.Staff": [],
   "SK.SALES.Supervisor": [],
   "SK.TECHNOLOGY.Assistant Manager": [],
-  "SK.TECHNOLOGY.Chief Officer": [],
+  "SK.TECHNOLOGY.Chief Officer": [
+    "1.0.4"
+  ],
   "SK.TECHNOLOGY.Director": [],
   "SK.TECHNOLOGY.Manager": [],
   "SK.TECHNOLOGY.Managing Director": [],

@@ -41,6 +41,14 @@ export default function QuotationListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalQuotations, setTotalQuotations] = useState(0);
 
+  // Edit modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(
+    null,
+  );
+  const [isLoadingQuotation, setIsLoadingQuotation] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
   // Fetch quotations with filters
   const fetchQuotations = useCallback(async () => {
     setLoading(true);
@@ -150,6 +158,67 @@ export default function QuotationListPage() {
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Function to fetch and open the edit modal
+  const handleEditQuotation = async (quotationId: string) => {
+    setIsLoadingQuotation(true);
+    setUpdateError(null);
+
+    try {
+      const response = await fetch(`/api/sales/quotation?id=${quotationId}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch quotation");
+      }
+
+      const data = await response.json();
+      setEditingQuotation(data.quotation);
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching quotation:", error);
+      setUpdateError(
+        error instanceof Error ? error.message : "Failed to load quotation",
+      );
+    } finally {
+      setIsLoadingQuotation(false);
+    }
+  };
+
+  // Function to update the quotation
+  const handleUpdateQuotation = async (formData: any) => {
+    setIsLoadingQuotation(true);
+    setUpdateError(null);
+
+    try {
+      const response = await fetch(
+        `/api/sales/quotation?id=${editingQuotation?.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update quotation");
+      }
+
+      // Close modal and refresh quotation list
+      setIsEditModalOpen(false);
+      fetchQuotations(); // Assuming you have a function to refresh the list
+    } catch (error) {
+      console.error("Error updating quotation:", error);
+      setUpdateError(
+        error instanceof Error ? error.message : "Failed to update quotation",
+      );
+    } finally {
+      setIsLoadingQuotation(false);
     }
   };
 
@@ -375,8 +444,8 @@ export default function QuotationListPage() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3.5">
-                        <Link
-                          href={`/sales/quotation?id=${quotation.id}`}
+                        <button
+                          onClick={() => handleEditQuotation(quotation.id)}
                           className="text-primary hover:text-primary/80"
                           title="Edit quotation"
                         >
@@ -393,7 +462,7 @@ export default function QuotationListPage() {
                               d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                             ></path>
                           </svg>
-                        </Link>
+                        </button>
                         <button
                           onClick={() =>
                             router.push(
@@ -589,6 +658,86 @@ export default function QuotationListPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Quotation Modal */}
+      {isEditModalOpen && editingQuotation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
+          <div className="w-full max-w-4xl bg-white dark:bg-boxdark rounded-sm shadow-lg p-6 mx-4">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold text-black dark:text-white">
+                Edit Quotation #{editingQuotation.quotation_number}
+              </h3>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {updateError && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {updateError}
+              </div>
+            )}
+
+            <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+              {/* You can either implement a full form here or use an iframe */}
+              {/* Option 1: iframe approach */}
+              <iframe
+                src={`/sales/quotation/auto?id=${editingQuotation.id}&modal=true`}
+                className="w-full h-[calc(100vh-200px)] border-none"
+              />
+
+              {/* Option 2: Direct form implementation 
+        <form id="editQuotationForm" onSubmit={(e) => {
+          e.preventDefault();
+          // Get form data and call handleUpdateQuotation
+        }}>
+          ... form fields ...
+        </form>
+        */}
+            </div>
+
+            <div className="flex justify-end mt-6 space-x-3">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 dark:bg-meta-4 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-meta-3"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="editQuotationForm" // Match this to your form's id if using Option 2
+                className="px-4 py-2 bg-primary rounded-md text-white hover:bg-primary/90"
+                disabled={isLoadingQuotation}
+              >
+                {isLoadingQuotation ? (
+                  <>
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></span>
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DefaultLayout>
   );
 }

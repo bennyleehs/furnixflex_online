@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Path to task directory
-    const taskDir = path.join(process.cwd(), 'src', 'data', 'sales', 'task', taskId);
+    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
     
     // Check if directory exists, create it if it doesn't
     if (!fs.existsSync(taskDir)) {

@@ -1,6 +1,7 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -132,6 +133,42 @@ export async function GET(request: NextRequest) {
         status: 500,
         headers: { "Content-Type": "application/json" },
       }
+    );
+  }
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: { taskId: string } }
+) {
+  const taskId = params.taskId;
+  
+  try {
+    // Handle file upload for the specific task
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+    
+    // Process the file upload
+    // ...file processing logic...
+    
+    return NextResponse.json({ 
+      success: true,
+      message: 'File uploaded successfully',
+      taskId
+    });
+    
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    return NextResponse.json(
+      { error: 'Failed to upload file' },
+      { status: 500 }
     );
   }
 }

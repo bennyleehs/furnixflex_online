@@ -445,8 +445,8 @@ export default function QuotationPage() {
   const saveQuotation = async (status: "draft" | "sent" = "draft") => {
     if (!taskId) return;
 
-    // const subtotal = calculateSubtotal();
-    // const total = calculateTotal();
+    const subtotal = calculateSubtotal();
+    const total = calculateTotal();
 
     try {
       // First, check if a quotation exists for this task ID in the database
@@ -515,9 +515,9 @@ export default function QuotationPage() {
           salesUID: quotation?.salesUID || task?.sales_uid || "",
           items,
           subtotal,
-          discount: products.discount || 0, // Use product discount if available
+          discount: 0,
           tax,
-          total: grandTotal,
+          total,
           notes,
           terms,
           status,
@@ -584,9 +584,9 @@ export default function QuotationPage() {
           salesUID: quotation?.salesUID || task?.sales_uid || "",
           items,
           subtotal,
-          discount: products.discount || 0, // Use product discount if available
+          discount: 0,
           tax,
-          total: grandTotal,
+          total,
           notes,
           terms,
           status,
@@ -710,33 +710,6 @@ export default function QuotationPage() {
       `- Products in lookup for this category/subcategory: ${productsByCategory.length}`,
     );
   };
-
-// Add this utility function
-const formatWithCommas = (value: number | string): string => {
-  // Convert to number if it's a string
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  
-  // Handle NaN and null values
-  if (isNaN(num) || num === null) return '0.00';
-  
-  // Format with 2 decimal places
-  const formattedValue = num.toFixed(2);
-  
-  // Only add commas if the number is 1000 or greater
-  if (num >= 1000) {
-    // Split into integer and decimal parts
-    const parts = formattedValue.split('.');
-    
-    // Add commas to the integer part
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    
-    // Join with the decimal part
-    return parts.join('.');
-  }
-  
-  // For numbers less than 1000, just return with 2 decimal places
-  return formattedValue;
-};
 
   // Add this useEffect to calculate total discount
   useEffect(() => {
@@ -1664,8 +1637,7 @@ const formatWithCommas = (value: number | string): string => {
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
-
-                      {/* <td className="px-3 py-2">
+                      <td className="px-3 py-2">
                         <input
                           type="number"
                           value={
@@ -1682,39 +1654,10 @@ const formatWithCommas = (value: number | string): string => {
                           step="0.01"
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
-                      </td> */}
-
-                      {/* Unit Price Column */}
-                      <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={item.unitPrice ? formatWithCommas(item.unitPrice) : ""}
-                          onFocus={(e) => {
-                            // When focused, show raw number for editing
-                            e.target.value = item.unitPrice?.toString() || "";
-                          }}
-                          onBlur={(e) => {
-                            // When blurred, update with formatted value
-                            const rawValue = e.target.value.replace(/[^0-9.]/g, "");
-                            e.target.value = formatWithCommas(rawValue);
-                          }}
-                          onChange={(e) => {
-                            // Remove any non-numeric characters except decimal point
-                            const value = e.target.value.replace(/[^0-9.]/g, "");
-                            updateItem(item.id, "unitPrice", value);
-                            
-                            // Update total based on quantity and unit price
-                            const quantity = Number(item.quantity) || 0;
-                            const unitPrice = Number(value) || 0;
-                            updateItem(item.id, "total", quantity * unitPrice);
-                          }}
-                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
-                        />
-                      </td>                      
-
+                      </td>
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
-                          {formatWithCommas(item.total)||0}
+                          {parseFloat(String(item.total || 0)).toFixed(2)}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-center">
@@ -1809,10 +1752,10 @@ const formatWithCommas = (value: number | string): string => {
             <div className="mt-8 border-t border-gray-200 pt-4">
               <h3 className="text-lg font-medium mb-3">Summary</h3>
               <div className="flex justify-end">
-                <div className="w-3/3">
+                <div className="w-1/3">
                   <div className="flex justify-between border-b border-gray-200 py-1">
                     <span>Subtotal:</span>
-                    <span>RM {formatWithCommas(subtotal)}</span>
+                    <span>RM {subtotal.toFixed(2)}</span>
                   </div>
                   
                   {/* Discount Row */}
@@ -1831,8 +1774,8 @@ const formatWithCommas = (value: number | string): string => {
                   
                   {/* Grand Total */}
                   <div className="flex justify-between py-2 font-bold">
-                    <span>Grand Total:</span>
-                    <span>RM {formatWithCommas(grandTotal)}</span>
+                    <span>Total:</span>
+                    <span>RM {grandTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -31,11 +31,12 @@ export interface Task {
 export interface Product {
   id: string;
   name: string;
+  description: string;
   price: number;
   unit: string;
-  description?: string;
-  category: string;
-  subcategory: string;
+  discount?: number; // Add this property (optional if not all products have a discount)
+  category?: string;
+  subcategory?: string;
 }
 
 // Quotation item interface

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
-import { createPool } from '@/lib/db'; // Import your database connection
 
 // Clear interface definition for EventLog
 interface EventLog {
@@ -20,7 +19,7 @@ interface EventLog {
 async function saveEventLog(taskId: string, log: EventLog) {
   try {
     // Create directory structure if it doesn't exist
-    const taskDir = path.join(process.cwd(), 'src', 'data', 'sales', 'task', taskId);
+    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
     await fs.mkdir(taskDir, { recursive: true });
     
     // Define log file path
@@ -67,7 +66,7 @@ async function saveEventLog(taskId: string, log: EventLog) {
 // Handle file upload
 async function saveFile(taskId: string, file: File) {
   try {
-    const taskDir = path.join(process.cwd(), 'src', 'data', 'sales', 'task', taskId);
+    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
     await fs.mkdir(taskDir, { recursive: true });
     
     // Ensure filename is unique
@@ -197,7 +196,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Path to task directory
-    const taskDir = path.join(process.cwd(), 'src', 'data', 'sales', 'task', taskId);
+    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
     
     // Define log file path
     const logFilePath = path.join(taskDir, `${taskId}log.txt`);
@@ -224,25 +223,25 @@ export async function GET(request: NextRequest) {
 }
 
 // Add function to update task status in database
-async function updateTaskInDatabase(taskId: string, newStatus: string) {
-  try {
-    const conn = createPool();
+// async function updateTaskInDatabase(taskId: string, newStatus: string) {
+//   try {
+//     const conn = createPool();
     
-    // Update the task status in the customer1 table
-    const [result] = await conn.execute(
-      'UPDATE customers SET status = ? WHERE id = ?',
-      [newStatus, taskId]
-    );
+//     // Update the task status in the customer1 table
+//     const [result] = await conn.execute(
+//       'UPDATE customers SET status = ? WHERE id = ?',
+//       [newStatus, taskId]
+//     );
     
-    // Log for debugging
-    console.log(`Database updated: Task #${taskId} status set to "${newStatus}"`);
+//     // Log for debugging
+//     console.log(`Database updated: Task #${taskId} status set to "${newStatus}"`);
     
-    return true;
-  } catch (error) {
-    console.error('Error updating database:', error);
-    throw new Error('Failed to update task status in database');
-  }
-}
+//     return true;
+//   } catch (error) {
+//     console.error('Error updating database:', error);
+//     throw new Error('Failed to update task status in database');
+//   }
+// }
 
 // POST handler for task updates and file uploads
 export async function POST(request: NextRequest) {
@@ -262,10 +261,10 @@ export async function POST(request: NextRequest) {
     console.log(`Updating task ${taskId} from ${oldStatus} to ${newStatus}`);
     
     // Only update database if status actually changed
-    if (newStatus !== oldStatus) {
-      // Update database first to ensure data consistency
-      await updateTaskInDatabase(taskId, newStatus);
-    }
+    // if (newStatus !== oldStatus) {
+    //   // Update database first to ensure data consistency
+    //   await updateTaskInDatabase(taskId, newStatus);
+    // }
     
     // Process file uploads - completely separate from notes
     const uploadedFiles = [];

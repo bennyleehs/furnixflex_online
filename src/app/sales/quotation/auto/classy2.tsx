@@ -40,24 +40,15 @@ export default function QuotationPage() {
   const [terms, setTerms] = useState(
     "1. This quotation is valid for 14 days from the date of issue.\n2. 50% deposit required to confirm order.\n3. Balance payment due upon completion.",
   );
-  // const [discount, setDiscount] = useState(0);
+  const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [validDays, setValidDays] = useState(14);
   const [editingCustomer, setEditingCustomer] = useState(false);
 
-  // Add state variables for calculations
-  const [subtotal, setSubtotal] = useState<number>(0);
-  const [taxAmount, setTaxAmount] = useState<number>(8);
-  const [grandTotal, setGrandTotal] = useState<number>(0);
-  const [taxLabel, setTaxLabel] = useState<string>("SST"); // Default tax label
-
-  // Add this with your other state variables
-  const [totalDiscount, setTotalDiscount] = useState<number>(0);
-
   // Add a state for the quotation number
   const [generatedQuotationNumber, setGeneratedQuotationNumber] =
     useState<string>("");
-    
+
   // Categories and products state
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<Record<string, string[]>>(
@@ -246,76 +237,78 @@ export default function QuotationPage() {
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
-        console.log("Raw API response:", data);
 
-        // Set categories and subcategories directly from API
-        setCategories(data.categories || []);
-        setSubcategories(data.subcategories || {});
+        // Debug the structure
+        console.log("API response categories:", data.categories);
 
-        // Create a properly structured products object
-        const productsStructure: Record<string, Record<string, Product[]>> = {};
-        
-        // Initialize the structure with all categories and subcategories
-        (data.categories || []).forEach((category: string) => {
-          productsStructure[category] = {};
-          
-          // Add all subcategories for this category
-          if (data.subcategories && data.subcategories[category]) {
-            data.subcategories[category].forEach((subcategory: string) => {
-              productsStructure[category][subcategory] = [];
-            });
+        // Clean up categories by trimming whitespace
+        const cleanCategories = (data.categories || []).map((c: string) =>
+          c.trim(),
+        );
+
+        // Organize data by category and subcategory
+        setCategories(cleanCategories);
+
+        // Clean up subcategories
+        const cleanSubcategories: Record<string, string[]> = {};
+        Object.keys(data.subcategories || {}).forEach((category) => {
+          const cleanCategory = category.trim();
+          // Make sure we're not storing empty arrays
+          const categorySubcats = (
+            (data.subcategories as Record<string, string[]>)[category] || []
+          )
+            .map((s) => s.trim())
+            .filter((s) => s); // Filter out empty strings
+
+          if (categorySubcats.length > 0) {
+            cleanSubcategories[cleanCategory] = categorySubcats;
           }
         });
-        
-        // Populate with products from allProducts array
-        data.allProducts.forEach((product: any) => {
-          const category = product.category;
-          const subcategory = product.subcategory;
-          
-          // Ensure the category and subcategory arrays exist
-          if (!productsStructure[category]) {
-            productsStructure[category] = {};
-          }
-          
-          if (!productsStructure[category][subcategory]) {
-            productsStructure[category][subcategory] = [];
-          }
-          
-          // Add the product to the appropriate category and subcategory
-          productsStructure[category][subcategory].push({
-            id: String(product.id),
-            name: product.name,
-            description: product.description || "",
-            price: product.price,
-            unit: product.unit,
-            discount: product.discount || 0,
-            // Add any other necessary properties
+        console.log("Processed subcategories:", cleanSubcategories);
+        setSubcategories(cleanSubcategories);
+
+        // Clean up products
+        const cleanProducts: Record<string, Record<string, Product[]>> = {};
+        Object.keys(data.products || {}).forEach((category) => {
+          const cleanCategory = category.trim();
+          cleanProducts[cleanCategory] = {};
+
+          Object.keys(data.products[category] || {}).forEach((subcategory) => {
+            const cleanSubcategory = subcategory.trim();
+            cleanProducts[cleanCategory][cleanSubcategory] =
+              data.products[category][subcategory];
           });
         });
-        
-        console.log("Structured products:", productsStructure);
-        setProducts(productsStructure);
+        setProducts(cleanProducts);
 
-        // Build product lookup for quick reference
-        const productMap: Record<string, Product> = {};
-        data.allProducts.forEach((product: any) => {
-          productMap[String(product.id)] = {
-            id: String(product.id),
-            name: product.name,
-            description: product.description || "",
-            price: product.price,
-            unit: product.unit,
-            discount: product.discount || 0,
-            category: product.category,
-            subcategory: product.subcategory,
-            // Add any other necessary properties
-          };
+        // Cache product data for quick lookup with clean keys
+        const productMap: Record<
+          string,
+          Product & { category: string; subcategory: string }
+        > = {};
+        Object.keys(data.products || {}).forEach((category) => {
+          const cleanCategory = category.trim();
+          Object.keys(data.products[category] || {}).forEach((subcategory) => {
+            const cleanSubcategory = subcategory.trim();
+            (data.products[category][subcategory] || []).forEach(
+              (product: Product) => {
+                // Always store product IDs as strings
+                productMap[String(product.id)] = {
+                  ...product,
+                  id: String(product.id), // Ensure ID is string in the product object too
+                  category: cleanCategory,
+                  subcategory: cleanSubcategory,
+                };
+              },
+            );
+          });
         });
         setProductLookup(productMap);
-        
       } catch (error) {
         console.error("Error fetching products:", error);
-        setProductsError("Failed to load products from database. Please refresh and try again.");
+        setProductsError(
+          "Failed to load products from database. Please refresh and try again.",
+        );
       } finally {
         setLoadingProducts(false);
       }
@@ -323,18 +316,6 @@ export default function QuotationPage() {
 
     fetchProducts();
   }, []);
-
-  // Enhanced logging for subcategories
-  useEffect(() => {
-    if (Object.keys(subcategories).length > 0) {
-      console.log("Subcategories data loaded:");
-      Object.keys(subcategories).forEach((cat) => {
-        console.log(
-          `  - ${cat}: ${subcategories[cat]?.length || 0} subcategories`,
-        );
-      });
-    }
-  }, [subcategories]);
 
   // Add a useEffect to log product categories and subcategories
   useEffect(() => {
@@ -347,6 +328,18 @@ export default function QuotationPage() {
         : "No categories",
     );
   }, [products]);
+
+  // Enhanced logging for subcategories
+  useEffect(() => {
+    if (Object.keys(subcategories).length > 0) {
+      console.log("Subcategories data loaded:");
+      Object.keys(subcategories).forEach((cat) => {
+        console.log(
+          `  - ${cat}: ${subcategories[cat]?.length || 0} subcategories`,
+        );
+      });
+    }
+  }, [subcategories]);
 
   // Add a new item to the quotation
   const addItem = () => {
@@ -365,33 +358,6 @@ export default function QuotationPage() {
         note: "",
       },
     ]);
-  };
-
-  // Add a new item after the specified item
-  const addItemAfter = (id: string) => {
-    const index = items.findIndex(item => item.id === id);
-    if (index === -1) return;
-    
-    const newItem: QuotationItem = {
-      id: crypto.randomUUID(),
-      category: "",
-      subcategory: "",
-      productId: "",
-      description: "",
-      quantity: 1,
-      unit: "unit",
-      unitPrice: 0,
-      total: 0,
-      note: "",
-    };
-    
-    const newItems = [
-      ...items.slice(0, index + 1),
-      newItem,
-      ...items.slice(index + 1)
-    ];
-    
-    setItems(newItems);
   };
 
   // Remove an item from the quotation
@@ -424,29 +390,29 @@ export default function QuotationPage() {
   };
 
   // Update the calculateSubtotal function
-  // const calculateSubtotal = () => {
-  //   return items.reduce((sum, item) => {
-  //     // Ensure item.total is treated as a number
-  //     const itemTotal = parseFloat(item.total as any) || 0;
-  //     return sum + itemTotal;
-  //   }, 0);
-  // };
+  const calculateSubtotal = () => {
+    return items.reduce((sum, item) => {
+      // Ensure item.total is treated as a number
+      const itemTotal = parseFloat(item.total as any) || 0;
+      return sum + itemTotal;
+    }, 0);
+  };
 
   // Update the calculateTotal function
-  // const calculateTotal = () => {
-  //   const subtotal = calculateSubtotal();
-  //   // Remove discount calculation - no longer needed
-  //   const taxAmount = (subtotal * (parseFloat(tax as any) || 0)) / 100;
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    // Remove discount calculation - no longer needed
+    const taxAmount = (subtotal * (parseFloat(tax as any) || 0)) / 100;
 
-  //   return subtotal + taxAmount;
-  // };
+    return subtotal + taxAmount;
+  };
 
   // Save quotation
   const saveQuotation = async (status: "draft" | "sent" = "draft") => {
     if (!taskId) return;
 
-    // const subtotal = calculateSubtotal();
-    // const total = calculateTotal();
+    const subtotal = calculateSubtotal();
+    const total = calculateTotal();
 
     try {
       // First, check if a quotation exists for this task ID in the database
@@ -515,9 +481,9 @@ export default function QuotationPage() {
           salesUID: quotation?.salesUID || task?.sales_uid || "",
           items,
           subtotal,
-          discount: products.discount || 0, // Use product discount if available
+          discount: 0,
           tax,
-          total: grandTotal,
+          total,
           notes,
           terms,
           status,
@@ -584,9 +550,9 @@ export default function QuotationPage() {
           salesUID: quotation?.salesUID || task?.sales_uid || "",
           items,
           subtotal,
-          discount: products.discount || 0, // Use product discount if available
+          discount: 0,
           tax,
-          total: grandTotal,
+          total,
           notes,
           terms,
           status,
@@ -710,67 +676,6 @@ export default function QuotationPage() {
       `- Products in lookup for this category/subcategory: ${productsByCategory.length}`,
     );
   };
-
-// Add this utility function
-const formatWithCommas = (value: number | string): string => {
-  // Convert to number if it's a string
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  
-  // Handle NaN and null values
-  if (isNaN(num) || num === null) return '0.00';
-  
-  // Format with 2 decimal places
-  const formattedValue = num.toFixed(2);
-  
-  // Only add commas if the number is 1000 or greater
-  if (num >= 1000) {
-    // Split into integer and decimal parts
-    const parts = formattedValue.split('.');
-    
-    // Add commas to the integer part
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    
-    // Join with the decimal part
-    return parts.join('.');
-  }
-  
-  // For numbers less than 1000, just return with 2 decimal places
-  return formattedValue;
-};
-
-  // Add this useEffect to calculate total discount
-  useEffect(() => {
-    // Calculate subtotal and discount
-    let subtotal = 0;
-    let discount = 0;
-    
-    items.forEach(item => {
-      subtotal += Number(item.total) || 0;
-      
-      // Calculate item discount if applicable
-      if (item.productId && productLookup[item.productId]) {
-        const product = productLookup[item.productId];
-        if (product.discount && product.discount > 0) {
-          // Calculate discount amount based on item total and discount percentage
-          // const itemDiscount = (Number(item.total) || 0) * (product.discount / 100);
-          // discount += itemDiscount;
-          discount += product.discount;
-        }
-      }
-    });
-    
-    setSubtotal(subtotal);
-    setTotalDiscount(discount);
-    
-  // If subtotal is 0, set grand total to 0 regardless of other calculations
-  if (subtotal === 0) {
-    setGrandTotal(0);
-  } else {
-    // Otherwise calculate normally: subtotal - discount + tax
-    const finalAmount = subtotal - discount + (taxAmount || 0);
-    setGrandTotal(finalAmount);
-  }
-  }, [items, productLookup, taxAmount]);
 
   if (loading) {
     return (
@@ -1475,7 +1380,7 @@ const formatWithCommas = (value: number | string): string => {
                     </th>
                     {/* Remove the discount column header */}
                     <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Amount
+                      Total
                     </th>
                     <th className="w-10 px-3 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase"></th>
                   </tr>
@@ -1587,44 +1492,108 @@ const formatWithCommas = (value: number | string): string => {
 
                           {/* Product Dropdown - Fixed Version */}
                           <select
-                            value={String(item.productId || "")}
+                            value={item.productId || ""}
                             onChange={(e) => {
-                              e.stopPropagation(); // Prevent event bubbling
+                              e.stopPropagation();
                               const productId = e.target.value;
-                              console.log("Product selected:", productId);
-                              
-                              // Create a complete updated item to avoid multiple state updates
+                              console.log("Selected product ID:", productId);
+
+                              // Update all product-related fields in one atomic operation
                               const updatedItem = { ...item, productId };
-                              
-                              if (productId && productLookup[productId]) {
-                                const product = productLookup[productId];
-                                console.log("Found product in lookup:", product);
-                                
-                                // Update all relevant fields at once
-                                updatedItem.description = product.name || "";
-                                updatedItem.unitPrice = product.price || 0;
-                                updatedItem.unit = product.unit || "unit";
-                                
-                                // Calculate total
-                                const quantity = Number(updatedItem.quantity) || 1;
-                                updatedItem.total = quantity * updatedItem.unitPrice;
+
+                              // If a product is selected, populate other fields
+                              if (
+                                productId &&
+                                item.category &&
+                                item.subcategory
+                              ) {
+                                console.log(
+                                  "Looking for product in:",
+                                  item.category,
+                                  item.subcategory,
+                                  "Available products:",
+                                  products[item.category]?.[item.subcategory]
+                                    ?.length || 0,
+                                );
+
+                                // First try finding the product in the specified category/subcategory
+                                let selectedProduct = products[item.category]?.[
+                                  item.subcategory
+                                ]?.find(
+                                  (p) => String(p.id) === String(productId),
+                                );
+
+                                // If not found, try the lookup cache as fallback
+                                if (
+                                  !selectedProduct &&
+                                  productLookup[productId]
+                                ) {
+                                  selectedProduct = productLookup[productId];
+                                  console.log(
+                                    "Product found in lookup cache instead",
+                                  );
+                                }
+
+                                if (selectedProduct) {
+                                  console.log(
+                                    "Product found:",
+                                    selectedProduct,
+                                  );
+                                  updatedItem.description =
+                                    selectedProduct.name ||
+                                    selectedProduct.description ||
+                                    "";
+                                  updatedItem.unitPrice =
+                                    selectedProduct.price || 0;
+                                  updatedItem.unit =
+                                    selectedProduct.unit || "unit";
+                                  updatedItem.total =
+                                    (updatedItem.quantity || 1) *
+                                    (selectedProduct.price || 0);
+                                } else {
+                                  console.error(
+                                    "Product not found in either location",
+                                  );
+                                }
                               }
-                              
-                              // Update the entire item at once
-                              const newItems = items.map(i => i.id === item.id ? updatedItem : i);
+
+                              // Update state with the complete item in one operation
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
                               setItems(newItems);
                             }}
-                            disabled={!item.category || !item.subcategory}
+                            disabled={
+                              !item.category ||
+                              !item.subcategory ||
+                              !(
+                                products[item.category]?.[item.subcategory]
+                                  ?.length > 0
+                              )
+                            }
                             className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                           >
                             <option value="">Select Product</option>
-                            {item.category && 
-                             item.subcategory && 
-                             products[item.category]?.[item.subcategory]?.map((product) => (
-                              <option key={product.id} value={String(product.id)}>
-                                {product.name}
+                            {item.category &&
+                            item.subcategory &&
+                            products[item.category]?.[item.subcategory]
+                              ?.length > 0 ? (
+                              products[item.category][item.subcategory].map(
+                                (product) => (
+                                  <option
+                                    key={product.id}
+                                    value={String(product.id)}
+                                  >
+                                    {product.name || product.description} (
+                                    {`${(product.price || 0).toFixed(2)}`}
+                                  </option>
+                                ),
+                              )
+                            ) : (
+                              <option value="" disabled>
+                                No products available
                               </option>
-                            ))}
+                            )}
                           </select>
                         </div>
 
@@ -1664,8 +1633,7 @@ const formatWithCommas = (value: number | string): string => {
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
-
-                      {/* <td className="px-3 py-2">
+                      <td className="px-3 py-2">
                         <input
                           type="number"
                           value={
@@ -1682,49 +1650,18 @@ const formatWithCommas = (value: number | string): string => {
                           step="0.01"
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
-                      </td> */}
-
-                      {/* Unit Price Column */}
-                      <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={item.unitPrice ? formatWithCommas(item.unitPrice) : ""}
-                          onFocus={(e) => {
-                            // When focused, show raw number for editing
-                            e.target.value = item.unitPrice?.toString() || "";
-                          }}
-                          onBlur={(e) => {
-                            // When blurred, update with formatted value
-                            const rawValue = e.target.value.replace(/[^0-9.]/g, "");
-                            e.target.value = formatWithCommas(rawValue);
-                          }}
-                          onChange={(e) => {
-                            // Remove any non-numeric characters except decimal point
-                            const value = e.target.value.replace(/[^0-9.]/g, "");
-                            updateItem(item.id, "unitPrice", value);
-                            
-                            // Update total based on quantity and unit price
-                            const quantity = Number(item.quantity) || 0;
-                            const unitPrice = Number(value) || 0;
-                            updateItem(item.id, "total", quantity * unitPrice);
-                          }}
-                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
-                        />
-                      </td>                      
-
+                      </td>
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
-                          {formatWithCommas(item.total)||0}
+                          {parseFloat(String(item.total || 0)).toFixed(2)}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-center">
-                        <div className="flex items-center justify-center space-x-2">
-                          {/* Add Item Button */}
+                        {items.length > 1 && (
                           <button
                             type="button"
-                            onClick={() => addItemAfter(item.id)}
-                            className="text-primary hover:text-primary/80"
-                            title="Add item after this row"
+                            onClick={() => removeItem(item.id)}
+                            className="text-danger hover:text-danger/80"
                           >
                             <svg
                               className="h-5 w-5"
@@ -1736,35 +1673,11 @@ const formatWithCommas = (value: number | string): string => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                d="M6 18L18 6M6 6l12 12"
                               ></path>
                             </svg>
                           </button>
-                          
-                          {/* Delete Button - Only show if there's more than one item */}
-                          {items.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item.id)}
-                              className="text-danger hover:text-danger/80"
-                              title="Remove this item"
-                            >
-                              <svg
-                                className="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M6 18L18 6M6 6l12 12"
-                                ></path>
-                              </svg>
-                            </button>
-                          )}
-                        </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -1806,39 +1719,59 @@ const formatWithCommas = (value: number | string): string => {
             </div>
 
             {/* Summary */}
-            <div className="mt-8 border-t border-gray-200 pt-4">
-              <h3 className="text-lg font-medium mb-3">Summary</h3>
-              <div className="flex justify-end">
-                <div className="w-3/3">
-                  <div className="flex justify-between border-b border-gray-200 py-1">
-                    <span>Subtotal:</span>
-                    <span>RM {formatWithCommas(subtotal)}</span>
+            <div>
+              <div className="dark:bg-meta-4 border-stroke dark:border-strokedark rounded-lg border bg-gray-50 p-5">
+                <h3 className="mb-4 font-semibold text-black dark:text-white">
+                  Quotation Summary
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Subtotal:
+                    </span>
+                    <span className="font-medium">
+                      {calculateSubtotal().toFixed(2)}
+                    </span>
                   </div>
-                  
-                  {/* Discount Row */}
-                  <div className="flex justify-between border-b border-gray-200 py-1 text-danger">
-                    <span>Discount:</span>
-                    <span>- {totalDiscount.toFixed(2)}%</span>
-                  </div>
-                  
-                  {/* Tax Row (if applicable) */}
-                  {taxLabel && (
-                    <div className="flex justify-between border-b border-gray-200 py-1">
-                      <span>{taxLabel}:</span>
-                      <span>{taxAmount.toFixed(2)}%</span>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Tax (%):
+                      </span>
+                      <input
+                        type="number"
+                        value={tax}
+                        onChange={(e) =>
+                          setTax(parseFloat(e.target.value) || 0)
+                        }
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        className="border-stroke dark:bg-boxdark focus:border-primary w-16 rounded-sm border-[1.5px] bg-white px-2 py-1 text-sm outline-hidden transition"
+                      />
                     </div>
-                  )}
-                  
-                  {/* Grand Total */}
-                  <div className="flex justify-between py-2 font-bold">
-                    <span>Grand Total:</span>
-                    <span>RM {formatWithCommas(grandTotal)}</span>
+                    <span className="font-medium">
+                      {(
+                        calculateSubtotal() *
+                        ((parseFloat(tax as any) || 0) / 100)
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="border-stroke dark:border-strokedark mt-4 flex items-center justify-between border-t-2 pt-4">
+                    <span className="font-medium text-black dark:text-white">
+                      TOTAL:
+                    </span>
+                    <span className="text-xl font-bold text-black dark:text-white">
+                      {calculateTotal().toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </DefaultLayout>
