@@ -423,119 +423,80 @@ export default function QuotationPage() {
     );
   };
 
-  // Update the calculateSubtotal function
-  // const calculateSubtotal = () => {
-  //   return items.reduce((sum, item) => {
-  //     // Ensure item.total is treated as a number
-  //     const itemTotal = parseFloat(item.total as any) || 0;
-  //     return sum + itemTotal;
-  //   }, 0);
-  // };
-
-  // Update the calculateTotal function
-  // const calculateTotal = () => {
-  //   const subtotal = calculateSubtotal();
-  //   // Remove discount calculation - no longer needed
-  //   const taxAmount = (subtotal * (parseFloat(tax as any) || 0)) / 100;
-
-  //   return subtotal + taxAmount;
-  // };
-
-  // Save quotation
+  // Save quotation with taskId-based upsert logic
   const saveQuotation = async (status: "draft" | "sent" = "draft") => {
     if (!taskId) return;
 
-    // const subtotal = calculateSubtotal();
-    // const total = calculateTotal();
-
     try {
-      // First, check if a quotation exists for this task ID in the database
-      // if we don't already have one loaded in state
-      if (!quotation?.id) {
-        const checkResponse = await fetch(
-          `/api/sales/quotation?taskId=${taskId}`,
-        );
-
-        if (checkResponse.ok) {
-          const checkData = await checkResponse.json();
-
-          if (checkData.quotation) {
-            // Found existing quotation in database - load it into state
-            setQuotation(checkData.quotation);
-            setItems(checkData.quotation.items || []);
-            setNotes(checkData.quotation.notes || "");
-            setTerms(checkData.quotation.terms || terms);
-            setTax(checkData.quotation.tax || 0);
-
-            // Show notification and return
+      // Always check if a quotation exists for this task ID in the database
+      const checkResponse = await fetch(`/api/sales/quotation?taskId=${taskId}`);
+      let existingQuotation = null;
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        if (checkData.quotation) {
+          existingQuotation = checkData.quotation;
+          
+          // If we didn't have the quotation loaded yet, update our state
+          if (!quotation || quotation.id !== existingQuotation.id) {
+            setQuotation(existingQuotation);
+            setItems(existingQuotation.items || []);
+            setNotes(existingQuotation.notes || "");
+            setTerms(existingQuotation.terms || terms);
+            setTax(existingQuotation.tax || 0);
+            
+            // Show notification
             alert("Found existing quotation. Loaded for editing.");
             return;
           }
         }
       }
 
-      // Continue with normal flow - update if we have a quotation ID, otherwise create new
-      if (quotation?.id) {
-        // Check if anything has changed before sending update request
-        const hasChanges =
-          quotation.salesRepresentative !==
-            (quotation?.salesRepresentative || task?.sales_name || "") ||
-          quotation.salesUID !==
-            (quotation?.salesUID || task?.sales_uid || "") ||
-          quotation.tax !== tax ||
-          quotation.notes !== notes ||
-          quotation.terms !== terms ||
-          quotation.status !== status ||
-          // Deep compare items (simplified version)
-          JSON.stringify(quotation.items) !== JSON.stringify(items);
+      // Prepare common data for both create and update
+      const quotationData = {
+        task_id: taskId,
+        customer_name: task?.name || "",
+        customer_contact: task?.phone1 || "",
+        customer_address: [
+          task?.address_line1,
+          task?.address_line2,
+          task?.city,
+          task?.state,
+        ]
+          .filter(Boolean)
+          .join(", "),
+        quotation_date: today,
+        valid_until: validUntilString,
+        sales_representative: quotation?.salesRepresentative || task?.sales_name || "",
+        sales_uid: quotation?.salesUID || task?.sales_uid || "",
+        items,
+        subtotal,
+        discount: totalDiscount || 0,
+        tax,
+        total: grandTotal,
+        notes,
+        terms,
+        status,
+      };
 
-        if (!hasChanges) {
-          alert("No changes detected. Quotation remains unchanged.");
-          return;
-        }
-
-        // Prepare update data with existing quotation ID
+      // If we have an existing quotation, update it - otherwise create new
+      if (existingQuotation) {
+        // Add ID and reference fields to update an existing quotation
         const updateData = {
-          id: quotation.id,
-          task_id: taskId,
-          customerName: task?.name || "",
-          customerContact: task?.phone1 || "",
-          customerAddress: [
-            task?.address_line1,
-            task?.address_line2,
-            task?.city,
-            task?.state,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          quotationDate: today,
-          validUntil: validUntilString,
-          salesRepresentative:
-            quotation?.salesRepresentative || task?.sales_name || "",
-          salesUID: quotation?.salesUID || task?.sales_uid || "",
-          items,
-          subtotal,
-          discount: products.discount || 0, // Use product discount if available
-          tax,
-          total: grandTotal,
-          notes,
-          terms,
-          status,
-          quote_ref: quotation.quote_ref,
-          quotation_number: quotation.quotation_number,
+          ...quotationData,
+          id: existingQuotation.id,
+          quote_ref: existingQuotation.quote_ref,
+          quotation_number: existingQuotation.quotation_number || generatedQuotationNumber,
         };
 
         // Update existing quotation
-        const response = await fetch(
-          `/api/sales/quotation?id=${quotation.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updateData),
+        const response = await fetch(`/api/sales/quotation`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(updateData),
+        });
 
         if (!response.ok) throw new Error("Failed to update quotation");
 
@@ -565,42 +526,17 @@ export default function QuotationPage() {
         // Generate full quotation_number
         const quotation_number = `${quote_ref}-${runningNumber}`;
 
-        const quotationData = {
-          task_id: taskId,
-          customerName: task?.name || "",
-          customerContact: task?.phone1 || "",
-          customerAddress: [
-            task?.address_line1,
-            task?.address_line2,
-            task?.city,
-            task?.state,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          quotationDate: today,
-          validUntil: validUntilString,
-          salesRepresentative:
-            quotation?.salesRepresentative || task?.sales_name || "",
-          salesUID: quotation?.salesUID || task?.sales_uid || "",
-          items,
-          subtotal,
-          discount: products.discount || 0, // Use product discount if available
-          tax,
-          total: grandTotal,
-          notes,
-          terms,
-          status,
-          quote_ref,
-          quotation_number,
-        };
-
         // Create new quotation
         const response = await fetch("/api/sales/quotation", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(quotationData),
+          body: JSON.stringify({
+            ...quotationData,
+            quote_ref,
+            quotation_number,
+          }),
         });
 
         if (!response.ok) throw new Error("Failed to save quotation");
@@ -643,7 +579,7 @@ export default function QuotationPage() {
     try {
       // This would need to be implemented in your API
       const response = await fetch(
-        `/api/sales/quotation/pdf?id=${quotation.id}`,
+        `/api/sales/quotation/pdf?id=${quotation.quotation_number}`,
         {
           method: "GET",
         },

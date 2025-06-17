@@ -21,17 +21,16 @@ export async function GET(request: Request) {
       if (quotationRows.length > 0) {
         quotation = quotationRows[0];
         
-        // Fetch related items
+        // Fetch related items - using quotation_number field
         try {
           const [itemRows] = await pool.query(
-            'SELECT * FROM quotation_items WHERE quotation_id = ?',
-            [quotationId]
+            'SELECT * FROM quotation_items WHERE quotation_number = ?',
+            [quotation.quotation_number]
           ) as [any[], any];
           
           items = itemRows;
         } catch (itemError) {
           console.warn('Could not fetch quotation items:', itemError);
-          // Return empty array for items if table doesn't exist
           items = [];
         }
       }
@@ -45,11 +44,11 @@ export async function GET(request: Request) {
       if (quotationRows.length > 0) {
         quotation = quotationRows[0];
         
-        // Fetch related items
+        // Fetch related items - using quotation_number field
         try {
           const [itemRows] = await pool.query(
-            'SELECT * FROM quotation_items WHERE quotation_id = ?',
-            [quotation.id]
+            'SELECT * FROM quotation_items WHERE quotation_number = ?',
+            [quotation.quotation_number]
           ) as [any[], any];
           
           items = itemRows;
@@ -95,17 +94,17 @@ export async function POST(request: Request) {
       `INSERT INTO quotations 
        (task_id, customer_name, customer_contact, customer_address,
         quotation_date, valid_until, sales_representative, sales_uid,
-        subtotal, discount, tax, total, notes, terms, status, quote_ref) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        subtotal, discount, tax, total, notes, terms, status, quote_ref, quotation_number) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         body.task_id,
         body.customer_name,
         body.customer_contact,
         body.customer_address || '',
-        body.quotation_date || new Date().toISOString(),
-        body.valid_until || new Date().toISOString(),
+        body.quotation_date,
+        body.valid_until,
         body.sales_representative,
-        body.sales_uid || '',
+        body.sales_uid,
         body.subtotal || '0.00',
         body.discount || '0.00',
         body.tax || '0.00',
@@ -113,22 +112,25 @@ export async function POST(request: Request) {
         body.notes || '',
         body.terms || '',
         body.status || 'draft',
-        body.quote_ref
+        body.quote_ref,
+        body.quotation_number || ''
       ]
     ) as [any, any];
     
     const quotationId = result.insertId;
+    const quotation_number = body.quotation_number;
     
     // Insert quotation items if provided
     if (body.items && body.items.length > 0) {
       for (const item of body.items) {
         await pool.query(
           `INSERT INTO quotation_items 
-           (quotation_id, category, subcategory, product_id, description, 
+           (quotation_number, task_id, category, subcategory, product, description, 
             quantity, unit, unit_price, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            quotationId,
+            quotation_number,            // Save quotation_number
+            body.task_id || '',         // Save task_id from parent quotation
             item.category || '',
             item.subcategory || '',
             item.productId || '',
@@ -143,10 +145,24 @@ export async function POST(request: Request) {
       }
     }
     
+    // Fetch the newly created quotation for response
+    const [quotationRows] = await pool.query(
+      'SELECT * FROM quotations WHERE id = ?',
+      [quotationId]
+    ) as [any[], any];
+    
+    const [itemRows] = await pool.query(
+      'SELECT * FROM quotation_items WHERE quotation_number = ?',
+      [quotation_number]
+    ) as [any[], any];
+    
+    const quotation = quotationRows[0];
+    quotation.items = itemRows;
+    
     return NextResponse.json({ 
       success: true, 
       message: 'Quotation created successfully', 
-      quotationId 
+      quotation
     });
     
   } catch (error) {
@@ -159,105 +175,112 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const url = new URL(request.url);
-  const quotationId = url.searchParams.get('id');
-  
-  if (!quotationId) {
-    return NextResponse.json(
-      { error: 'Quotation ID is required' },
-      { status: 400 }
-    );
-  }
-  
   try {
     const body = await request.json();
     const pool = createPool();
     
-    // Update existing quotation
+    // Ensure quotation ID is provided
+    if (!body.id) {
+      return NextResponse.json(
+        { error: 'Quotation ID is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Update quotation with correct column names (snake_case)
     await pool.query(
-      `UPDATE quotations SET 
-       customerName = ?, customerContact = ?, validUntil = ?, 
-       salesRepresentative = ?, subtotal = ?, tax = ?, total = ? 
+      `UPDATE quotations SET
+        task_id = ?,
+        customer_name = ?,
+        customer_contact = ?,
+        customer_address = ?,
+        quotation_date = ?,
+        valid_until = ?,
+        sales_representative = ?,
+        sales_uid = ?,
+        subtotal = ?,
+        discount = ?,
+        tax = ?,
+        total = ?,
+        notes = ?,
+        terms = ?,
+        status = ?
        WHERE id = ?`,
       [
-        body.customerName,
-        body.customerContact,
-        body.validUntil,
-        body.salesRepresentative,
-        body.subtotal,
-        body.tax,
-        body.total,
-        quotationId
+        body.task_id,
+        body.customer_name,
+        body.customer_contact,
+        body.customer_address || '',
+        body.quotation_date,
+        body.valid_until,
+        body.sales_representative,
+        body.sales_uid || '',
+        body.subtotal || '0.00',
+        body.discount || '0.00',
+        body.tax || '0.00',
+        body.total || '0.00',
+        body.notes || '',
+        body.terms || '',
+        body.status || 'draft',
+        body.id
       ]
     );
     
-    // Delete existing items
-    await pool.query(
-      'DELETE FROM quotation_items WHERE quotation_id = ?',
-      [quotationId]
-    );
-    
-    // Insert updated items
-    if (body.items && body.items.length > 0) {
+    // Handle items if provided
+    if (body.items && Array.isArray(body.items)) {
+      // First, delete all existing items for this quotation
+      await pool.query(
+        'DELETE FROM quotation_items WHERE quotation_number = ?',
+        [body.quotation_number]
+      );
+      
+      // Then insert the updated items
       for (const item of body.items) {
         await pool.query(
           `INSERT INTO quotation_items 
-           (quotation_id, category, subcategory, product_id, description, 
-            quantity, unit, unit_price, discount, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (quotation_number, task_id, category, subcategory, product,
+            quantity, unit, unit_price, total, note) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            quotationId,
-            item.category,
-            item.subcategory,
-            item.product_id,
-            item.description,
-            item.quantity,
-            item.unit,
-            item.unit_price,
-            item.discount,
-            item.total,
-            item.note || null
+            body.quotation_number,      // Save quotation_number
+            body.task_id || '',         // Save task_id from parent quotation
+            item.category || '',
+            item.subcategory || '',
+            item.description || '',
+            item.quantity || 0,
+            item.unit || '',
+            item.unitPrice || 0,
+            item.total || 0,
+            item.note || ''
           ]
         );
       }
     }
     
-    // Fetch the updated quotation with its items
+    // Fetch the updated quotation
     const [quotationRows] = await pool.query(
       'SELECT * FROM quotations WHERE id = ?',
-      [quotationId]
+      [body.id]
     ) as [any[], any];
     
-    let quotation = null;
-    let items = [];
+    const [itemRows] = await pool.query(
+      'SELECT * FROM quotation_items WHERE quotation_number = ?',
+      [body.quotation_number]
+    ) as [any[], any];
     
-    if (quotationRows.length > 0) {
-      quotation = quotationRows[0];
-      
-      try {
-        const [itemRows] = await pool.query(
-          'SELECT * FROM quotation_items WHERE quotation_id = ?',
-          [quotationId]
-        ) as [any[], any];
-        
-        items = itemRows;
-      } catch (itemError) {
-        console.warn('Could not fetch quotation items:', itemError);
-      }
-      
-      quotation.items = items;
-    }
+    const quotation = quotationRows[0];
+    quotation.items = itemRows;
     
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Quotation updated successfully', 
-      quotation 
+    return NextResponse.json({
+      success: true,
+      message: 'Quotation updated successfully',
+      quotation
     });
     
   } catch (error) {
     console.error('Error updating quotation:', error);
     return NextResponse.json(
-      { error: 'Failed to update quotation' },
+      { error: 'Failed to update quotation', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
