@@ -11,30 +11,12 @@ const secretKey = process.env.JWT_SECRET
   ? new TextEncoder().encode(process.env.JWT_SECRET)
   : null;
 
-//function verifyPassword
-export async function verifyPassword1(
+// Function to verify the password
+export async function verifyPassword(
   password: string,
   hashedPassword: string,
-) {
-  return bcrypt.compare(password, hashedPassword);
-}
-
-// function to handle $2y$ and $2b$ hash formats [$2y$ format, convert to $2b$ for bcrypt compatibility]
-// function normalizeHash(hash: string): string {
-//   // Check if hash -
-//   if (hash.startsWith("$2y$")) {
-//     return hash.replace("$2y$", "$2b$");
-//   }
-//   return hash;
-// }
-
-// Function to verify the password with its stored hash
-export async function verifyPassword(
-  inputPassword: string,
-  storedHash: string,
 ): Promise<boolean> {
-  // const normalizedHash = normalizeHash(storedHash);
-  return bcrypt.compare(inputPassword, storedHash);
+  return bcrypt.compare(password, hashedPassword);
 }
 
 // function verify token

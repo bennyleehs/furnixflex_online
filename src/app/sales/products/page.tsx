@@ -315,7 +315,10 @@ export default function ProductsPage() {
           {!loadingPermissions && (
             <>
               {createMenuSubmenu &&
-                canCreate(createMenuSubmenu.menu, createMenuSubmenu.submenu) && (
+                canCreate(
+                  createMenuSubmenu.menu,
+                  createMenuSubmenu.submenu,
+                ) && (
                   <button
                     onClick={() => {
                       resetForm();
@@ -879,60 +882,69 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <div className="flex items-center justify-center space-x-3.5">{!loadingPermissions && ( // Only render buttons if permissions are loaded
-                        <>
-                        {editMenuSubmenu &&
-                            canEdit(
-                              editMenuSubmenu.menu,
-                              editMenuSubmenu.submenu,
-                            ) && (
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-primary hover:text-primary/80"
-                          title="Edit product"
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.5"
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            ></path>
-                          </svg>
-                        </button>
+                      <div className="flex items-center justify-center space-x-3.5">
+                        {!loadingPermissions && ( // Only render buttons if permissions are loaded
+                          <>
+                            {editMenuSubmenu &&
+                              canEdit(
+                                editMenuSubmenu.menu,
+                                editMenuSubmenu.submenu,
+                              ) && (
+                                <button
+                                  onClick={() => handleEdit(product)}
+                                  className="text-primary hover:text-primary/80"
+                                  title="Edit product"
+                                >
+                                  <svg
+                                    className="fill-current"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 576 512"
+                                  >
+                                    <path
+                                      d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
+                                      fill=""
+                                    />
+                                  </svg>
+                                </button>
+                              )}
+                            {deleteMenuSubmenu &&
+                              canDelete(
+                                deleteMenuSubmenu.menu,
+                                deleteMenuSubmenu.submenu,
+                              ) && (
+                                <button
+                                  onClick={() => handleDelete(product.id)}
+                                  className="text-danger hover:text-danger/80"
+                                  title="Delete product"
+                                >
+                                  <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    <line
+                                      x1="10"
+                                      y1="11"
+                                      x2="10"
+                                      y2="17"
+                                    ></line>
+                                    <line
+                                      x1="14"
+                                      y1="11"
+                                      x2="14"
+                                      y2="17"
+                                    ></line>
+                                  </svg>
+                                </button>
+                              )}
+                          </>
                         )}
-                        {deleteMenuSubmenu &&
-                            canDelete(
-                              deleteMenuSubmenu.menu,
-                              deleteMenuSubmenu.submenu,
-                            ) && (
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="text-danger hover:text-danger/80"
-                          title="Delete product"
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.5"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            ></path>
-                          </svg>
-                        </button>
-                        )}
-                        </>
-                      )}
                       </div>
                     </td>
                   </tr>

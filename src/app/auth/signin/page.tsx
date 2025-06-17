@@ -11,7 +11,7 @@ const SignIn = () => {
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const {setUser} = useAuth()
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +36,7 @@ const SignIn = () => {
           uid: data.uid,
           name: data.name || "User", // Assuming API returns user name or fallback
         });
-        
+
         setMessage(data.message || "Sign-in successful");
         setIsError(false);
         router.push("/");
@@ -179,15 +179,17 @@ const SignIn = () => {
               />
             </div>
             <div className="mt-2 text-center">
-              {message && (
-                <p
-                  className={`mt-2 ${
-                    isError ? "text-center text-red-500" : "text-green-500"
-                  }`}
-                >
-                  {message}
-                </p>
-              )}
+              <div className="h-6 sm:h-6 md:h-7">
+                {message && (
+                  <p
+                    className={`transition-opacity duration-300 ${
+                      isError ? "text-red-500" : "text-green-500"
+                    }`}
+                  >
+                    {message}
+                  </p>
+                )}
+              </div>
               {/* <!-- Footer --> */}
               <p className="mt-auto py-4 text-center text-sm text-gray-400">
                 &copy; {new Date().getFullYear()} - Classy Project Marketing

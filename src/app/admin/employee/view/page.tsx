@@ -385,71 +385,6 @@ export default function EmployeeDetailPage() {
     }
   };
 
-  // Add this function with your other functions
-  // const handleChangePassword = async () => {
-  //   // Reset errors
-  //   setPasswordError(null);
-
-  //   // Validate passwords
-  //   if (!newPassword) {
-  //     setPasswordError("New password is required");
-  //     return;
-  //   }
-
-  //   if (newPassword.length < 8) {
-  //     setPasswordError("Password must be at least 8 characters long");
-  //     return;
-  //   }
-
-  //   if (newPassword !== confirmPassword) {
-  //     setPasswordError("Passwords do not match");
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsChangingPassword(true);
-
-  //     const response = await fetch('/api/admin/employee/changePassword', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({
-  //         employeeId: employee?.id,
-  //         employeeUid: employee?.uid,
-  //         newPassword
-  //       })
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json().catch(() => ({}));
-  //       throw new Error(`Failed to change password: ${errorData.message || response.statusText}`);
-  //     }
-
-  //     // Reset form and close modal
-  //     setNewPassword('');
-  //     setConfirmPassword('');
-  //     setIsChangePasswordModalOpen(false);
-
-  //     // Show success message
-  //     setSuccessMessage("Password changed successfully");
-  //     setTimeout(() => setSuccessMessage(null), 3000);
-
-  //   } catch (err) {
-  //     console.error("Password change error:", err);
-  //     setPasswordError("Error changing password: " + (err instanceof Error ? err.message : String(err)));
-  //   } finally {
-  //     setIsChangingPassword(false);
-  //   }
-  // };
-
-  // const toggleNewPwdVisibility = () => {
-  //   setShowNewPwd(!showNewPwd);
-  // };
-  // const toggleConfirmPwdVisibility = () => {
-  //   setShowConfirmPwd(!showConfirmPwd);
-  // };
-
   const toggleNewPwdVisibility = () => setShowNewPwd((prev) => !prev);
   const toggleConfirmPwdVisibility = () => setShowConfirmPwd((prev) => !prev);
 
@@ -580,29 +515,6 @@ export default function EmployeeDetailPage() {
       )}
 
       <div ref={topRef} className="flex flex-col gap-5">
-        {/* Header with back button */}
-        {/* <div className="flex justify-between items-center">
-          <button
-            onClick={handleBack}
-            className="flex items-center text-blue-600 hover:text-blue-800 dark:text-primary dark:hover:text-primary/80"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              ></path>
-            </svg>
-            Back to Employee List
-          </button>
-        </div> */}
-
         {/* Error state */}
         {error && (
           <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
@@ -694,13 +606,6 @@ export default function EmployeeDetailPage() {
                         </div>
                       )}
                     </div>
-
-                    {/* <button
-                      onClick={handlePhotoUpload}
-                      className="text-sm text-blue-600 hover:text-blue-800 dark:text-primary dark:hover:text-primary/80"
-                    >
-                      Change Photo
-                    </button> */}
 
                     <input
                       type="file"

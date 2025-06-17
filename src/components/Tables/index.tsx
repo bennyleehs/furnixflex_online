@@ -256,7 +256,7 @@ export default function Tables({
                   ))}
                   {/* Action buttons */}
                   <td className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6">
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-2">
                       {!loadingPermissions && ( // Only render buttons if permissions are loaded
                         <>
                           {/* Edit Button */}
@@ -271,7 +271,6 @@ export default function Tables({
                                 title="Edit"
                               >
                                 <svg
-                                  xmlns="http://www.w3.org/2000/svg"
                                   className="fill-current"
                                   width="18"
                                   height="18"
@@ -296,7 +295,6 @@ export default function Tables({
                                 title="Mark as History"
                               >
                                 <svg
-                                  xmlns="http://www.w3.org/2000/svg"
                                   width="20"
                                   height="20"
                                   viewBox="0 0 24 24"
