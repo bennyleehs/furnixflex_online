@@ -1,151 +1,151 @@
-"use client"
+//src/app/profile/page.tsx
+"use client";
+import React, { useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Image from "next/image";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
+interface Users {}
+
 const Profile = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle profile photo upload
+  const handlePhotoUpload = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <DefaultLayout>
       <div>
         <Breadcrumb pageName="Profile" />
 
-        <div className="rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          {/* <div className="relative z-20 h-35 md:h-65">
-            <Image
-              src={"/images/cover/cover-01.png"}
-              alt="profile cover"
-              className="h-full w-full rounded-tl-sm rounded-tr-sm object-cover object-center"
-              width={970}
-              height={260}
-              style={{
-                width: "auto",
-                height: "auto",
-              }}
-            />
-            <div className="absolute bottom-1 right-1 z-10 xsm:bottom-4 xsm:right-4">
-              <label
-                htmlFor="cover"
-                className="flex cursor-pointer items-center justify-center gap-2 rounded-sm bg-primary px-2 py-1 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
-              >
-                <input
-                  type="file"
-                  name="cover"
-                  id="cover"
-                  className="sr-only"
-                />
-                <span>
-                  <svg
-                    className="fill-current"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+        <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white">
+          <div className="border-stroke dark:border-strokedark border-b p-6">
+            <div className="flex flex-col gap-6 md:flex-row">
+              <div className="flex flex-col items-center">
+                <div className="dark:border-boxdark relative mb-3 h-32 w-32 overflow-hidden rounded-full border-4 border-gray-100">
+                  {/* {users?.profilePhoto ? ( */}
+                  {/* {users?.profilePhoto? (
+                    <Image
+                      src={users.profilePhoto}
+                      alt={users.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : ( */}
+                  <div className="dark:bg-meta-4 flex h-full w-full items-center justify-center bg-gray-200">
+                    {/* people icon */}
+                    <svg
+                      className="h-16 w-16 text-gray-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+                  {/* )} */}
+
+                  {/* Upload overlay */}
+                  <div
+                    className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
+                    onClick={handlePhotoUpload}
                   >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M4.76464 1.42638C4.87283 1.2641 5.05496 1.16663 5.25 1.16663H8.75C8.94504 1.16663 9.12717 1.2641 9.23536 1.42638L10.2289 2.91663H12.25C12.7141 2.91663 13.1592 3.101 13.4874 3.42919C13.8156 3.75738 14 4.2025 14 4.66663V11.0833C14 11.5474 13.8156 11.9925 13.4874 12.3207C13.1592 12.6489 12.7141 12.8333 12.25 12.8333H1.75C1.28587 12.8333 0.840752 12.6489 0.512563 12.3207C0.184375 11.9925 0 11.5474 0 11.0833V4.66663C0 4.2025 0.184374 3.75738 0.512563 3.42919C0.840752 3.101 1.28587 2.91663 1.75 2.91663H3.77114L4.76464 1.42638ZM5.56219 2.33329L4.5687 3.82353C4.46051 3.98582 4.27837 4.08329 4.08333 4.08329H1.75C1.59529 4.08329 1.44692 4.14475 1.33752 4.25415C1.22812 4.36354 1.16667 4.51192 1.16667 4.66663V11.0833C1.16667 11.238 1.22812 11.3864 1.33752 11.4958C1.44692 11.6052 1.59529 11.6666 1.75 11.6666H12.25C12.4047 11.6666 12.5531 11.6052 12.6625 11.4958C12.7719 11.3864 12.8333 11.238 12.8333 11.0833V4.66663C12.8333 4.51192 12.7719 4.36354 12.6625 4.25415C12.5531 4.14475 12.4047 4.08329 12.25 4.08329H9.91667C9.72163 4.08329 9.53949 3.98582 9.4313 3.82353L8.43781 2.33329H5.56219Z"
-                      fill="white"
-                    />
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M6.99992 5.83329C6.03342 5.83329 5.24992 6.61679 5.24992 7.58329C5.24992 8.54979 6.03342 9.33329 6.99992 9.33329C7.96642 9.33329 8.74992 8.54979 8.74992 7.58329C8.74992 6.61679 7.96642 5.83329 6.99992 5.83329ZM4.08325 7.58329C4.08325 5.97246 5.38909 4.66663 6.99992 4.66663C8.61075 4.66663 9.91659 5.97246 9.91659 7.58329C9.91659 9.19412 8.61075 10.5 6.99992 10.5C5.38909 10.5 4.08325 9.19412 4.08325 7.58329Z"
-                      fill="white"
-                    />
-                  </svg>
-                </span>
-                <span>Edit</span>
-              </label>
-            </div>
-          </div> */}
-          <div className="px-4 pb-6 text-center lg:pb-8 xl:pb-11.5">
-            <div className="relative mx-auto h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur-sm sm:h-44 sm:max-w-44 sm:p-3">
-              <div className="relative drop-shadow-2">
-                <Image
-                  src={"/images/user/user-06.png"}
-                  width={160}
-                  height={160}
-                  style={{
-                    width: "auto",
-                    height: "auto",
-                  }}
-                  alt="profile"
-                />
-                <label
-                  htmlFor="profile"
-                  className="absolute bottom-0 right-0 flex h-8.5 w-8.5 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2"
+                    <svg
+                      className="h-8 w-8 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+
+                  {uploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1">
+                {/* <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
+                  {user?.name}
+                </h3>
+                <p className="font-medium">{user?.department || "None"}</p> */}
+
+                <h2 className="mb-1 text-2xl font-bold text-gray-800 dark:text-white">
+                  {user?.name}
+                </h2>
+                <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span>UID: {user?.uid}</span>
+                  <span className="h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400"></span>
+                  <span>{user?.name}</span>
+                  <span className="h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400"></span>
+                  <span>
+                    Status:
+                    {/* <span
+                          className={`ml-1 rounded-full px-2 py-1 font-medium ${
+                            users.status === "Active"
+                              ? "text-success dark:bg-success/60 bg-green-200/60 dark:text-green-100"
+                              : users.status === "Inactive"
+                                ? "text-warning bg-warning/20 dark:bg-warning/60 dark:text-yellow-100"
+                                : "text-danger bg-danger/20 dark:bg-danger/60 dark:text-red-200"
+                          }`}
+                        >
+                          {users.status}
+                        </span> */}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex w-full justify-center md:w-auto">
+                <button
+                  // onClick={() => setIsChangePasswordModalOpen(true)}
+                  className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex h-10 w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:w-auto md:px-4 dark:text-white dark:hover:text-white"
                 >
                   <svg
-                    className="fill-current"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
+                    className="mr-2 h-4 w-4"
                     fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M4.76464 1.42638C4.87283 1.2641 5.05496 1.16663 5.25 1.16663H8.75C8.94504 1.16663 9.12717 1.2641 9.23536 1.42638L10.2289 2.91663H12.25C12.7141 2.91663 13.1592 3.101 13.4874 3.42919C13.8156 3.75738 14 4.2025 14 4.66663V11.0833C14 11.5474 13.8156 11.9925 13.4874 12.3207C13.1592 12.6489 12.7141 12.8333 12.25 12.8333H1.75C1.28587 12.8333 0.840752 12.6489 0.512563 12.3207C0.184375 11.9925 0 11.5474 0 11.0833V4.66663C0 4.2025 0.184374 3.75738 0.512563 3.42919C0.840752 3.101 1.28587 2.91663 1.75 2.91663H3.77114L4.76464 1.42638ZM5.56219 2.33329L4.5687 3.82353C4.46051 3.98582 4.27837 4.08329 4.08333 4.08329H1.75C1.59529 4.08329 1.44692 4.14475 1.33752 4.25415C1.22812 4.36354 1.16667 4.51192 1.16667 4.66663V11.0833C1.16667 11.238 1.22812 11.3864 1.33752 11.4958C1.44692 11.6052 1.59529 11.6666 1.75 11.6666H12.25C12.4047 11.6666 12.5531 11.6052 12.6625 11.4958C12.7719 11.3864 12.8333 11.238 12.8333 11.0833V4.66663C12.8333 4.51192 12.7719 4.36354 12.6625 4.25415C12.5531 4.14475 12.4047 4.08329 12.25 4.08329H9.91667C9.72163 4.08329 9.53949 3.98582 9.4313 3.82353L8.43781 2.33329H5.56219Z"
-                      fill=""
-                    />
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M7.00004 5.83329C6.03354 5.83329 5.25004 6.61679 5.25004 7.58329C5.25004 8.54979 6.03354 9.33329 7.00004 9.33329C7.96654 9.33329 8.75004 8.54979 8.75004 7.58329C8.75004 6.61679 7.96654 5.83329 7.00004 5.83329ZM4.08337 7.58329C4.08337 5.97246 5.38921 4.66663 7.00004 4.66663C8.61087 4.66663 9.91671 5.97246 9.91671 7.58329C9.91671 9.19412 8.61087 10.5 7.00004 10.5C5.38921 10.5 4.08337 9.19412 4.08337 7.58329Z"
-                      fill=""
-                    />
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    ></path>
                   </svg>
-                  <input
-                    type="file"
-                    name="profile"
-                    id="profile"
-                    className="sr-only"
-                  />
-                </label>
+                  Change Password
+                </button>
               </div>
             </div>
-            <div className="mt-4">
-              <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
-                {user?.name}
-              </h3>
-              <p className="font-medium">{user?.departmentName}</p>
-              <div className="mx-auto mb-5.5 mt-4.5 grid max-w-94 grid-cols-3 rounded-md border border-stroke py-2.5 shadow-1 dark:border-strokedark dark:bg-[#37404F]">
-                <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
-                  <span className="font-semibold text-black dark:text-white">
-                    259
-                  </span>
-                  <span className="text-sm">Posts</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
-                  <span className="font-semibold text-black dark:text-white">
-                    129K
-                  </span>
-                  <span className="text-sm">Followers</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
-                  <span className="font-semibold text-black dark:text-white">
-                    2K
-                  </span>
-                  <span className="text-sm">Following</span>
-                </div>
-              </div>
-
-              <div className="mx-auto max-w-180">
-                <h4 className="font-semibold text-black dark:text-white">
-                  Slot
-                </h4>
-                
-              </div>
-
-              
-            </div>
+          </div>
+          <div className="p-6">
+            <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
+              {user?.name}
+            </h3>
+            <p className="font-medium">{user?.uid || "None"}</p>
           </div>
         </div>
       </div>

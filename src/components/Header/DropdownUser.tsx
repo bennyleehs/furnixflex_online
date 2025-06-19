@@ -1,13 +1,14 @@
+//src/components/Header/DropdownUser.tsx
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import LogoutButton from "./LogOut";
-import { useAuth } from "@/context/AuthContext"; // You may need to create this hook
+import { useAuth } from "@/context/AuthContext"; 
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user } = useAuth(); // Get authenticated user from your auth context
+  const { user } = useAuth(); // Get authenticated user from auth context
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -22,12 +23,10 @@ const DropdownUser = () => {
           </span>
           <span className="block text-xs">{user?.name || "Guest User"}</span>
         </span>
-
         <span className="h-12 w-12 rounded-full">
           <Image
             width={112}
             height={112}
-            // src={"/images/user/user-01.png"}
             src={"/images/logo/classy_icon.svg"}
             style={{
               width: "auto",
@@ -53,7 +52,6 @@ const DropdownUser = () => {
           />
         </svg>
       </Link>
-
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
         <div

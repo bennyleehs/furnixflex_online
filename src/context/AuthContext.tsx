@@ -1,12 +1,17 @@
+//src/context/AuthContext.tsx
 "use client";
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 // Define user type
 type User = {
   uid: string;
   name: string;
-  role?: string;
-  departmentName?: string;
   // Add other user properties as needed
 };
 
@@ -26,13 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Load user from localStorage on initial render
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         setUserState(JSON.parse(storedUser));
       } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('user');
+        console.error("Failed to parse stored user:", error);
+        localStorage.removeItem("user");
       }
     }
     setIsLoading(false);
@@ -42,9 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setUser = (userData: User | null) => {
     setUserState(userData);
     if (userData) {
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(userData));
     } else {
-      localStorage.removeItem('user');
+      localStorage.removeItem("user");
     }
   };
 
@@ -73,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

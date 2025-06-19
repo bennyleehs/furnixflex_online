@@ -549,7 +549,7 @@ export default function EmployeeDetailPage() {
         {!loading && !error && employee && (
           <div className="grid grid-cols-1 gap-5">
             {/* Combined Employee and Documents Card */}
-            <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-sm border bg-white">
+            <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white">
               {/* Top section with photo, name and actions */}
               <div
                 ref={employeeDetailsSectionRef} // Move the ref here
@@ -673,7 +673,7 @@ export default function EmployeeDetailPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-start place-content-evenly space-x-2">
+                  <div className="flex place-content-evenly items-start space-x-2">
                     <button
                       onClick={() =>
                         router.push(`/admin/employee/edit?id=${employee.id}`)
