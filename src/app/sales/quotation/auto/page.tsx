@@ -25,15 +25,17 @@ export default function QuotationPage() {
   const [items, setItems] = useState<QuotationItem[]>([
     {
       id: crypto.randomUUID(),
+      productId: "", // Use string for product ID
       category: "",
       subcategory: "",
-      productId: "",
+      productName: "",
       description: "",
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
       total: 0,
-      note: "", // Initialize with empty note
+      note: "",
+      discount: 0
     },
   ]);
   const [notes, setNotes] = useState("");
@@ -354,15 +356,17 @@ export default function QuotationPage() {
       ...items,
       {
         id: crypto.randomUUID(),
+        productId: "", // Use string for product ID
         category: "",
         subcategory: "",
-        productId: "",
+        productName: "",
         description: "",
         quantity: 1, // Not undefined
         unit: "unit", // Not undefined
         unitPrice: 0, // Not undefined
         total: 0, // Not undefined
         note: "",
+        discount: 0
       },
     ]);
   };
@@ -374,15 +378,17 @@ export default function QuotationPage() {
     
     const newItem: QuotationItem = {
       id: crypto.randomUUID(),
+      productId: "", // Use string for product ID
       category: "",
       subcategory: "",
-      productId: "",
+      productName: "",
       description: "",
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
       total: 0,
       note: "",
+      discount: 0
     };
     
     const newItems = [
@@ -1427,6 +1433,7 @@ const formatWithCommas = (value: number | string): string => {
                       <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                         {index + 1}
                       </td>
+
                       <td className="px-3 py-2">
                         <div className="grid grid-cols-3 gap-2">
                           {/* Category Dropdown - Fixed Version */}
@@ -1440,9 +1447,10 @@ const formatWithCommas = (value: number | string): string => {
                               // Create a new complete object rather than multiple updates
                               const updatedItem = {
                                 ...item,
+                                productId:"",
                                 category,
                                 subcategory: "",
-                                productId: "",
+                                productName: "",
                                 description: "",
                                 unitPrice: 0,
                                 unit: "unit",
@@ -1486,8 +1494,9 @@ const formatWithCommas = (value: number | string): string => {
                               // Update all dependent fields in one go
                               const updatedItem = {
                                 ...item,
+                                productId:"",
                                 subcategory,
-                                productId: "",
+                                productName: "",
                                 description: "",
                                 unitPrice: 0,
                                 unit: "unit",
@@ -1537,8 +1546,10 @@ const formatWithCommas = (value: number | string): string => {
                                 console.log("Found product in lookup:", product);
                                 
                                 // Update all relevant fields at once
-                                updatedItem.description = product.name || "";
+                                // updatedItem.description = product.name || "";
+                                updatedItem.productName = product.name || "";
                                 updatedItem.unitPrice = product.price || 0;
+                                updatedItem.discount = product.discount || 0;
                                 updatedItem.unit = product.unit || "unit";
                                 
                                 // Calculate total
@@ -1571,24 +1582,24 @@ const formatWithCommas = (value: number | string): string => {
                           </div>
                         )}
                       </td>
+
+                      {/* Quantity Input with 0.1 Increment/Decrement */}
                       <td className="px-3 py-2">
                         <input
                           type="number"
-                          value={
-                            item.quantity !== undefined ? item.quantity : 0
-                          }
-                          onChange={(e) =>
-                            updateItem(
-                              item.id,
-                              "quantity",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
                           min="1"
-                          step="1"
+                          step="0.1"
+                          value={item.quantity !== undefined ? item.quantity : 0}
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent event bubbling
+                            // Parse the input value as a float
+                            const value = parseFloat(e.target.value);
+                            updateItem(item.id, "quantity", value);
+                          }}
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
+
                       <td className="px-3 py-2">
                         <input
                           type="text"
@@ -1600,25 +1611,6 @@ const formatWithCommas = (value: number | string): string => {
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
-
-                      {/* <td className="px-3 py-2">
-                        <input
-                          type="number"
-                          value={
-                            item.unitPrice !== undefined ? item.unitPrice : 0
-                          }
-                          onChange={(e) =>
-                            updateItem(
-                              item.id,
-                              "unitPrice",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
-                          min="0"
-                          step="0.01"
-                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
-                        />
-                      </td> */}
 
                       {/* Unit Price Column */}
                       <td className="px-3 py-2">

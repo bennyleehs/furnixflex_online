@@ -42,11 +42,13 @@ export interface Product {
 // Quotation item interface
 export interface QuotationItem {
   id: string;
+  productId: string; // Use number for product ID
   category: string;
   subcategory: string;
-  productId: string;
+  productName: string;
   description: string;
   quantity: number;
+  discount: number; // Add discount field
   unit: string;
   unitPrice: number;
   total: number;

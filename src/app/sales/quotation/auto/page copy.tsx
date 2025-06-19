@@ -25,15 +25,17 @@ export default function QuotationPage() {
   const [items, setItems] = useState<QuotationItem[]>([
     {
       id: crypto.randomUUID(),
+      productId: "", // Use string for product ID
       category: "",
       subcategory: "",
-      productId: "",
+      productName: "",
       description: "",
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
       total: 0,
-      note: "", // Initialize with empty note
+      note: "",
+      discount: 0
     },
   ]);
   const [notes, setNotes] = useState("");
@@ -354,15 +356,17 @@ export default function QuotationPage() {
       ...items,
       {
         id: crypto.randomUUID(),
+        productId: "", // Use string for product ID
         category: "",
         subcategory: "",
-        productId: "",
+        productName: "",
         description: "",
         quantity: 1, // Not undefined
         unit: "unit", // Not undefined
         unitPrice: 0, // Not undefined
         total: 0, // Not undefined
         note: "",
+        discount: 0
       },
     ]);
   };
@@ -374,15 +378,17 @@ export default function QuotationPage() {
     
     const newItem: QuotationItem = {
       id: crypto.randomUUID(),
+      productId: "", // Use string for product ID
       category: "",
       subcategory: "",
-      productId: "",
+      productName: "",
       description: "",
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
       total: 0,
       note: "",
+      discount: 0
     };
     
     const newItems = [
@@ -423,119 +429,80 @@ export default function QuotationPage() {
     );
   };
 
-  // Update the calculateSubtotal function
-  // const calculateSubtotal = () => {
-  //   return items.reduce((sum, item) => {
-  //     // Ensure item.total is treated as a number
-  //     const itemTotal = parseFloat(item.total as any) || 0;
-  //     return sum + itemTotal;
-  //   }, 0);
-  // };
-
-  // Update the calculateTotal function
-  // const calculateTotal = () => {
-  //   const subtotal = calculateSubtotal();
-  //   // Remove discount calculation - no longer needed
-  //   const taxAmount = (subtotal * (parseFloat(tax as any) || 0)) / 100;
-
-  //   return subtotal + taxAmount;
-  // };
-
-  // Save quotation
+  // Save quotation with taskId-based upsert logic
   const saveQuotation = async (status: "draft" | "sent" = "draft") => {
     if (!taskId) return;
 
-    const subtotal = calculateSubtotal();
-    const total = calculateTotal();
-
     try {
-      // First, check if a quotation exists for this task ID in the database
-      // if we don't already have one loaded in state
-      if (!quotation?.id) {
-        const checkResponse = await fetch(
-          `/api/sales/quotation?taskId=${taskId}`,
-        );
-
-        if (checkResponse.ok) {
-          const checkData = await checkResponse.json();
-
-          if (checkData.quotation) {
-            // Found existing quotation in database - load it into state
-            setQuotation(checkData.quotation);
-            setItems(checkData.quotation.items || []);
-            setNotes(checkData.quotation.notes || "");
-            setTerms(checkData.quotation.terms || terms);
-            setTax(checkData.quotation.tax || 0);
-
-            // Show notification and return
+      // Always check if a quotation exists for this task ID in the database
+      const checkResponse = await fetch(`/api/sales/quotation?taskId=${taskId}`);
+      let existingQuotation = null;
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        if (checkData.quotation) {
+          existingQuotation = checkData.quotation;
+          
+          // If we didn't have the quotation loaded yet, update our state
+          if (!quotation || quotation.id !== existingQuotation.id) {
+            setQuotation(existingQuotation);
+            setItems(existingQuotation.items || []);
+            setNotes(existingQuotation.notes || "");
+            setTerms(existingQuotation.terms || terms);
+            setTax(existingQuotation.tax || 0);
+            
+            // Show notification
             alert("Found existing quotation. Loaded for editing.");
             return;
           }
         }
       }
 
-      // Continue with normal flow - update if we have a quotation ID, otherwise create new
-      if (quotation?.id) {
-        // Check if anything has changed before sending update request
-        const hasChanges =
-          quotation.salesRepresentative !==
-            (quotation?.salesRepresentative || task?.sales_name || "") ||
-          quotation.salesUID !==
-            (quotation?.salesUID || task?.sales_uid || "") ||
-          quotation.tax !== tax ||
-          quotation.notes !== notes ||
-          quotation.terms !== terms ||
-          quotation.status !== status ||
-          // Deep compare items (simplified version)
-          JSON.stringify(quotation.items) !== JSON.stringify(items);
+      // Prepare common data for both create and update
+      const quotationData = {
+        task_id: taskId,
+        customer_name: task?.name || "",
+        customer_contact: task?.phone1 || "",
+        customer_address: [
+          task?.address_line1,
+          task?.address_line2,
+          task?.city,
+          task?.state,
+        ]
+          .filter(Boolean)
+          .join(", "),
+        quotation_date: today,
+        valid_until: validUntilString,
+        sales_representative: quotation?.salesRepresentative || task?.sales_name || "",
+        sales_uid: quotation?.salesUID || task?.sales_uid || "",
+        items,
+        subtotal,
+        discount: totalDiscount || 0,
+        tax,
+        total: grandTotal,
+        notes,
+        terms,
+        status,
+      };
 
-        if (!hasChanges) {
-          alert("No changes detected. Quotation remains unchanged.");
-          return;
-        }
-
-        // Prepare update data with existing quotation ID
+      // If we have an existing quotation, update it - otherwise create new
+      if (existingQuotation) {
+        // Add ID and reference fields to update an existing quotation
         const updateData = {
-          id: quotation.id,
-          task_id: taskId,
-          customerName: task?.name || "",
-          customerContact: task?.phone1 || "",
-          customerAddress: [
-            task?.address_line1,
-            task?.address_line2,
-            task?.city,
-            task?.state,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          quotationDate: today,
-          validUntil: validUntilString,
-          salesRepresentative:
-            quotation?.salesRepresentative || task?.sales_name || "",
-          salesUID: quotation?.salesUID || task?.sales_uid || "",
-          items,
-          subtotal,
-          discount: 0,
-          tax,
-          total,
-          notes,
-          terms,
-          status,
-          quote_ref: quotation.quote_ref,
-          quotation_number: quotation.quotation_number,
+          ...quotationData,
+          id: existingQuotation.id,
+          quote_ref: existingQuotation.quote_ref,
+          quotation_number: existingQuotation.quotation_number || generatedQuotationNumber,
         };
 
         // Update existing quotation
-        const response = await fetch(
-          `/api/sales/quotation?id=${quotation.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updateData),
+        const response = await fetch(`/api/sales/quotation`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(updateData),
+        });
 
         if (!response.ok) throw new Error("Failed to update quotation");
 
@@ -565,42 +532,17 @@ export default function QuotationPage() {
         // Generate full quotation_number
         const quotation_number = `${quote_ref}-${runningNumber}`;
 
-        const quotationData = {
-          task_id: taskId,
-          customerName: task?.name || "",
-          customerContact: task?.phone1 || "",
-          customerAddress: [
-            task?.address_line1,
-            task?.address_line2,
-            task?.city,
-            task?.state,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          quotationDate: today,
-          validUntil: validUntilString,
-          salesRepresentative:
-            quotation?.salesRepresentative || task?.sales_name || "",
-          salesUID: quotation?.salesUID || task?.sales_uid || "",
-          items,
-          subtotal,
-          discount: 0,
-          tax,
-          total,
-          notes,
-          terms,
-          status,
-          quote_ref,
-          quotation_number,
-        };
-
         // Create new quotation
         const response = await fetch("/api/sales/quotation", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(quotationData),
+          body: JSON.stringify({
+            ...quotationData,
+            quote_ref,
+            quotation_number,
+          }),
         });
 
         if (!response.ok) throw new Error("Failed to save quotation");
@@ -643,7 +585,7 @@ export default function QuotationPage() {
     try {
       // This would need to be implemented in your API
       const response = await fetch(
-        `/api/sales/quotation/pdf?id=${quotation.id}`,
+        `/api/sales/quotation/pdf?id=${quotation.quotation_number}`,
         {
           method: "GET",
         },
@@ -710,6 +652,33 @@ export default function QuotationPage() {
       `- Products in lookup for this category/subcategory: ${productsByCategory.length}`,
     );
   };
+
+// Add this utility function
+const formatWithCommas = (value: number | string): string => {
+  // Convert to number if it's a string
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  
+  // Handle NaN and null values
+  if (isNaN(num) || num === null) return '0.00';
+  
+  // Format with 2 decimal places
+  const formattedValue = num.toFixed(2);
+  
+  // Only add commas if the number is 1000 or greater
+  if (num >= 1000) {
+    // Split into integer and decimal parts
+    const parts = formattedValue.split('.');
+    
+    // Add commas to the integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    // Join with the decimal part
+    return parts.join('.');
+  }
+  
+  // For numbers less than 1000, just return with 2 decimal places
+  return formattedValue;
+};
 
   // Add this useEffect to calculate total discount
   useEffect(() => {
@@ -1464,6 +1433,7 @@ export default function QuotationPage() {
                       <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                         {index + 1}
                       </td>
+
                       <td className="px-3 py-2">
                         <div className="grid grid-cols-3 gap-2">
                           {/* Category Dropdown - Fixed Version */}
@@ -1477,9 +1447,10 @@ export default function QuotationPage() {
                               // Create a new complete object rather than multiple updates
                               const updatedItem = {
                                 ...item,
+                                productId:"",
                                 category,
                                 subcategory: "",
-                                productId: "",
+                                productName: "",
                                 description: "",
                                 unitPrice: 0,
                                 unit: "unit",
@@ -1523,8 +1494,9 @@ export default function QuotationPage() {
                               // Update all dependent fields in one go
                               const updatedItem = {
                                 ...item,
+                                productId:"",
                                 subcategory,
-                                productId: "",
+                                productName: "",
                                 description: "",
                                 unitPrice: 0,
                                 unit: "unit",
@@ -1575,7 +1547,9 @@ export default function QuotationPage() {
                                 
                                 // Update all relevant fields at once
                                 updatedItem.description = product.name || "";
+                                updatedItem.productName = product.name || "";
                                 updatedItem.unitPrice = product.price || 0;
+                                updatedItem.discount = product.discount || 0;
                                 updatedItem.unit = product.unit || "unit";
                                 
                                 // Calculate total
@@ -1608,24 +1582,24 @@ export default function QuotationPage() {
                           </div>
                         )}
                       </td>
+
+                      {/* Quantity Input with 0.1 Increment/Decrement */}
                       <td className="px-3 py-2">
                         <input
                           type="number"
-                          value={
-                            item.quantity !== undefined ? item.quantity : 0
-                          }
-                          onChange={(e) =>
-                            updateItem(
-                              item.id,
-                              "quantity",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
                           min="1"
-                          step="1"
+                          step="0.1"
+                          value={item.quantity !== undefined ? item.quantity : 0}
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent event bubbling
+                            // Parse the input value as a float
+                            const value = parseFloat(e.target.value);
+                            updateItem(item.id, "quantity", value);
+                          }}
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
+
                       <td className="px-3 py-2">
                         <input
                           type="text"
@@ -1637,27 +1611,38 @@ export default function QuotationPage() {
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
+
+                      {/* Unit Price Column */}
                       <td className="px-3 py-2">
                         <input
-                          type="number"
-                          value={
-                            item.unitPrice !== undefined ? item.unitPrice : 0
-                          }
-                          onChange={(e) =>
-                            updateItem(
-                              item.id,
-                              "unitPrice",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
-                          min="0"
-                          step="0.01"
-                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                          type="text"
+                          value={item.unitPrice ? formatWithCommas(item.unitPrice) : ""}
+                          onFocus={(e) => {
+                            // When focused, show raw number for editing
+                            e.target.value = item.unitPrice?.toString() || "";
+                          }}
+                          onBlur={(e) => {
+                            // When blurred, update with formatted value
+                            const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+                            e.target.value = formatWithCommas(rawValue);
+                          }}
+                          onChange={(e) => {
+                            // Remove any non-numeric characters except decimal point
+                            const value = e.target.value.replace(/[^0-9.]/g, "");
+                            updateItem(item.id, "unitPrice", value);
+                            
+                            // Update total based on quantity and unit price
+                            const quantity = Number(item.quantity) || 0;
+                            const unitPrice = Number(value) || 0;
+                            updateItem(item.id, "total", quantity * unitPrice);
+                          }}
+                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
-                      </td>
+                      </td>                      
+
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
-                          {parseFloat(String(item.total || 0)).toFixed(2)}
+                          {formatWithCommas(item.total)||0}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-center">
@@ -1752,10 +1737,10 @@ export default function QuotationPage() {
             <div className="mt-8 border-t border-gray-200 pt-4">
               <h3 className="text-lg font-medium mb-3">Summary</h3>
               <div className="flex justify-end">
-                <div className="w-1/3">
+                <div className="w-3/3">
                   <div className="flex justify-between border-b border-gray-200 py-1">
                     <span>Subtotal:</span>
-                    <span>RM {subtotal.toFixed(2)}</span>
+                    <span>RM {formatWithCommas(subtotal)}</span>
                   </div>
                   
                   {/* Discount Row */}
@@ -1774,8 +1759,8 @@ export default function QuotationPage() {
                   
                   {/* Grand Total */}
                   <div className="flex justify-between py-2 font-bold">
-                    <span>Total:</span>
-                    <span>RM {grandTotal.toFixed(2)}</span>
+                    <span>Grand Total:</span>
+                    <span>RM {formatWithCommas(grandTotal)}</span>
                   </div>
                 </div>
               </div>

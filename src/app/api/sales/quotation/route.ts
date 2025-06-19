@@ -125,19 +125,21 @@ export async function POST(request: Request) {
       for (const item of body.items) {
         await pool.query(
           `INSERT INTO quotation_items 
-           (quotation_number, task_id, category, subcategory, product, description, 
-            quantity, unit, unit_price, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (quotation_number, task_id, productId, category, subcategory, productName, description,
+            quantity, unit, unitPrice, discount, total, note) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            quotation_number,            // Save quotation_number
+            body.quotation_number,      // Save quotation_number
             body.task_id || '',         // Save task_id from parent quotation
+            item.productId || 0,        // Use productId instead of productName
             item.category || '',
             item.subcategory || '',
-            item.productId || '',
+            item.productName || '',
             item.description || '',
             item.quantity || 0,
             item.unit || '',
             item.unitPrice || 0,
+            item.discount || 0,
             item.total || 0,
             item.note || ''
           ]
@@ -238,18 +240,21 @@ export async function PUT(request: Request) {
       for (const item of body.items) {
         await pool.query(
           `INSERT INTO quotation_items 
-           (quotation_number, task_id, category, subcategory, product,
-            quantity, unit, unit_price, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (quotation_number, task_id, productId, category, subcategory, productName, description,
+            quantity, unit, unitPrice, discount, total, note) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             body.quotation_number,      // Save quotation_number
             body.task_id || '',         // Save task_id from parent quotation
+            item.productId || 0,        // Use productId instead of productName
             item.category || '',
             item.subcategory || '',
+            item.productName || '',
             item.description || '',
             item.quantity || 0,
             item.unit || '',
             item.unitPrice || 0,
+            item.discount || 0,
             item.total || 0,
             item.note || ''
           ]
