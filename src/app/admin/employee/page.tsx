@@ -616,7 +616,6 @@ export default function EmployeePage() {
       };
       
       // Auto-generate UID if not in edit mode and both branch and department are selected
-      // We only need branch and department now, not role
       if (!isEditMode && updated.branch && updated.department) {
         updated.uid = generateUID();
       }
@@ -663,9 +662,7 @@ export default function EmployeePage() {
       return updated;
     });
   };
-  
-  // This function is already defined above, so removing the duplicate declaration
-  
+
   // Add this function with your helper functions
   const generateUID = () => {
     if (!isEditMode && formData.branch && formData.department) {
@@ -701,8 +698,7 @@ export default function EmployeePage() {
   
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Employee Management" />
-      
+      <Breadcrumb pageName="Employee Management" />      
       <div className="flex flex-col gap-5">
         {/* Create/Edit Form Card - Displayed on top when open */}
         {isModalOpen && (
@@ -842,9 +838,6 @@ export default function EmployeePage() {
               
               {/* Contact Information */}
               <div className="mb-4 mt-6">
-                {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
-                  Contact Information
-                </h4> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Phone field */}
                   <div>
@@ -940,9 +933,6 @@ export default function EmployeePage() {
               
               {/* Company Information */}
               <div className="mb-4 mt-6">
-                {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
-                  Company Information
-                </h4> */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Branch field */}
                   <div>
@@ -1011,9 +1001,6 @@ export default function EmployeePage() {
               
               {/* Banking Information */}
               <div className="mb-4 mt-6">
-                {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
-                  Banking Information
-                </h4> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Bank Name field */}
                   <div>
@@ -1111,7 +1098,7 @@ export default function EmployeePage() {
               </button>
             </div>
             
-            {/* Keep the create button */}
+            {/* Create button */}
             {!loadingPermissions && canCreate(MENU, SUBMENU) && (
               <button
                 onClick={openCreateModal}
@@ -1203,7 +1190,7 @@ export default function EmployeePage() {
                             {/* Edit Button */}
                             <button
                               onClick={() => openEditModal(employee)}
-                              className="text-primary hover:text-primary/90" // Changed from blue to primary
+                              className="text-primary hover:text-primary/90"
                               title="Edit employee"
                               disabled={!canEdit(MENU, SUBMENU)}
                             >

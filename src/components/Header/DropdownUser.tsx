@@ -93,7 +93,6 @@ const DropdownUser = () => {
             can use this slot for future feature 
             </li> */}
           </ul>
-          {/* Button log out */}
           <LogoutButton />
         </div>
       )}

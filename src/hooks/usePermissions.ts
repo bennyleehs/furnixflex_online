@@ -40,9 +40,7 @@ const usePermissions = (): UsePermissionsResult => {
       setPermissions([]);
     })
     .finally(() => setLoadingPermissions(false));
-}, []);
-
-  // Empty dependency array means this runs once on component mount
+}, []);  // Empty dependency array means this runs once on component mount
 
   /**
    * Helper to check if a required permission is granted by the user's permissions,

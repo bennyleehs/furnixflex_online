@@ -206,8 +206,6 @@ export async function getUserAccessiblePaths(
     const accessiblePaths: string[] = [...DEFAULT_ACCESS_ROUTES];
     
     const db = createPool();
-
-    // Get user's role from database
     const [rows] = await db.query<RowDataPacket[]>(
       "SELECT role_id FROM users WHERE id = ?",
       [userId],

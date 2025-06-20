@@ -14,9 +14,7 @@ let accessControlCache: AccessControlMap | null = null;
 let cacheTimestamp = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-/**
- * Load access control permissions from JSON file
- */
+//Load access control permissions from JSON file
 export function loadAccessControl(): AccessControlMap {
   const now = Date.now();
   
@@ -75,7 +73,6 @@ export function getDefaultAccessRoutes(): string[] {
   return routes;
 }
 
-// Constants
 export const DEFAULT_ACCESS_ROUTES = getDefaultAccessRoutes();
 
 // Extract all menu items from the sidebar for permission checking
@@ -142,9 +139,7 @@ export function getPermissionsForRole(branch: string, department: string, role: 
   return [];
 }
 
-/**
- * Check if a specific permission value grants access to a path
- */
+// Check if a specific permission value grants access to a path
 export function checkPermissionForPath(permissionId: string, path: string): boolean {
   // For default access routes
   if (DEFAULT_ACCESS_ROUTES.some(route => route === path || path.startsWith(route + "/"))) {

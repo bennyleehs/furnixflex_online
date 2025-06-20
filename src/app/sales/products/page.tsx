@@ -16,8 +16,8 @@ interface Product {
   price: number;
   discount: number;
   unit: string;
-  effective_start_date?: Date | null; // Add start date
-  effective_end_date?: Date | null; // Add end date
+  effective_start_date?: Date | null;
+  effective_end_date?: Date | null;
   task_id?: string;
   created_at?: string;
   updated_at?: string;
@@ -72,11 +72,9 @@ export default function ProductsPage() {
   const [showNewSubcategory, setShowNewSubcategory] = useState(false);
 
   const {
-    canFullAccess,
     canEdit,
     canCreate,
     canDelete,
-    canMonitor,
     loadingPermissions,
   } = usePermissions();
 
@@ -96,7 +94,7 @@ export default function ProductsPage() {
   const createMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
   const editMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
   const deleteMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
-  const monitorMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
+  // const monitorMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
 
   // Ref for the form
   const formRef = useRef<HTMLDivElement>(null);
@@ -514,14 +512,13 @@ export default function ProductsPage() {
                       // Keep the raw string value during typing
                       setFormData({ ...formData, price: inputValue });
                     } else {
-                      // Convert to number once we have a valid number
+                      // Convert to number once got a valid number
                       setFormData({
                         ...formData,
                         price: parseFloat(inputValue) || 0,
                       });
                     }
                   }}
-                  // Removed min="0" to allow negative values
                   step="0.01"
                   className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
                   placeholder="0.00"

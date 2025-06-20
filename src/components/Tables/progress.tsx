@@ -184,9 +184,6 @@ export default function ProgressTable({
 
       {/* Pipeline flow visualization with responsive layout */}
       <div className="mb-6">
-        {/* Hidden the heading as we moved it to the top level */}
-        {/* <h4 className="text-md font-medium mb-2">Pipeline Flow</h4> */}
-
         {/* Desktop view - full pipeline */}
         <div className="border-stroke dark:border-strokedark relative mb-1 hidden border-b py-4 md:flex">
           {stageData.stageInfo.map((info, index) => {
