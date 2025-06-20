@@ -198,7 +198,7 @@ export default function ProgressTable({
             else if (
               ["Deposit", "Production", "Installation"].includes(info.stage)
             ) {
-              bgColorClass = "bg-warning";
+              bgColorClass = "bg-meta-11";
             }
 
             return (
@@ -224,7 +224,7 @@ export default function ProgressTable({
                                     "Production",
                                     "Installation",
                                   ].includes(info.stage)
-                                ? "ring-warning"
+                                ? "ring-meta-11"
                                 : "ring-primary"
                           }`
                         : ""
@@ -255,7 +255,7 @@ export default function ProgressTable({
         </div>
 
         {/* Mobile view - condensed pipeline */}
-        <div className="border-stroke dark:border-strokedark mb-1 flex flex-wrap justify-center gap-3 border-b py-4 md:hidden">
+        <div className="border-stroke dark:border-strokedark mb-1 flex flex-wrap justify-center gap-6 border-b py-4 md:hidden">
           {stageData.stageInfo.map((info, index) => {
             // Determine color based on stage
             let bgColorClass = "bg-primary";
@@ -265,7 +265,7 @@ export default function ProgressTable({
             else if (
               ["Deposit", "Production", "Installation"].includes(info.stage)
             ) {
-              bgColorClass = "bg-warning";
+              bgColorClass = "bg-meta-11";
             }
 
             return (
@@ -280,11 +280,25 @@ export default function ProgressTable({
               >
                 {/* Compact display for mobile */}
                 <div
-                  className={`h-9 w-9 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-xs font-medium shadow-md ${selectedStage === info.stage ? "ring-2 ring-offset-1" : ""}`}
+                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-xs font-medium shadow-md ${
+                    selectedStage === info.stage
+                      ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
+                          info.stage === "Job Done"
+                            ? "ring-success"
+                            : [
+                                  "Deposit",
+                                  "Production",
+                                  "Installation",
+                                ].includes(info.stage)
+                              ? "ring-meta-11"
+                              : "ring-primary"
+                        }`
+                      : ""
+                  } transition-all duration-200`}
                 >
                   {index + 1}
                 </div>
-                <div className="mt-1 max-w-[60px] truncate text-center text-[10px] text-gray-500">
+                <div className="mt-1 max-w-[60px] text-wrap text-center text-[10px] text-black dark:text-white">
                   {info.stage}
                 </div>
                 <div className="text-[10px] font-bold">{info.count}</div>
@@ -410,12 +424,12 @@ export default function ProgressTable({
       </h4>
 
       {/* Changed from space-y-3 to grid with 2 columns */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2">
         {displayedTasks.map((task) => {
           // Determine color based on progress
           let colorClass = "bg-primary";
           if (task.progressPercentage >= 100) colorClass = "bg-success";
-          else if (task.progressPercentage >= 50) colorClass = "bg-warning";
+          else if (task.progressPercentage >= 60) colorClass = "bg-meta-11";
 
           // Parse composite fields into components
           const [name, nric] = (task.name || "")
@@ -504,7 +518,7 @@ export default function ProgressTable({
                         <path d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971ZM128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" />
                       </svg> */}
                       <svg
-                      className="mt-0.5 mr-1.5 h-3.5 w-3.5 text-red-500"
+                        className="mt-0.5 mr-1.5 h-3.5 w-3.5 text-red-500"
                         fill="currentColor"
                         width="800px"
                         height="800px"
@@ -527,7 +541,7 @@ export default function ProgressTable({
                         : ["Deposit", "Production", "Installation"].includes(
                               task.status,
                             )
-                          ? "bg-warning/20 text-warning hover:bg-warning/30 dark:bg-warning/30 dark:hover:bg-warning/40"
+                          ? "bg-meta-11/20 text-warning hover:bg-meta-11/30 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
                           : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-700/30 dark:text-indigo-300 dark:hover:bg-indigo-700/40"
                     } transition-colors`}
                     onClick={() =>
@@ -548,7 +562,7 @@ export default function ProgressTable({
               </div>
 
               {/* Source Info - horizontal and inline layout */}
-              <div className="dark:bg-meta-4 rounded-sm bg-gray-50 px-3 py-2">
+              {/* <div className="dark:bg-meta-4 rounded-sm bg-gray-50 px-3 py-2">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="text-sm font-medium">Source Info: </span>
                   {sourceName && (
@@ -567,7 +581,7 @@ export default function ProgressTable({
                     </span>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               {/* Progress section */}
               <div className="my-2 flex items-center justify-between">
@@ -629,7 +643,7 @@ export default function ProgressTable({
                         : ["Deposit", "Production", "Installation"].includes(
                               task.status,
                             )
-                          ? "bg-warning/10 text-warning"
+                          ? "bg-meta-11/10 text-meta-11"
                           : "bg-primary/10 text-primary"
                     }`}
                   >

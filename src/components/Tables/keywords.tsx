@@ -182,54 +182,77 @@ export default function Tables({
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     if (totalPages <= 1) return null;
 
-    const pages = [];
+    const pages: (number | string)[] = [];
     const maxPagesToShow = 5;
 
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = startPage + maxPagesToShow - 1;
+    const addPage = (page: number | string) => pages.push(page);
 
-    if (endPage > totalPages) {
-      endPage = totalPages;
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
-    }
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) addPage(i);
+    } else {
+      addPage(1);
+      const left = Math.max(currentPage - 1, 2);
+      const right = Math.min(currentPage + 1, totalPages - 1);
 
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+      if (left > 2) addPage("...");
+
+      for (let i = left; i <= right; i++) addPage(i);
+
+      if (right < totalPages - 1) addPage("...");
+      addPage(totalPages);
     }
 
     return (
-      <div className="flex items-center justify-between py-4">
-        <div>
+      <div className="flex flex-col items-center justify-between gap-4 py-4 sm:flex-row sm:items-center">
+        <div className="flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
           <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
             Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}{" "}
             to {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
             <span className="text-primary">{totalItems} entries</span>
           </p>
         </div>
-        <div className="flex space-x-1">
-          <button
-            onClick={() => onPageChange(1)}
-            disabled={currentPage === 1}
-            className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
-          >
-            First
-          </button>
+        <div className="flex flex-wrap justify-center gap-1">
+          {/* <button
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
+        >
+          First
+        </button> */}
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
           >
             Prev
+            <svg
+              className="h-6 w-6 text-white"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="m15 19-7-7 7-7"
+              />
+            </svg>
           </button>
 
-          {pages.map((page) => (
+          {pages.map((page, index) => (
             <button
-              key={page}
-              onClick={() => onPageChange(page)}
+              key={`${page}-${index}`}
+              onClick={() => typeof page === "number" && onPageChange(page)}
+              disabled={page === "..."}
               className={`rounded px-3 py-1 ${
                 currentPage === page
                   ? "bg-primary text-white"
-                  : "hover:bg-primary dark:bg-meta-4 dark:hover:bg-primary bg-gray-200 hover:text-white dark:hover:text-white"
+                  : typeof page === "string"
+                    ? "cursor-default bg-transparent text-gray-500"
+                    : "hover:bg-primary dark:bg-meta-4 dark:hover:bg-primary bg-gray-200 hover:text-white dark:hover:text-white"
               }`}
             >
               {page}
@@ -242,14 +265,29 @@ export default function Tables({
             className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
           >
             Next
+            {/* <svg
+              className="h-6 w-6 text-white"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="m9 5 7 7-7 7"
+              />
+            </svg> */}
           </button>
-          <button
-            onClick={() => onPageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
-          >
-            Last
-          </button>
+          {/* <button
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
+        >
+          Last
+        </button> */}
         </div>
       </div>
     );
@@ -434,25 +472,12 @@ export default function Tables({
           createMenuSubmenu &&
           !loadingPermissions &&
           canCreate(createMenuSubmenu.menu, createMenuSubmenu.submenu) && (
-            <div className="w-full sm:w-auto">
+            <div className="w-full sm:w-30">
               <Link
                 href={createLink || "/"}
-                className="dark:border-strokedark dark:bg-primary dark:hover:bg-primarydark flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
+                className="bg-primary hover:bg-primarydark dark:border-strokedark flex h-full w-full items-center justify-center rounded-md border px-4 py-2 text-white sm:w-auto"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
+                CREATE
               </Link>
             </div>
           )}

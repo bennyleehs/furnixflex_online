@@ -178,7 +178,7 @@ export default function Tables({
                     [key]: e.target.value,
                   }))
                 }
-                className="outline-hidden transition focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs dark:text-white"
+                className="focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs outline-hidden transition dark:text-white"
               >
                 {(filterOptions[key] || []).map((option, index) => (
                   <option key={`${key}-${option.label}`} value={option.label}>
@@ -196,25 +196,12 @@ export default function Tables({
           createMenuSubmenu &&
           !loadingPermissions &&
           canCreate(createMenuSubmenu.menu, createMenuSubmenu.submenu) && (
-            <div className="w-full sm:w-auto">
+            <div className="w-full sm:w-30">
               <Link
                 href={createLink}
-                className="dark:border-strokedark dark:bg-primary dark:hover:bg-primarydark flex h-full w-full items-center justify-center rounded-md border border-black bg-white px-4 py-2 text-black hover:bg-gray-100 sm:w-auto dark:text-white"
+                className="bg-primary hover:bg-primarydark dark:border-strokedark flex h-full w-full items-center justify-center rounded-md border px-4 py-2 text-white sm:w-auto"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
+                CREATE
               </Link>
             </div>
           )}
