@@ -1,5 +1,4 @@
 "use client";
-
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Form from "@/components/FormElements/FormUni";
@@ -199,6 +198,7 @@ export default function Page() {
       title: "Source",
       inputType: "select",
       valueKey: "source",
+      required: true,
       options: [
         { value: "FB", label: "FB" },
         { value: "TikTok", label: "TikTok" },
@@ -214,6 +214,7 @@ export default function Page() {
       title: "Insterested",
       inputType: "select",
       valueKey: "interested",
+      required: true,
       options: [
         { value: "Package", label: "Package" },
         { value: "Non-package", label: "Non-package" },

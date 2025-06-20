@@ -57,7 +57,7 @@ const SignIn = () => {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <div className="container mx-auto sm:mx-40 md:mx-50 2xl:mx-180">
+      <div className="container mx-auto sm:mx-40 md:mx-60 xl:mx-120 2xl:mx-180">
         <div className="w-full max-w-full md:max-w-4xl">
           <div className="flex justify-center sm:p-8 md:p-4 xl:p-6">
             <Image
