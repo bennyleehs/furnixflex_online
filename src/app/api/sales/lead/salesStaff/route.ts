@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const db = createPool();
-
     const sql = `
       SELECT
         u.id,
@@ -19,30 +18,27 @@ export async function GET(req: NextRequest) {
           WHERE sales_id = u.id AND status NOT IN ('Job Done', 'Over Budget', 'Drop Interest')
         ) as task_count
       FROM users u
-      LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN departments d ON u.deptName = d.name
       WHERE d.name = 'Sales' AND u.status = "Active"
       ORDER BY task_count ASC
     `;
 
-    // Execute the query
     const [rows] = await db.query<RowDataPacket[]>(sql);
-
-    // Return the formatted response
     return NextResponse.json(
-      { 
-        employees: rows 
-      }, 
-      { status: 200 }
+      {
+        employees: rows,
+      },
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching sales personnel:", error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         message: "Failed to fetch sales personnel",
-        error: (error as Error).message 
-      }, 
-      { status: 500 }
+        error: (error as Error).message,
+      },
+      { status: 500 },
     );
   }
 }

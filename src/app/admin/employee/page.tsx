@@ -528,19 +528,18 @@ export default function EmployeePage() {
     setFilteredEmployees(filtered);
   }, [branchFilter, departmentFilter, statusFilter, employees]);
 
-  // Function to extract unique options from employee data
-  const extractOptions = () => {
-    const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
-    const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
-    const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
-    
-    setBranchOptions(branches);
-    setDepartmentOptions(departments);
-    setRoleOptions(roles);
-  };
-
   // Call extractOptions whenever employees data changes
   useEffect(() => {
+    const extractOptions = () => {
+      const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
+      const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
+      const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
+      
+      setBranchOptions(branches);
+      setDepartmentOptions(departments);
+      setRoleOptions(roles);
+    };
+
     if (employees.length) {
       extractOptions();
     }
