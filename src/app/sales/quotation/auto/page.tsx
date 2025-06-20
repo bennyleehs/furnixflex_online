@@ -21,6 +21,9 @@ export default function QuotationPage() {
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const hasFetchedData = useRef(false);
 
+  // Add this with your other useState declarations at the top of your component
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+
   // Form states
   const [items, setItems] = useState<QuotationItem[]>([
     {
@@ -478,7 +481,7 @@ export default function QuotationPage() {
         items,
         subtotal,
         discount: totalDiscount || 0,
-        tax,
+        tax: taxAmount || 0,
         total: grandTotal,
         notes,
         terms,
@@ -576,34 +579,81 @@ export default function QuotationPage() {
   };
 
   // Generate PDF quotation
-  const generatePDF = async () => {
-    if (!quotation) {
-      alert("Please save the quotation first");
-      return;
+const generatePDF = async () => {
+  if (!quotation) return;
+  
+  try {
+    setGeneratingPdf(true);
+    
+    // Prepare the data with proper formatting
+    const pdfData = {
+      quotation: {
+        ...quotation,
+        items: items.map(item => ({
+          category: item.category,
+          subcategory: item.subcategory,
+          product: item.productName,
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          discount: item.discount || 0,
+          total: item.total,
+          note: item.note
+        }))
+      },
+      company: {
+        name: "CLASSYPRO Aluminium Kitchen",
+        address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+        phone: "+6016-8866001",
+        email: "inquiry@classy-pro.com",
+        website: "www.classy-pro.com",
+        logo: "/images/logo/classy_logo_gray.png ", // Ensure this path is correct
+      },
+      format: {
+        pageSize: "A4",
+        orientation: "portrait",
+        margins: { top: 50, right: 50, bottom: 50, left: 50 },
+        header: true,
+        footer: true,
+        tableLines: true,
+        currencySymbol: "RM"
+      }
+    };
+    
+    // Call the API endpoint to generate PDF
+    const response = await fetch('/api/sales/quotation/generate-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(pdfData)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to generate PDF');
     }
-
-    try {
-      // This would need to be implemented in your API
-      const response = await fetch(
-        `/api/sales/quotation/pdf?id=${quotation.quotation_number}`,
-        {
-          method: "GET",
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to generate PDF");
-
-      // Create a blob from the PDF Stream
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-
-      // Open the PDF in a new tab
-      window.open(url, "_blank");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF");
-    }
-  };
+    
+    // Get PDF blob and trigger download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `Quotation-${quotation.quotation_number}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    alert('Failed to generate PDF. Please try again.');
+  } finally {
+    setGeneratingPdf(false);
+  }
+};
 
   // Log items changes
   useEffect(() => {

@@ -25,6 +25,8 @@
     "generic-pool": "^3.9.0",
     "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "jsvectormap": "^1.6.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.475.0",
