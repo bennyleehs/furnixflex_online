@@ -60,7 +60,9 @@ export interface Quotation {
   id: string;
   task_id: string;
   customerName: string;
+  customerNric: string;
   customerContact: string;
+  customerEmail: string;
   customerAddress: string;
   quotationDate: string;
   validUntil: string;

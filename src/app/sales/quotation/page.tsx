@@ -85,6 +85,7 @@ export default function QuotationListPage() {
       const data = await response.json();
       setQuotations(data.quotations);
       setTotalQuotations(data.total);
+      console.log("Fetched quotations:", data.quotations);
 
       // Extract unique sales reps for the filter dropdown
       if (data.salesReps) {
@@ -161,13 +162,12 @@ export default function QuotationListPage() {
     }
   };
 
-  // Function to fetch and open the edit modal
-  const handleEditQuotation = async (quotationId: string) => {
+  // Function to redirect to quotation editor with task ID
+  const handleEditQuotation = async (task_id: string) => {
     setIsLoadingQuotation(true);
-    setUpdateError(null);
 
     try {
-      const response = await fetch(`/api/sales/quotation?id=${quotationId}`);
+      const response = await fetch(`/api/sales/quotation?taskId=${task_id}`);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -175,13 +175,20 @@ export default function QuotationListPage() {
       }
 
       const data = await response.json();
-      setEditingQuotation(data.quotation);
-      setIsEditModalOpen(true);
+      
+      // Get the task_id from the quotation data
+      const taskId = data.quotation.task_id;
+      
+      if (!taskId) {
+        alert("This quotation doesn't have an associated task.");
+        return;
+      }
+      
+      // Redirect to the quotation editor with the task ID
+      router.push(`/sales/quotation/auto?taskId=${taskId}`);
     } catch (error) {
       console.error("Error fetching quotation:", error);
-      setUpdateError(
-        error instanceof Error ? error.message : "Failed to load quotation",
-      );
+      alert("Failed to load quotation: " + (error instanceof Error ? error.message : "Unknown error"));
     } finally {
       setIsLoadingQuotation(false);
     }
@@ -445,7 +452,7 @@ export default function QuotationListPage() {
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3.5">
                         <button
-                          onClick={() => handleEditQuotation(quotation.id)}
+                          onClick={() => handleEditQuotation(quotation.task_id)}
                           className="text-primary hover:text-primary/80"
                           title="Edit quotation"
                         >

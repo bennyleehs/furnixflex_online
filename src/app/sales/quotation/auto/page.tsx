@@ -10,6 +10,7 @@ import {
   QuotationItem,
   Quotation,
 } from "@/types/sales-quotation";
+import { set } from "date-fns";
 
 export default function QuotationPage() {
   const searchParams = useSearchParams();
@@ -46,13 +47,13 @@ export default function QuotationPage() {
     "1. This quotation is valid for 14 days from the date of issue.\n2. 50% deposit required to confirm order.\n3. Balance payment due upon completion.",
   );
   // const [discount, setDiscount] = useState(0);
-  const [tax, setTax] = useState(0);
+  const [tax, setTax] = useState(8);
   const [validDays, setValidDays] = useState(14);
   const [editingCustomer, setEditingCustomer] = useState(false);
 
   // Add state variables for calculations
   const [subtotal, setSubtotal] = useState<number>(0);
-  const [taxAmount, setTaxAmount] = useState<number>(8);
+  const [disAmount, setDisAmount] = useState<number>(0);
   const [grandTotal, setGrandTotal] = useState<number>(0);
   const [taxLabel, setTaxLabel] = useState<string>("SST"); // Default tax label
 
@@ -465,12 +466,18 @@ export default function QuotationPage() {
       const quotationData = {
         task_id: taskId,
         customer_name: task?.name || "",
+        customer_nric: task?.nric || "",
         customer_contact: task?.phone1 || "",
+        customer_email: task?.email || "",
+        customer_property: task?.property || "",
+        customer_guard: task?.guard || "",
         customer_address: [
           task?.address_line1,
           task?.address_line2,
           task?.city,
+          task?.postcode,
           task?.state,
+          task?.country,
         ]
           .filter(Boolean)
           .join(", "),
@@ -481,7 +488,7 @@ export default function QuotationPage() {
         items,
         subtotal,
         discount: totalDiscount || 0,
-        tax: taxAmount || 0,
+        tax: tax || 0,
         total: grandTotal,
         notes,
         terms,
@@ -579,81 +586,95 @@ export default function QuotationPage() {
   };
 
   // Generate PDF quotation
-const generatePDF = async () => {
-  if (!quotation) return;
-  
-  try {
-    setGeneratingPdf(true);
-    
-    // Prepare the data with proper formatting
-    const pdfData = {
-      quotation: {
-        ...quotation,
-        items: items.map(item => ({
-          category: item.category,
-          subcategory: item.subcategory,
-          product: item.productName,
-          description: item.description,
-          quantity: item.quantity,
-          unit: item.unit,
-          unitPrice: item.unitPrice,
-          discount: item.discount || 0,
-          total: item.total,
-          note: item.note
-        }))
-      },
-      company: {
-        name: "CLASSYPRO Aluminium Kitchen",
-        address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
-        phone: "+6016-8866001",
-        email: "inquiry@classy-pro.com",
-        website: "www.classy-pro.com",
-        logo: "/images/logo/classy_logo_gray.png ", // Ensure this path is correct
-      },
-      format: {
-        pageSize: "A4",
-        orientation: "portrait",
-        margins: { top: 50, right: 50, bottom: 50, left: 50 },
-        header: true,
-        footer: true,
-        tableLines: true,
-        currencySymbol: "RM"
+  const generatePDF = async () => {
+
+    // if (!quotation) {
+      // Alert the user to save the quotation first
+      const confirmSave = confirm("You need to save the quotation before generating a PDF. Would you like to save now?");
+      
+      if (confirmSave) {
+      // Save as draft and then continue
+      await saveQuotation("draft");
+      // If quotation is still not available after saving, return
+      if (!quotation) {
+        alert("Unable to generate PDF. Please try saving again.");
+        return;
       }
-    };
+      } else {
+      // User declined to save, abort PDF generation
+      return;
+      }
+    // }
     
-    // Call the API endpoint to generate PDF
-    const response = await fetch('/api/sales/quotation/generate-pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(pdfData)
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to generate PDF');
+    try {
+      setGeneratingPdf(true);
+      
+      // Prepare the data with proper formatting
+      const pdfData = {
+        quotation: {
+          ...quotation,
+          items: items.map(item => ({
+            category: item.category,
+            subcategory: item.subcategory,
+            product: item.productName,
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            discount: item.discount || 0,
+            total: item.total,
+            note: item.note
+          }))
+        },
+        company: {
+          name: "CLASSYPRO Aluminium Kitchen",
+          address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          phone: "+6016-8866001",
+          email: "inquiry@classy-pro.com",
+          website: "www.classy-pro.com",
+          logo: "/images/logo/classy_logo_gray.png ", // Ensure this path is correct
+        },
+        format: {
+          pageSize: "A4",
+          orientation: "portrait",
+          margins: { top: 50, right: 50, bottom: 50, left: 50 },
+          header: true,
+          footer: true,
+          tableLines: true,
+          currencySymbol: "RM"
+        }
+      };
+      
+      // Call the API endpoint to generate PDF
+      const response = await fetch('/api/sales/quotation/generate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(pdfData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+      
+      // Get PDF blob and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, `Q-${quotation.quotation_number}.pdf`);
+
+      // Revoke the URL after a small delay to ensure the new window has loaded the PDF
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setGeneratingPdf(false);
     }
-    
-    // Get PDF blob and trigger download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = `Quotation-${quotation.quotation_number}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    
-    // Clean up
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Failed to generate PDF. Please try again.');
-  } finally {
-    setGeneratingPdf(false);
-  }
-};
+  };
 
   // Log items changes
   useEffect(() => {
@@ -757,12 +778,21 @@ const formatWithCommas = (value: number | string): string => {
   // If subtotal is 0, set grand total to 0 regardless of other calculations
   if (subtotal === 0) {
     setGrandTotal(0);
+    setDisAmount(0);
   } else {
     // Otherwise calculate normally: subtotal - discount + tax
-    const finalAmount = subtotal - discount + (taxAmount || 0);
+    // Calculate the discount amount from percentage using the local discount variable
+    const discountAmount = subtotal * (discount / 100);
+    setDisAmount(discountAmount);
+
+    // Calculate the tax amount from percentage (applied after discount)
+    const taxAmount = (subtotal - discountAmount) * (tax / 100);
+
+    // Calculate final amount
+    const finalAmount = subtotal + taxAmount;
     setGrandTotal(finalAmount);
   }
-  }, [items, productLookup, taxAmount]);
+  }, [items, productLookup, tax]);
 
   if (loading) {
     return (
@@ -813,7 +843,7 @@ const formatWithCommas = (value: number | string): string => {
           <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-xs border bg-white p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-black dark:text-white">
-                Customer Information
+                Customer Informations
               </h2>
               <button
                 onClick={() => setEditingCustomer(!editingCustomer)}
@@ -1598,6 +1628,7 @@ const formatWithCommas = (value: number | string): string => {
                                 // Update all relevant fields at once
                                 // updatedItem.description = product.name || "";
                                 updatedItem.productName = product.name || "";
+                                updatedItem.description = product.description || "";
                                 updatedItem.unitPrice = product.price || 0;
                                 updatedItem.discount = product.discount || 0;
                                 updatedItem.unit = product.unit || "unit";
@@ -1784,26 +1815,25 @@ const formatWithCommas = (value: number | string): string => {
             </div>
 
             {/* Summary */}
-            <div className="mt-8 border-t border-gray-200 pt-4">
-              <h3 className="text-lg font-medium mb-3">Summary</h3>
+            <div className="mt-8 border-t border-gray-200 pt-2">
+              <h3 className="text-lg font-medium mb-2">Summary</h3>
               <div className="flex justify-end">
-                <div className="w-3/3">
-                  <div className="flex justify-between border-b border-gray-200 py-1">
+                <div className="w-2/3">
+                  <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>RM {formatWithCommas(subtotal)}</span>
+                    <span>{formatWithCommas(subtotal)}</span>
                   </div>
                   
-                  {/* Discount Row */}
-                  <div className="flex justify-between border-b border-gray-200 py-1 text-danger">
-                    <span>Discount:</span>
-                    <span>- {totalDiscount.toFixed(2)}%</span>
+                  <div className="flex justify-between border-b border-gray-200 py-2 text-danger">
+                    <span>Discount: ({totalDiscount.toFixed(2)})%</span>
+                    <span>- {formatWithCommas(disAmount)}</span>
                   </div>
                   
                   {/* Tax Row (if applicable) */}
                   {taxLabel && (
                     <div className="flex justify-between border-b border-gray-200 py-1">
                       <span>{taxLabel}:</span>
-                      <span>{taxAmount.toFixed(2)}%</span>
+                      <span>{tax}%</span>
                     </div>
                   )}
                   

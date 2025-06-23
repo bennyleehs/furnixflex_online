@@ -6,18 +6,53 @@ import 'jspdf-autotable';
 
 export async function POST(request: Request) {
   try {
+
     const data = await request.json();
+    if (!data || !data.quotation || !data.quotation.task_id) {
+      return NextResponse.json({ error: 'Invalid data provided' }, { status: 400 });
+    }
+    console.log('Received data:', data.quotation.task_id);
+    // Create directory if it doesn't exist
+    const uploadsDir = path.join(process.cwd(), 'public', 'sales', data.quotation.task_id, 'quotation');
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    
+    // Create a safe filename from quotation number
+    const safeFilename = data.quotation.quotation_number.replace(/[^a-zA-Z0-9-_]/g, '_');
+    // const filePath = path.join(uploadsDir, `Quotation-${safeFilename}.pdf`);
+    
+    // Check if file already exists and generate a unique name with incrementing index if needed
+    let fileIndex = 0;
+    let fileName = `Q-${safeFilename}.pdf`;
+    let filePath = path.join(uploadsDir, fileName);
+    
+    while (fs.existsSync(filePath)) {
+      fileIndex++;
+      fileName = `Q-${safeFilename}-${fileIndex.toString()}.pdf`;
+      filePath = path.join(uploadsDir, fileName);
+    }
     
     // Generate PDF using jsPDF
-    const pdfBuffer = await generateQuotationPDF(data);
+    const pdfBuffer = await generateQuotationPDF(data, fileIndex);
     
+    // Save the PDF to the file system
+    fs.writeFileSync(filePath, pdfBuffer);
+    
+    // Return success response with the file path
+    // return NextResponse.json({
+    //   success: true,
+    //   message: 'PDF saved successfully',
+    //   filePath: filePath.replace(process.cwd(), ''),
+    //   fileName: `Q-${safeFilename}.pdf`
+    // });
+
     // Return the PDF
     return new Response(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Quotation-${data.quotation.quotation_number}.pdf"`
+        'Content-Disposition': `attachment; filename="Quotation-${fileName}.pdf"`
       }
     });
+
   } catch (error) {
     console.error('Error generating PDF:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -28,7 +63,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function generateQuotationPDF(data: any): Promise<Buffer> {
+async function generateQuotationPDF(data: any,fileIndex: number): Promise<Buffer> {
   // Create a new jsPDF instance
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -91,16 +126,17 @@ try {
   // Calculate column widths and positions
   const columnWidth = (pageWidth - (2 * margin)) / 3;
   const col1X = margin;
-  const col2X = margin + columnWidth +2;
+  const col2X = margin + columnWidth -5;
   const col3X = margin + (columnWidth * 2) +12;
 
   // Quotation information with labels and values vertically aligned
+  const valueC1 = col1X + 11;
   const labelX = col3X;
-  const valueX = col3X + 10; // Offset for values
+  const valueC3 = col3X + 10; // Offset for values
 
   // Column Headers
-  doc.setFontSize(10);
-  doc.setFont('times', 'normal'); // Using fontLable object
+  doc.setFontSize(12);
+  doc.setFont('courier', 'bold'); // Using fontLable object
   doc.text('CUSTOMER', col1X, sectionTop);
   doc.text('ADDRESS', col2X, sectionTop);
   doc.text('QUOTATION', col3X, sectionTop);
@@ -115,6 +151,14 @@ try {
   // Column Labels
   doc.setFontSize(10);
   doc.setFont('times', 'normal');
+  doc.text('Name:', col1X, sectionTop + 5);
+  doc.text('NRIC:', col1X, sectionTop + 10);
+  doc.text('TEL:', col1X, sectionTop + 15);
+  doc.text('Email:', col1X, sectionTop + 20);
+
+  doc.text('Property:', col2X, sectionTop + 20);
+  doc.text('Access:', col2X+32, sectionTop + 20);
+
   doc.text('REF:', labelX, sectionTop + 5);
   doc.text('Date:', labelX, sectionTop + 10);
   doc.text('PIC:', labelX, sectionTop + 15);
@@ -123,43 +167,79 @@ try {
   // Column Contents
   doc.setFontSize(10);
   doc.setFont('times', 'bold');
-  doc.text(data.quotation.customer_name, col1X, sectionTop + 5);
-  doc.text(data.quotation.customer_contact, col1X, sectionTop + 10);
-  doc.text(data.quotation.customer_email || "", col1X, sectionTop + 15);
+  doc.text(data.quotation.customer_name, valueC1, sectionTop + 5);
+  doc.text(data.quotation.customer_nric || "", valueC1, sectionTop + 10);
+  doc.text(data.quotation.customer_contact, valueC1, sectionTop + 15);
+  doc.text(data.quotation.customer_email || "", valueC1, sectionTop + 20);
+
+  doc.text(data.quotation.customer_property || "", col2X+14, sectionTop + 20);
+  doc.text(data.quotation.customer_guard || "", col2X+44, sectionTop + 20);
 
   // Initialize addressLinesArray with an empty array
   let addressLinesArray = [];
   // Add shipping address if available
   if (data.quotation.customer_address) {
     const shipAddress = data.quotation.customer_address;
-    addressLinesArray = shipAddress.split(',').map((line: string) => line.trim()).filter((line: any) => line);
-    // Display each line with proper spacing
-    addressLinesArray.forEach((line: string | string[], index: number) => {
-      doc.text(line, col2X, sectionTop + 5 + (index * 5));
-    });
+    // First split by commas and trim each part
+    const addressParts = shipAddress.split(',').map((part: string) => part.trim()).filter((part: any) => part);
+    
+    // Format according to specific pattern:
+    // Line 1: First 2 parts
+    // Line 2: Next 3 parts
+    // Line 3: All remaining parts
+    
+    if (addressParts.length > 0) {
+      // First line - first 2 parts with comma at end
+      const firstLine = addressParts.slice(0, 2).join(', ') + ',';
+      addressLinesArray.push(firstLine);
+      
+      // Second line - next 3 parts with comma at end
+      if (addressParts.length > 2) {
+        const secondLine = addressParts.slice(2, 5).join(', ') + ',';
+        addressLinesArray.push(secondLine);
+        
+        // Third line - all remaining parts
+        if (addressParts.length > 5) {
+          const thirdLine = addressParts.slice(5).join(', ');
+          addressLinesArray.push(thirdLine);
+        }
+      }
+      
+      // Display each line with proper spacing
+      addressLinesArray.forEach((line: string, index: number) => {
+        doc.text(line, col2X, sectionTop + 5 + (index * 5));
+      });
+    } else {
+      // Default empty value if no address parts after filtering
+      doc.text('N/A', col2X, sectionTop + 5);
+      addressLinesArray = ['N/A'];
+    }
   } else {
     // Default empty value if no address is provided
     doc.text('N/A', col2X, sectionTop + 5);
     addressLinesArray = ['N/A'];
   }
 
-  doc.text(data.quotation.quotation_number, valueX, sectionTop + 5);
-  doc.text(new Date(data.quotation.quotation_date).toLocaleDateString(), valueX, sectionTop + 10);
-  doc.text('~', valueX+17, sectionTop + 10);
-  doc.text(new Date(data.quotation.valid_until).toLocaleDateString(), valueX +20, sectionTop + 10);
-  doc.text(data.quotation.sales_representative, valueX, sectionTop + 15);
-  // doc.text(data.quotation.payment_terms || '', valueX, sectionTop + 20);
+  doc.text(data.quotation.quotation_number, valueC3, sectionTop + 5);
+  doc.text(`-${fileIndex.toString()}`, valueC3+doc.getTextWidth(data.quotation.quotation_number), sectionTop + 5);
+  doc.text(new Date(data.quotation.quotation_date).toLocaleDateString(), valueC3, sectionTop + 10);
+  doc.text('~', valueC3+17, sectionTop + 10);
+  doc.text(new Date(data.quotation.valid_until).toLocaleDateString(), valueC3 +20, sectionTop + 10);
+  doc.text(data.quotation.sales_representative, valueC3, sectionTop + 15);
+  const salesRepWidth = doc.getTextWidth(data.quotation.sales_representative)+1;
+  doc.text(`(${data.quotation.sales_uid})`, valueC3 + salesRepWidth, sectionTop + 15);
+  // doc.text(data.quotation.payment_terms || '', valueC3, sectionTop + 20);
 
 
   // ----- ITEMS TABLE SECTION -----
   // Starting y position after the header information
-  let yPosition = margin + 35 + (addressLinesArray.length - 1) * 5;
+  let yPosition = margin + 38 + (addressLinesArray.length - 1) * 5;
   
   // Add items table header
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('Items:', margin, yPosition);
-  yPosition += 5;
+  // doc.text('Items:', margin, yPosition);
+  // yPosition += 5;
   
   // Create a manual table since autoTable might not be working
   const colWidths = [10, 80, 15, 20, 30, 30];
@@ -179,10 +259,10 @@ try {
   
   doc.text('No', colPositions[0] + 2, yPosition + 5);
   doc.text('Description', colPositions[1] + 2, yPosition + 5);
-  doc.text('Qty', colPositions[2] + 2, yPosition + 5);
-  doc.text('Unit', colPositions[3] + 2, yPosition + 5);
-  doc.text('Unit Price (RM)', colPositions[4] + 2, yPosition + 5);
-  doc.text('Total (RM)', colPositions[5] + 2, yPosition + 5);
+  doc.text('Qty', colPositions[2] + 19, yPosition + 5);
+  doc.text('Unit', colPositions[3] + 15, yPosition + 5);
+  doc.text('Unit Price', colPositions[4] + 10, yPosition + 5);
+  doc.text('Total (RM)', colPositions[5] + 5, yPosition + 5);
   
   yPosition += 10;
   
@@ -211,10 +291,10 @@ try {
       
       doc.text('No', colPositions[0] + 2, yPosition + 5);
       doc.text('Description', colPositions[1] + 2, yPosition + 5);
-      doc.text('Qty', colPositions[2] + 2, yPosition + 5);
-      doc.text('Unit', colPositions[3] + 2, yPosition + 5);
-      doc.text('Unit Price (RM)', colPositions[4] + 2, yPosition + 5);
-      doc.text('Total (RM)', colPositions[5] + 2, yPosition + 5);
+      doc.text('Qty', colPositions[2] + 19, yPosition + 5);
+      doc.text('Unit', colPositions[3] + 15, yPosition + 5);
+      doc.text('Unit Price', colPositions[4] + 10, yPosition + 5);
+      doc.text('Total (RM)', colPositions[5] + 5, yPosition + 5);
       
       yPosition += 10;
       doc.setTextColor(0, 0, 0);
@@ -241,8 +321,8 @@ try {
     const rowHeight = Math.max(6, descLines.length * 5);
     
     // Right-aligned numeric values
-    doc.text(item.quantity.toString(), colPositions[2] + colWidths[2] - 2, yPosition + 4, { align: 'right' });
-    doc.text(item.unit, colPositions[3] + 2, yPosition + 4);
+    doc.text(item.quantity.toString(), colPositions[2] + colWidths[2] +11, yPosition + 4, { align: 'right' });
+    doc.text(item.unit, colPositions[3] + 16, yPosition + 4);
     doc.text(unitPrice, colPositions[4] + colWidths[4] - 2, yPosition + 4, { align: 'right' });
     doc.text(total, colPositions[5] + colWidths[5] -5, yPosition + 4, { align: 'right' });
     
@@ -267,14 +347,14 @@ try {
   // Subtotal
   doc.setFont('helvetica', 'normal');
   doc.text('Subtotal:', summaryX, summaryY);
-  doc.text(`RM ${parseFloat(data.quotation.subtotal).toFixed(2)}`, 
+  doc.text(`${parseFloat(data.quotation.subtotal).toFixed(2)}`, 
     summaryX + summaryWidth, summaryY, { align: 'right' });
   summaryY += 5;
   
   // Discount (if applicable)
   if (parseFloat(data.quotation.discount) > 0) {
     doc.text('Discount:', summaryX, summaryY);
-    doc.text(`${parseFloat(data.quotation.discount).toFixed(2)}%`, 
+    doc.text(`- ${parseFloat(data.quotation.discount).toFixed(2)}%`, 
       summaryX + summaryWidth, summaryY, { align: 'right' });
     summaryY += 5;
   }

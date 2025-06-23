@@ -19,7 +19,7 @@ interface EventLog {
 async function saveEventLog(taskId: string, log: EventLog) {
   try {
     // Create directory structure if it doesn't exist
-    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
+    const taskDir = path.join(process.cwd(), 'public', 'sales', taskId, 'upload');
     await fs.mkdir(taskDir, { recursive: true });
     
     // Define log file path
@@ -66,7 +66,7 @@ async function saveEventLog(taskId: string, log: EventLog) {
 // Handle file upload
 async function saveFile(taskId: string, file: File) {
   try {
-    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
+    const taskDir = path.join(process.cwd(), 'public', 'sales', taskId, 'upload');
     await fs.mkdir(taskDir, { recursive: true });
     
     // Ensure filename is unique
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Path to task directory
-    const taskDir = path.join(process.cwd(), 'public', 'sales', 'task', taskId, 'upload');
+    const taskDir = path.join(process.cwd(), 'public', 'sales', taskId, 'upload');
     
     // Define log file path
     const logFilePath = path.join(taskDir, `${taskId}log.txt`);

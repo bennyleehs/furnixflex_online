@@ -34,7 +34,7 @@ export default function LeadPage() {
         name: `${item.name} / ${item.nric}`, 
         contact: `${item.phone1} / ${item.phone2} / ${item.email}`,
         address: `${item.address_line1}, ${item.address_line2}, 
-                  ${item.city}, ${item.state}, ${item.country}`,
+                  ${item.city}, ${item.postcode}, ${item.state}, ${item.country}`,
         type: `${item.property} / ${item.guard}`,
         date: new Date(item.created_at).toLocaleDateString(), // Format date as needed
         status: `${item.status}`, 

@@ -92,15 +92,19 @@ export async function POST(request: Request) {
     // Insert new quotation with correct column names (snake_case)
     const [result] = await pool.query(
       `INSERT INTO quotations 
-       (task_id, customer_name, customer_contact, customer_address,
-        quotation_date, valid_until, sales_representative, sales_uid,
+       (task_id, customer_name, customer_nric, customer_contact, customer_email, customer_address,
+        customer_property, customer_guard, quotation_date, valid_until, sales_representative, sales_uid,
         subtotal, discount, tax, total, notes, terms, status, quote_ref, quotation_number) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         body.task_id,
         body.customer_name,
+        body.customer_nric,
         body.customer_contact,
+        body.customer_email,
         body.customer_address || '',
+        body.customer_property || '',
+        body.customer_guard || '',
         body.quotation_date,
         body.valid_until,
         body.sales_representative,
@@ -194,8 +198,12 @@ export async function PUT(request: Request) {
       `UPDATE quotations SET
         task_id = ?,
         customer_name = ?,
+        customer_nric = ?,
         customer_contact = ?,
+        customer_email = ?,
         customer_address = ?,
+        customer_property = ?,
+        customer_guard = ?,
         quotation_date = ?,
         valid_until = ?,
         sales_representative = ?,
@@ -211,8 +219,12 @@ export async function PUT(request: Request) {
       [
         body.task_id,
         body.customer_name,
+        body.customer_nric,
         body.customer_contact,
+        body.customer_email,
         body.customer_address || '',
+        body.customer_property || '',
+        body.customer_guard || '',
         body.quotation_date,
         body.valid_until,
         body.sales_representative,

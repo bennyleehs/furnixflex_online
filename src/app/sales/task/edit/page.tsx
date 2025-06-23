@@ -225,10 +225,24 @@ export default function TaskEditPage() {
       
       // If status is changed to Quotation, navigate to quotation page
       if (newStatus === "Quotation") {
-        // Add a small delay to allow users to see the status change before redirect
-        setTimeout(() => {
-          router.push(`/sales/quotation/auto?taskId=${taskId}`);
-        }, 500);
+        // Check if sales representative is assigned before redirecting
+        if (!task.sales_uid || !task.sales_name) {
+          // Show error or warning notification
+          window.alert("Sales Representative Required: Please assign a sales representative before creating a quotation.");
+          
+          // Optionally revert the status change
+          setTask({
+            ...task,
+            status: oldStatus,
+            stageIndex: pipelineStages.indexOf(oldStatus),
+            progressPercentage: Math.round(((pipelineStages.indexOf(oldStatus) + 1) / pipelineStages.length) * 100)
+          });
+        } else {
+          // Add a small delay to allow users to see the status change before redirect
+          setTimeout(() => {
+            router.push(`/sales/quotation/auto?taskId=${taskId}`);
+          }, 500);
+        }
       }
       
     } catch (error) {
