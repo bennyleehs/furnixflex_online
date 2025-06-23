@@ -40,6 +40,7 @@ export default function Tables({
   >({});
   const router = useRouter();
 
+  // FIX 1: Added 'canDelete' to the destructuring here
   const {
     canFullAccess,
     canEdit,

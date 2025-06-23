@@ -363,7 +363,7 @@ export default function ProgressTable({
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
+              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-hidden focus:border-primary dark:bg-meta-4 dark:text-white"
             />
             {searchQuery && (
               <button

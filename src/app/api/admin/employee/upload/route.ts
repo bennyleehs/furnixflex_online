@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
       // Create a unique filename with appropriate prefix
       const timestamp = Date.now();
       const prefix = fileType === 'photo' ? 'profile' : 'doc';
-      const filename = `${prefix}_${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+      const filename = `${prefix}_${file.name}`;
+    //   const filename = `${prefix}_${timestamp}_${file.name.replace(/\s+/g, '_')}`;
       const filePath = path.join(uploadDir, filename);
       
       // Convert the file to a Buffer and write it to the filesystem

@@ -40,6 +40,37 @@ interface Employee {
   roleName?: string;
 }
 
+// Define the employee type
+interface Employee {
+  id: string;
+  uid: string;
+  name: string;
+  nric: string;
+  phone: string;
+  email: string;
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  state: string;
+  country: string;
+  bank_name: string;
+  bank_account: string;
+  branchRef: string;
+  deptRef?: string;  // Add this
+  branch: string;
+  department: string;
+  role: string;
+  status: string;
+  fullName?: string;
+  contactInfo?: string;
+  fullAddress?: string;
+  bankInfo?: string;
+  position?: string;
+  branchName?: string;
+  deptName?: string;
+  roleName?: string;
+}
+
 export default function EmployeePage() {
   const router = useRouter();
   
@@ -528,6 +559,17 @@ export default function EmployeePage() {
     setFilteredEmployees(filtered);
   }, [branchFilter, departmentFilter, statusFilter, employees]);
 
+  // Function to extract unique options from employee data
+  const extractOptions = () => {
+    const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
+    const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
+    const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
+    
+    setBranchOptions(branches);
+    setDepartmentOptions(departments);
+    setRoleOptions(roles);
+  };
+
   // Call extractOptions whenever employees data changes
   useEffect(() => {
     const extractOptions = () => {
@@ -698,7 +740,8 @@ export default function EmployeePage() {
   
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Employee Management" />      
+      <Breadcrumb pageName="Employee Management" />
+      
       <div className="flex flex-col gap-5">
         {/* Create/Edit Form Card - Displayed on top when open */}
         {isModalOpen && (
@@ -838,6 +881,9 @@ export default function EmployeePage() {
               
               {/* Contact Information */}
               <div className="mb-4 mt-6">
+                {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
+                  Contact Information
+                </h4> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Phone field */}
                   <div>
@@ -933,6 +979,9 @@ export default function EmployeePage() {
               
               {/* Company Information */}
               <div className="mb-4 mt-6">
+                {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
+                  Company Information
+                </h4> */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Branch field */}
                   <div>
@@ -1001,6 +1050,9 @@ export default function EmployeePage() {
               
               {/* Banking Information */}
               <div className="mb-4 mt-6">
+                {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
+                  Banking Information
+                </h4> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Bank Name field */}
                   <div>
@@ -1098,7 +1150,7 @@ export default function EmployeePage() {
               </button>
             </div>
             
-            {/* Create button */}
+            {/* Keep the create button */}
             {!loadingPermissions && canCreate(MENU, SUBMENU) && (
               <button
                 onClick={openCreateModal}
@@ -1190,7 +1242,7 @@ export default function EmployeePage() {
                             {/* Edit Button */}
                             <button
                               onClick={() => openEditModal(employee)}
-                              className="text-primary hover:text-primary/90"
+                              className="text-primary hover:text-primary/90" // Changed from blue to primary
                               title="Edit employee"
                               disabled={!canEdit(MENU, SUBMENU)}
                             >

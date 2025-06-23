@@ -7,7 +7,7 @@ import React, { useEffect, useState, useRef } from "react";
 import usePermissions from "@/hooks/usePermissions"; //custom hook
 
 const MENU = "1";
-const SUBMENU = "2";
+const SUBMENU = "0";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function DepartmentPage() {

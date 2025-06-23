@@ -9,24 +9,11 @@ import { useSearchParams } from "next/navigation";
 import { Column } from '@/types/form';
 
 interface Country {
-  name: {
-    common: string;
-    official: string;
-    nativeName: Record<string, { official: string; common: string; }>;
-  };
-  idd: {
-    root: string;
-    suffixes: string[];
-  };
+  name: string;
+  callingCodes: string[];
   timezones: string[];
-  currencies: Record<string, {
-    name: string;
-    symbol: string;
-  }>;
+  currencies: { code: string; symbol: string }[];
 }
-
-// First, define the allowed countries
-const ALLOWED_COUNTRIES = ['malaysia', 'indonesia', 'philippines'];
 
 export default function BranchPage() {
   const [countries, setCountries] = useState<Country[]>([]);
@@ -40,16 +27,9 @@ export default function BranchPage() {
   useEffect(() => {
     async function fetchCountries() {
       try {
-        setLoading(true);
-        // Create an array of promises for each country fetch
-        const promises = ALLOWED_COUNTRIES.map(country =>
-          fetch(`https://restcountries.com/v3.1/name/${country}`)
-            .then(res => res.json())
-            .then(data => data[0]) // Take first result since API returns array
-        );
-
-        // Wait for all promises to resolve
-        const countriesData = await Promise.all(promises);
+        const res = await fetch("https://restcountries.com/v2/all");
+        if (!res.ok) throw new Error("Failed to fetch countries");
+        const countriesData = await res.json();
         setCountries(countriesData);
       } catch (err) {
         setError("Error fetching countries");
@@ -90,13 +70,13 @@ export default function BranchPage() {
       inputType: "select", 
       valueKey: "country", 
       options: countries.map(country => ({ 
-        id: country.name.common,
-        value: country.name.common,
-        label: country.name.common,
-        idd: country.idd?.root ? `${country.idd.root}${country.idd.suffixes?.[0] || ''}` : '',
+        id: country.name, // Add this line to provide required id
+        value: country.name,
+        label: country.name, 
+        idd: country.callingCodes, 
         timezones: country.timezones,
-        currencies_code: Object.keys(country.currencies || {})[0] || '',
-        currencies_symbol: Object.values(country.currencies || {})[0]?.symbol || ''
+        currencies_code: country.currencies?.[0]?.code || '',
+        currencies_symbol: country.currencies?.[0]?.symbol || ''      
       })) 
     },
     { title: "Time Zone", inputType: "text", valueKey: "time_zone" },

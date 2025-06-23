@@ -16,7 +16,7 @@
           },
           {
             "label": "Admin",
-            "route": "/dashboard/administration"
+            "route": "/dashboard/admin"
           }
         ]
       },
@@ -126,14 +126,20 @@
             "id": "2.4",
             "route": "/sales/quotation"
           },
+
+          {
+            "label": "Customer",
+            "id": "2.5",
+            "route": "/sales/customer"
+          },
           {
             "label": "Invoices",
-            "id": "2.5",
+            "id": "2.6",
             "route": "/sales/invoices"
           },
           {
             "label": "CRM",
-            "id": "2.6",
+            "id": "2.10",
             "route": "/sales/crm"
           }
         ]

@@ -12,6 +12,7 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { setUser } = useAuth();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,10 +62,10 @@ const SignIn = () => {
         <div className="w-full max-w-full md:max-w-4xl">
           <div className="flex justify-center sm:p-8 md:p-4 xl:p-6">
             <Image
-              width={160}
-              height={2}
-              src={"/images/logo/classy_icon.svg"}
-              alt="Logo Classy Pro"
+              src="/images/logo/classy_icon.svg"
+              width={100}
+              height={50}
+              alt="Classy Logo"
             />
           </div>
           <form className="p-4" onSubmit={handleSubmit}>

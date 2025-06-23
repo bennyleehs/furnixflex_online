@@ -10,6 +10,7 @@ import {
   QuotationItem,
   Quotation,
 } from "@/types/sales-quotation";
+import { set } from "date-fns";
 
 export default function QuotationPage() {
   const searchParams = useSearchParams();
@@ -21,34 +22,48 @@ export default function QuotationPage() {
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const hasFetchedData = useRef(false);
 
+  // Add this with your other useState declarations at the top of your component
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+
   // Form states
   const [items, setItems] = useState<QuotationItem[]>([
     {
       id: crypto.randomUUID(),
+      productId: "", // Use string for product ID
       category: "",
       subcategory: "",
-      productId: "",
+      productName: "",
       description: "",
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
       total: 0,
-      note: "", // Initialize with empty note
+      note: "",
+      discount: 0
     },
   ]);
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState(
     "1. This quotation is valid for 14 days from the date of issue.\n2. 50% deposit required to confirm order.\n3. Balance payment due upon completion.",
   );
-  const [discount, setDiscount] = useState(0);
-  const [tax, setTax] = useState(0);
+  // const [discount, setDiscount] = useState(0);
+  const [tax, setTax] = useState(8);
   const [validDays, setValidDays] = useState(14);
   const [editingCustomer, setEditingCustomer] = useState(false);
+
+  // Add state variables for calculations
+  const [subtotal, setSubtotal] = useState<number>(0);
+  const [disAmount, setDisAmount] = useState<number>(0);
+  const [grandTotal, setGrandTotal] = useState<number>(0);
+  const [taxLabel, setTaxLabel] = useState<string>("SST"); // Default tax label
+
+  // Add this with your other state variables
+  const [totalDiscount, setTotalDiscount] = useState<number>(0);
 
   // Add a state for the quotation number
   const [generatedQuotationNumber, setGeneratedQuotationNumber] =
     useState<string>("");
-
+    
   // Categories and products state
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<Record<string, string[]>>(
@@ -237,78 +252,76 @@ export default function QuotationPage() {
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
+        console.log("Raw API response:", data);
 
-        // Debug the structure
-        console.log("API response categories:", data.categories);
+        // Set categories and subcategories directly from API
+        setCategories(data.categories || []);
+        setSubcategories(data.subcategories || {});
 
-        // Clean up categories by trimming whitespace
-        const cleanCategories = (data.categories || []).map((c: string) =>
-          c.trim(),
-        );
-
-        // Organize data by category and subcategory
-        setCategories(cleanCategories);
-
-        // Clean up subcategories
-        const cleanSubcategories: Record<string, string[]> = {};
-        Object.keys(data.subcategories || {}).forEach((category) => {
-          const cleanCategory = category.trim();
-          // Make sure we're not storing empty arrays
-          const categorySubcats = (
-            (data.subcategories as Record<string, string[]>)[category] || []
-          )
-            .map((s) => s.trim())
-            .filter((s) => s); // Filter out empty strings
-
-          if (categorySubcats.length > 0) {
-            cleanSubcategories[cleanCategory] = categorySubcats;
+        // Create a properly structured products object
+        const productsStructure: Record<string, Record<string, Product[]>> = {};
+        
+        // Initialize the structure with all categories and subcategories
+        (data.categories || []).forEach((category: string) => {
+          productsStructure[category] = {};
+          
+          // Add all subcategories for this category
+          if (data.subcategories && data.subcategories[category]) {
+            data.subcategories[category].forEach((subcategory: string) => {
+              productsStructure[category][subcategory] = [];
+            });
           }
         });
-        console.log("Processed subcategories:", cleanSubcategories);
-        setSubcategories(cleanSubcategories);
-
-        // Clean up products
-        const cleanProducts: Record<string, Record<string, Product[]>> = {};
-        Object.keys(data.products || {}).forEach((category) => {
-          const cleanCategory = category.trim();
-          cleanProducts[cleanCategory] = {};
-
-          Object.keys(data.products[category] || {}).forEach((subcategory) => {
-            const cleanSubcategory = subcategory.trim();
-            cleanProducts[cleanCategory][cleanSubcategory] =
-              data.products[category][subcategory];
+        
+        // Populate with products from allProducts array
+        data.allProducts.forEach((product: any) => {
+          const category = product.category;
+          const subcategory = product.subcategory;
+          
+          // Ensure the category and subcategory arrays exist
+          if (!productsStructure[category]) {
+            productsStructure[category] = {};
+          }
+          
+          if (!productsStructure[category][subcategory]) {
+            productsStructure[category][subcategory] = [];
+          }
+          
+          // Add the product to the appropriate category and subcategory
+          productsStructure[category][subcategory].push({
+            id: String(product.id),
+            name: product.name,
+            description: product.description || "",
+            price: product.price,
+            unit: product.unit,
+            discount: product.discount || 0,
+            // Add any other necessary properties
           });
         });
-        setProducts(cleanProducts);
+        
+        console.log("Structured products:", productsStructure);
+        setProducts(productsStructure);
 
-        // Cache product data for quick lookup with clean keys
-        const productMap: Record<
-          string,
-          Product & { category: string; subcategory: string }
-        > = {};
-        Object.keys(data.products || {}).forEach((category) => {
-          const cleanCategory = category.trim();
-          Object.keys(data.products[category] || {}).forEach((subcategory) => {
-            const cleanSubcategory = subcategory.trim();
-            (data.products[category][subcategory] || []).forEach(
-              (product: Product) => {
-                // Always store product IDs as strings
-                productMap[String(product.id)] = {
-                  ...product,
-                  id: String(product.id), // Ensure ID is string in the product object too
-                  category: cleanCategory,
-                  subcategory: cleanSubcategory,
-                };
-              },
-            );
-          });
+        // Build product lookup for quick reference
+        const productMap: Record<string, Product> = {};
+        data.allProducts.forEach((product: any) => {
+          productMap[String(product.id)] = {
+            id: String(product.id),
+            name: product.name,
+            description: product.description || "",
+            price: product.price,
+            unit: product.unit,
+            discount: product.discount || 0,
+            category: product.category,
+            subcategory: product.subcategory,
+            // Add any other necessary properties
+          };
         });
         setProductLookup(productMap);
+        
       } catch (error) {
         console.error("Error fetching products:", error);
-        setProductsError(
-          "Failed to load products from database. Please refresh and try again.",
-        );
+        setProductsError("Failed to load products from database. Please refresh and try again.");
       } finally {
         setLoadingProducts(false);
       }
@@ -316,18 +329,6 @@ export default function QuotationPage() {
 
     fetchProducts();
   }, []);
-
-  // Add a useEffect to log product categories and subcategories
-  useEffect(() => {
-    // Log the first few keys of products to debug
-    console.log("Product categories:", Object.keys(products).slice(0, 3));
-    console.log(
-      "First category subcategories:",
-      Object.keys(products)[0]
-        ? Object.keys(products[Object.keys(products)[0]])
-        : "No categories",
-    );
-  }, [products]);
 
   // Enhanced logging for subcategories
   useEffect(() => {
@@ -341,23 +342,66 @@ export default function QuotationPage() {
     }
   }, [subcategories]);
 
+  // Add a useEffect to log product categories and subcategories
+  useEffect(() => {
+    // Log the first few keys of products to debug
+    console.log("Product categories:", Object.keys(products).slice(0, 3));
+    console.log(
+      "First category subcategories:",
+      Object.keys(products)[0]
+        ? Object.keys(products[Object.keys(products)[0]])
+        : "No categories",
+    );
+  }, [products]);
+
   // Add a new item to the quotation
   const addItem = () => {
     setItems([
       ...items,
       {
         id: crypto.randomUUID(),
+        productId: "", // Use string for product ID
         category: "",
         subcategory: "",
-        productId: "",
+        productName: "",
         description: "",
         quantity: 1, // Not undefined
         unit: "unit", // Not undefined
         unitPrice: 0, // Not undefined
         total: 0, // Not undefined
         note: "",
+        discount: 0
       },
     ]);
+  };
+
+  // Add a new item after the specified item
+  const addItemAfter = (id: string) => {
+    const index = items.findIndex(item => item.id === id);
+    if (index === -1) return;
+    
+    const newItem: QuotationItem = {
+      id: crypto.randomUUID(),
+      productId: "", // Use string for product ID
+      category: "",
+      subcategory: "",
+      productName: "",
+      description: "",
+      quantity: 1,
+      unit: "unit",
+      unitPrice: 0,
+      total: 0,
+      note: "",
+      discount: 0
+    };
+    
+    const newItems = [
+      ...items.slice(0, index + 1),
+      newItem,
+      ...items.slice(index + 1)
+    ];
+    
+    setItems(newItems);
   };
 
   // Remove an item from the quotation
@@ -389,119 +433,86 @@ export default function QuotationPage() {
     );
   };
 
-  // Update the calculateSubtotal function
-  const calculateSubtotal = () => {
-    return items.reduce((sum, item) => {
-      // Ensure item.total is treated as a number
-      const itemTotal = parseFloat(item.total as any) || 0;
-      return sum + itemTotal;
-    }, 0);
-  };
-
-  // Update the calculateTotal function
-  const calculateTotal = () => {
-    const subtotal = calculateSubtotal();
-    // Remove discount calculation - no longer needed
-    const taxAmount = (subtotal * (parseFloat(tax as any) || 0)) / 100;
-
-    return subtotal + taxAmount;
-  };
-
-  // Save quotation
+  // Save quotation with taskId-based upsert logic
   const saveQuotation = async (status: "draft" | "sent" = "draft") => {
     if (!taskId) return;
 
-    const subtotal = calculateSubtotal();
-    const total = calculateTotal();
-
     try {
-      // First, check if a quotation exists for this task ID in the database
-      // if we don't already have one loaded in state
-      if (!quotation?.id) {
-        const checkResponse = await fetch(
-          `/api/sales/quotation?taskId=${taskId}`,
-        );
-
-        if (checkResponse.ok) {
-          const checkData = await checkResponse.json();
-
-          if (checkData.quotation) {
-            // Found existing quotation in database - load it into state
-            setQuotation(checkData.quotation);
-            setItems(checkData.quotation.items || []);
-            setNotes(checkData.quotation.notes || "");
-            setTerms(checkData.quotation.terms || terms);
-            setTax(checkData.quotation.tax || 0);
-
-            // Show notification and return
+      // Always check if a quotation exists for this task ID in the database
+      const checkResponse = await fetch(`/api/sales/quotation?taskId=${taskId}`);
+      let existingQuotation = null;
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        if (checkData.quotation) {
+          existingQuotation = checkData.quotation;
+          
+          // If we didn't have the quotation loaded yet, update our state
+          if (!quotation || quotation.id !== existingQuotation.id) {
+            setQuotation(existingQuotation);
+            setItems(existingQuotation.items || []);
+            setNotes(existingQuotation.notes || "");
+            setTerms(existingQuotation.terms || terms);
+            setTax(existingQuotation.tax || 0);
+            
+            // Show notification
             alert("Found existing quotation. Loaded for editing.");
             return;
           }
         }
       }
 
-      // Continue with normal flow - update if we have a quotation ID, otherwise create new
-      if (quotation?.id) {
-        // Check if anything has changed before sending update request
-        const hasChanges =
-          quotation.salesRepresentative !==
-            (quotation?.salesRepresentative || task?.sales_name || "") ||
-          quotation.salesUID !==
-            (quotation?.salesUID || task?.sales_uid || "") ||
-          quotation.tax !== tax ||
-          quotation.notes !== notes ||
-          quotation.terms !== terms ||
-          quotation.status !== status ||
-          // Deep compare items (simplified version)
-          JSON.stringify(quotation.items) !== JSON.stringify(items);
+      // Prepare common data for both create and update
+      const quotationData = {
+        task_id: taskId,
+        customer_name: task?.name || "",
+        customer_nric: task?.nric || "",
+        customer_contact: task?.phone1 || "",
+        customer_email: task?.email || "",
+        customer_property: task?.property || "",
+        customer_guard: task?.guard || "",
+        customer_address: [
+          task?.address_line1,
+          task?.address_line2,
+          task?.city,
+          task?.postcode,
+          task?.state,
+          task?.country,
+        ]
+          .filter(Boolean)
+          .join(", "),
+        quotation_date: today,
+        valid_until: validUntilString,
+        sales_representative: quotation?.salesRepresentative || task?.sales_name || "",
+        sales_uid: quotation?.salesUID || task?.sales_uid || "",
+        items,
+        subtotal,
+        discount: totalDiscount || 0,
+        tax: tax || 0,
+        total: grandTotal,
+        notes,
+        terms,
+        status,
+      };
 
-        if (!hasChanges) {
-          alert("No changes detected. Quotation remains unchanged.");
-          return;
-        }
-
-        // Prepare update data with existing quotation ID
+      // If we have an existing quotation, update it - otherwise create new
+      if (existingQuotation) {
+        // Add ID and reference fields to update an existing quotation
         const updateData = {
-          id: quotation.id,
-          task_id: taskId,
-          customerName: task?.name || "",
-          customerContact: task?.phone1 || "",
-          customerAddress: [
-            task?.address_line1,
-            task?.address_line2,
-            task?.city,
-            task?.state,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          quotationDate: today,
-          validUntil: validUntilString,
-          salesRepresentative:
-            quotation?.salesRepresentative || task?.sales_name || "",
-          salesUID: quotation?.salesUID || task?.sales_uid || "",
-          items,
-          subtotal,
-          discount: 0,
-          tax,
-          total,
-          notes,
-          terms,
-          status,
-          quote_ref: quotation.quote_ref,
-          quotation_number: quotation.quotation_number,
+          ...quotationData,
+          id: existingQuotation.id,
+          quote_ref: existingQuotation.quote_ref,
+          quotation_number: existingQuotation.quotation_number || generatedQuotationNumber,
         };
 
         // Update existing quotation
-        const response = await fetch(
-          `/api/sales/quotation?id=${quotation.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updateData),
+        const response = await fetch(`/api/sales/quotation`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(updateData),
+        });
 
         if (!response.ok) throw new Error("Failed to update quotation");
 
@@ -531,42 +542,17 @@ export default function QuotationPage() {
         // Generate full quotation_number
         const quotation_number = `${quote_ref}-${runningNumber}`;
 
-        const quotationData = {
-          task_id: taskId,
-          customerName: task?.name || "",
-          customerContact: task?.phone1 || "",
-          customerAddress: [
-            task?.address_line1,
-            task?.address_line2,
-            task?.city,
-            task?.state,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          quotationDate: today,
-          validUntil: validUntilString,
-          salesRepresentative:
-            quotation?.salesRepresentative || task?.sales_name || "",
-          salesUID: quotation?.salesUID || task?.sales_uid || "",
-          items,
-          subtotal,
-          discount: 0,
-          tax,
-          total,
-          notes,
-          terms,
-          status,
-          quote_ref,
-          quotation_number,
-        };
-
         // Create new quotation
         const response = await fetch("/api/sales/quotation", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(quotationData),
+          body: JSON.stringify({
+            ...quotationData,
+            quote_ref,
+            quotation_number,
+          }),
         });
 
         if (!response.ok) throw new Error("Failed to save quotation");
@@ -601,31 +587,92 @@ export default function QuotationPage() {
 
   // Generate PDF quotation
   const generatePDF = async () => {
-    if (!quotation) {
-      alert("Please save the quotation first");
+
+    // if (!quotation) {
+      // Alert the user to save the quotation first
+      const confirmSave = confirm("You need to save the quotation before generating a PDF. Would you like to save now?");
+      
+      if (confirmSave) {
+      // Save as draft and then continue
+      await saveQuotation("draft");
+      // If quotation is still not available after saving, return
+      if (!quotation) {
+        alert("Unable to generate PDF. Please try saving again.");
+        return;
+      }
+      } else {
+      // User declined to save, abort PDF generation
       return;
-    }
-
+      }
+    // }
+    
     try {
-      // This would need to be implemented in your API
-      const response = await fetch(
-        `/api/sales/quotation/pdf?id=${quotation.id}`,
-        {
-          method: "GET",
+      setGeneratingPdf(true);
+      
+      // Prepare the data with proper formatting
+      const pdfData = {
+        quotation: {
+          ...quotation,
+          items: items.map(item => ({
+            category: item.category,
+            subcategory: item.subcategory,
+            product: item.productName,
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            discount: item.discount || 0,
+            total: item.total,
+            note: item.note
+          }))
         },
-      );
-
-      if (!response.ok) throw new Error("Failed to generate PDF");
-
-      // Create a blob from the PDF Stream
+        company: {
+          name: "CLASSYPRO Aluminium Kitchen",
+          address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          phone: "+6016-8866001",
+          email: "inquiry@classy-pro.com",
+          website: "www.classy-pro.com",
+          logo: "/images/logo/classy_logo_gray.png ", // Ensure this path is correct
+        },
+        format: {
+          pageSize: "A4",
+          orientation: "portrait",
+          margins: { top: 50, right: 50, bottom: 50, left: 50 },
+          header: true,
+          footer: true,
+          tableLines: true,
+          currencySymbol: "RM"
+        }
+      };
+      
+      // Call the API endpoint to generate PDF
+      const response = await fetch('/api/sales/quotation/generate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(pdfData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+      
+      // Get PDF blob and trigger download
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, `Q-${quotation.quotation_number}.pdf`);
 
-      // Open the PDF in a new tab
-      window.open(url, "_blank");
+      // Revoke the URL after a small delay to ensure the new window has loaded the PDF
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 1000);
+      
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF");
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setGeneratingPdf(false);
     }
   };
 
@@ -677,6 +724,76 @@ export default function QuotationPage() {
     );
   };
 
+// Add this utility function
+const formatWithCommas = (value: number | string): string => {
+  // Convert to number if it's a string
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  
+  // Handle NaN and null values
+  if (isNaN(num) || num === null) return '0.00';
+  
+  // Format with 2 decimal places
+  const formattedValue = num.toFixed(2);
+  
+  // Only add commas if the number is 1000 or greater
+  if (num >= 1000) {
+    // Split into integer and decimal parts
+    const parts = formattedValue.split('.');
+    
+    // Add commas to the integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    // Join with the decimal part
+    return parts.join('.');
+  }
+  
+  // For numbers less than 1000, just return with 2 decimal places
+  return formattedValue;
+};
+
+  // Add this useEffect to calculate total discount
+  useEffect(() => {
+    // Calculate subtotal and discount
+    let subtotal = 0;
+    let discount = 0;
+    
+    items.forEach(item => {
+      subtotal += Number(item.total) || 0;
+      
+      // Calculate item discount if applicable
+      if (item.productId && productLookup[item.productId]) {
+        const product = productLookup[item.productId];
+        if (product.discount && product.discount > 0) {
+          // Calculate discount amount based on item total and discount percentage
+          // const itemDiscount = (Number(item.total) || 0) * (product.discount / 100);
+          // discount += itemDiscount;
+          discount += product.discount;
+        }
+      }
+    });
+    
+    setSubtotal(subtotal);
+    setTotalDiscount(discount);
+    
+  // If subtotal is 0, set grand total to 0 regardless of other calculations
+  if (subtotal === 0) {
+    setGrandTotal(0);
+    setDisAmount(0);
+  } else {
+    // Otherwise calculate normally: subtotal - discount + tax
+    // Calculate the discount amount from percentage using the local discount variable
+    const discountAmount = subtotal * (discount / 100);
+    setDisAmount(discountAmount);
+
+    // Calculate the tax amount from percentage (applied after discount)
+    const taxAmount = (subtotal - discountAmount) * (tax / 100);
+
+    // Calculate final amount
+    const finalAmount = subtotal + taxAmount;
+    setGrandTotal(finalAmount);
+  }
+  }, [items, productLookup, tax]);
+
   if (loading) {
     return (
       <DefaultLayout>
@@ -726,7 +843,7 @@ export default function QuotationPage() {
           <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-xs border bg-white p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-black dark:text-white">
-                Customer Information
+                Customer Informations
               </h2>
               <button
                 onClick={() => setEditingCustomer(!editingCustomer)}
@@ -1380,7 +1497,7 @@ export default function QuotationPage() {
                     </th>
                     {/* Remove the discount column header */}
                     <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Total
+                      Amount
                     </th>
                     <th className="w-10 px-3 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase"></th>
                   </tr>
@@ -1396,6 +1513,7 @@ export default function QuotationPage() {
                       <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                         {index + 1}
                       </td>
+
                       <td className="px-3 py-2">
                         <div className="grid grid-cols-3 gap-2">
                           {/* Category Dropdown - Fixed Version */}
@@ -1409,9 +1527,10 @@ export default function QuotationPage() {
                               // Create a new complete object rather than multiple updates
                               const updatedItem = {
                                 ...item,
+                                productId:"",
                                 category,
                                 subcategory: "",
-                                productId: "",
+                                productName: "",
                                 description: "",
                                 unitPrice: 0,
                                 unit: "unit",
@@ -1455,8 +1574,9 @@ export default function QuotationPage() {
                               // Update all dependent fields in one go
                               const updatedItem = {
                                 ...item,
+                                productId:"",
                                 subcategory,
-                                productId: "",
+                                productName: "",
                                 description: "",
                                 unitPrice: 0,
                                 unit: "unit",
@@ -1492,108 +1612,47 @@ export default function QuotationPage() {
 
                           {/* Product Dropdown - Fixed Version */}
                           <select
-                            value={item.productId || ""}
+                            value={String(item.productId || "")}
                             onChange={(e) => {
-                              e.stopPropagation();
+                              e.stopPropagation(); // Prevent event bubbling
                               const productId = e.target.value;
-                              console.log("Selected product ID:", productId);
-
-                              // Update all product-related fields in one atomic operation
+                              console.log("Product selected:", productId);
+                              
+                              // Create a complete updated item to avoid multiple state updates
                               const updatedItem = { ...item, productId };
-
-                              // If a product is selected, populate other fields
-                              if (
-                                productId &&
-                                item.category &&
-                                item.subcategory
-                              ) {
-                                console.log(
-                                  "Looking for product in:",
-                                  item.category,
-                                  item.subcategory,
-                                  "Available products:",
-                                  products[item.category]?.[item.subcategory]
-                                    ?.length || 0,
-                                );
-
-                                // First try finding the product in the specified category/subcategory
-                                let selectedProduct = products[item.category]?.[
-                                  item.subcategory
-                                ]?.find(
-                                  (p) => String(p.id) === String(productId),
-                                );
-
-                                // If not found, try the lookup cache as fallback
-                                if (
-                                  !selectedProduct &&
-                                  productLookup[productId]
-                                ) {
-                                  selectedProduct = productLookup[productId];
-                                  console.log(
-                                    "Product found in lookup cache instead",
-                                  );
-                                }
-
-                                if (selectedProduct) {
-                                  console.log(
-                                    "Product found:",
-                                    selectedProduct,
-                                  );
-                                  updatedItem.description =
-                                    selectedProduct.name ||
-                                    selectedProduct.description ||
-                                    "";
-                                  updatedItem.unitPrice =
-                                    selectedProduct.price || 0;
-                                  updatedItem.unit =
-                                    selectedProduct.unit || "unit";
-                                  updatedItem.total =
-                                    (updatedItem.quantity || 1) *
-                                    (selectedProduct.price || 0);
-                                } else {
-                                  console.error(
-                                    "Product not found in either location",
-                                  );
-                                }
+                              
+                              if (productId && productLookup[productId]) {
+                                const product = productLookup[productId];
+                                console.log("Found product in lookup:", product);
+                                
+                                // Update all relevant fields at once
+                                // updatedItem.description = product.name || "";
+                                updatedItem.productName = product.name || "";
+                                updatedItem.description = product.description || "";
+                                updatedItem.unitPrice = product.price || 0;
+                                updatedItem.discount = product.discount || 0;
+                                updatedItem.unit = product.unit || "unit";
+                                
+                                // Calculate total
+                                const quantity = Number(updatedItem.quantity) || 1;
+                                updatedItem.total = quantity * updatedItem.unitPrice;
                               }
-
-                              // Update state with the complete item in one operation
-                              const newItems = items.map((i) =>
-                                i.id === item.id ? updatedItem : i,
-                              );
+                              
+                              // Update the entire item at once
+                              const newItems = items.map(i => i.id === item.id ? updatedItem : i);
                               setItems(newItems);
                             }}
-                            disabled={
-                              !item.category ||
-                              !item.subcategory ||
-                              !(
-                                products[item.category]?.[item.subcategory]
-                                  ?.length > 0
-                              )
-                            }
+                            disabled={!item.category || !item.subcategory}
                             className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                           >
                             <option value="">Select Product</option>
-                            {item.category &&
-                            item.subcategory &&
-                            products[item.category]?.[item.subcategory]
-                              ?.length > 0 ? (
-                              products[item.category][item.subcategory].map(
-                                (product) => (
-                                  <option
-                                    key={product.id}
-                                    value={String(product.id)}
-                                  >
-                                    {product.name || product.description} (
-                                    {`${(product.price || 0).toFixed(2)}`}
-                                  </option>
-                                ),
-                              )
-                            ) : (
-                              <option value="" disabled>
-                                No products available
+                            {item.category && 
+                             item.subcategory && 
+                             products[item.category]?.[item.subcategory]?.map((product) => (
+                              <option key={product.id} value={String(product.id)}>
+                                {product.name}
                               </option>
-                            )}
+                            ))}
                           </select>
                         </div>
 
@@ -1604,24 +1663,24 @@ export default function QuotationPage() {
                           </div>
                         )}
                       </td>
+
+                      {/* Quantity Input with 0.1 Increment/Decrement */}
                       <td className="px-3 py-2">
                         <input
                           type="number"
-                          value={
-                            item.quantity !== undefined ? item.quantity : 0
-                          }
-                          onChange={(e) =>
-                            updateItem(
-                              item.id,
-                              "quantity",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
                           min="1"
-                          step="1"
+                          step="0.1"
+                          value={item.quantity !== undefined ? item.quantity : 0}
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent event bubbling
+                            // Parse the input value as a float
+                            const value = parseFloat(e.target.value);
+                            updateItem(item.id, "quantity", value);
+                          }}
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
+
                       <td className="px-3 py-2">
                         <input
                           type="text"
@@ -1633,35 +1692,48 @@ export default function QuotationPage() {
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                         />
                       </td>
+
+                      {/* Unit Price Column */}
                       <td className="px-3 py-2">
                         <input
-                          type="number"
-                          value={
-                            item.unitPrice !== undefined ? item.unitPrice : 0
-                          }
-                          onChange={(e) =>
-                            updateItem(
-                              item.id,
-                              "unitPrice",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
-                          min="0"
-                          step="0.01"
-                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                          type="text"
+                          value={item.unitPrice ? formatWithCommas(item.unitPrice) : ""}
+                          onFocus={(e) => {
+                            // When focused, show raw number for editing
+                            e.target.value = item.unitPrice?.toString() || "";
+                          }}
+                          onBlur={(e) => {
+                            // When blurred, update with formatted value
+                            const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+                            e.target.value = formatWithCommas(rawValue);
+                          }}
+                          onChange={(e) => {
+                            // Remove any non-numeric characters except decimal point
+                            const value = e.target.value.replace(/[^0-9.]/g, "");
+                            updateItem(item.id, "unitPrice", value);
+                            
+                            // Update total based on quantity and unit price
+                            const quantity = Number(item.quantity) || 0;
+                            const unitPrice = Number(value) || 0;
+                            updateItem(item.id, "total", quantity * unitPrice);
+                          }}
+                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
-                      </td>
+                      </td>                      
+
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
-                          {parseFloat(String(item.total || 0)).toFixed(2)}
+                          {formatWithCommas(item.total)||0}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-center">
-                        {items.length > 1 && (
+                        <div className="flex items-center justify-center space-x-2">
+                          {/* Add Item Button */}
                           <button
                             type="button"
-                            onClick={() => removeItem(item.id)}
-                            className="text-danger hover:text-danger/80"
+                            onClick={() => addItemAfter(item.id)}
+                            className="text-primary hover:text-primary/80"
+                            title="Add item after this row"
                           >
                             <svg
                               className="h-5 w-5"
@@ -1673,11 +1745,35 @@ export default function QuotationPage() {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M6 18L18 6M6 6l12 12"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                               ></path>
                             </svg>
                           </button>
-                        )}
+                          
+                          {/* Delete Button - Only show if there's more than one item */}
+                          {items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="text-danger hover:text-danger/80"
+                              title="Remove this item"
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M6 18L18 6M6 6l12 12"
+                                ></path>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1719,59 +1815,38 @@ export default function QuotationPage() {
             </div>
 
             {/* Summary */}
-            <div>
-              <div className="dark:bg-meta-4 border-stroke dark:border-strokedark rounded-lg border bg-gray-50 p-5">
-                <h3 className="mb-4 font-semibold text-black dark:text-white">
-                  Quotation Summary
-                </h3>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Subtotal:
-                    </span>
-                    <span className="font-medium">
-                      {calculateSubtotal().toFixed(2)}
-                    </span>
+            <div className="mt-8 border-t border-gray-200 pt-2">
+              <h3 className="text-lg font-medium mb-2">Summary</h3>
+              <div className="flex justify-end">
+                <div className="w-2/3">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>{formatWithCommas(subtotal)}</span>
                   </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Tax (%):
-                      </span>
-                      <input
-                        type="number"
-                        value={tax}
-                        onChange={(e) =>
-                          setTax(parseFloat(e.target.value) || 0)
-                        }
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        className="border-stroke dark:bg-boxdark focus:border-primary w-16 rounded-sm border-[1.5px] bg-white px-2 py-1 text-sm outline-hidden transition"
-                      />
+                  
+                  <div className="flex justify-between border-b border-gray-200 py-2 text-danger">
+                    <span>Discount: ({totalDiscount.toFixed(2)})%</span>
+                    <span>- {formatWithCommas(disAmount)}</span>
+                  </div>
+                  
+                  {/* Tax Row (if applicable) */}
+                  {taxLabel && (
+                    <div className="flex justify-between border-b border-gray-200 py-1">
+                      <span>{taxLabel}:</span>
+                      <span>{tax}%</span>
                     </div>
-                    <span className="font-medium">
-                      {(
-                        calculateSubtotal() *
-                        ((parseFloat(tax as any) || 0) / 100)
-                      ).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="border-stroke dark:border-strokedark mt-4 flex items-center justify-between border-t-2 pt-4">
-                    <span className="font-medium text-black dark:text-white">
-                      TOTAL:
-                    </span>
-                    <span className="text-xl font-bold text-black dark:text-white">
-                      {calculateTotal().toFixed(2)}
-                    </span>
+                  )}
+                  
+                  {/* Grand Total */}
+                  <div className="flex justify-between py-2 font-bold">
+                    <span>Grand Total:</span>
+                    <span>RM {formatWithCommas(grandTotal)}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </DefaultLayout>

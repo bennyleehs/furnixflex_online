@@ -41,38 +41,19 @@ async function handler(req: AuthenticatedRequest) {
     }
 
     // Execute the query
-    const [rows] = id
-      ? await db.query<RowDataPacket[]>(sql, [id])
-      : await db.query<RowDataPacket[]>(sql);
+    const [rows] = id ? await db.query<RowDataPacket[]>(sql, [id]) : await db.query<RowDataPacket[]>(sql);
 
     if (id && rows.length === 0) {
-      return NextResponse.json(
-        { message: "Branch not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Branch not found" }, { status: 404 });
     }
 
     // Return the raw rows directly
-    return NextResponse.json(id ? rows[0] : { listBranch: rows }, {
-      status: 200,
-    });
+    return NextResponse.json(id ? rows[0] : { listBranch: rows }, { status: 200 });
   } catch (error) {
     console.error("Error fetching branches:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // Export the route handler with authentication middleware
-export const GET = withAuth(handler, [
-  "1.0.1",
-  "1.0.2",
-  "1.0.3",
-  "1.0.4",
-  "1.1.1",
-  "1.1.2",
-  "1.1.3",
-  "1.1.4",
-]);
+export const GET = withAuth(handler, ["1.0.1","1.0.2","1.0.3","1.0.4"]);

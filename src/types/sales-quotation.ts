@@ -31,21 +31,24 @@ export interface Task {
 export interface Product {
   id: string;
   name: string;
+  description: string;
   price: number;
   unit: string;
-  description?: string;
-  category: string;
-  subcategory: string;
+  discount?: number; // Add this property (optional if not all products have a discount)
+  category?: string;
+  subcategory?: string;
 }
 
 // Quotation item interface
 export interface QuotationItem {
   id: string;
+  productId: string; // Use number for product ID
   category: string;
   subcategory: string;
-  productId: string;
+  productName: string;
   description: string;
   quantity: number;
+  discount: number; // Add discount field
   unit: string;
   unitPrice: number;
   total: number;
@@ -57,7 +60,9 @@ export interface Quotation {
   id: string;
   task_id: string;
   customerName: string;
+  customerNric: string;
   customerContact: string;
+  customerEmail: string;
   customerAddress: string;
   quotationDate: string;
   validUntil: string;

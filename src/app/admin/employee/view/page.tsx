@@ -1,4 +1,3 @@
-//app/admin/employee/view/page/tsx
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -131,12 +130,12 @@ export default function EmployeeDetailPage() {
   const handleBack = () => {
     router.push("/admin/employee");
   };
-
+  
   // Handle profile photo upload
   const handlePhotoUpload = () => {
     fileInputRef.current?.click();
   };
-
+  
   // Update uploadProfilePhoto function
   const uploadProfilePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -204,12 +203,10 @@ export default function EmployeeDetailPage() {
       setUploading(false);
     }
   };
-
   // Handle document upload
   const handleDocumentUpload = () => {
     documentInputRef.current?.click();
   };
-
   // Update uploadDocument function
   const uploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -404,7 +401,6 @@ export default function EmployeeDetailPage() {
       setPasswordError("New password is required");
       return;
     }
-
     if (newPassword.length < 8) {
       setPasswordError("Password must be at least 8 characters long");
       return;
@@ -1013,7 +1009,6 @@ export default function EmployeeDetailPage() {
                               </div>
                             </div>
                           </div>
-
                           <div className="flex items-center space-x-2">
                             <a
                               href={doc.url}

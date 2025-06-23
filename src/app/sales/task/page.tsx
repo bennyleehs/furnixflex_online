@@ -3,7 +3,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 // import Tables from "@/components/Tables/keywords";
 import Tables from "@/components/Tables/progress";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 export default function Page() {
   const [data, setData] = useState([]);

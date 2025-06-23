@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const sanitizedFileName = fileName.replace(/\.\./g, '').replace(/\//g, '');
     
     // Construct file path
-    const taskDir = path.join(process.cwd(), 'src', 'data', 'sales', 'task', taskId);
+    const taskDir = path.join(process.cwd(), 'public', 'sales', taskId, 'upload');
     const filePath = path.join(taskDir, sanitizedFileName);
     
     // Check if file exists
