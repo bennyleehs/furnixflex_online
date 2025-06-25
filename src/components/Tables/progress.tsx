@@ -309,7 +309,7 @@ export default function ProgressTable({
       <div className="mb-4">
         <div className="flex flex-wrap items-center justify-between">
           {/* Sales rep filters with dark mode support */}
-          <div className="mb-2 flex flex-wrap gap-2 md:mb-0">
+          <div className="mb-2 flex flex-wrap gap-2 md:mb-0 lg:mb-2">
             <button
               className={`rounded-full px-3 py-1 text-xs ${
                 !selectedPIC
@@ -357,7 +357,7 @@ export default function ProgressTable({
           </div>
 
           {/* Search input - right side */}
-          <div className="relative w-full md:w-auto md:min-w-[200px]">
+          <div className="relative w-full lg:mt-0  md:mt-4 md:w-auto md:min-w-[200px]">
             <input
               type="text"
               placeholder="Search tasks..."

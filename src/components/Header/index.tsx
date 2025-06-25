@@ -11,7 +11,7 @@ const Header = (props: {
 }) => {
   return (
     <header className="drop-shadow-1 dark:bg-boxdark sticky top-0 z-999 flex w-full bg-white dark:drop-shadow-none">
-      <div className="shadow-2 flex grow items-center justify-between px-4 py-4 md:px-6 2xl:px-8">
+      <div className="shadow-2 flex grow items-center justify-between px-4 py-2 md:px-6 2xl:px-8">
         <div className="flex items-center gap-2 sm:gap-4">
           {/* <!-- Hamburger Toggle BTN --> */}
           <div className="flex items-center gap-2 sm:gap-4 lg:hidden">

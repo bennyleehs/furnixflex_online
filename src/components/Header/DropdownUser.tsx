@@ -55,7 +55,7 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
         <div
-          className={`border-stroke shadow-default dark:border-strokedark dark:bg-boxdark absolute right-0 mt-5 flex w-62.5 flex-col rounded-lg border bg-white`}
+          className={`border-stroke shadow-default dark:border-strokedark dark:bg-boxdark absolute right-0 mt-2.5 flex w-62.5 flex-col rounded-lg border bg-white`}
         >
           <span className="border-stroke dark:border-strokedark block items-center gap-3.5 border-b px-6 py-2 duration-300 ease-in-out lg:hidden lg:text-base">
             <span className="block font-medium text-black dark:text-white">
