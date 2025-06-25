@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "./styles.css"; // Import the CSS file
+import usePermissions from "@/hooks/usePermissions";
 
 interface TableProps {
   columns: { key: string; title: string }[]; // Defines column keys & titles
@@ -16,6 +17,11 @@ interface TableProps {
   onFilterChange?: (key: string, value: string) => void; // Callback for filter changes
   onSearchChange?: (query: string) => void; // Add new prop for search changes
   selectedStatus?: string; // Add this new prop
+  showCreateButton?: boolean; //prop to control button visibility (from parent)
+  createPermissionPrefix?: string; // To control the create button
+  editPermissionPrefix?: string; // To control the edit button
+  deletePermissionPrefix?: string; // To control the delete button
+  monitorPermissionPrefix?: string; // To control overall visibility (hiding all buttons)
 }
 
 export default function Tables({
@@ -31,15 +37,53 @@ export default function Tables({
   onFilterChange,
   onSearchChange, // Add onSearchChange to props
   selectedStatus = "All", // Default to "Active" if not provided
+  showCreateButton = true, // Default to true for backward compatibility
+  createPermissionPrefix,
+  editPermissionPrefix,
+  deletePermissionPrefix,
+  monitorPermissionPrefix,
 }: TableProps) {
   const [tableData, setTableData] = useState(data);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
-  const [filterOptions, setFilterOptions] = useState<Record<string, { label: string; count: number }[]>>({});
-  const [searchQuery, setSearchQuery] = useState(''); // Add new state for search query
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, string>
+  >({});
+  const [filterOptions, setFilterOptions] = useState<
+    Record<string, { label: string; count: number }[]>
+  >({});
+  const [searchQuery, setSearchQuery] = useState(""); // Add new state for search query
   const router = useRouter();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Ref for search timeout
-  const [filterCounts, setFilterCounts] = useState<Record<string, Record<string, number>>>({});
+  const [filterCounts, setFilterCounts] = useState<
+    Record<string, Record<string, number>>
+  >({});
+
+  const {
+    canFullAccess,
+    canEdit,
+    canCreate,
+    canDelete,
+    canMonitor,
+    loadingPermissions,
+  } = usePermissions();
+
+  const getMenuSubmenu = (
+    permissionPrefix?: string,
+  ): { menu: string; submenu: string } | null => {
+    if (!permissionPrefix) {
+      return null;
+    }
+    const parts = permissionPrefix.split(".");
+    if (parts.length >= 2) {
+      return { menu: parts[0], submenu: parts[1] };
+    }
+    return null;
+  };
+
+  const createMenuSubmenu = getMenuSubmenu(createPermissionPrefix);
+  const editMenuSubmenu = getMenuSubmenu(editPermissionPrefix);
+  const deleteMenuSubmenu = getMenuSubmenu(deletePermissionPrefix);
+  const monitorMenuSubmenu = getMenuSubmenu(monitorPermissionPrefix);
 
   useEffect(() => {
     // Initialize with the selected status from props
@@ -57,9 +101,13 @@ export default function Tables({
       data.forEach((row) => {
         const cellValue = row[col.key]?.toString() || "";
         const segments = cellValue.split(/[/,]/); // Split by '/' or ','
-        segments.forEach((segment: { trim: () => { (): any; new(): any; length: number; }; }) => {
-          maxLength = Math.max(maxLength, segment.trim().length); // Find the longest segment
-        });
+        segments.forEach(
+          (segment: {
+            trim: () => { (): any; new (): any; length: number };
+          }) => {
+            maxLength = Math.max(maxLength, segment.trim().length); // Find the longest segment
+          },
+        );
       });
       return maxLength * 8; // Approximate width in pixels (8px per character)
     });
@@ -69,56 +117,57 @@ export default function Tables({
   useEffect(() => {
     // Always start with the original data
     let filteredData = [...data];
-    
+
     // First apply all dropdown filters (including status)
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (value !== "All") {
         filteredData = filteredData.filter((row) => row[key] === value);
       }
     });
-    
+
     // Then apply search filter on the status-filtered data
-    if (searchQuery.trim() !== '') {
+    if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase().trim();
       filteredData = filteredData.filter((row) => {
         // Search through all column values
-        return columns.some(column => {
+        return columns.some((column) => {
           const cellValue = row[column.key];
-          return cellValue && 
-            cellValue.toString().toLowerCase().includes(query);
+          return (
+            cellValue && cellValue.toString().toLowerCase().includes(query)
+          );
         });
       });
     }
-    
+
     // Update the tableData with filtered results
     setTableData(filteredData);
-    
+
     // Rest of your filter options calculation...
   }, [selectedFilters, searchQuery, data, columns, filterKeys]);
 
   useEffect(() => {
     // Set table data
     setTableData(data);
-    
+
     // Calculate counts for all filter keys that don't have pre-calculated counts
     const newFilterCounts: Record<string, Record<string, number>> = {};
-    
-    filterKeys.forEach(key => {
+
+    filterKeys.forEach((key) => {
       // Skip status if we already have statusCounts
       if (key === "status" && statusCounts) return;
-      
+
       // Calculate counts for this filter key
       const counts: Record<string, number> = {};
-      data.forEach(row => {
+      data.forEach((row) => {
         const value = String(row[key] || "");
         counts[value] = (counts[value] || 0) + 1;
       });
-      
+
       newFilterCounts[key] = counts;
     });
-    
+
     setFilterCounts(newFilterCounts);
-    
+
     // Existing code...
   }, [data, columns, filterKeys, statusCounts]);
 
@@ -126,9 +175,10 @@ export default function Tables({
     router.push(`${createLink || "/"}?id=${row.id}`);
   };
 
+  // pagination
   const renderPagination = () => {
     if (!totalItems || !onPageChange) return null;
-    
+
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     if (totalPages <= 1) return null;
 
@@ -151,11 +201,11 @@ export default function Tables({
       if (right < totalPages - 1) addPage("...");
       addPage(totalPages);
     }
-    
+
     return (
       <div className="flex flex-col items-center justify-between gap-4 py-4 sm:flex-row sm:items-center">
-        <div className="flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
-          <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
+        <div className="flex w-full flex-col space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2 sm:text-center md:items-start">
+          <p className="text-center text-sm font-bold text-gray-500 dark:text-gray-400">
             Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}{" "}
             to {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
             <span className="text-primary">{totalItems} entries</span>
@@ -172,11 +222,10 @@ export default function Tables({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-1 rounded-sm bg-gray-200 disabled:opacity-50"
+            className="bg-primary flex items-center rounded-sm py-1 pr-2 text-white hover:opacity-80 disabled:opacity-50"
           >
-            Prev
             <svg
-              className="h-6 w-6 text-white"
+              className="h-5 w-5 text-white"
               width="24"
               height="24"
               fill="none"
@@ -190,6 +239,7 @@ export default function Tables({
                 d="m15 19-7-7 7-7"
               />
             </svg>
+            Prev
           </button>
 
           {pages.map((page, index) => (
@@ -208,15 +258,15 @@ export default function Tables({
               {page}
             </button>
           ))}
-          
+
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded-sm bg-gray-200 disabled:opacity-50"
+            className="bg-primary flex items-center rounded-sm py-1 pl-2 text-white hover:opacity-80 disabled:opacity-50"
           >
             Next
-            {/* <svg
-              className="h-6 w-6 text-white"
+            <svg
+              className="h-5 w-5 text-white"
               width="24"
               height="24"
               fill="none"
@@ -229,7 +279,7 @@ export default function Tables({
                 strokeWidth="2"
                 d="m9 5 7 7-7 7"
               />
-            </svg> */}
+            </svg>
           </button>
           {/* <button
           onClick={() => onPageChange(totalPages)}
@@ -249,12 +299,12 @@ export default function Tables({
       ...prev,
       [key]: value,
     }));
-    
+
     // Call parent component's filter handler if provided
     if (onFilterChange) {
       onFilterChange(key, value);
     }
-    
+
     // Reset to page 1 when filter changes
     if (onPageChange) {
       onPageChange(1);
@@ -263,44 +313,47 @@ export default function Tables({
 
   const renderFilter = (key: string) => {
     // Determine which counts object to use
-    const counts = key === "status" && statusCounts 
-      ? statusCounts 
-      : filterCounts[key] || {};
-    
+    const counts =
+      key === "status" && statusCounts ? statusCounts : filterCounts[key] || {};
+
     // Get unique values for this key (if no counts available)
-    let options: Array<{value: string, label: string, count: number}> = [];
-    
+    let options: Array<{ value: string; label: string; count: number }> = [];
+
     if (Object.keys(counts).length > 0) {
       // Create options from counts
       options = Object.entries(counts).map(([value, count]) => ({
         value: value === "null" ? "" : value,
         label: value === "null" ? "(Empty)" : value,
-        count
+        count,
       }));
     } else {
       // Fallback to unique values without counts
-      const uniqueValues = [...new Set(data.map(row => String(row[key] || "")))];
-      options = uniqueValues.map(value => ({
+      const uniqueValues = [
+        ...new Set(data.map((row) => String(row[key] || ""))),
+      ];
+      options = uniqueValues.map((value) => ({
         value,
         label: value || "(Empty)",
-        count: 0
+        count: 0,
       }));
     }
-    
+
     // Add "All" option
     options.unshift({ value: "All", label: "All", count: totalItems });
-    
-    // Remove the mb-4 mr-4 margins that were pushing elements apart
+
     return (
-      <div>
+      <div className="flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
         <select
           id={`filter-${key}`}
           value={selectedFilters[key] || "All"}
           onChange={(e) => handleFilterChange(key, e.target.value)}
-          className="p-2 border rounded-sm min-w-[130px]"
+          className="focus:border-primary dark:focus:border-primary border-stroke dark:border-strokedark dark:bg-meta-4 w-full rounded-md border bg-white px-4 py-2 text-gray-700 shadow-xs outline-hidden transition dark:text-white"
         >
           {options.map((option, index) => (
-            <option key={`${key}-${option.value}-${index}`} value={option.value}>
+            <option
+              key={`${key}-${option.value}-${index}`}
+              value={option.value}
+            >
               {option.label} ({option.count})
             </option>
           ))}
@@ -310,32 +363,39 @@ export default function Tables({
   };
 
   return (
-    <div className="rounded-lg border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-2">
+    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-2">
       {/* Table Header with inline filters & search */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         {/* Filter area - make everything inline */}
-        <div className="flex items-center flex-wrap gap-3 flex-1">
+        <div className="flex w-full flex-wrap gap-4">
           {filterKeys.map((key) => (
-            <div key={key} className="flex items-center space-x-1">
-              <span className="text-sm font-medium whitespace-nowrap">{key.charAt(0).toUpperCase() + key.slice(1)}:</span>
+            <div
+              key={key}
+              className="flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2"
+            >
+              <label
+                htmlFor={`filter-dropdown-${key}`}
+                className="text-sm font-medium text-gray-700 dark:text-white"
+              >
+                {key.charAt(0).toUpperCase() + key.slice(1)}:
+              </label>
               {renderFilter(key)}
             </div>
           ))}
-          
+
           {/* Search and Results Count Container */}
-          <div className="flex items-center space-x-2">
-            {/* Search Input */}
-            <div className="relative w-[200px]">
+          {/* Search Input */}
+          <div className="relative flex w-full flex-col items-start space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
+            <div className="relative w-full md:w-[200px]">
               <input
                 type="text"
-                placeholder={`Search in ${selectedFilters['status'] || 'All'}...`}
-                className="border border-stroke dark:border-strokedark px-8 py-2 rounded-sm text-sm w-full"
+                placeholder={`Search in ${selectedFilters["status"] || "All"}...`}
+                className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-4 py-2 text-sm transition outline-none"
                 value={searchQuery}
                 onChange={(e) => {
                   const newQuery = e.target.value;
                   setSearchQuery(newQuery);
-                  
-                  // Debounce logic remains the same...
+
                   if (onSearchChange) {
                     if (searchTimeoutRef.current) {
                       clearTimeout(searchTimeoutRef.current);
@@ -349,8 +409,8 @@ export default function Tables({
                   }
                 }}
               />
-              <svg
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400"
+              {/* <svg
+                className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -362,14 +422,14 @@ export default function Tables({
                   strokeWidth={2}
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
-              </svg>
+              </svg> */}
               {searchQuery && (
                 <button
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 dark:text-gray-400"
                   onClick={() => {
-                    setSearchQuery('');
+                    setSearchQuery("");
                     if (onSearchChange) {
-                      onSearchChange('');
+                      onSearchChange("");
                     }
                     if (onPageChange) {
                       onPageChange(1);
@@ -381,6 +441,7 @@ export default function Tables({
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    className="h-4 w-4"
                   >
                     <path
                       strokeLinecap="round"
@@ -392,16 +453,17 @@ export default function Tables({
                 </button>
               )}
             </div>
-            
-            {/* Results count text */}
-            {/* <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+          </div>
+
+          {/* Results count text */}
+          {/* <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
               {searchQuery ? 
                 `Showing ${tableData.length} of ${totalItems} total results for "${searchQuery}"` : 
                 selectedFilters['status'] && selectedFilters['status'] !== 'All' ?
                   `Showing ${Math.min(tableData.length, totalItems)} of ${totalItems} ${selectedFilters['status']} records` :
                   `Showing ${Math.min(itemsPerPage, totalItems)} of ${totalItems} records`}
             </span> */}
-          </div>
+          {/* </div> */}
         </div>
 
         {/* Create Button */}
@@ -425,17 +487,17 @@ export default function Tables({
       <div className="max-w-full overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+            <tr className="bg-gray-2 dark:bg-meta-4 text-left">
               {columns.map((col, index) => (
                 <th
                   key={col.key}
                   style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
-                  className="px-2 py-4 font-medium text-black dark:text-white xl:pl-6"
+                  className="px-2 py-4 font-medium text-black xl:pl-6 dark:text-white"
                 >
                   {col.title}
                 </th>
               ))}
-              <th className="min-w-[140px] px-2 py-4 font-medium text-black dark:text-white xl:pl-6">
+              <th className="min-w-[140px] px-2 py-4 font-medium text-black xl:pl-6 dark:text-white">
                 Overview/Options
               </th>
             </tr>
@@ -447,31 +509,67 @@ export default function Tables({
                   <td
                     key={col.key}
                     style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
-                    className="border-b border-[#eee] px-2 py-5 dark:border-strokedark xl:pl-6"
+                    className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6"
                   >
                     {row[col.key]}
                   </td>
                 ))}
                 {/* action */}
-                <td className="border-b border-[#eee] px-2 py-5 dark:border-strokedark xl:pl-6">
+                <td className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6">
                   <div className="flex items-center space-x-6">
-                    <button
-                      className="hover:text-primary"
-                      onClick={() => handleEdit(row)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="fill-current"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 576 512"
-                      >
-                        <path
-                          d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
-                          fill=""
-                        />
-                      </svg>
-                    </button>
+                    {!loadingPermissions && ( // Only render buttons if permissions are loaded
+                      <>
+                        {/* Edit Button */}
+                        {editMenuSubmenu &&
+                          canEdit(
+                            editMenuSubmenu.menu,
+                            editMenuSubmenu.submenu,
+                          ) && (
+                            <button
+                              className="hover:text-primary"
+                              onClick={() => handleEdit(row)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="fill-current"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 576 512"
+                              >
+                                <path
+                                  d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
+                                  fill=""
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        {deleteMenuSubmenu &&
+                          canDelete(
+                            deleteMenuSubmenu.menu,
+                            deleteMenuSubmenu.submenu,
+                          ) && (
+                            <button
+                              className="hover:text-red"
+                              title="Mark as History"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                              </svg>
+                            </button>
+                          )}
+                      </>
+                    )}
                     <button className="hover:text-primary">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -500,4 +598,3 @@ export default function Tables({
     </div>
   );
 }
-

@@ -25,38 +25,7 @@ interface Employee {
   bank_name: string;
   bank_account: string;
   branchRef: string;
-  deptRef?: string;  // Add this
-  branch: string;
-  department: string;
-  role: string;
-  status: string;
-  fullName?: string;
-  contactInfo?: string;
-  fullAddress?: string;
-  bankInfo?: string;
-  position?: string;
-  branchName?: string;
-  deptName?: string;
-  roleName?: string;
-}
-
-// Define the employee type
-interface Employee {
-  id: string;
-  uid: string;
-  name: string;
-  nric: string;
-  phone: string;
-  email: string;
-  address_line1: string;
-  address_line2: string;
-  city: string;
-  state: string;
-  country: string;
-  bank_name: string;
-  bank_account: string;
-  branchRef: string;
-  deptRef?: string;  // Add this
+  deptRef?: string; // Add this
   branch: string;
   department: string;
   role: string;
@@ -73,71 +42,72 @@ interface Employee {
 
 export default function EmployeePage() {
   const router = useRouter();
-  
+
   // Data states
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false);
-  
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
-    uid: '',
-    name: '',
-    nric: '',
-    phone: '',
-    email: '',
-    address_line1: '',
-    address_line2: '',
-    city: '',
-    state: '',
-    country: '',
-    bank_name: '',
-    bank_account: '',
-    branchRef: '',
-    branch: '',
-    department: '',
-    role: '',
-    status: '',
+    uid: "",
+    name: "",
+    nric: "",
+    phone: "",
+    email: "",
+    address_line1: "",
+    address_line2: "",
+    city: "",
+    state: "",
+    country: "",
+    bank_name: "",
+    bank_account: "",
+    branchRef: "",
+    branch: "",
+    department: "",
+    role: "",
+    status: "",
   });
-  
+
   // Edit mode state
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState<Employee | null>(null);
-  
+
   // Permissions
-  const { canCreate, canEdit, canDelete, loadingPermissions } = usePermissions();
-  
+  const { canCreate, canEdit, canDelete, loadingPermissions } =
+    usePermissions();
+
   // Filter states
-  const [branchFilter, setBranchFilter] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  
+  const [branchFilter, setBranchFilter] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
   // Add these state variables with your other state declarations
   const [branchOptions, setBranchOptions] = useState<string[]>([]);
   const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
   const [roleOptions, setRoleOptions] = useState<string[]>([]);
   const [branchesData, setBranchesData] = useState<any[]>([]);
   const [departmentsData, setDepartmentsData] = useState<any[]>([]);
-  
+
   // Fetch employees data
   const fetchEmployees = async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/admin/employee");
-      
+
       if (!res.ok) {
         throw new Error("Failed to fetch employees");
       }
-      
+
       const data = await res.json();
-      
+
       // Format employee data
-      const formattedData = data.listEmployee.map((employee:any) => ({
+      const formattedData = data.listEmployee.map((employee: any) => ({
         ...employee,
         id: `${employee.id}`,
         uid: `${employee.uid}`,
@@ -147,106 +117,115 @@ export default function EmployeePage() {
         bankInfo: `${employee.bank_name}, ${employee.bank_account}`,
         position: `${employee.branchName} / ${employee.deptName} / ${employee.roleName}`,
       }));
-      
+
       setEmployees(formattedData);
       setFilteredEmployees(formattedData);
     } catch (err) {
-      setError("Error fetching employees: " + (err instanceof Error ? err.message : String(err)));
+      setError(
+        "Error fetching employees: " +
+          (err instanceof Error ? err.message : String(err)),
+      );
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-  
+
   // Initial data fetch
   useEffect(() => {
     // Remove the hasFetchedData.current check to allow reloading when page changes
     fetchEmployees();
     fetchOptionsData();
-    
+
     // Add a router event listener for page changes
     const handleRouteChange = () => {
       fetchEmployees();
       fetchOptionsData();
     };
-    
+
     // Clean up event listener on component unmount
     return () => {
       // If using Next.js Router, you'd clean up the event listener here
     };
   }, []); // Keep the empty dependency array
-  
+
   // Handle form input changes
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    
+
     // Don't allow direct changes to UID in create mode if we have all three values
-    if (name === 'uid' && !isEditMode && formData.branch && formData.department && formData.role) {
+    if (
+      name === "uid" &&
+      !isEditMode &&
+      formData.branch &&
+      formData.department &&
+      formData.role
+    ) {
       return; // Prevent manual changes to auto-generated UIDs
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  
+
   // Handle filter changes
-  const handleFilterChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleFilterChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    
-    switch(name) {
-      case 'branch':
+
+    switch (name) {
+      case "branch":
         setBranchFilter(value);
         break;
-      case 'department':
+      case "department":
         setDepartmentFilter(value);
         break;
-      case 'status':
+      case "status":
         setStatusFilter(value);
         break;
     }
   };
-  
+
   // Open modal to create new employee
   const openCreateModal = () => {
     // Reset form data
     setFormData({
-      uid: '',
-      name: '',
-      nric: '',
-      phone: '',
-      email: '',
-      address_line1: '',
-      address_line2: '',
-      city: '',
-      state: '',
-      country: '',
-      bank_name: '',
-      bank_account: '',
-      branchRef: '',
-      branch: '',
-      department: '',
-      role: '',
-      status: '',
+      uid: "",
+      name: "",
+      nric: "",
+      phone: "",
+      email: "",
+      address_line1: "",
+      address_line2: "",
+      city: "",
+      state: "",
+      country: "",
+      bank_name: "",
+      bank_account: "",
+      branchRef: "",
+      branch: "",
+      department: "",
+      role: "",
+      status: "",
     });
     setCurrentEmployee(null);
     setIsEditMode(false);
     setIsModalOpen(true);
   };
-  
+
   // Close modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
-  
+
   // Create new employee
-  const createEmployee = async (e: { preventDefault: () => void; }) => {
+  const createEmployee = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
-      
+
       // Map form fields to match database column names
       const mappedData = {
         ...formData,
@@ -254,11 +233,11 @@ export default function EmployeePage() {
         branchRef: getBranchRefByName(formData.branch),
         deptName: formData.department,
         deptRef: getDeptRefByName(formData.department),
-        roleName: formData.role
+        roleName: formData.role,
       };
-      
+
       console.log("Create payload:", mappedData);
-      
+
       const response = await fetch("/api/admin/employee", {
         method: "POST",
         headers: {
@@ -266,31 +245,34 @@ export default function EmployeePage() {
         },
         body: JSON.stringify(mappedData),
       });
-      
+
       // Get the response data for more detailed error information
       const responseData = await response.json().catch(() => null);
-      
+
       if (!response.ok) {
-        const errorMessage = responseData?.message || "Failed to create employee";
+        const errorMessage =
+          responseData?.message || "Failed to create employee";
         throw new Error(errorMessage);
       }
-      
+
       // Refresh employee list
       fetchEmployees();
-      
+
       // Close modal
       closeModal();
-      
+
       // Show success message (optional)
       setError(null); // Clear any previous errors
     } catch (err) {
-      setError("Error creating employee: " + (err instanceof Error ? err.message : String(err)));
+      setError(
+        "Error creating employee: " +
+          (err instanceof Error ? err.message : String(err)),
+      );
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-  
 
   // Open modal to edit employee
   const formRef = useRef<HTMLFormElement>(null);
@@ -301,70 +283,79 @@ export default function EmployeePage() {
   const openEditModal = (employee: Employee) => {
     // Store the complete employee object for reference
     setCurrentEmployee(employee);
-    
+
     // Log the employee data for debugging
     console.log("Opening edit modal for employee:", employee);
-    
+
     // Extract branch, department and role data with proper fallbacks
-    const branchName = employee.branchName || employee.position?.split(' / ')[0] || '';
-    const deptName = employee.deptName || employee.position?.split(' / ')[1] || '';
-    const roleName = employee.roleName || employee.position?.split(' / ')[2] || '';
-    
+    const branchName =
+      employee.branchName || employee.position?.split(" / ")[0] || "";
+    const deptName =
+      employee.deptName || employee.position?.split(" / ")[1] || "";
+    const roleName =
+      employee.roleName || employee.position?.split(" / ")[2] || "";
+
     // Find the branch reference that matches the branch name
-    const branch = branchesData.find(b => b.name === branchName);
+    const branch = branchesData.find((b) => b.name === branchName);
     const branchRef = branch?.ref || null;
-    
+
     // Find the department reference that matches the department name
-    const dept = departmentsData.find(d => d.name === deptName);
+    const dept = departmentsData.find((d) => d.name === deptName);
     const deptRef = dept?.ref || null;
-    
-    console.log("Extracted values:", { branchName, deptName, roleName, branchRef, deptRef });
-    
+
+    console.log("Extracted values:", {
+      branchName,
+      deptName,
+      roleName,
+      branchRef,
+      deptRef,
+    });
+
     // Set all form values with proper fallbacks
     setFormData({
-      uid: employee.uid || '',
-      name: employee.name || '',
-      nric: employee.nric || '',
-      phone: employee.phone || '',
-      email: employee.email || '',
-      address_line1: employee.address_line1 || '',
-      address_line2: employee.address_line2 || '',
-      city: employee.city || '',
-      state: employee.state || '',
-      country: employee.country || '',
-      bank_name: employee.bank_name || '',
-      bank_account: employee.bank_account || '',
-      branchRef: branchRef || employee.branchRef || '',
-      branch: branchName || '',
-      department: deptName || '',
-      role: roleName || '',
-      status: employee.status || '',
+      uid: employee.uid || "",
+      name: employee.name || "",
+      nric: employee.nric || "",
+      phone: employee.phone || "",
+      email: employee.email || "",
+      address_line1: employee.address_line1 || "",
+      address_line2: employee.address_line2 || "",
+      city: employee.city || "",
+      state: employee.state || "",
+      country: employee.country || "",
+      bank_name: employee.bank_name || "",
+      bank_account: employee.bank_account || "",
+      branchRef: branchRef || employee.branchRef || "",
+      branch: branchName || "",
+      department: deptName || "",
+      role: roleName || "",
+      status: employee.status || "",
     });
-    
+
     // Ensure options are available in dropdowns if they're not already in the lists
     if (branchName && !branchOptions.includes(branchName)) {
       setBranchOptions([...branchOptions, branchName]);
     }
-    
+
     if (deptName && !departmentOptions.includes(deptName)) {
       setDepartmentOptions([...departmentOptions, deptName]);
     }
-    
+
     if (roleName && !roleOptions.includes(roleName)) {
       setRoleOptions([...roleOptions, roleName]);
     }
-    
+
     // Enable edit mode and open the modal
     setIsEditMode(true);
     setIsModalOpen(true);
-    
+
     // Use setTimeout to ensure the modal is rendered before focusing
     setTimeout(() => {
       // Scroll form to top
       if (formRef.current) {
         formRef.current.scrollTop = 0;
       }
-      
+
       // Focus on the name field
       if (nameInputRef.current) {
         nameInputRef.current.focus();
@@ -373,30 +364,30 @@ export default function EmployeePage() {
   };
 
   // Update employee
-  const updateEmployee = async (e: { preventDefault: () => void; }) => {
+  const updateEmployee = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    
+
     if (!currentEmployee) return;
-    
+
     try {
       setLoading(true);
-      
-      const employeeId = currentEmployee.id.split(' / ')[0];
-      
+
+      const employeeId = currentEmployee.id.split(" / ")[0];
+
       // Log request details for debugging
       console.log("Updating employee with ID:", employeeId);
-      
+
       // Map form fields to match database column names
       const mappedData = {
         ...formData,
-        branchRef: formData.branchRef,    // Map branch to branchName
-        branchName: formData.branch,    // Map branch to branchName
-        deptName: formData.department,  // Map department to deptName
-        roleName: formData.role         // Map role to roleName
+        branchRef: formData.branchRef, // Map branch to branchName
+        branchName: formData.branch, // Map branch to branchName
+        deptName: formData.department, // Map department to deptName
+        roleName: formData.role, // Map role to roleName
       };
-      
+
       console.log("Update payload:", mappedData);
-      
+
       // Use query parameter format instead of path parameter
       const response = await fetch(`/api/admin/employee?id=${employeeId}`, {
         method: "PUT",
@@ -405,28 +396,31 @@ export default function EmployeePage() {
         },
         body: JSON.stringify(mappedData),
       });
-      
+
       // Get the response data for more detailed error information
       const responseData = await response.json().catch(() => null);
-      
+
       if (!response.ok) {
-        const errorMessage = responseData?.message || "Failed to update employee";
+        const errorMessage =
+          responseData?.message || "Failed to update employee";
         throw new Error(errorMessage);
       } else {
         // Refresh employee list
         await fetchEmployees();
-        
+
         // Refresh options data
         await fetchOptionsData();
-        
+
         // Close modal
         closeModal();
-        
+
         // Show success message (optional)
         setError(null); // Clear any previous errors
       }
     } catch (err) {
-      const errorMessage = "Error updating employee: " + (err instanceof Error ? err.message : String(err));
+      const errorMessage =
+        "Error updating employee: " +
+        (err instanceof Error ? err.message : String(err));
       setError(errorMessage);
       console.error("Update employee error:", err);
     } finally {
@@ -439,52 +433,55 @@ export default function EmployeePage() {
     if (!confirm("Are you sure you want to mark this employee as history?")) {
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // Extract the real values just like in openEditModal
-      const branchName = employee.branchName || employee.position?.split(' / ')[0] || '';
-      const deptName = employee.deptName || employee.position?.split(' / ')[1] || '';
-      const roleName = employee.roleName || employee.position?.split(' / ')[2] || '';
-      
+      const branchName =
+        employee.branchName || employee.position?.split(" / ")[0] || "";
+      const deptName =
+        employee.deptName || employee.position?.split(" / ")[1] || "";
+      const roleName =
+        employee.roleName || employee.position?.split(" / ")[2] || "";
+
       // Find the branch reference that matches the branch name
-      const branch = branchesData.find(b => b.name === branchName);
+      const branch = branchesData.find((b) => b.name === branchName);
       const branchRef = branch?.ref || null;
-      
+
       // Set up form data with all existing values
       const historyFormData = {
-        uid: employee.uid || '',
-        name: employee.name || '',
-        nric: employee.nric || '',
-        phone: employee.phone || '',
-        email: employee.email || '',
-        address_line1: employee.address_line1 || '',
-        address_line2: employee.address_line2 || '',
-        city: employee.city || '',
-        state: employee.state || '',
-        country: employee.country || '',
-        bank_name: employee.bank_name || '',
-        bank_account: employee.bank_account || '',
-        branchRef: branchRef || '',
-        branch: branchName || '',
-        department: deptName || '',
-        role: roleName || '',
-        status: 'History' // Set status to History
+        uid: employee.uid || "",
+        name: employee.name || "",
+        nric: employee.nric || "",
+        phone: employee.phone || "",
+        email: employee.email || "",
+        address_line1: employee.address_line1 || "",
+        address_line2: employee.address_line2 || "",
+        city: employee.city || "",
+        state: employee.state || "",
+        country: employee.country || "",
+        bank_name: employee.bank_name || "",
+        bank_account: employee.bank_account || "",
+        branchRef: branchRef || "",
+        branch: branchName || "",
+        department: deptName || "",
+        role: roleName || "",
+        status: "History", // Set status to History
       };
-      
+
       // Use the existing update API endpoint
-      const employeeId = employee.id.split(' / ')[0];
-      
+      const employeeId = employee.id.split(" / ")[0];
+
       // Map form fields to match database column names (similar to updateEmployee)
       const mappedData = {
         ...historyFormData,
         branchRef: historyFormData.branchRef,
         branchName: historyFormData.branch,
         deptName: historyFormData.department,
-        roleName: historyFormData.role
+        roleName: historyFormData.role,
       };
-      
+
       // Call API to update employee status
       fetch(`/api/admin/employee?id=${employeeId}`, {
         method: "PUT",
@@ -493,37 +490,42 @@ export default function EmployeePage() {
         },
         body: JSON.stringify(mappedData),
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          throw new Error(data.message || "Failed to mark employee as history");
-        }
-        
-        // Refresh employee list
-        fetchEmployees();
-        setError(null);
-      })
-      .catch(err => {
-        setError("Error marking employee as history: " + 
-          (err instanceof Error ? err.message : String(err)));
-        console.error(err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-      
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            throw new Error(
+              data.message || "Failed to mark employee as history",
+            );
+          }
+
+          // Refresh employee list
+          fetchEmployees();
+          setError(null);
+        })
+        .catch((err) => {
+          setError(
+            "Error marking employee as history: " +
+              (err instanceof Error ? err.message : String(err)),
+          );
+          console.error(err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } catch (err) {
-      setError("Error preparing data: " + 
-        (err instanceof Error ? err.message : String(err)));
+      setError(
+        "Error preparing data: " +
+          (err instanceof Error ? err.message : String(err)),
+      );
       console.error(err);
       setLoading(false);
     }
   };
 
   // Handle form submission
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    
+
     if (isEditMode) {
       updateEmployee(e);
     } else {
@@ -533,50 +535,45 @@ export default function EmployeePage() {
 
   // Reset filters
   const resetFilters = () => {
-    setBranchFilter('');
-    setDepartmentFilter('');
-    setStatusFilter('');
+    setBranchFilter("");
+    setDepartmentFilter("");
+    setStatusFilter("");
   };
 
   // Apply filters whenever they change
   useEffect(() => {
     if (!employees.length) return;
-    
+
     let filtered = [...employees];
-    
+
     if (branchFilter) {
-      filtered = filtered.filter(emp => emp.branchName === branchFilter);
+      filtered = filtered.filter((emp) => emp.branchName === branchFilter);
     }
-    
+
     if (departmentFilter) {
-      filtered = filtered.filter(emp => emp.deptName === departmentFilter);
+      filtered = filtered.filter((emp) => emp.deptName === departmentFilter);
     }
-    
+
     if (statusFilter) {
-      filtered = filtered.filter(emp => emp.status === statusFilter);
+      filtered = filtered.filter((emp) => emp.status === statusFilter);
     }
-    
+
     setFilteredEmployees(filtered);
   }, [branchFilter, departmentFilter, statusFilter, employees]);
-
-  // Function to extract unique options from employee data
-  const extractOptions = () => {
-    const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
-    const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
-    const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
-    
-    setBranchOptions(branches);
-    setDepartmentOptions(departments);
-    setRoleOptions(roles);
-  };
 
   // Call extractOptions whenever employees data changes
   useEffect(() => {
     const extractOptions = () => {
-      const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
-      const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
-      const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
-      
+      const branches = [...new Set(employees.map((emp) => emp.branch))]
+        .filter(Boolean)
+        .sort();
+      const departments = [...new Set(employees.map((emp) => emp.department))]
+        .filter(Boolean)
+        .sort();
+      const roles = [...new Set(employees.map((emp) => emp.role))]
+        .filter(Boolean)
+        .sort();
+
       setBranchOptions(branches);
       setDepartmentOptions(departments);
       setRoleOptions(roles);
@@ -590,17 +587,18 @@ export default function EmployeePage() {
   // Add these helper functions before your return statement
   const getBranchOptions = () => branchOptions;
   const getDepartmentOptions = () => departmentOptions;
-  const getStatusOptions = () => [...new Set(employees.map(emp => emp.status))].filter(Boolean).sort();
+  const getStatusOptions = () =>
+    [...new Set(employees.map((emp) => emp.status))].filter(Boolean).sort();
 
   // Add this helper function before your return statement
   const getBranchRefByName = (branchName: string) => {
-    const branch = branchesData.find(b => b.name === branchName);
+    const branch = branchesData.find((b) => b.name === branchName);
     return branch?.ref || null;
   };
 
   // Add this helper function before your return statement
   const getDeptRefByName = (deptName: string) => {
-    const dept = departmentsData.find(d => d.name === deptName);
+    const dept = departmentsData.find((d) => d.name === deptName);
     return dept?.ref || null;
   };
 
@@ -611,96 +609,102 @@ export default function EmployeePage() {
       const branchRes = await fetch("/api/admin/branch");
       if (!branchRes.ok) throw new Error("Failed to fetch branches");
       const branchData = await branchRes.json();
-      
+
       // Fetch departments
       const deptRes = await fetch("/api/admin/department");
       if (!deptRes.ok) throw new Error("Failed to fetch departments");
       const deptData = await deptRes.json();
-      
+
       // Fetch roles
       const roleRes = await fetch("/api/admin/role");
       if (!roleRes.ok) throw new Error("Failed to fetch roles");
       const roleData = await roleRes.json();
-      
+
       // Store complete branch and department data for reference lookup
       setBranchesData(branchData.listBranch || []);
       setDepartmentsData(deptData.listDepartment || []);
-      
+
       // Set the options arrays for dropdowns
-      const branchOptions = branchData.listBranch.map((item: any) => item.name).filter(Boolean);
-      const deptOptions = deptData.listDepartment.map((item: any) => item.name).filter(Boolean);
-      const roleOptions = roleData.listRole.map((item: any) => item.name).filter(Boolean);
-      
+      const branchOptions = branchData.listBranch
+        .map((item: any) => item.name)
+        .filter(Boolean);
+      const deptOptions = deptData.listDepartment
+        .map((item: any) => item.name)
+        .filter(Boolean);
+      const roleOptions = roleData.listRole
+        .map((item: any) => item.name)
+        .filter(Boolean);
+
       setBranchOptions(branchOptions);
       setDepartmentOptions(deptOptions);
       setRoleOptions(roleOptions);
-      
-      console.log("Filter options loaded:", { 
-        branches: branchOptions.length, 
-        departments: deptOptions.length, 
-        roles: roleOptions.length 
+
+      console.log("Filter options loaded:", {
+        branches: branchOptions.length,
+        departments: deptOptions.length,
+        roles: roleOptions.length,
       });
     } catch (err) {
       console.error("Error fetching dropdown options:", err);
     }
   };
-  
+
   // Modify the handleBranchChange function
   const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const branchName = e.target.value;
-    const branch = branchesData.find(b => b.name === branchName);
-    
-    setFormData(prev => {
+    const branch = branchesData.find((b) => b.name === branchName);
+
+    setFormData((prev) => {
       const updated = {
         ...prev,
         branch: branchName,
-        branchRef: branch?.ref || null
+        branchRef: branch?.ref || null,
       };
-      
+
       // Auto-generate UID if not in edit mode and both branch and department are selected
       if (!isEditMode && updated.branch && updated.department) {
         updated.uid = generateUID();
       }
-      
+
       return updated;
     });
   };
-  
+
   // Update department handler
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    const dept = departmentsData.find(d => d.name === value);
-    
-    setFormData(prev => {
+    const dept = departmentsData.find((d) => d.name === value);
+
+    setFormData((prev) => {
       const updated = {
         ...prev,
         department: value,
-        deptRef: dept?.ref || null
+        deptRef: dept?.ref || null,
       };
-      
+
       // Auto-generate UID if not in edit mode and both branch and department are selected
       if (!isEditMode && updated.branch && updated.department) {
         updated.uid = generateUID();
       }
-      
+
       return updated;
     });
   };
-  
+
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
-    
-    setFormData(prev => {
+
+    setFormData((prev) => {
       const updated = {
         ...prev,
-        role: value
+        role: value,
       };
-      
+
       // Auto-generate UID if not in edit mode and all required fields are selected
       if (!isEditMode && updated.branch && updated.department && updated.role) {
         updated.uid = generateUID();
       }
-      
+
       return updated;
     });
   };
@@ -709,72 +713,91 @@ export default function EmployeePage() {
   const generateUID = () => {
     if (!isEditMode && formData.branch && formData.department) {
       // Get the branchRef from the selected branch
-      const branchRef = getBranchRefByName(formData.branch) || '';
-      
+      const branchRef = getBranchRefByName(formData.branch) || "";
+
       // Find departmentRef from departments data
-      const deptRef = getDeptRefByName(formData.department) || '';
-      
+      const deptRef = getDeptRefByName(formData.department) || "";
+
       if (!branchRef || !deptRef) {
         console.warn("Missing reference for branch or department");
-        return '';
+        return "";
       }
-      
+
       // Count existing employees with the same branch NAME and department NAME
       // This ensures we're counting all employees in the same department regardless of ref
-      const sameTypeEmployees = employees.filter(emp => 
-        emp.branchName === formData.branch && 
-        emp.deptName === formData.department
+      const sameTypeEmployees = employees.filter(
+        (emp) =>
+          emp.branchName === formData.branch &&
+          emp.deptName === formData.department,
       );
-      
+
       // Generate next running number (count + 1), padding to 4 digits
-      const nextNumber = (sameTypeEmployees.length + 1).toString().padStart(4, '0');
-      
+      const nextNumber = (sameTypeEmployees.length + 1)
+        .toString()
+        .padStart(4, "0");
+
       // Format with hyphens for better readability: branchRef-deptRef-0001
       const newUID = `${branchRef}${deptRef}${nextNumber}`;
-      
-      console.log(`Generated UID: ${newUID} (Found ${sameTypeEmployees.length} existing employees with branch "${formData.branch}" and department "${formData.department}")`);
+
+      console.log(
+        `Generated UID: ${newUID} (Found ${sameTypeEmployees.length} existing employees with branch "${formData.branch}" and department "${formData.department}")`,
+      );
       return newUID;
     }
-    return '';
+    return "";
   };
-  
+
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Employee Management" />
-      
+
       <div className="flex flex-col gap-5">
         {/* Create/Edit Form Card - Displayed on top when open */}
         {isModalOpen && (
-          <div 
+          <div
             className={`rounded-sm border ${
-              isEditMode 
-                ? 'border-primary/50 shadow-lg dark:border-primary/30' 
-                : 'border-stroke dark:border-strokedark'
-            } bg-white shadow-default dark:bg-boxdark w-full mb-5`}
+              isEditMode
+                ? "border-primary/50 dark:border-primary/30 shadow-lg"
+                : "border-stroke dark:border-strokedark"
+            } shadow-default dark:bg-boxdark mb-5 w-full bg-white`}
           >
             {/* Form header with edit indicator and action buttons */}
-            <div className="px-6 py-4 border-b border-stroke dark:border-strokedark flex justify-between items-center">
-              <h4 className="text-lg font-semibold text-black dark:text-white flex items-center">
+            <div className="border-stroke dark:border-strokedark flex items-center justify-between border-b px-6 py-4">
+              <h4 className="flex items-center text-lg font-semibold text-black dark:text-white">
                 {isEditMode ? (
                   <>
-                    <span className="mr-2 text-primary">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                    <span className="text-primary mr-2">
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        ></path>
                       </svg>
                     </span>
-                    Edit Employee:  <span className="font-bold"> ({formData.uid} - {formData.name})</span>
+                    Edit Employee:{" "}
+                    <span className="font-bold">
+                      {" "}
+                      ({formData.uid} - {formData.name})
+                    </span>
                   </>
                 ) : (
-                  'Add New Employee'
+                  "Add New Employee"
                 )}
               </h4>
-              
+
               {/* Action buttons moved to header */}
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition dark:bg-meta-4 dark:hover:bg-meta-3 dark:text-white text-sm"
+                  className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-300 dark:text-white"
                 >
                   Cancel
                 </button>
@@ -782,31 +805,31 @@ export default function EmployeePage() {
                   type="submit"
                   form="employeeForm" // Connect to form ID
                   className={`px-3 py-1.5 ${
-                    isEditMode 
-                      ? 'bg-primary hover:bg-primary/90' 
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  } text-white rounded-md transition text-sm`}
+                    isEditMode
+                      ? "bg-primary hover:bg-primary/90"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } rounded-md text-sm text-white transition`}
                 >
-                  {isEditMode ? 'Update' : 'Create'}
+                  {isEditMode ? "Update" : "Create"}
                 </button>
               </div>
             </div>
-            
-            <form 
+
+            <form
               id="employeeForm" // Add ID to connect with the submit button in header
-              ref={formRef} 
-              onSubmit={handleSubmit} 
-              className="px-6 py-4 overflow-y-auto max-h-[calc(100vh-200px)]"
+              ref={formRef}
+              onSubmit={handleSubmit}
+              className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 py-4"
             >
               {/* Basic Information Section */}
               <div className="mb-4">
                 {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
                   Basic Information
                 </h4> */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
                   {/* UID field - Read-only when editing */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       UID {/* Removed the required asterisk */}
                     </label>
                     <input
@@ -818,9 +841,11 @@ export default function EmployeePage() {
                       readOnly
                       // readOnly={isEditMode}
                       disabled={isEditMode}
-                      className={`w-full rounded border-[1.5px] border-stroke ${
-                        isEditMode ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-transparent'
-                      } py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                      className={`border-stroke w-full rounded border-[1.5px] ${
+                        isEditMode
+                          ? "cursor-not-allowed bg-gray-100 dark:bg-gray-700"
+                          : "bg-transparent"
+                      } focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary px-5 py-3 text-sm transition outline-none dark:text-white`}
                     />
                     {!isEditMode && (
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -828,10 +853,10 @@ export default function EmployeePage() {
                       </p>
                     )}
                   </div>
-                  
+
                   {/* Name field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Name <span className="text-danger">*</span>
                     </label>
                     <input
@@ -840,14 +865,14 @@ export default function EmployeePage() {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                       required
                     />
                   </div>
-                  
+
                   {/* NRIC field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       NRIC
                     </label>
                     <input
@@ -855,20 +880,20 @@ export default function EmployeePage() {
                       name="nric"
                       value={formData.nric}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   {/* Status field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Status
                     </label>
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
@@ -878,16 +903,16 @@ export default function EmployeePage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Contact Information */}
-              <div className="mb-4 mt-6">
+              <div className="mt-6 mb-4">
                 {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
                   Contact Information
                 </h4> */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {/* Phone field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Phone
                     </label>
                     <input
@@ -895,13 +920,13 @@ export default function EmployeePage() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   {/* Email field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Email
                     </label>
                     <input
@@ -909,13 +934,13 @@ export default function EmployeePage() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   {/* Address Line 1 field - spans 2 columns */}
                   <div className="lg:col-span-2">
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Address
                     </label>
                     <input
@@ -924,13 +949,13 @@ export default function EmployeePage() {
                       value={formData.address_line1}
                       onChange={handleChange}
                       placeholder="Address Line 1"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
                 </div>
-                
+
                 {/* Second row of contact info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-4">
+                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
                   <div className="lg:col-span-2">
                     <input
                       type="text"
@@ -938,10 +963,10 @@ export default function EmployeePage() {
                       value={formData.address_line2}
                       onChange={handleChange}
                       placeholder="Address Line 2"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   <div>
                     <input
                       type="text"
@@ -949,10 +974,10 @@ export default function EmployeePage() {
                       value={formData.city}
                       onChange={handleChange}
                       placeholder="City"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   <div>
                     <input
                       type="text"
@@ -960,10 +985,10 @@ export default function EmployeePage() {
                       value={formData.state}
                       onChange={handleChange}
                       placeholder="State"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   <div>
                     <input
                       type="text"
@@ -971,92 +996,105 @@ export default function EmployeePage() {
                       value={formData.country}
                       onChange={handleChange}
                       placeholder="Country"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Company Information */}
-              <div className="mb-4 mt-6">
+              <div className="mt-6 mb-4">
                 {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
                   Company Information
                 </h4> */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   {/* Branch field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Branch
                     </label>
                     <select
                       name="branch"
                       value={formData.branch}
                       onChange={handleBranchChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     >
                       <option value="">Select Branch</option>
                       {branchOptions.map((branch, index) => (
-                        <option key={`form-branch-${index}`} value={branch}>{branch}</option>
+                        <option key={`form-branch-${index}`} value={branch}>
+                          {branch}
+                        </option>
                       ))}
-                      {formData.branch && !branchOptions.includes(formData.branch) && (
-                        <option value={formData.branch}>{formData.branch}</option>
-                      )}
+                      {formData.branch &&
+                        !branchOptions.includes(formData.branch) && (
+                          <option value={formData.branch}>
+                            {formData.branch}
+                          </option>
+                        )}
                     </select>
                   </div>
-                  
+
                   {/* Department field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Department
                     </label>
                     <select
                       name="department"
                       value={formData.department}
                       onChange={handleDepartmentChange} // Use the new handler
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     >
                       <option value="">Select Department</option>
                       {departmentOptions.map((dept, index) => (
-                        <option key={`form-dept-${index}`} value={dept}>{dept}</option>
+                        <option key={`form-dept-${index}`} value={dept}>
+                          {dept}
+                        </option>
                       ))}
-                      {formData.department && !departmentOptions.includes(formData.department) && (
-                        <option value={formData.department}>{formData.department}</option>
-                      )}
+                      {formData.department &&
+                        !departmentOptions.includes(formData.department) && (
+                          <option value={formData.department}>
+                            {formData.department}
+                          </option>
+                        )}
                     </select>
                   </div>
-                  
+
                   {/* Role field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Role
                     </label>
                     <select
                       name="role"
                       value={formData.role}
                       onChange={handleRoleChange} // Use the new handler
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     >
                       <option value="">Select Role</option>
                       {roleOptions.map((role, index) => (
-                        <option key={`form-role-${index}`} value={role}>{role}</option>
+                        <option key={`form-role-${index}`} value={role}>
+                          {role}
+                        </option>
                       ))}
-                      {formData.role && !roleOptions.includes(formData.role) && (
-                        <option value={formData.role}>{formData.role}</option>
-                      )}
+                      {formData.role &&
+                        !roleOptions.includes(formData.role) && (
+                          <option value={formData.role}>{formData.role}</option>
+                        )}
                     </select>
                   </div>
                 </div>
               </div>
-              
+
               {/* Banking Information */}
-              <div className="mb-4 mt-6">
+              <div className="mt-6 mb-4">
                 {/* <h4 className="text-lg font-medium text-black dark:text-white mb-3">
                   Banking Information
                 </h4> */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {/* Bank Name field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Bank Name
                     </label>
                     <input
@@ -1064,13 +1102,13 @@ export default function EmployeePage() {
                       name="bank_name"
                       value={formData.bank_name}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
-                  
+
                   {/* Bank Account field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                       Bank Account
                     </label>
                     <input
@@ -1078,7 +1116,7 @@ export default function EmployeePage() {
                       name="bank_account"
                       value={formData.bank_account}
                       onChange={handleChange}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-sm outline-none transition focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none dark:text-white"
                     />
                   </div>
                 </div>
@@ -1086,11 +1124,11 @@ export default function EmployeePage() {
             </form>
           </div>
         )}
-        
+
         {/* Employee List Card - Always displayed */}
-        <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
+        <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark w-full rounded-sm border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-1">
           {/* Header and Create Button */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div className="flex flex-wrap items-center gap-3">
               {/* Branch Filter */}
               <div className="min-w-[150px]">
@@ -1098,66 +1136,69 @@ export default function EmployeePage() {
                   name="branch"
                   value={branchFilter}
                   onChange={handleFilterChange}
-                  className="w-full rounded-lg border border-stroke bg-white dark:bg-boxdark py-2 px-4 outline-none focus:border-primary focus-visible:shadow-none dark:border-strokedark dark:text-white text-sm"
+                  className="border-stroke dark:bg-boxdark focus:border-primary dark:border-strokedark w-full rounded-lg border bg-white px-4 py-2 text-sm outline-none focus-visible:shadow-none dark:text-white"
                 >
                   <option value="">All Branches</option>
                   {/* Use the branchOptions state directly instead of deriving from employees */}
-                  {branchOptions
-                    .sort()
-                    .map((branch, index) => (
-                      <option key={`branch-filter-${index}`} value={branch}>{branch}</option>
-                    ))
-                  }
+                  {branchOptions.sort().map((branch, index) => (
+                    <option key={`branch-filter-${index}`} value={branch}>
+                      {branch}
+                    </option>
+                  ))}
                 </select>
               </div>
-              
+
               {/* Department Filter */}
               <div className="min-w-[150px]">
                 <select
                   name="department"
                   value={departmentFilter}
                   onChange={handleFilterChange}
-                  className="w-full rounded-lg border border-stroke bg-white dark:bg-boxdark py-2 px-4 outline-none focus:border-primary focus-visible:shadow-none dark:border-strokedark dark:text-white text-sm"
+                  className="border-stroke dark:bg-boxdark focus:border-primary dark:border-strokedark w-full rounded-lg border bg-white px-4 py-2 text-sm outline-none focus-visible:shadow-none dark:text-white"
                 >
                   <option value="">All Departments</option>
                   {getDepartmentOptions().map((dept, index) => (
-                    <option key={`dept-${index}`} value={dept}>{dept}</option>
+                    <option key={`dept-${index}`} value={dept}>
+                      {dept}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               {/* Status Filter */}
               <div className="min-w-[150px]">
                 <select
                   name="status"
                   value={statusFilter}
                   onChange={handleFilterChange}
-                  className="w-full rounded-lg border border-stroke bg-white dark:bg-boxdark py-2 px-4 outline-none focus:border-primary focus-visible:shadow-none dark:border-strokedark dark:text-white text-sm"
+                  className="border-stroke dark:bg-boxdark focus:border-primary dark:border-strokedark w-full rounded-lg border bg-white px-4 py-2 text-sm outline-none focus-visible:shadow-none dark:text-white"
                 >
                   <option value="">All Status</option>
                   {getStatusOptions().map((status, index) => (
-                    <option key={`status-${index}`} value={status}>{status}</option>
+                    <option key={`status-${index}`} value={status}>
+                      {status}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               {/* Reset Filters Button */}
               <button
                 onClick={resetFilters}
-                className="rounded-lg border border-stroke bg-white dark:bg-boxdark py-2 px-4 text-sm text-black dark:text-white hover:bg-gray-50 dark:hover:bg-meta-4 transition-colors"
+                className="border-stroke dark:bg-boxdark dark:hover:bg-meta-4 rounded-lg border bg-white px-4 py-2 text-sm text-black transition-colors hover:bg-gray-50 dark:text-white"
               >
                 Reset
               </button>
             </div>
-            
+
             {/* Keep the create button */}
             {!loadingPermissions && canCreate(MENU, SUBMENU) && (
               <button
                 onClick={openCreateModal}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 py-2 px-4 text-white hover:bg-blue-700"
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
               >
                 <svg
-                  className="w-5 h-5 mr-2"
+                  className="mr-2 h-5 w-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1173,42 +1214,42 @@ export default function EmployeePage() {
               </button>
             )}
           </div>
-          
+
           {/* Error and Loading states */}
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
               {error}
             </div>
           )}
-          
+
           {loading && (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex items-center justify-center py-8">
+              <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
             </div>
           )}
-          
+
           {/* Employee Table */}
           {!loading && !error && (
             <div className="max-w-full overflow-x-auto">
               <table className="w-full table-auto">
                 <thead>
-                  <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                  <tr className="bg-gray-2 dark:bg-meta-4 text-left">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       UID
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Name/NRIC
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Contact
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Position
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Status
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Actions
                     </th>
                   </tr>
@@ -1216,7 +1257,7 @@ export default function EmployeePage() {
                 <tbody>
                   {filteredEmployees.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-4 px-4 text-center">
+                      <td colSpan={6} className="px-4 py-4 text-center">
                         No employees found
                       </td>
                     </tr>
@@ -1226,28 +1267,26 @@ export default function EmployeePage() {
                         key={index}
                         className={`${
                           index % 2 === 0
-                            ? "bg-white dark:bg-boxdark"
+                            ? "dark:bg-boxdark bg-white"
                             : "bg-gray-1 dark:bg-meta-4"
                         }`}
                       >
-                        <td className="py-3 px-4">{employee.uid}</td>
-                        <td className="py-3 px-4">{employee.fullName}</td>
-                        <td className="py-3 px-4">{employee.contactInfo}</td>
-                        <td className="py-3 px-4">{employee.position}</td>
-                        <td className="py-3 px-4">
-                          {employee.status}
-                        </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">{employee.uid}</td>
+                        <td className="px-4 py-3">{employee.fullName}</td>
+                        <td className="px-4 py-3">{employee.contactInfo}</td>
+                        <td className="px-4 py-3">{employee.position}</td>
+                        <td className="px-4 py-3">{employee.status}</td>
+                        <td className="px-4 py-3">
                           <div className="flex items-center space-x-3">
                             {/* Edit Button */}
                             <button
                               onClick={() => openEditModal(employee)}
-                              className="text-primary hover:text-primary/90" // Changed from blue to primary
+                              className="text-primary hover:text-primary/90"
                               title="Edit employee"
                               disabled={!canEdit(MENU, SUBMENU)}
                             >
                               <svg
-                                className="w-5 h-5"
+                                className="h-5 w-5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -1260,7 +1299,7 @@ export default function EmployeePage() {
                                 ></path>
                               </svg>
                             </button>
-                            
+
                             {/* Delete Button */}
                             <button
                               onClick={() => markAsHistory(employee)}
@@ -1269,7 +1308,7 @@ export default function EmployeePage() {
                               disabled={!canDelete(MENU, SUBMENU)}
                             >
                               <svg
-                                className="w-5 h-5"
+                                className="h-5 w-5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -1282,15 +1321,19 @@ export default function EmployeePage() {
                                 ></path>
                               </svg>
                             </button>
-                            
+
                             {/* View Button */}
                             <button
-                              onClick={() => router.push(`/admin/employee/view?id=${employee.id.split(' / ')[0]}`)}
+                              onClick={() =>
+                                router.push(
+                                  `/admin/employee/view?id=${employee.id.split(" / ")[0]}`,
+                                )
+                              }
                               className="text-gray-500 hover:text-gray-700"
                               title="View employee details"
                             >
                               <svg
-                                className="w-5 h-5"
+                                className="h-5 w-5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
