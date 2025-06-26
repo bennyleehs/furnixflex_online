@@ -4,76 +4,46 @@ import { createPool } from '@/lib/db';
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const taskId = url.searchParams.get('taskId');
-  const quotationId = url.searchParams.get('id');
+  const status = url.searchParams.get('status');
+  
+  // Return error if taskId is not provided
+  if (!taskId) {
+    return NextResponse.json(
+      { error: 'taskId parameter is required' },
+      { status: 400 }
+    );
+  }
   
   try {
     const pool = createPool();
-    let quotation = null;
-    let items = [];
     
-    if (quotationId) {
-      // Fetch quotation by ID
-      const [quotationRows] = await pool.query(
-        'SELECT * FROM quotations WHERE id = ?',
-        [quotationId]
+    // Fetch quotation by taskId
+    const [quotationRows] = await pool.query(
+      'SELECT * FROM quotations WHERE task_id = ? ORDER BY created_at DESC LIMIT 1',
+      [taskId]
+    ) as [any[], any];
+    
+    if (quotationRows.length === 0) {
+      return NextResponse.json({ quotation: null });
+    }
+    
+    const quotation = quotationRows[0];
+    
+    // Fetch related items - using quotation_number field
+    try {
+      const [itemRows] = await pool.query(
+        'SELECT * FROM quotation_items WHERE quotation_number = ?',
+        [quotation.quotation_number]
       ) as [any[], any];
       
-      if (quotationRows.length > 0) {
-        quotation = quotationRows[0];
-        
-        // Fetch related items - using quotation_number field
-        try {
-          const [itemRows] = await pool.query(
-            'SELECT * FROM quotation_items WHERE quotation_number = ?',
-            [quotation.quotation_number]
-          ) as [any[], any];
-          
-          items = itemRows;
-        } catch (itemError) {
-          console.warn('Could not fetch quotation items:', itemError);
-          items = [];
-        }
-      }
-    } else if (taskId) {
-      // Fetch quotation by taskId
-      const [quotationRows] = await pool.query(
-        'SELECT * FROM quotations WHERE task_id = ? ORDER BY created_at DESC LIMIT 1',
-        [taskId]
-      ) as [any[], any];
-      
-      if (quotationRows.length > 0) {
-        quotation = quotationRows[0];
-        
-        // Fetch related items - using quotation_number field
-        try {
-          const [itemRows] = await pool.query(
-            'SELECT * FROM quotation_items WHERE quotation_number = ?',
-            [quotation.quotation_number]
-          ) as [any[], any];
-          
-          items = itemRows;
-        } catch (itemError) {
-          console.warn('Could not fetch quotation items:', itemError);
-          items = [];
-        }
-      }
-    } else {
-      // No ID or taskId provided, return all quotations
-      const [quotationRows] = await pool.query(
-        'SELECT * FROM quotations ORDER BY created_at DESC'
-      ) as [any[], any];
-      
-      return NextResponse.json({ quotations: quotationRows });
+      quotation.items = itemRows;
+    } catch (itemError) {
+      console.warn('Could not fetch quotation items:', itemError);
+      quotation.items = [];
     }
     
     // Return the quotation with its items
-    if (quotation) {
-      quotation.items = items;
-      return NextResponse.json({ quotation });
-    }
-    
-    // If no quotation found, return null
-    return NextResponse.json({ quotation: null });
+    return NextResponse.json({ quotation });
     
   } catch (error) {
     console.error('Error fetching quotation:', error);
@@ -298,6 +268,70 @@ export async function PUT(request: Request) {
     console.error('Error updating quotation:', error);
     return NextResponse.json(
       { error: 'Failed to update quotation', details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+// Add this PATCH method after your existing PUT method
+export async function PATCH(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const taskId = url.searchParams.get('taskId');
+    const body = await request.json();
+    const pool = createPool();
+    
+    // Ensure taskId is provided
+    if (!taskId) {
+      return NextResponse.json(
+        { error: 'Task ID is required as a query parameter' },
+        { status: 400 }
+      );
+    }
+    
+    // Ensure status is provided
+    if (!body.status) {
+      return NextResponse.json(
+        { error: 'Status is required in request body' },
+        { status: 400 }
+      );
+    }
+
+    const status = body.status;
+
+    // Update only the status field
+    await pool.query(
+      'UPDATE quotations SET status = ? WHERE task_id = ?',
+      [status, taskId]
+    );
+    
+    // Update task status in customers table if needed
+    let taskStatus = null;
+    if (status === 'accepted') {
+      taskStatus = 'Deal Closed';
+    } else if (status === 'rejected') {
+      taskStatus = 'Over Budget';
+    }
+    
+    if (taskStatus) {
+      await pool.query(
+        'UPDATE customers SET status = ? WHERE id = ?',
+        [taskStatus, taskId]
+      );
+    }
+    
+    // Must return a response here
+    return NextResponse.json({
+      success: true,
+      message: `Quotation status updated to ${status}`,
+      task_id: taskId,
+      taskStatus: taskStatus
+    });
+    
+  } catch (error) {
+    console.error('Error updating quotation status:', error);
+    return NextResponse.json(
+      { error: 'Failed to update quotation status', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

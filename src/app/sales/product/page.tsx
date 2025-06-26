@@ -70,13 +70,11 @@ export default function ProductsPage() {
   const [newSubcategory, setNewSubcategory] = useState("");
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [showNewSubcategory, setShowNewSubcategory] = useState(false);
+  const [newUnit, setNewUnit] = useState("");
+  const [showNewUnit, setShowNewUnit] = useState(false);
 
-  const {
-    canEdit,
-    canCreate,
-    canDelete,
-    loadingPermissions,
-  } = usePermissions();
+  const { canEdit, canCreate, canDelete, loadingPermissions } =
+    usePermissions();
 
   const getMenuSubmenu = (
     permissionPrefix?: string,
@@ -368,7 +366,7 @@ export default function ProductsPage() {
           </h4>
 
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               {/* Category */}
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -461,7 +459,7 @@ export default function ProductsPage() {
                       disabled={!formData.category}
                       required
                     >
-                      <option label="Select Subcategory" disabled></option>
+                      <option value="">Select Subcategory</option>
                       {formData.category &&
                         subcategories[formData.category]?.map((subcategory) => (
                           <option key={subcategory} value={subcategory}>
@@ -498,7 +496,59 @@ export default function ProductsPage() {
                 />
               </div>
 
-              {/* Product Price - Allow negative values */}
+              {/* Unit */}
+              <div className="mb-4">
+                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Unit
+                </label>
+                {showNewUnit ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newUnit}
+                      onChange={(e) => setNewUnit(e.target.value)}
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
+                      placeholder="Enter new unit"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewUnit(false)}
+                      className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded bg-gray-100 px-4 py-3 hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={formData.unit}
+                      onChange={(e) =>
+                        setFormData({ ...formData, unit: e.target.value })
+                      }
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
+                    >
+                      <option value="set">Set</option>
+                      <option value="feet">Feet</option>
+                      <option value="ft²">ft² (Square Feet)</option>
+                      <option value="unit">Unit</option>
+                      <option value="lot">Lot</option>
+                      <option value="nos">NOS</option>
+                      <option value="sqft">Sq.ft</option>
+                      <option value="pcs">Pcs</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewUnit(true)}
+                      className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded bg-gray-100 px-4 py-3 hover:bg-gray-200"
+                    >
+                      New
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Product Price */}
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                   Price (RM) *
@@ -512,7 +562,7 @@ export default function ProductsPage() {
                       // Keep the raw string value during typing
                       setFormData({ ...formData, price: inputValue });
                     } else {
-                      // Convert to number once got a valid number
+                      // Convert to number once we have a valid number
                       setFormData({
                         ...formData,
                         price: parseFloat(inputValue) || 0,
@@ -548,64 +598,6 @@ export default function ProductsPage() {
                 />
               </div>
 
-              {/* Unit */}
-              <div className="mb-4">
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Unit
-                </label>
-                <select
-                  value={formData.unit}
-                  onChange={(e) =>
-                    setFormData({ ...formData, unit: e.target.value })
-                  }
-                  className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
-                >
-                  <option value="set">Set</option>
-                  <option value="feet">Feet</option>
-                  <option value="unit">Unit</option>
-                  <option value="lot">Lot</option>
-                  <option value="nos">NOS</option>
-                </select>
-              </div>
-
-              {/* Effective Duration Date Range */}
-              <div className="mb-4">
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Effective Duration
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-xs text-gray-500 dark:text-gray-400">
-                      Start Date
-                    </label>
-                    <DatePicker
-                      selected={formData.effective_start_date}
-                      onChange={(date: Date | null) =>
-                        setFormData({ ...formData, effective_start_date: date })
-                      }
-                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
-                      placeholderText="Select start date"
-                      dateFormat="dd/MM/yyyy"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500 dark:text-gray-400">
-                      End Date
-                    </label>
-                    <DatePicker
-                      selected={formData.effective_end_date}
-                      onChange={(date: Date | null) =>
-                        setFormData({ ...formData, effective_end_date: date })
-                      }
-                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
-                      placeholderText="Select end date"
-                      dateFormat="dd/MM/yyyy"
-                      minDate={formData.effective_start_date || undefined}
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Task ID */}
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -622,8 +614,46 @@ export default function ProductsPage() {
                 />
               </div>
 
-              {/* Description */}
-              <div className="mb-4 md:col-span-2">
+              {/* Effective Duration - Start Date */}
+              <div className="mb-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Start Date
+                    </label>
+                    <DatePicker
+                      selected={formData.effective_start_date}
+                      onChange={(date: Date | null) =>
+                        setFormData({ ...formData, effective_start_date: date })
+                      }
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
+                      placeholderText="Select start date"
+                      dateFormat="dd/MM/yyyy"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+                      End Date
+                    </label>
+                    <DatePicker
+                      selected={formData.effective_end_date}
+                      onChange={(date: Date | null) =>
+                        setFormData({ ...formData, effective_end_date: date })
+                      }
+                      className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
+                      placeholderText="Select end date"
+                      dateFormat="dd/MM/yyyy"
+                      minDate={formData.effective_start_date || undefined}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Effective Duration - End Date */}
+              {/* <div className="mb-4"></div> */}
+
+              {/* Description - Now placed in the same row but spans 3 columns */}
+              <div className="mb-4 md:col-span-3">
                 <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
                   Description
                 </label>
@@ -651,7 +681,6 @@ export default function ProductsPage() {
               >
                 Cancel
               </button>
-              {/* Submit button */}
               <button
                 type="submit"
                 className={`px-4 py-2 ${

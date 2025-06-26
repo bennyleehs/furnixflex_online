@@ -26,7 +26,7 @@
         "route": "#",
         "children": [
           {
-            "label": "Branches",
+            "label": "Branche",
             "id": "1.1",
             "route": "/admin/branch"
           },
@@ -35,7 +35,7 @@
             "route": "#",
             "children": [
               {
-                "label": "Departments",
+                "label": "Department",
                 "id": "1.2",
                 "route": "/admin/department"
               },
@@ -45,7 +45,7 @@
                 "route": "/admin/role"
               },
               {
-                "label": "Employees",
+                "label": "Employee",
                 "id": "1.4",
                 "route": "/admin/employee"
               },
@@ -54,7 +54,7 @@
                 "route": "",
                 "children": [
                   {
-                    "label": "Clocks",
+                    "label": "Clock",
                     "id": "1.5",
                     "route": "/admin/clock"
                   }
@@ -74,7 +74,7 @@
             ]
           },
           {
-            "label": "Assets",
+            "label": "Asset",
             "route": "",
             "children": [
               {
@@ -83,9 +83,9 @@
                 "route": "/admin/properties"
               },
               {
-                "label": "Equipments",
+                "label": "Equipment",
                 "id": "1.8",
-                "route": "/admin/equipments"
+                "route": "/admin/equipment"
               },
               {
                 "label": "Inventory",
@@ -97,7 +97,7 @@
           {
             "label": "Partners",
             "id": "1.10",
-            "route": "/admin/partners"
+            "route": "/admin/partner"
           }
         ]
       },
@@ -107,9 +107,9 @@
         "route": "#",
         "children": [
           {
-            "label": "Products",
+            "label": "Product",
             "id": "2.1",
-            "route": "/sales/products"
+            "route": "/sales/product"
           },
           {
             "label": "Lead",
@@ -127,14 +127,9 @@
             "route": "/sales/quotation"
           },
           {
-            "label": "Invoices",
+            "label": "Invoice",
             "id": "2.5",
-            "route": "/sales/invoices"
-          },
-          {
-            "label": "CRM",
-            "id": "2.6",
-            "route": "/sales/crm"
+            "route": "/sales/invoice"
           }
         ]
       },
@@ -148,7 +143,7 @@
             "route": "#",
             "children": [
               {
-                "label": "Sales",
+                "label": "Sale",
                 "route": "#",
                 "children": [
                   {

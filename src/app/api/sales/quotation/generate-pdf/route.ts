@@ -242,13 +242,13 @@ try {
   // yPosition += 5;
   
   // Create a manual table since autoTable might not be working
-  const colWidths = [10, 80, 15, 20, 30, 30];
+  const colWidths = [10, 90, 15, 20, 30, 20];
   const colPositions = [
     margin,
     margin + colWidths[0],
-    margin + colWidths[0] + colWidths[1],
-    margin + colWidths[0] + colWidths[1] + colWidths[2],
-    margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3],
+    margin + colWidths[0] + colWidths[1] + 17,
+    margin + colWidths[0] + colWidths[1] + colWidths[2] + 11,
+    margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 3,
     margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4]
   ];
   
@@ -258,11 +258,11 @@ try {
   doc.rect(margin, yPosition, pageWidth - (2 * margin), 7, 'F');
   
   doc.text('No', colPositions[0] + 2, yPosition + 5);
-  doc.text('Description', colPositions[1] + 2, yPosition + 5);
-  doc.text('Qty', colPositions[2] + 19, yPosition + 5);
-  doc.text('Unit', colPositions[3] + 15, yPosition + 5);
-  doc.text('Unit Price', colPositions[4] + 10, yPosition + 5);
-  doc.text('Total (RM)', colPositions[5] + 5, yPosition + 5);
+  doc.text('Description', colPositions[1] , yPosition + 5);
+  doc.text('Qty', colPositions[2] , yPosition + 5);
+  doc.text('Unit', colPositions[3] , yPosition + 5);
+  doc.text('Unit Price', colPositions[4] , yPosition + 5);
+  doc.text('Total (RM)', colPositions[5] -5 , yPosition + 5);
   
   yPosition += 10;
   
@@ -291,10 +291,10 @@ try {
       
       doc.text('No', colPositions[0] + 2, yPosition + 5);
       doc.text('Description', colPositions[1] + 2, yPosition + 5);
-      doc.text('Qty', colPositions[2] + 19, yPosition + 5);
-      doc.text('Unit', colPositions[3] + 15, yPosition + 5);
-      doc.text('Unit Price', colPositions[4] + 10, yPosition + 5);
-      doc.text('Total (RM)', colPositions[5] + 5, yPosition + 5);
+      doc.text('Qty', colPositions[2] , yPosition + 5);
+      doc.text('Unit', colPositions[3] , yPosition + 5);
+      doc.text('Unit Price', colPositions[4] , yPosition + 5);
+      doc.text('Total (RM)', colPositions[5] , yPosition + 5);
       
       yPosition += 10;
       doc.setTextColor(0, 0, 0);
@@ -316,15 +316,19 @@ try {
     // Handle long descriptions with text wrapping
     const description = item.description || item.product || '';
     const descLines = doc.splitTextToSize(description, colWidths[1] - 4);
-    doc.text(descLines, colPositions[1] + 2, yPosition + 4);
+    doc.text(descLines, colPositions[1] , yPosition + 4);
     
     const rowHeight = Math.max(6, descLines.length * 5);
     
     // Right-aligned numeric values
-    doc.text(item.quantity.toString(), colPositions[2] + colWidths[2] +11, yPosition + 4, { align: 'right' });
-    doc.text(item.unit, colPositions[3] + 16, yPosition + 4);
-    doc.text(unitPrice, colPositions[4] + colWidths[4] - 2, yPosition + 4, { align: 'right' });
-    doc.text(total, colPositions[5] + colWidths[5] -5, yPosition + 4, { align: 'right' });
+    doc.text(item.quantity.toString(), colPositions[2] + colWidths[2] -8, yPosition + 4, { align: 'right' });
+    doc.text(item.unit, colPositions[3] +1, yPosition + 4);
+    // Format numbers with thousand separators
+    const formattedUnitPrice = parseFloat(unitPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    const formattedTotal = parseFloat(total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    doc.text(formattedUnitPrice, colPositions[4] + colWidths[4] -13, yPosition + 4, { align: 'right' });
+    doc.text(formattedTotal, colPositions[5] + colWidths[5] -5, yPosition + 4, { align: 'right' });
     
     yPosition += rowHeight;
   });
@@ -347,7 +351,8 @@ try {
   // Subtotal
   doc.setFont('helvetica', 'normal');
   doc.text('Subtotal:', summaryX, summaryY);
-  doc.text(`${parseFloat(data.quotation.subtotal).toFixed(2)}`, 
+  const formattedSubtotal = parseFloat(data.quotation.subtotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  doc.text(formattedSubtotal, 
     summaryX + summaryWidth, summaryY, { align: 'right' });
   summaryY += 5;
   
@@ -376,7 +381,8 @@ try {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.text('Total:', summaryX, summaryY+1);
-  doc.text(`RM ${parseFloat(data.quotation.total).toFixed(2)}`, 
+  const formattedTotal = parseFloat(data.quotation.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  doc.text(`RM ${formattedTotal}`, 
     summaryX + summaryWidth, summaryY+1, { align: 'right' });
   
   // ----- NOTES SECTION -----
