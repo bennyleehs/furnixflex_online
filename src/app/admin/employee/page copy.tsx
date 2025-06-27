@@ -525,23 +525,45 @@ export default function EmployeePage() {
     setFilteredEmployees(filtered);
   }, [branchFilter, departmentFilter, statusFilter, employees]);
 
-  // Function to extract unique options from employee data
-  const extractOptions = () => {
-    const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
-    const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
-    const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
+  // // Function to extract unique options from employee data
+  // const extractOptions = () => {
+  //   const branches = [...new Set(employees.map(emp => emp.branch))].filter(Boolean).sort();
+  //   const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean).sort();
+  //   const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean).sort();
     
-    setBranchOptions(branches);
-    setDepartmentOptions(departments);
-    setRoleOptions(roles);
-  };
+  //   setBranchOptions(branches);
+  //   setDepartmentOptions(departments);
+  //   setRoleOptions(roles);
+  // };
 
-  // Call extractOptions whenever employees data changes
+  // // Call extractOptions whenever employees data changes
+  // useEffect(() => {
+  //   if (employees.length) {
+  //     extractOptions();
+  //   }
+  // }, [employees]);
+
   useEffect(() => {
-    if (employees.length) {
-      extractOptions();
-    }
-  }, [employees]);
+      const extractOptions = () => {
+        const branches = [...new Set(employees.map((emp) => emp.branch))]
+          .filter(Boolean)
+          .sort();
+        const departments = [...new Set(employees.map((emp) => emp.department))]
+          .filter(Boolean)
+          .sort();
+        const roles = [...new Set(employees.map((emp) => emp.role))]
+          .filter(Boolean)
+          .sort();
+  
+        setBranchOptions(branches);
+        setDepartmentOptions(departments);
+        setRoleOptions(roles);
+      };
+  
+      if (employees.length) {
+        extractOptions();
+      }
+    }, [employees]);
 
   // Add these helper functions before your return statement
   const getBranchOptions = () => branchOptions;

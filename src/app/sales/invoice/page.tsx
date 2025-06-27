@@ -1,1126 +1,545 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import { useState, useEffect, SetStateAction } from 'react';
+import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import DatePicker from 'react-datepicker';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Datepicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
-// Invoice item interface
-interface InvoiceItem {
-  id?: number;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  amount: number;
-  unit?: string;
-}
-
-// Payment interface
-interface Payment {
-  id?: number;
-  date: string;
-  amount: number;
-  method: string;
-  reference: string;
-  notes?: string;
-  gateway?: string;
-  status?: string;
-}
-
-// Bank details interface
-interface BankDetails {
-  bankName: string;
-  accountNumber: string;
-  accountName: string;
-  swiftCode: string;
-}
-
-// Invoice interface
 interface Invoice {
-  reference: string;
-  id?: number;
-  invoiceNumber: string;
-  invoiceDate: string;
-  dueDate: string;
-  customerName: string;
-  customerContact: string;
-  customerEmail: string;
-  customerAddress: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  notes: string;
-  terms: string;
+  id: string | number;
+  invoice_number: string;
+  invoice_date: string;
+  customer_name: string;
+  customer_email: string;
+  total: number | string;
   status: string;
-  quotationId?: string;
-  jobOrderId?: string;
-  taskId?: string;
-  payments: Payment[];
-  amountPaid: number;
-  balance: number;
-  enableOnlinePayment: boolean;
-  paymentGateway: string;
-  bankDetails?: BankDetails;
-  created_at?: string;
-  updated_at?: string;
+  due_date: string;
 }
 
-// Payment status badge component
-const PaymentStatusBadge = ({ status, paid, total }: { status: string; paid: number; total: number }) => {
-  let badgeClass = '';
-  let statusText = '';
-  
-  if (status === 'paid' || paid >= total) {
-    badgeClass = 'bg-success/10 text-success';
-    statusText = 'Paid';
-  } else if (status === 'overdue') {
-    badgeClass = 'bg-danger/10 text-danger';
-    statusText = 'Overdue';
-  } else if (paid > 0) {
-    badgeClass = 'bg-warning/10 text-warning';
-    statusText = 'Partial';
-  } else if (status === 'sent') {
-    badgeClass = 'bg-info/10 text-info';
-    statusText = 'Sent';
-  } else {
-    badgeClass = 'bg-gray-100 text-gray-600 dark:bg-meta-4 dark:text-gray-300';
-    statusText = 'Draft';
-  }
-  
-  return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}`}>
-      {statusText}
-    </span>
-  );
-};
-
-export default function InvoicePage() {
+export default function InvoiceListPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const quotationId = searchParams.get('quotationId');
-  const jobOrderId = searchParams.get('jobOrderId');
-  const taskId = searchParams.get('taskId');
-  const invoiceId = searchParams.get('id');
-  
-  const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(!!invoiceId);
-  const [invoiceData, setInvoiceData] = useState<Invoice>({
-    reference: '',
-    invoiceNumber: `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-    invoiceDate: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default 30 days
-    customerName: '',
-    customerContact: '',
-    customerEmail: '',
-    customerAddress: '',
-    items: [],
-    subtotal: 0,
-    tax: 0,
-    total: 0,
-    notes: '',
-    terms: 'Payment is due within 30 days. Late payments are subject to a 5% fee.',
-    status: 'draft',
-    quotationId: quotationId || '',
-    jobOrderId: jobOrderId || '',
-    taskId: taskId || '',
-    // Payment tracking fields
-    payments: [],
-    amountPaid: 0,
-    balance: 0,
-    // Payment gateway options
-    enableOnlinePayment: false,
-    paymentGateway: 'stripe',
-    bankDetails: {
-      bankName: '',
-      accountNumber: '',
-      accountName: '',
-      swiftCode: ''
-    }
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
+  // Filter state
+  const [search, setSearch] = useState('');
+  const [dateRange, setDateRange] = useState<{
+    startDate: string | null;
+    endDate: string | null;
+  }>({
+    startDate: null,
+    endDate: null,
   });
-  
-  // Fetch invoice data if editing
+  const [status, setStatus] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Get current date for display
+  const today = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
   useEffect(() => {
-    if (invoiceId) {
-      fetchInvoice(invoiceId);
-    } else if (quotationId) {
-      fetchQuotationData(quotationId);
-    } else if (taskId) {
-      fetchCustomerData(taskId);
-    }
-  }, [invoiceId, quotationId, taskId]);
-  
-  // Fetch invoice data for editing
-  const fetchInvoice = async (id: string) => {
+    fetchInvoices();
+  }, [page, pageSize, status]);
+
+  const fetchInvoices = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/sales/invoice?id=${id}`);
+      setError(null);
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('pageSize', pageSize.toString());
+      
+      if (search) params.append('search', search);
+      if (dateRange.startDate) params.append('from', dateRange.startDate);
+      if (dateRange.endDate) params.append('to', dateRange.endDate);
+      if (status !== 'all') params.append('status', status);
+
+      const response = await fetch(`/api/sales/invoice?${params.toString()}`);
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch invoice');
+        throw new Error('Failed to fetch invoices');
       }
       
       const data = await response.json();
-      if (data.invoice) {
-        // Format dates properly
-        const invoice = {
-          ...data.invoice,
-          invoiceDate: data.invoice.invoice_date || data.invoice.invoiceDate || new Date().toISOString().split('T')[0],
-          dueDate: data.invoice.due_date || data.invoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          payments: data.invoice.payments || [],
-          amountPaid: data.invoice.amountPaid || 0,
-          balance: data.invoice.balance || data.invoice.total || 0,
-          enableOnlinePayment: data.invoice.enableOnlinePayment || false,
-          paymentGateway: data.invoice.paymentGateway || 'stripe',
-        };
-        
-        setInvoiceData(invoice);
-        setIsEditing(true);
-      }
-    } catch (error) {
-      console.error('Error fetching invoice:', error);
-      alert('Failed to fetch invoice details');
+      setInvoices(data.invoices || []);
+      setTotal(data.total || 0);
+    } catch (err) {
+      console.error('Error fetching invoices:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load invoices');
     } finally {
       setLoading(false);
     }
   };
-  
-  // Fetch quotation data to pre-fill invoice
-  const fetchQuotationData = async (id: string) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/sales/quotation?id=${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch quotation');
-      }
-      
-      const data = await response.json();
-      if (data.quotation) {
-        const quotation = data.quotation;
-        
-        // Map quotation items to invoice items
-        const items = quotation.items?.map((item: { description: any; quantity: any; unit_price: any; unitPrice: any; amount: any; unit: any; }) => ({
-          description: item.description,
-          quantity: item.quantity,
-          unitPrice: item.unit_price || item.unitPrice,
-          amount: item.amount,
-          unit: item.unit
-        })) || [];
-        
-        // Calculate totals
-        const subtotal = items.reduce((sum: any, item: { amount: any; }) => sum + (item.amount || 0), 0);
-        const tax = subtotal * 0.06; // 6% tax
-        const total = subtotal + tax;
-        
-        setInvoiceData({
-          ...invoiceData,
-          customerName: quotation.customer_name || '',
-          customerContact: quotation.customer_contact || '',
-          customerEmail: quotation.customer_email || '',
-          customerAddress: quotation.customer_address || '',
-          quotationId: id,
-          taskId: quotation.task_id || taskId || '',
-          items: items,
-          subtotal: subtotal,
-          tax: tax,
-          total: total,
-          balance: total
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching quotation:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Fetch customer data from task
-  const fetchCustomerData = async (task_id: string) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/sales/tasks?taskId=${task_id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch customer data');
-      }
-      
-      const data = await response.json();
-      if (data.task) {
-        const task = data.task;
-        
-        setInvoiceData({
-          ...invoiceData,
-          customerName: task.customer_name || '',
-          customerContact: task.phone || task.contact || '',
-          customerEmail: task.email || '',
-          customerAddress: task.address || '',
-          taskId: task_id,
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching customer data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleSearch = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    
-    try {
-      setLoading(true);
-      
-      // Validate items
-      if (invoiceData.items.length === 0) {
-        alert("Please add at least one item to the invoice");
-        setLoading(false);
-        return;
-      }
-      
-      // Calculate payment totals to ensure they're correct
-      let totalPaid = 0;
-      if (invoiceData.payments && invoiceData.payments.length > 0) {
-        totalPaid = invoiceData.payments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
-      }
-      
-      const balance = invoiceData.total - totalPaid;
-      
-      // Determine invoice status based on payments
-      let status = invoiceData.status;
-      if (totalPaid >= invoiceData.total) {
-        status = 'paid';
-      } else if (totalPaid > 0 && status !== 'overdue') {
-        status = 'partial';
-      }
-      
-      // Prepare data for API
-      const invoiceToSave = {
-        ...invoiceData,
-        status: status,
-        subtotal: Number(invoiceData.subtotal),
-        tax: Number(invoiceData.tax),
-        total: Number(invoiceData.total),
-        amountPaid: totalPaid,
-        balance: balance,
-        items: invoiceData.items.map(item => ({
-          ...item,
-          quantity: Number(item.quantity),
-          unitPrice: Number(item.unitPrice),
-          amount: Number(item.amount)
-        })),
-        payments: invoiceData.payments ? invoiceData.payments.map(payment => ({
-          ...payment,
-          amount: Number(payment.amount)
-        })) : []
-      };
-      
-      // API endpoint and method
-      const url = isEditing ? `/api/sales/invoice?id=${invoiceId}` : '/api/sales/invoice';
-      const method = isEditing ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(invoiceToSave),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to ${isEditing ? 'update' : 'create'} invoice`);
-      }
-      
-      const result = await response.json();
-      
-      // Show success message
-      alert(`Invoice ${isEditing ? 'updated' : 'created'} successfully!`);
-      
-      // Redirect to invoice list or view
-      router.push('/sales/invoices');
-      
-    } catch (error) {
-      console.error(`Error ${isEditing ? 'updating' : 'creating'} invoice:`, error);
-      alert(`Failed to ${isEditing ? 'update' : 'create'} invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setLoading(false);
-    }
+    setPage(1); // Reset to first page when searching
+    fetchInvoices();
   };
   
+  const handleDateRangeChange = (range: SetStateAction<{ startDate: string | null; endDate: string | null; }>) => {
+    setDateRange(range);
+  };
+
+  const handleFilterApply = () => {
+    setPage(1); // Reset to first page when applying filters
+    fetchInvoices();
+    setShowFilters(false);
+  };
+
+  const handleFilterReset = () => {
+    setSearch('');
+    setDateRange({ startDate: null, endDate: null });
+    setStatus('all');
+    setPage(1);
+    fetchInvoices();
+    setShowFilters(false);
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      // Build query parameters for export (all data, not paginated)
+      const params = new URLSearchParams();
+      params.append('export', 'csv');
+      if (search) params.append('search', search);
+      if (dateRange.startDate) params.append('from', dateRange.startDate);
+      if (dateRange.endDate) params.append('to', dateRange.endDate);
+      if (status !== 'all') params.append('status', status);
+
+      const response = await fetch(`/api/sales/invoice/export?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to export invoices');
+      }
+      
+      // Download the CSV file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `invoices-export-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting invoices:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      alert(`Failed to export invoices: ${errorMessage}`);
+    }
+  };
+
+  // Get status badge color
+  const getStatusBadgeClass = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'sent':
+        return 'bg-blue-100 text-blue-800';
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'overdue':
+        return 'bg-red-100 text-red-800';
+      case 'partial':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Format currency
+  const formatCurrency = (amount: string | number | bigint) => {
+    try {
+      // Convert string or bigint to number if needed
+      const numAmount = typeof amount === 'string' ? parseFloat(amount) : Number(amount);
+      
+      // Format the number as currency
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(numAmount);
+    } catch (err) {
+      console.error('Error formatting currency:', err);
+      // Return a fallback format in case of error
+      return `$${amount}`;
+    }
+  };
+
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName={isEditing ? "Edit Invoice" : "Create Invoice"} noHeader={true}/>
-        
-        <div className="bg-white dark:bg-boxdark rounded-sm shadow-default p-6 mb-8">
-          <h2 className="text-title-md2 font-bold text-black dark:text-white mb-5">
-            {isEditing ? `Edit Invoice #${invoiceData.invoiceNumber}` : 'Create New Invoice'}
-          </h2>
-          
-          {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        <Breadcrumb pageName="Invoices" noHeader={true}/>
+
+        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+          {/* Header with actions */}
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-title-md2 font-bold text-black dark:text-white">
+              Invoices
+            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => router.push('/sales/invoice/new')}
+                className="inline-flex items-center gap-2.5 rounded-md bg-primary px-4 py-2 font-medium text-white hover:bg-opacity-90"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Invoice
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="inline-flex items-center gap-2.5 rounded-md border border-stroke px-4 py-2 font-medium hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                Filter
+              </button>
+              <button
+                onClick={handleExportCSV}
+                className="inline-flex items-center gap-2.5 rounded-md border border-stroke px-4 py-2 font-medium hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export
+              </button>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Invoice & Customer Details Section */}
-              <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark p-6">
-                <h2 className="mb-4 text-xl font-semibold text-black dark:text-white">
-                  Invoice Details
-                </h2>
-                
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {/* Invoice number */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Invoice Number
-                    </label>
-                    <input
-                      type="text"
-                      value={invoiceData.invoiceNumber}
-                      onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      required
-                    />
-                  </div>
-                  
-                  {/* Invoice Date */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Invoice Date
-                    </label>
-                    <input
-                      type="date"
-                      value={invoiceData.invoiceDate}
-                      onChange={(e) => setInvoiceData({...invoiceData, invoiceDate: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      required
-                    />
-                  </div>
-                  
-                  {/* Due Date */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Due Date
-                    </label>
-                    <input
-                      type="date"
-                      value={invoiceData.dueDate}
-                      onChange={(e) => setInvoiceData({...invoiceData, dueDate: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      required
-                    />
-                  </div>
-                  
-                  {/* Status */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Status
-                    </label>
-                    <select
-                      value={invoiceData.status}
-                      onChange={(e) => setInvoiceData({...invoiceData, status: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="sent">Sent</option>
-                      <option value="paid">Paid</option>
-                      <option value="partial">Partial</option>
-                      <option value="overdue">Overdue</option>
-                    </select>
-                  </div>
-                  
-                  {/* Customer Name */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Customer Name
-                    </label>
-                    <input
-                      type="text"
-                      value={invoiceData.customerName}
-                      onChange={(e) => setInvoiceData({...invoiceData, customerName: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      required
-                    />
-                  </div>
-                  
-                  {/* Customer Contact */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Contact Number
-                    </label>
-                    <input
-                      type="text"
-                      value={invoiceData.customerContact}
-                      onChange={(e) => setInvoiceData({...invoiceData, customerContact: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    />
-                  </div>
-                  
-                  {/* Customer Email */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={invoiceData.customerEmail}
-                      onChange={(e) => setInvoiceData({...invoiceData, customerEmail: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    />
-                  </div>
-                  
-                  {/* Reference */}
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Reference/PO Number
-                    </label>
-                    <input
-                      type="text"
-                      value={invoiceData.reference || ''}
-                      onChange={(e) => setInvoiceData({...invoiceData, reference: e.target.value})}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      placeholder="Purchase order or reference number"
-                    />
-                  </div>
-                  
-                  {/* Customer Address - Spans full width */}
-                  <div className="lg:col-span-4">
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Billing Address
-                    </label>
-                    <textarea
-                      value={invoiceData.customerAddress}
-                      onChange={(e) => setInvoiceData({...invoiceData, customerAddress: e.target.value})}
-                      rows={2}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Line Items Section */}
-              <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-black dark:text-white">
-                    Invoice Items
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setInvoiceData({
-                        ...invoiceData,
-                        items: [
-                          ...invoiceData.items,
-                          { id: Date.now(), description: '', quantity: 1, unitPrice: 0, amount: 0 }
-                        ]
-                      });
-                    }}
-                    className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1 rounded-md text-sm flex items-center"
-                  >
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Add Item
-                  </button>
-                </div>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[800px]">
-                    <thead>
-                      <tr className="border-b border-stroke dark:border-strokedark">
-                        <th className="p-2.5 text-left text-sm font-medium text-black dark:text-white">Description</th>
-                        <th className="p-2.5 text-right text-sm font-medium text-black dark:text-white w-24">Quantity</th>
-                        <th className="p-2.5 text-right text-sm font-medium text-black dark:text-white w-32">Unit Price</th>
-                        <th className="p-2.5 text-right text-sm font-medium text-black dark:text-white w-32">Amount</th>
-                        <th className="p-2.5 w-10"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoiceData.items.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                            No items added yet. Click "Add Item" to add invoice line items.
-                          </td>
-                        </tr>
-                      ) : (
-                        invoiceData.items.map((item, index) => (
-                          <tr key={item.id || index} className="border-b border-stroke dark:border-strokedark">
-                            <td className="p-2.5">
-                              <input
-                                type="text"
-                                value={item.description}
-                                onChange={(e) => {
-                                  const updatedItems = [...invoiceData.items];
-                                  updatedItems[index].description = e.target.value;
-                                  setInvoiceData({ ...invoiceData, items: updatedItems });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary"
-                                placeholder="Item description"
-                                required
-                              />
-                            </td>
-                            <td className="p-2.5">
-                              <input
-                                type="number"
-                                min="1"
-                                step="1"
-                                value={item.quantity}
-                                onChange={(e) => {
-                                  const updatedItems = [...invoiceData.items];
-                                  updatedItems[index].quantity = Number(e.target.value);
-                                  updatedItems[index].amount = updatedItems[index].quantity * updatedItems[index].unitPrice;
-                                  
-                                  // Recalculate totals
-                                  const subtotal = updatedItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-                                  const tax = subtotal * 0.06; // 6% tax
-                                  const total = subtotal + tax;
-                                  const balance = total - (invoiceData.amountPaid || 0);
-                                  
-                                  setInvoiceData({ 
-                                    ...invoiceData, 
-                                    items: updatedItems,
-                                    subtotal,
-                                    tax,
-                                    total,
-                                    balance
-                                  });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary text-right"
-                                required
-                              />
-                            </td>
-                            <td className="p-2.5">
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={item.unitPrice}
-                                onChange={(e) => {
-                                  const updatedItems = [...invoiceData.items];
-                                  updatedItems[index].unitPrice = Number(e.target.value);
-                                  updatedItems[index].amount = updatedItems[index].quantity * updatedItems[index].unitPrice;
-                                  
-                                  // Recalculate totals
-                                  const subtotal = updatedItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-                                  const tax = subtotal * 0.06; // 6% tax
-                                  const total = subtotal + tax;
-                                  const balance = total - (invoiceData.amountPaid || 0);
-                                  
-                                  setInvoiceData({ 
-                                    ...invoiceData, 
-                                    items: updatedItems,
-                                    subtotal,
-                                    tax,
-                                    total,
-                                    balance
-                                  });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary text-right"
-                                required
-                              />
-                            </td>
-                            <td className="p-2.5 text-right font-medium">
-                              {(item.amount || 0).toFixed(2)}
-                            </td>
-                            <td className="p-2.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updatedItems = invoiceData.items.filter((_, i) => i !== index);
-                                  
-                                  // Recalculate totals
-                                  const subtotal = updatedItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-                                  const tax = subtotal * 0.06; // 6% tax
-                                  const total = subtotal + tax;
-                                  const balance = total - (invoiceData.amountPaid || 0);
-                                  
-                                  setInvoiceData({ 
-                                    ...invoiceData, 
-                                    items: updatedItems,
-                                    subtotal,
-                                    tax,
-                                    total,
-                                    balance
-                                  });
-                                }}
-                                className="text-danger hover:text-danger/70"
-                                title="Remove item"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                    <tfoot>
-                      <tr className="border-t border-stroke dark:border-strokedark">
-                        <td colSpan={3} className="p-2.5 text-right font-medium">Subtotal:</td>
-                        <td className="p-2.5 text-right font-medium">
-                          {invoiceData.subtotal.toFixed(2)}
-                        </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td colSpan={3} className="p-2.5 text-right font-medium">Tax (6%):</td>
-                        <td className="p-2.5 text-right font-medium">
-                          {invoiceData.tax.toFixed(2)}
-                        </td>
-                        <td></td>
-                      </tr>
-                      <tr className="bg-gray-50 dark:bg-meta-4">
-                        <td colSpan={3} className="p-2.5 text-right font-semibold">Total:</td>
-                        <td className="p-2.5 text-right font-semibold">
-                          {invoiceData.total.toFixed(2)}
-                        </td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-              
-              {/* Payment History Section */}
-              <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-black dark:text-white">
-                    Payment History
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setInvoiceData({
-                        ...invoiceData,
-                        payments: [
-                          ...(invoiceData.payments || []),
-                          { 
-                            id: Date.now(),
-                            amount: 0,
-                            date: new Date().toISOString().split('T')[0],
-                            method: 'cash',
-                            reference: '',
-                            notes: ''
-                          }
-                        ]
-                      });
-                    }}
-                    className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1 rounded-md text-sm flex items-center"
-                  >
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Add Payment
-                  </button>
-                </div>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[800px]">
-                    <thead>
-                      <tr className="border-b border-stroke dark:border-strokedark">
-                        <th className="p-2.5 text-left text-sm font-medium text-black dark:text-white">Date</th>
-                        <th className="p-2.5 text-left text-sm font-medium text-black dark:text-white">Method</th>
-                        <th className="p-2.5 text-left text-sm font-medium text-black dark:text-white">Reference</th>
-                        <th className="p-2.5 text-right text-sm font-medium text-black dark:text-white w-32">Amount</th>
-                        <th className="p-2.5 w-10"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {!invoiceData.payments || invoiceData.payments.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                            No payments recorded yet. Click "Add Payment" to record a payment.
-                          </td>
-                        </tr>
-                      ) : (
-                        invoiceData.payments.map((payment, index) => (
-                          <tr key={payment.id || index} className="border-b border-stroke dark:border-strokedark">
-                            <td className="p-2.5">
-                              <input
-                                type="date"
-                                value={payment.date}
-                                onChange={(e) => {
-                                  const updatedPayments = [...invoiceData.payments];
-                                  updatedPayments[index].date = e.target.value;
-                                  setInvoiceData({ ...invoiceData, payments: updatedPayments });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary"
-                                required
-                              />
-                            </td>
-                            <td className="p-2.5">
-                              <select
-                                value={payment.method}
-                                onChange={(e) => {
-                                  const updatedPayments = [...invoiceData.payments];
-                                  updatedPayments[index].method = e.target.value;
-                                  setInvoiceData({ ...invoiceData, payments: updatedPayments });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary"
-                                required
-                              >
-                                <option value="cash">Cash</option>
-                                <option value="bank_transfer">Bank Transfer</option>
-                                <option value="credit_card">Credit Card</option>
-                                <option value="online">Online Payment</option>
-                                <option value="check">Check</option>
-                                <option value="other">Other</option>
-                              </select>
-                            </td>
-                            <td className="p-2.5">
-                              <input
-                                type="text"
-                                value={payment.reference}
-                                onChange={(e) => {
-                                  const updatedPayments = [...invoiceData.payments];
-                                  updatedPayments[index].reference = e.target.value;
-                                  setInvoiceData({ ...invoiceData, payments: updatedPayments });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary"
-                                placeholder="Transaction reference"
-                              />
-                            </td>
-                            <td className="p-2.5">
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={payment.amount}
-                                onChange={(e) => {
-                                  const updatedPayments = [...invoiceData.payments];
-                                  updatedPayments[index].amount = Number(e.target.value);
-                                  
-                                  // Calculate remaining balance
-                                  const totalPaid = updatedPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                                  const remainingBalance = invoiceData.total - totalPaid;
-                                  
-                                  setInvoiceData({ 
-                                    ...invoiceData, 
-                                    payments: updatedPayments,
-                                    amountPaid: totalPaid,
-                                    balance: remainingBalance
-                                  });
-                                }}
-                                className="w-full border-0 bg-transparent px-3 py-1 text-sm outline-none focus:border-b-[1.5px] focus:border-primary text-right"
-                                required
-                              />
-                            </td>
-                            <td className="p-2.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updatedPayments = invoiceData.payments.filter((_, i) => i !== index);
-                                  
-                                  // Recalculate totals
-                                  const totalPaid = updatedPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                                  const remainingBalance = invoiceData.total - totalPaid;
-                                  
-                                  setInvoiceData({ 
-                                    ...invoiceData, 
-                                    payments: updatedPayments,
-                                    amountPaid: totalPaid,
-                                    balance: remainingBalance
-                                  });
-                                }}
-                                className="text-danger hover:text-danger/70"
-                                title="Remove payment"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                    {invoiceData.payments && invoiceData.payments.length > 0 && (
-                      <tfoot>
-                        <tr className="border-t border-stroke dark:border-strokedark">
-                          <td colSpan={3} className="p-2.5 text-right font-medium">Total Paid:</td>
-                          <td className="p-2.5 text-right font-medium">
-                            {(invoiceData.amountPaid || 0).toFixed(2)}
-                          </td>
-                          <td></td>
-                        </tr>
-                        <tr className="bg-gray-50 dark:bg-meta-4">
-                          <td colSpan={3} className="p-2.5 text-right font-semibold">Remaining Balance:</td>
-                          <td className="p-2.5 text-right font-semibold">
-                            {(invoiceData.balance || invoiceData.total).toFixed(2)}
-                          </td>
-                          <td></td>
-                        </tr>
-                      </tfoot>
-                    )}
-                  </table>
-                </div>
-              </div>
-              
-              {/* Payment Gateway Options Section */}
-              <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark p-6">
-                <h2 className="mb-4 text-xl font-semibold text-black dark:text-white">
-                  Payment Options
-                </h2>
-                
-                <div className="mb-4">
-                  <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                    Enable Online Payment
+          </div>
+
+          {/* Search bar */}
+          <div className="mb-4.5">
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                type="text"
+                placeholder="Search by invoice #, customer, or amount..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+              />
+              <button type="submit" className="absolute right-4 top-3.5">
+                <svg className="h-5 w-5 text-body dark:text-bodydark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          {/* Filters panel */}
+          {showFilters && (
+            <div className="mb-6 rounded-lg border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+              <h3 className="mb-3 text-lg font-semibold text-black dark:text-white">
+                Filter Options
+              </h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div>
+                  <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+                    From Date
                   </label>
-                  <div className="flex items-center">
-                    <label className="flex cursor-pointer select-none items-center mr-4">
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={invoiceData.enableOnlinePayment}
-                          onChange={(e) => setInvoiceData({...invoiceData, enableOnlinePayment: e.target.checked})}
-                          className="sr-only"
-                        />
-                        <div className={`box mr-2 flex h-5 w-5 items-center justify-center rounded border ${
-                          invoiceData.enableOnlinePayment ? 'border-primary bg-primary' : 'border-stroke dark:border-strokedark'
-                        }`}>
-                          <span className={`opacity-0 ${invoiceData.enableOnlinePayment ? '!opacity-100' : ''}`}>
-                            <svg
-                              className="h-3.5 w-3.5 stroke-white"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium">Enable payment link in customer email</span>
-                    </label>
-                  </div>
+                  <input
+                    type="date"
+                    value={dateRange.startDate || ''}
+                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                    className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                  />
                 </div>
-                
-                {invoiceData.enableOnlinePayment && (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div className="border border-stroke dark:border-strokedark rounded-md p-3 flex items-center">
-                      <input
-                        type="radio"
-                        id="gateway-stripe"
-                        name="paymentGateway"
-                        value="stripe"
-                        checked={invoiceData.paymentGateway === 'stripe'}
-                        onChange={(e) => setInvoiceData({...invoiceData, paymentGateway: e.target.value})}
-                        className="mr-2"
-                      />
-                      <label htmlFor="gateway-stripe" className="flex items-center cursor-pointer">
-                        <span className="bg-blue-50 text-blue-700 p-2 rounded mr-2">
-                          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z" />
-                            <path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z" />
-                          </svg>
-                        </span>
-                        <div>
-                          <span className="font-medium block">Stripe</span>
-                          <span className="text-xs text-gray-500">Credit/Debit Cards</span>
-                        </div>
-                      </label>
-                    </div>
-                    
-                    <div className="border border-stroke dark:border-strokedark rounded-md p-3 flex items-center">
-                      <input
-                        type="radio"
-                        id="gateway-paypal"
-                        name="paymentGateway"
-                        value="paypal"
-                        checked={invoiceData.paymentGateway === 'paypal'}
-                        onChange={(e) => setInvoiceData({...invoiceData, paymentGateway: e.target.value})}
-                        className="mr-2"
-                      />
-                      <label htmlFor="gateway-paypal" className="flex items-center cursor-pointer">
-                        <span className="bg-blue-50 text-blue-700 p-2 rounded mr-2">
-                          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M2.273 5.625A4.483 4.483 0 015.25 4.5h13.5c1.141 0 2.183.425 2.977 1.125A3 3 0 0018.75 3H5.25a3 3 0 00-2.977 2.625zM2.273 8.625A4.483 4.483 0 015.25 7.5h13.5c1.141 0 2.183.425 2.977 1.125A3 3 0 0018.75 6H5.25a3 3 0 00-2.977 2.625zM5.25 9a3 3 0 00-3 3v6a3 3 0 003 3h13.5a3 3 0 003-3v-6a3 3 0 00-3-3H15a.75.75 0 00-.75.75 2.25 2.25 0 01-4.5 0A.75.75 0 009 9H5.25z" />
-                          </svg>
-                        </span>
-                        <div>
-                          <span className="font-medium block">PayPal</span>
-                          <span className="text-xs text-gray-500">PayPal Account</span>
-                        </div>
-                      </label>
-                    </div>
-                    
-                    <div className="border border-stroke dark:border-strokedark rounded-md p-3 flex items-center">
-                      <input
-                        type="radio"
-                        id="gateway-bank"
-                        name="paymentGateway"
-                        value="bank_transfer"
-                        checked={invoiceData.paymentGateway === 'bank_transfer'}
-                        onChange={(e) => setInvoiceData({...invoiceData, paymentGateway: e.target.value})}
-                        className="mr-2"
-                      />
-                      <label htmlFor="gateway-bank" className="flex items-center cursor-pointer">
-                        <span className="bg-blue-50 text-blue-700 p-2 rounded mr-2">
-                          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M11.584 2.376a.75.75 0 01.832 0l9 6a.75.75 0 11-.832 1.248L12 3.901 3.416 9.624a.75.75 0 01-.832-1.248l9-6z" />
-                            <path fillRule="evenodd" d="M20.25 10.332v9.918H21a.75.75 0 010 1.5H3a.75.75 0 010-1.5h.75v-9.918a.75.75 0 01.634-.74A49.109 49.109 0 0112 9c2.59 0 5.134.202 7.616.592a.75.75 0 01.634.74zm-7.5 2.418a.75.75 0 00-1.5 0v6.75a.75.75 0 001.5 0v-6.75zm3-.75a.75.75 0 01.75.75v6.75a.75.75 0 01-1.5 0v-6.75a.75.75 0 01.75-.75zM9 12.75a.75.75 0 00-1.5 0v6.75a.75.75 0 001.5 0v-6.75z" clipRule="evenodd" />
-                            <path d="M12 7.875a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" />
-                          </svg>
-                        </span>
-                        <div>
-                          <span className="font-medium block">Bank Transfer</span>
-                          <span className="text-xs text-gray-500">Direct Bank Transfer</span>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                )}
-                
-                {invoiceData.enableOnlinePayment && invoiceData.paymentGateway === 'bank_transfer' && (
-                  <div className="mt-4 bg-gray-50 dark:bg-meta-4 p-3 rounded">
-                    <h3 className="font-medium mb-2">Bank Account Details</h3>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-xs font-medium">
-                          Bank Name
-                        </label>
-                        <input
-                          type="text"
-                          value={invoiceData.bankDetails?.bankName || ''}
-                          onChange={(e) => setInvoiceData({
-                            ...invoiceData, 
-                            bankDetails: {
-                              accountNumber: invoiceData.bankDetails?.accountNumber || '',
-                              accountName: invoiceData.bankDetails?.accountName || '',
-                              swiftCode: invoiceData.bankDetails?.swiftCode || '',
-                              bankName: e.target.value
-                            }
-                          })}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-1 text-sm outline-none focus:border-primary active:border-primary"
-                          placeholder="Bank name"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium">
-                          Account Number
-                        </label>
-                        <input
-                          type="text"
-                          value={invoiceData.bankDetails?.accountNumber || ''}
-                          onChange={(e) => setInvoiceData({
-                            ...invoiceData, 
-                            bankDetails: {
-                              bankName: invoiceData.bankDetails?.bankName || '',
-                              accountNumber: e.target.value,
-                              accountName: invoiceData.bankDetails?.accountName || '',
-                              swiftCode: invoiceData.bankDetails?.swiftCode || ''
-                            }
-                          })}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-1 text-sm outline-none focus:border-primary active:border-primary"
-                          placeholder="Account number"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium">
-                          Account Name
-                        </label>
-                        <input
-                          type="text"
-                          value={invoiceData.bankDetails?.accountName || ''}
-                          onChange={(e) => setInvoiceData({
-                            ...invoiceData, 
-                            bankDetails: {
-                              bankName: invoiceData.bankDetails?.bankName || '',
-                              accountNumber: invoiceData.bankDetails?.accountNumber || '',
-                              swiftCode: invoiceData.bankDetails?.swiftCode || '',
-                              accountName: e.target.value
-                            }
-                          })}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-1 text-sm outline-none focus:border-primary active:border-primary"
-                          placeholder="Account holder name"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium">
-                          Branch Code / SWIFT
-                        </label>
-                        <input
-                          type="text"
-                          value={invoiceData.bankDetails?.swiftCode || ''}
-                          onChange={(e) => setInvoiceData({
-                            ...invoiceData, 
-                            bankDetails: {
-                              bankName: invoiceData.bankDetails?.bankName || '',
-                              accountNumber: invoiceData.bankDetails?.accountNumber || '',
-                              accountName: invoiceData.bankDetails?.accountName || '',
-                              swiftCode: e.target.value
-                            }
-                          })}
-                          className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-1 text-sm outline-none focus:border-primary active:border-primary"
-                          placeholder="SWIFT code"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Notes & Terms Section */}
-              <div className="bg-white dark:bg-boxdark rounded-sm border border-stroke dark:border-strokedark p-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Notes
-                    </label>
-                    <textarea
-                      value={invoiceData.notes}
-                      onChange={(e) => setInvoiceData({...invoiceData, notes: e.target.value})}
-                      rows={3}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      placeholder="Additional notes for the customer (optional)"
-                    ></textarea>
-                  </div>
-                  
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                      Terms & Conditions
-                    </label>
-                    <textarea
-                      value={invoiceData.terms}
-                      onChange={(e) => setInvoiceData({...invoiceData, terms: e.target.value})}
-                      rows={3}
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-3 py-2 text-sm font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                      placeholder="Payment terms and conditions"
-                    ></textarea>
-                  </div>
+                <div>
+                  <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+                    To Date
+                  </label>
+                  <input
+                    type="date"
+                    value={dateRange.endDate || ''}
+                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                    className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="paid">Paid</option>
+                    <option value="partial">Partially Paid</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
                 </div>
               </div>
-              
-              {/* Submit button */}
-              <div className="flex justify-end space-x-4 mt-6">
-                <button 
-                  type="button"
-                  onClick={() => router.back()}
-                  className="bg-gray-200 dark:bg-meta-4 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-md hover:bg-gray-300 dark:hover:bg-meta-3"
-                  disabled={loading}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  onClick={handleFilterApply}
+                  className="rounded-md bg-primary px-4 py-2 font-medium text-white hover:bg-opacity-90"
                 >
-                  Cancel
+                  Apply Filters
                 </button>
                 <button
-                  type="submit"
-                  className="bg-primary text-white px-5 py-2 rounded-md hover:bg-primary/90 flex items-center"
-                  disabled={loading}
+                  onClick={handleFilterReset}
+                  className="rounded-md border border-stroke px-4 py-2 font-medium hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4"
                 >
-                  {loading && (
-                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                  )}
-                  {isEditing ? 'Update Invoice' : 'Create Invoice'}
+                  Reset
                 </button>
               </div>
-            </form>
+            </div>
+          )}
+
+          {/* Invoices Table */}
+          <div className="max-w-full overflow-x-auto">
+            {loading ? (
+              <div className="flex h-40 items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+              </div>
+            ) : error ? (
+              <div className="flex h-40 items-center justify-center">
+                <p className="text-lg text-danger">{error}</p>
+              </div>
+            ) : invoices.length === 0 ? (
+              <div className="flex h-40 flex-col items-center justify-center">
+                <p className="text-lg text-body dark:text-bodydark">No invoices found</p>
+                <p className="mt-1 text-sm text-body dark:text-bodydark">
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
+            ) : (
+              <table className="w-full table-auto">
+                <thead>
+                  <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                    <th className="py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+                      Invoice #
+                    </th>
+                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                      Date
+                    </th>
+                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                      Customer
+                    </th>
+                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                      Amount
+                    </th>
+                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                      Status
+                    </th>
+                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                      Due Date
+                    </th>
+                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice, index) => (
+                    <tr key={invoice.id} className="border-b border-[#eee] dark:border-strokedark">
+                      <td className="py-5 px-4 pl-9 xl:pl-11">
+                        <Link href={`/sales/invoice/${invoice.id}`} className="text-primary hover:underline">
+                          {invoice.invoice_number}
+                        </Link>
+                      </td>
+                      <td className="py-5 px-4">
+                        {new Date(invoice.invoice_date).toLocaleDateString()}
+                      </td>
+                      <td className="py-5 px-4">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {invoice.customer_name}
+                        </h5>
+                        <p className="text-sm">{invoice.customer_email}</p>
+                      </td>
+                      <td className="py-5 px-4">
+                        <span className="text-black dark:text-white">
+                          {formatCurrency(invoice.total)}
+                        </span>
+                      </td>
+                      <td className="py-5 px-4">
+                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${getStatusBadgeClass(invoice.status)}`}>
+                          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="py-5 px-4">
+                        {new Date(invoice.due_date).toLocaleDateString()}
+                      </td>
+                      <td className="py-5 px-4">
+                        <div className="flex items-center space-x-3.5">
+                          <Link href={`/sales/invoice/${invoice.id}`} className="hover:text-primary">
+                            <svg
+                              className="fill-current"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 18 18"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M8.99981 14.8219C3.43106 14.8219 0.674805 9.50624 0.562305 9.28124C0.47793 9.11249 0.47793 8.88749 0.562305 8.71874C0.674805 8.49374 3.43106 3.20624 8.99981 3.20624C14.5686 3.20624 17.3248 8.49374 17.4373 8.71874C17.5217 8.88749 17.5217 9.11249 17.4373 9.28124C17.3248 9.50624 14.5686 14.8219 8.99981 14.8219ZM1.85605 8.99999C2.4748 10.0406 4.89356 13.5562 8.99981 13.5562C13.1061 13.5562 15.5248 10.0406 16.1436 8.99999C15.5248 7.95936 13.1061 4.44374 8.99981 4.44374C4.89356 4.44374 2.4748 7.95936 1.85605 8.99999Z"
+                                fill=""
+                              />
+                              <path
+                                d="M9 11.3906C7.67812 11.3906 6.60938 10.3219 6.60938 9C6.60938 7.67813 7.67812 6.60938 9 6.60938C10.3219 6.60938 11.3906 7.67813 11.3906 9C11.3906 10.3219 10.3219 11.3906 9 11.3906ZM9 7.875C8.38125 7.875 7.875 8.38125 7.875 9C7.875 9.61875 8.38125 10.125 9 10.125C9.61875 10.125 10.125 9.61875 10.125 9C10.125 8.38125 9.61875 7.875 9 7.875Z"
+                                fill=""
+                              />
+                            </svg>
+                          </Link>
+                          <Link
+                            href={`/api/sales/invoice/pdf/${invoice.id}`}
+                            target="_blank"
+                            className="hover:text-primary"
+                          >
+                            <svg
+                              className="fill-current"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 18 18"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.8754 11.6719C16.5379 11.6719 16.2285 11.9531 16.2285 12.3187V14.8219C16.2285 15.075 16.0316 15.2719 15.7785 15.2719H2.22227C1.96914 15.2719 1.77227 15.075 1.77227 14.8219V12.3187C1.77227 11.9812 1.49102 11.6719 1.12539 11.6719C0.759766 11.6719 0.478516 11.9531 0.478516 12.3187V14.8219C0.478516 15.7781 1.23789 16.5375 2.19414 16.5375H15.7785C16.7348 16.5375 17.4941 15.7781 17.4941 14.8219V12.3187C17.5223 11.9531 17.2129 11.6719 16.8754 11.6719Z"
+                                fill=""
+                              />
+                              <path
+                                d="M8.55074 12.3469C8.66324 12.4594 8.83199 12.5156 9.00074 12.5156C9.16949 12.5156 9.31012 12.4594 9.45074 12.3469L13.4726 8.43752C13.7257 8.1844 13.7257 7.79065 13.5007 7.53752C13.2476 7.2844 12.8539 7.2844 12.6007 7.5094L9.64762 10.4063V2.1094C9.64762 1.7719 9.36637 1.46252 9.00074 1.46252C8.66324 1.46252 8.35387 1.74377 8.35387 2.1094V10.4063L5.40074 7.53752C5.14762 7.2844 4.75387 7.31252 4.50074 7.53752C4.24762 7.79065 4.27574 8.1844 4.50074 8.43752L8.55074 12.3469Z"
+                                fill=""
+                              />
+                            </svg>
+                          </Link>
+                          <button
+                            onClick={() => {
+                              if (confirm("Are you sure you want to delete this invoice?")) {
+                                // Handle delete
+                              }
+                            }}
+                            className="hover:text-danger"
+                          >
+                            <svg
+                              className="fill-current"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 18 18"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M13.7535 2.47502H11.5879V1.9969C11.5879 1.15315 10.9129 0.478149 10.0691 0.478149H7.90352C7.05977 0.478149 6.38477 1.15315 6.38477 1.9969V2.47502H4.21914C3.40352 2.47502 2.72852 3.15002 2.72852 3.96565V4.8094C2.72852 5.42815 3.09414 5.9344 3.62852 6.1594L4.07852 15.4688C4.13477 16.6219 5.09102 17.5219 6.24414 17.5219H11.7004C12.8535 17.5219 13.8098 16.6219 13.866 15.4688L14.3441 6.13127C14.8785 5.90627 15.2441 5.3719 15.2441 4.78127V3.93752C15.2441 3.15002 14.5691 2.47502 13.7535 2.47502ZM7.67852 1.9969C7.67852 1.85627 7.79102 1.74377 7.93164 1.74377H10.0973C10.2379 1.74377 10.3504 1.85627 10.3504 1.9969V2.47502H7.70664V1.9969H7.67852ZM4.02227 3.96565C4.02227 3.85315 4.10664 3.74065 4.24727 3.74065H13.7535C13.866 3.74065 13.9785 3.82502 13.9785 3.96565V4.8094C13.9785 4.9219 13.8941 5.0344 13.7535 5.0344H4.24727C4.13477 5.0344 4.02227 4.95002 4.02227 4.8094V3.96565ZM11.7285 16.2563H6.27227C5.79414 16.2563 5.40039 15.8906 5.37227 15.3844L4.95039 6.2719H13.0785L12.6566 15.3844C12.6004 15.8625 12.2066 16.2563 11.7285 16.2563Z"
+                                fill=""
+                              />
+                              <path
+                                d="M9.00039 9.11255C8.66289 9.11255 8.35352 9.3938 8.35352 9.75942V13.3313C8.35352 13.6688 8.63477 13.9782 9.00039 13.9782C9.33789 13.9782 9.64727 13.6969 9.64727 13.3313V9.75942C9.64727 9.3938 9.33789 9.11255 9.00039 9.11255Z"
+                                fill=""
+                              />
+                              <path
+                                d="M10.8754 9.11255C10.5379 9.11255 10.2285 9.3938 10.2285 9.75942V13.3313C10.2285 13.6688 10.5098 13.9782 10.8754 13.9782C11.2129 13.9782 11.5223 13.6969 11.5223 13.3313V9.75942C11.5223 9.3938 11.2129 9.11255 10.8754 9.11255Z"
+                                fill=""
+                              />
+                              <path
+                                d="M7.12545 9.11255C6.78795 9.11255 6.47858 9.3938 6.47858 9.75942V13.3313C6.47858 13.6688 6.75983 13.9782 7.12545 13.9782C7.46295 13.9782 7.77233 13.6969 7.77233 13.3313V9.75942C7.77233 9.3938 7.46295 9.11255 7.12545 9.11255Z"
+                                fill=""
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {!loading && !error && invoices.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center justify-between py-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-body dark:text-bodydark">
+                  Showing {(page - 1) * pageSize + 1} to{' '}
+                  {Math.min(page * pageSize, total)} of {total} invoices
+                </span>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                  className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border border-stroke px-4 text-sm hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4 ${
+                    page === 1
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'cursor-pointer'
+                  }`}
+                >
+                  Previous
+                </button>
+                
+                {/* Page numbers */}
+                {Array.from({ length: Math.min(5, Math.ceil(total / pageSize)) }, (_, i) => {
+                  // Logic to show correct page numbers when many pages exist
+                  let pageNum;
+                  const totalPages = Math.ceil(total / pageSize);
+                  
+                  if (totalPages <= 5) {
+                    // If 5 or fewer pages, show all page numbers
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    // If current page is among first 3, show pages 1-5
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    // If current page is among last 3, show last 5 pages
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    // Otherwise, show 2 pages before and after current page
+                    pageNum = page - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border ${
+                        page === pageNum
+                          ? 'border-primary bg-primary text-white'
+                          : 'border-stroke hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4'
+                      } px-4 text-sm`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => setPage(Math.min(Math.ceil(total / pageSize), page + 1))}
+                  disabled={page === Math.ceil(total / pageSize)}
+                  className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border border-stroke px-4 text-sm hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4 ${
+                    page === Math.ceil(total / pageSize)
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'cursor-pointer'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

@@ -51,9 +51,7 @@ export default function QuotationListPage() {
 
   // PDF modal states
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-  const [pdfFiles, setPdfFiles] = useState<
-    { name: string; lastModified: string }[]
-  >([]);
+  const [pdfFiles, setPdfFiles] = useState<{name: string; lastModified: string}[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Fetch quotations with filters
@@ -182,23 +180,20 @@ export default function QuotationListPage() {
       }
 
       const data = await response.json();
-
+      
       // Get the task_id from the quotation data
       const taskId = data.quotation.task_id;
-
+      
       if (!taskId) {
         alert("This quotation doesn't have an associated task.");
         return;
       }
-
+      
       // Redirect to the quotation editor with the task ID
       router.push(`/sales/quotation/auto?taskId=${taskId}`);
     } catch (error) {
       console.error("Error fetching quotation:", error);
-      alert(
-        "Failed to load quotation: " +
-          (error instanceof Error ? error.message : "Unknown error"),
-      );
+      alert("Failed to load quotation: " + (error instanceof Error ? error.message : "Unknown error"));
     } finally {
       setIsLoadingQuotation(false);
     }
@@ -214,9 +209,10 @@ export default function QuotationListPage() {
         `/api/sales/quotation?id=${editingQuotation?.id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers:
+            {
+              "Content-Type": "application/json",
+            },
           body: JSON.stringify(formData),
         },
       );
@@ -248,27 +244,22 @@ export default function QuotationListPage() {
 
     try {
       // Fetch list of PDFs for this task
-      const response = await fetch(
-        `/api/sales/quotation/files?taskId=${taskId}`,
-      );
-
+      const response = await fetch(`/api/sales/quotation/files?taskId=${taskId}`);
+      
       if (!response.ok) {
         throw new Error("Failed to fetch PDFs");
       }
-
+      
       const data = await response.json();
-
+      
       if (!data.files || data.files.length === 0) {
         alert("No PDFs found for this quotation. You can generate a new one.");
         return;
       }
-
+      
       if (data.files.length === 1) {
         // If only one PDF, open it directly
-        window.open(
-          `/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`,
-          "_blank",
-        );
+        window.open(`/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`, '_blank');
       } else {
         // If multiple PDFs, open modal for selection
         setPdfFiles(data.files);
@@ -277,10 +268,7 @@ export default function QuotationListPage() {
       }
     } catch (error) {
       console.error("Error fetching PDFs:", error);
-      alert(
-        "Error fetching PDFs: " +
-          (error instanceof Error ? error.message : "Unknown error"),
-      );
+      alert("Error fetching PDFs: " + (error instanceof Error ? error.message : "Unknown error"));
     }
   };
 
@@ -290,56 +278,46 @@ export default function QuotationListPage() {
       alert("No task ID associated with this quotation");
       return;
     }
-
+    
     try {
-      let response;
+      // For other statuses, proceed as before
+      const response = await fetch(`/api/sales/quotation?taskId=${taskId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
 
       if (status === "invoice") {
-        // Use the new dedicated endpoint for invoice conversion
-        response = await fetch(`/api/sales/invoice`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ taskId }),
-        });
-      } else {
-        // Use the existing endpoint for other status updates
-        response = await fetch(`/api/sales/quotation?taskId=${taskId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status }),
-        });
+        // Find the quotation to get its ID
+        const quotation = quotations.find(q => q.task_id === taskId);
+        if (!quotation) {
+          throw new Error("Quotation not found");
+        }
+        
+        // Navigate to auto invoice page instead of updating status directly
+        router.push(`/sales/invoice/auto?quotationId=${quotation.quotation_number}&taskId=${taskId}`);
+        return;
       }
-
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update status");
       }
 
-      alert(
-        `Quotation has been ${status === "invoice" ? "converted to invoice" : status}!`,
-      );
+      alert(`Quotation has been marked as ${status}!`);
       fetchQuotations();
-
-      if (status === "invoice") {
-        router.push(`/sales/invoice?taskId=${taskId}`);
-      }
     } catch (error) {
       console.error("Error updating status:", error);
-      alert(
-        "Failed to update status: " +
-          (error instanceof Error ? error.message : "Unknown error"),
-      );
+      alert("Failed to update status: " + (error instanceof Error ? error.message : "Unknown error"));
     }
   };
 
   return (
     <DefaultLayout>
       <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
-        <Breadcrumb pageName="Quotations" noHeader={true} />
+        <Breadcrumb pageName="Quotations" noHeader={true}/>
 
         <div className="mt-4 md:mt-0">
           <Link
@@ -564,54 +542,35 @@ export default function QuotationListPage() {
                           title="Edit quotation"
                         >
                           <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                            className="fill-current h-5 w-5"
+                            viewBox="0 0 576 512"
                           >
                             <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.5"
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            ></path>
+                              d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
+                              fill=""
+                            />
                           </svg>
                         </button>
                         <button
                           onClick={() => handleViewPdf(quotation.task_id)}
-                          className="text-warning hover:text-warning/80"
+                          className="text-primary hover:text-primary/80"
                           title="View PDF"
                         >
-                          {/* Replace the current download icon with a document/PDF icon */}
                           <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          className="h-5 w-5"
+                            fill="currentColor"
+                            viewBox="0 0 512 512"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.5"
-                              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.5"
-                              d="M12 11v6m-3-3h6"
-                            />
+                            <path d="M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z" />
                           </svg>
                         </button>
                         <button
-                          onClick={() =>
-                            handleStatusUpdate(quotation.task_id, "invoice")
-                          }
+                          onClick={() => handleStatusUpdate(quotation.task_id, "invoice")}
                           className={`text-success hover:text-success/80 ${quotation.status === "accepted" ? "hidden" : ""}`}
                           title="Mark as Invoice"
                         >
                           <svg
-                            className="h-5 w-5"
+                            className="h-6 w-6"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -619,20 +578,18 @@ export default function QuotationListPage() {
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              strokeWidth="1.5"
+                              strokeWidth="2.5"
                               d="M5 13l4 4L19 7"
                             ></path>
                           </svg>
                         </button>
                         <button
-                          onClick={() =>
-                            handleStatusUpdate(quotation.task_id, "draft")
-                          }
+                          onClick={() => handleStatusUpdate(quotation.task_id, "draft")}
                           className={`text-danger hover:text-danger/80 ${quotation.status === "history" ? "hidden" : ""}`}
                           title="Mark as Rejected"
                         >
                           <svg
-                            className="h-5 w-5"
+                            className="h-6 w-6"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -640,7 +597,7 @@ export default function QuotationListPage() {
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              strokeWidth="1.5"
+                              strokeWidth="2.5"
                               d="M6 18L18 6M6 6l12 12"
                             ></path>
                           </svg>
@@ -726,9 +683,9 @@ export default function QuotationListPage() {
 
       {/* Edit Quotation Modal */}
       {isEditModalOpen && editingQuotation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/50">
-          <div className="dark:bg-boxdark mx-4 w-full max-w-4xl rounded-sm bg-white p-6 shadow-lg">
-            <div className="mb-6 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
+          <div className="w-full max-w-4xl bg-white dark:bg-boxdark rounded-sm shadow-lg p-6 mx-4">
+            <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Edit Quotation #{editingQuotation.quotation_number}
               </h3>
@@ -737,7 +694,7 @@ export default function QuotationListPage() {
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <svg
-                  className="h-6 w-6"
+                  className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -753,7 +710,7 @@ export default function QuotationListPage() {
             </div>
 
             {updateError && (
-              <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700">
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                 {updateError}
               </div>
             )}
@@ -763,7 +720,7 @@ export default function QuotationListPage() {
               {/* Option 1: iframe approach */}
               <iframe
                 src={`/sales/quotation/auto?id=${editingQuotation.id}&modal=true`}
-                className="h-[calc(100vh-200px)] w-full border-none"
+                className="w-full h-[calc(100vh-200px)] border-none"
               />
 
               {/* Option 2: Direct form implementation 
@@ -776,23 +733,23 @@ export default function QuotationListPage() {
         */}
             </div>
 
-            <div className="mt-6 flex justify-end space-x-3">
+            <div className="flex justify-end mt-6 space-x-3">
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
+                className="px-4 py-2 bg-gray-200 dark:bg-meta-4 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-meta-3"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 form="editQuotationForm" // Match this to your form's id if using Option 2
-                className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white"
+                className="px-4 py-2 bg-primary rounded-md text-white hover:bg-primary/90"
                 disabled={isLoadingQuotation}
               >
                 {isLoadingQuotation ? (
                   <>
-                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></span>
                     Saving...
                   </>
                 ) : (
@@ -806,9 +763,9 @@ export default function QuotationListPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/50">
+       <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/50">
           <div className="dark:bg-boxdark mx-4 w-full max-w-md rounded-sm bg-white p-6 shadow-lg">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Select PDF
               </h3>
@@ -817,7 +774,7 @@ export default function QuotationListPage() {
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <svg
-                  className="h-6 w-6"
+                  className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -831,25 +788,22 @@ export default function QuotationListPage() {
                 </svg>
               </button>
             </div>
-
+            
             <div className="max-h-96 overflow-y-auto">
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {pdfFiles.map((file, index) => (
                   <li key={index} className="py-2">
                     <button
                       onClick={() => {
-                        window.open(
-                          `/api/sales/quotation/view-pdf?filePath=/sales/${selectedTaskId}/quotation/${file.name}`,
-                          "_blank",
-                        );
+                        window.open(`/api/sales/quotation/view-pdf?filePath=/sales/${selectedTaskId}/quotation/${file.name}`, '_blank');
                         setIsPdfModalOpen(false);
                       }}
-                      className="dark:hover:bg-meta-4 flex w-full items-center rounded px-2 py-2 text-left hover:bg-gray-100"
+                      className="flex items-center w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-meta-4 rounded"
                     >
-                      <svg
-                        className="text-warning mr-2 h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
+                      <svg 
+                        className="h-5 w-5 mr-2 text-warning" 
+                        fill="none" 
+                        stroke="currentColor" 
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -867,9 +821,7 @@ export default function QuotationListPage() {
                       </svg>
                       <div>
                         <span className="block font-medium">
-                          {file.name.length > 30
-                            ? `${file.name.substring(0, 27)}...`
-                            : file.name}
+                          {file.name.length > 30 ? `${file.name.substring(0, 27)}...` : file.name}
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(file.lastModified).toLocaleString()}
@@ -880,11 +832,11 @@ export default function QuotationListPage() {
                 ))}
               </ul>
             </div>
-
-            <div className="mt-4 flex justify-end">
+            
+            <div className="flex justify-end mt-4">
               <button
                 onClick={() => setIsPdfModalOpen(false)}
-                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
+                className="px-4 py-2 bg-gray-200 dark:bg-meta-4 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-meta-3"
               >
                 Cancel
               </button>
