@@ -3,6 +3,7 @@ import { createPool } from "@/lib/db";
 import { IUser } from "@/interface/app_interface";
 import { verifyPassword, generateToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export const runtime = "nodejs"; // Ensure it runs in Node.js
 
@@ -49,11 +50,19 @@ export async function POST(req: NextRequest) {
     // departmentName: user.departmentName,
     // role: user.roleName
   });
-  res.headers.set(
-    "Set-Cookie",
-    // `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,
-    `authToken=${token}; Path=/; SameSite=Lax, Max-Age=3600`,
-  );
+  // res.headers.set(
+  //   "Set-Cookie",
+  //   // `authToken=${token}; Path=/; HttpOnly; SameSite=Lax, Max-Age=3600`,
+  //   `authToken=${token}; Path=/; SameSite=Lax, Max-Age=3600`,
+  // );
+
+  (await cookies()).set("authToken", token, {
+  httpOnly: true,
+  maxAge: 60 * 60 * 24, // 1 day
+  path: "/",
+  sameSite: "lax",
+  // secure: true, // enable in production (HTTPS)
+});
 
   console.log("✅ Token set successfully");
 
