@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect, SetStateAction } from 'react';
-import DefaultLayout from '@/components/Layouts/DefaultLayout';
-import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Datepicker from 'react-datepicker';
+import { useCallback, useState, useEffect, SetStateAction } from "react";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Datepicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface Invoice {
@@ -31,7 +31,7 @@ export default function InvoiceListPage() {
   const [total, setTotal] = useState(0);
 
   // Filter state
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<{
     startDate: string | null;
     endDate: string | null;
@@ -39,59 +39,62 @@ export default function InvoiceListPage() {
     startDate: null,
     endDate: null,
   });
-  const [status, setStatus] = useState('all');
+  const [status, setStatus] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
   // Get current date for display
-  const today = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const today = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  useEffect(() => {
-    fetchInvoices();
-  }, [page, pageSize, status]);
-
-  const fetchInvoices = async () => {
+  // Wrap fetchInvoices in useCallback
+  const fetchInvoices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       // Build query parameters
       const params = new URLSearchParams();
-      params.append('page', page.toString());
-      params.append('pageSize', pageSize.toString());
-      
-      if (search) params.append('search', search);
-      if (dateRange.startDate) params.append('from', dateRange.startDate);
-      if (dateRange.endDate) params.append('to', dateRange.endDate);
-      if (status !== 'all') params.append('status', status);
+      params.append("page", page.toString());
+      params.append("pageSize", pageSize.toString());
+
+      if (search) params.append("search", search);
+      if (dateRange.startDate) params.append("from", dateRange.startDate);
+      if (dateRange.endDate) params.append("to", dateRange.endDate);
+      if (status !== "all") params.append("status", status);
 
       const response = await fetch(`/api/sales/invoice?${params.toString()}`);
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch invoices');
+        throw new Error("Failed to fetch invoices");
       }
-      
+
       const data = await response.json();
       setInvoices(data.invoices || []);
       setTotal(data.total || 0);
     } catch (err) {
-      console.error('Error fetching invoices:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load invoices');
+      console.error("Error fetching invoices:", err);
+      setError(err instanceof Error ? err.message : "Failed to load invoices");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, search, dateRange.startDate, dateRange.endDate, status]);
 
-  const handleSearch = (e: { preventDefault: () => void; }) => {
+  useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
+
+  const handleSearch = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setPage(1); // Reset to first page when searching
     fetchInvoices();
   };
-  
-  const handleDateRangeChange = (range: SetStateAction<{ startDate: string | null; endDate: string | null; }>) => {
+
+  const handleDateRangeChange = (
+    range: SetStateAction<{ startDate: string | null; endDate: string | null }>,
+  ) => {
     setDateRange(range);
   };
 
@@ -102,9 +105,9 @@ export default function InvoiceListPage() {
   };
 
   const handleFilterReset = () => {
-    setSearch('');
+    setSearch("");
     setDateRange({ startDate: null, endDate: null });
-    setStatus('all');
+    setStatus("all");
     setPage(1);
     fetchInvoices();
     setShowFilters(false);
@@ -114,31 +117,34 @@ export default function InvoiceListPage() {
     try {
       // Build query parameters for export (all data, not paginated)
       const params = new URLSearchParams();
-      params.append('export', 'csv');
-      if (search) params.append('search', search);
-      if (dateRange.startDate) params.append('from', dateRange.startDate);
-      if (dateRange.endDate) params.append('to', dateRange.endDate);
-      if (status !== 'all') params.append('status', status);
+      params.append("export", "csv");
+      if (search) params.append("search", search);
+      if (dateRange.startDate) params.append("from", dateRange.startDate);
+      if (dateRange.endDate) params.append("to", dateRange.endDate);
+      if (status !== "all") params.append("status", status);
 
-      const response = await fetch(`/api/sales/invoice/export?${params.toString()}`);
-      
+      const response = await fetch(
+        `/api/sales/invoice/export?${params.toString()}`,
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to export invoices');
+        throw new Error("Failed to export invoices");
       }
-      
+
       // Download the CSV file
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
+      const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
       a.download = `invoices-export-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error exporting invoices:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error("Error exporting invoices:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
       alert(`Failed to export invoices: ${errorMessage}`);
     }
   };
@@ -146,18 +152,18 @@ export default function InvoiceListPage() {
   // Get status badge color
   const getStatusBadgeClass = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'draft':
-        return 'bg-gray-100 text-gray-800';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800';
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'overdue':
-        return 'bg-red-100 text-red-800';
-      case 'partial':
-        return 'bg-yellow-100 text-yellow-800';
+      case "draft":
+        return "bg-gray-100 text-gray-800";
+      case "sent":
+        return "bg-blue-100 text-blue-800";
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "overdue":
+        return "bg-red-100 text-red-800";
+      case "partial":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -165,17 +171,18 @@ export default function InvoiceListPage() {
   const formatCurrency = (amount: string | number | bigint) => {
     try {
       // Convert string or bigint to number if needed
-      const numAmount = typeof amount === 'string' ? parseFloat(amount) : Number(amount);
-      
+      const numAmount =
+        typeof amount === "string" ? parseFloat(amount) : Number(amount);
+
       // Format the number as currency
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(numAmount);
     } catch (err) {
-      console.error('Error formatting currency:', err);
+      console.error("Error formatting currency:", err);
       // Return a fallback format in case of error
       return `$${amount}`;
     }
@@ -184,9 +191,9 @@ export default function InvoiceListPage() {
   return (
     <DefaultLayout>
       <div className="mx-auto">
-        <Breadcrumb pageName="Invoices" noHeader={true}/>
+        <Breadcrumb pageName="Invoices" noHeader={true} />
 
-        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-sm border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-1">
           {/* Header with actions */}
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-title-md2 font-bold text-black dark:text-white">
@@ -194,10 +201,18 @@ export default function InvoiceListPage() {
             </h2>
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => router.push('/sales/invoice/new')}
-                className="inline-flex items-center gap-2.5 rounded-md bg-primary px-4 py-2 font-medium text-white hover:bg-opacity-90"
+                onClick={() => router.push("/sales/invoice/new")}
+                className="bg-primary hover:bg-opacity-90 inline-flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-white"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
@@ -205,18 +220,34 @@ export default function InvoiceListPage() {
               </button>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="inline-flex items-center gap-2.5 rounded-md border border-stroke px-4 py-2 font-medium hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4"
+                className="border-stroke dark:border-strokedark dark:hover:bg-meta-4 inline-flex items-center gap-2.5 rounded-md border px-4 py-2 font-medium hover:bg-gray-50"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                 </svg>
                 Filter
               </button>
               <button
                 onClick={handleExportCSV}
-                className="inline-flex items-center gap-2.5 rounded-md border border-stroke px-4 py-2 font-medium hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4"
+                className="border-stroke dark:border-strokedark dark:hover:bg-meta-4 inline-flex items-center gap-2.5 rounded-md border px-4 py-2 font-medium hover:bg-gray-50"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -234,10 +265,18 @@ export default function InvoiceListPage() {
                 placeholder="Search by invoice #, customer, or amount..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                className="border-stroke focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary w-full rounded-lg border bg-transparent py-3 pr-12 pl-4 outline-none"
               />
-              <button type="submit" className="absolute right-4 top-3.5">
-                <svg className="h-5 w-5 text-body dark:text-bodydark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <button type="submit" className="absolute top-3.5 right-4">
+                <svg
+                  className="text-body dark:text-bodydark h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -247,7 +286,7 @@ export default function InvoiceListPage() {
 
           {/* Filters panel */}
           {showFilters && (
-            <div className="mb-6 rounded-lg border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+            <div className="border-stroke dark:border-strokedark dark:bg-boxdark mb-6 rounded-lg border bg-white p-4">
               <h3 className="mb-3 text-lg font-semibold text-black dark:text-white">
                 Filter Options
               </h3>
@@ -258,9 +297,11 @@ export default function InvoiceListPage() {
                   </label>
                   <input
                     type="date"
-                    value={dateRange.startDate || ''}
-                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                    className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                    value={dateRange.startDate || ""}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, startDate: e.target.value })
+                    }
+                    className="border-stroke focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary w-full rounded-lg border bg-transparent py-3 pr-12 pl-4 outline-none"
                   />
                 </div>
                 <div>
@@ -269,9 +310,11 @@ export default function InvoiceListPage() {
                   </label>
                   <input
                     type="date"
-                    value={dateRange.endDate || ''}
-                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                    className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                    value={dateRange.endDate || ""}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, endDate: e.target.value })
+                    }
+                    className="border-stroke focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary w-full rounded-lg border bg-transparent py-3 pr-12 pl-4 outline-none"
                   />
                 </div>
                 <div>
@@ -281,7 +324,7 @@ export default function InvoiceListPage() {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-12 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                    className="border-stroke focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary w-full rounded-lg border bg-transparent py-3 pr-12 pl-4 outline-none"
                   >
                     <option value="all">All Statuses</option>
                     <option value="draft">Draft</option>
@@ -295,13 +338,13 @@ export default function InvoiceListPage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={handleFilterApply}
-                  className="rounded-md bg-primary px-4 py-2 font-medium text-white hover:bg-opacity-90"
+                  className="bg-primary hover:bg-opacity-90 rounded-md px-4 py-2 font-medium text-white"
                 >
                   Apply Filters
                 </button>
                 <button
                   onClick={handleFilterReset}
-                  className="rounded-md border border-stroke px-4 py-2 font-medium hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4"
+                  className="border-stroke dark:border-strokedark dark:hover:bg-meta-4 rounded-md border px-4 py-2 font-medium hover:bg-gray-50"
                 >
                   Reset
                 </button>
@@ -313,79 +356,93 @@ export default function InvoiceListPage() {
           <div className="max-w-full overflow-x-auto">
             {loading ? (
               <div className="flex h-40 items-center justify-center">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+                <div className="border-primary h-10 w-10 animate-spin rounded-full border-4 border-solid border-t-transparent"></div>
               </div>
             ) : error ? (
               <div className="flex h-40 items-center justify-center">
-                <p className="text-lg text-danger">{error}</p>
+                <p className="text-danger text-lg">{error}</p>
               </div>
             ) : invoices.length === 0 ? (
               <div className="flex h-40 flex-col items-center justify-center">
-                <p className="text-lg text-body dark:text-bodydark">No invoices found</p>
-                <p className="mt-1 text-sm text-body dark:text-bodydark">
+                <p className="text-body dark:text-bodydark text-lg">
+                  No invoices found
+                </p>
+                <p className="text-body dark:text-bodydark mt-1 text-sm">
                   Try adjusting your search or filter criteria
                 </p>
               </div>
             ) : (
               <table className="w-full table-auto">
                 <thead>
-                  <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                    <th className="py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+                  <tr className="bg-gray-2 dark:bg-meta-4 text-left">
+                    <th className="px-4 py-4 font-medium text-black xl:pl-11 dark:text-white">
                       Invoice #
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Date
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Customer
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Amount
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Status
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Due Date
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="px-4 py-4 font-medium text-black dark:text-white">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoices.map((invoice, index) => (
-                    <tr key={invoice.id} className="border-b border-[#eee] dark:border-strokedark">
-                      <td className="py-5 px-4 pl-9 xl:pl-11">
-                        <Link href={`/sales/invoice/${invoice.id}`} className="text-primary hover:underline">
+                    <tr
+                      key={invoice.id}
+                      className="dark:border-strokedark border-b border-[#eee]"
+                    >
+                      <td className="px-4 py-5 pl-9 xl:pl-11">
+                        <Link
+                          href={`/sales/invoice/${invoice.id}`}
+                          className="text-primary hover:underline"
+                        >
                           {invoice.invoice_number}
                         </Link>
                       </td>
-                      <td className="py-5 px-4">
+                      <td className="px-4 py-5">
                         {new Date(invoice.invoice_date).toLocaleDateString()}
                       </td>
-                      <td className="py-5 px-4">
+                      <td className="px-4 py-5">
                         <h5 className="font-medium text-black dark:text-white">
                           {invoice.customer_name}
                         </h5>
                         <p className="text-sm">{invoice.customer_email}</p>
                       </td>
-                      <td className="py-5 px-4">
+                      <td className="px-4 py-5">
                         <span className="text-black dark:text-white">
                           {formatCurrency(invoice.total)}
                         </span>
                       </td>
-                      <td className="py-5 px-4">
-                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${getStatusBadgeClass(invoice.status)}`}>
-                          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                      <td className="px-4 py-5">
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${getStatusBadgeClass(invoice.status)}`}
+                        >
+                          {invoice.status.charAt(0).toUpperCase() +
+                            invoice.status.slice(1)}
                         </span>
                       </td>
-                      <td className="py-5 px-4">
+                      <td className="px-4 py-5">
                         {new Date(invoice.due_date).toLocaleDateString()}
                       </td>
-                      <td className="py-5 px-4">
+                      <td className="px-4 py-5">
                         <div className="flex items-center space-x-3.5">
-                          <Link href={`/sales/invoice/${invoice.id}`} className="hover:text-primary">
+                          <Link
+                            href={`/sales/invoice/${invoice.id}`}
+                            className="hover:text-primary"
+                          >
                             <svg
                               className="fill-current"
                               width="18"
@@ -429,7 +486,11 @@ export default function InvoiceListPage() {
                           </Link>
                           <button
                             onClick={() => {
-                              if (confirm("Are you sure you want to delete this invoice?")) {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this invoice?",
+                                )
+                              ) {
                                 // Handle delete
                               }
                             }}
@@ -474,8 +535,8 @@ export default function InvoiceListPage() {
           {!loading && !error && invoices.length > 0 && (
             <div className="mt-6 flex flex-wrap items-center justify-between py-3">
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-body dark:text-bodydark">
-                  Showing {(page - 1) * pageSize + 1} to{' '}
+                <span className="text-body dark:text-bodydark text-sm">
+                  Showing {(page - 1) * pageSize + 1} to{" "}
                   {Math.min(page * pageSize, total)} of {total} invoices
                 </span>
               </div>
@@ -483,57 +544,62 @@ export default function InvoiceListPage() {
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border border-stroke px-4 text-sm hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4 ${
+                  className={`border-stroke hover:border-primary dark:border-strokedark dark:hover:bg-meta-4 flex h-9 min-w-[36px] items-center justify-center rounded-md border px-4 text-sm hover:bg-gray-50 ${
                     page === 1
-                      ? 'cursor-not-allowed opacity-50'
-                      : 'cursor-pointer'
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
                   }`}
                 >
                   Previous
                 </button>
-                
+
                 {/* Page numbers */}
-                {Array.from({ length: Math.min(5, Math.ceil(total / pageSize)) }, (_, i) => {
-                  // Logic to show correct page numbers when many pages exist
-                  let pageNum;
-                  const totalPages = Math.ceil(total / pageSize);
-                  
-                  if (totalPages <= 5) {
-                    // If 5 or fewer pages, show all page numbers
-                    pageNum = i + 1;
-                  } else if (page <= 3) {
-                    // If current page is among first 3, show pages 1-5
-                    pageNum = i + 1;
-                  } else if (page >= totalPages - 2) {
-                    // If current page is among last 3, show last 5 pages
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    // Otherwise, show 2 pages before and after current page
-                    pageNum = page - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border ${
-                        page === pageNum
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-stroke hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4'
-                      } px-4 text-sm`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-                
+                {Array.from(
+                  { length: Math.min(5, Math.ceil(total / pageSize)) },
+                  (_, i) => {
+                    // Logic to show correct page numbers when many pages exist
+                    let pageNum;
+                    const totalPages = Math.ceil(total / pageSize);
+
+                    if (totalPages <= 5) {
+                      // If 5 or fewer pages, show all page numbers
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      // If current page is among first 3, show pages 1-5
+                      pageNum = i + 1;
+                    } else if (page >= totalPages - 2) {
+                      // If current page is among last 3, show last 5 pages
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      // Otherwise, show 2 pages before and after current page
+                      pageNum = page - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border ${
+                          page === pageNum
+                            ? "border-primary bg-primary text-white"
+                            : "border-stroke hover:border-primary dark:border-strokedark dark:hover:bg-meta-4 hover:bg-gray-50"
+                        } px-4 text-sm`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  },
+                )}
+
                 <button
-                  onClick={() => setPage(Math.min(Math.ceil(total / pageSize), page + 1))}
+                  onClick={() =>
+                    setPage(Math.min(Math.ceil(total / pageSize), page + 1))
+                  }
                   disabled={page === Math.ceil(total / pageSize)}
-                  className={`flex h-9 min-w-[36px] items-center justify-center rounded-md border border-stroke px-4 text-sm hover:border-primary hover:bg-gray-50 dark:border-strokedark dark:hover:bg-meta-4 ${
+                  className={`border-stroke hover:border-primary dark:border-strokedark dark:hover:bg-meta-4 flex h-9 min-w-[36px] items-center justify-center rounded-md border px-4 text-sm hover:bg-gray-50 ${
                     page === Math.ceil(total / pageSize)
-                      ? 'cursor-not-allowed opacity-50'
-                      : 'cursor-pointer'
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
                   }`}
                 >
                   Next

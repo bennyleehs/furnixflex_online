@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
@@ -187,83 +187,82 @@ export default function InvoicePage() {
   };
   
   // Fetch quotation data to pre-fill invoice
-  const fetchQuotationData = async (id: string) => {
+  const fetchQuotationData = useCallback(async (id: string) => {
     try {
       setLoading(true);
       const response = await fetch(`/api/sales/quotation?id=${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch quotation');
-      }
-      
+      if (!response.ok) throw new Error('Failed to fetch quotation');
       const data = await response.json();
       if (data.quotation) {
         const quotation = data.quotation;
-        
-        // Map quotation items to invoice items
-        const items = quotation.items?.map((item: { description: any; quantity: any; unit_price: any; unitPrice: any; amount: any; unit: any; }) => ({
+        const items = quotation.items?.map((item: any) => ({
           description: item.description,
           quantity: item.quantity,
           unitPrice: item.unit_price || item.unitPrice,
           amount: item.amount,
           unit: item.unit
         })) || [];
-        
-        // Calculate totals
-        const subtotal = items.reduce((sum: any, item: { amount: any; }) => sum + (item.amount || 0), 0);
-        const tax = subtotal * 0.06; // 6% tax
+        const subtotal = items.reduce((sum: any, item: any) => sum + (item.amount || 0), 0);
+        const tax = subtotal * 0.06;
         const total = subtotal + tax;
-        
-        setInvoiceData({
-          ...invoiceData,
+        setInvoiceData(prev => ({
+          ...prev,
           customerName: quotation.customer_name || '',
           customerContact: quotation.customer_contact || '',
           customerEmail: quotation.customer_email || '',
           customerAddress: quotation.customer_address || '',
           quotationId: id,
           taskId: quotation.task_id || taskId || '',
-          items: items,
-          subtotal: subtotal,
-          tax: tax,
-          total: total,
+          items,
+          subtotal,
+          tax,
+          total,
           balance: total
-        });
+        }));
       }
     } catch (error) {
       console.error('Error fetching quotation:', error);
     } finally {
       setLoading(false);
     }
-  };
-  
+  }, [taskId]);
+
   // Fetch customer data from task
-  const fetchCustomerData = async (task_id: string) => {
+  const fetchCustomerData = useCallback(async (task_id: string) => {
     try {
       setLoading(true);
       const response = await fetch(`/api/sales/tasks?taskId=${task_id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch customer data');
-      }
-      
+      if (!response.ok) throw new Error('Failed to fetch customer data');
       const data = await response.json();
       if (data.task) {
         const task = data.task;
-        
-        setInvoiceData({
-          ...invoiceData,
+        setInvoiceData(prev => ({
+          ...prev,
           customerName: task.customer_name || '',
           customerContact: task.phone || task.contact || '',
           customerEmail: task.email || '',
           customerAddress: task.address || '',
           taskId: task_id,
-        });
+        }));
       }
     } catch (error) {
       console.error('Error fetching customer data:', error);
     } finally {
       setLoading(false);
     }
-  };
-  
+  }, []);
+
+  // Fetch invoice data if editing
+  useEffect(() => {
+    if (invoiceId) {
+      fetchInvoice(invoiceId);
+    } else if (quotationId) {
+      fetchQuotationData(quotationId);
+    } else if (taskId) {
+      fetchCustomerData(taskId);
+    }
+  }, [invoiceId, quotationId, taskId, fetchQuotationData, fetchCustomerData]);
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -541,7 +540,7 @@ export default function InvoicePage() {
                       {invoiceData.items.length === 0 ? (
                         <tr>
                           <td colSpan={5} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                            No items added yet. Click "Add Item" to add invoice line items.
+                            No items added yet. Click &quot;Add Item&quot; to add invoice line items.
                           </td>
                         </tr>
                       ) : (
@@ -732,7 +731,7 @@ export default function InvoicePage() {
                       {!invoiceData.payments || invoiceData.payments.length === 0 ? (
                         <tr>
                           <td colSpan={5} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                            No payments recorded yet. Click "Add Payment" to record a payment.
+                            No payments recorded yet. Click &quot;Add Payment&quot; to record a payment.
                           </td>
                         </tr>
                       ) : (
