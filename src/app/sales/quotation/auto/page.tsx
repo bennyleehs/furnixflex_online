@@ -25,10 +25,25 @@ export default function QuotationPage() {
   // Add this with your other useState declarations at the top of your component
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
+  function generateUUID() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback for browsers/environments without crypto.randomUUID
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0,
+          v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      },
+    );
+  }
   // Form states
   const [items, setItems] = useState<QuotationItem[]>([
     {
-      id: crypto.randomUUID(),
+      // id: crypto.randomUUID(),
+      id: generateUUID(),
       productId: "", // Use string for product ID
       category: "",
       subcategory: "",
@@ -39,7 +54,7 @@ export default function QuotationPage() {
       unitPrice: 0,
       total: 0,
       note: "",
-      discount: 0
+      discount: 0,
     },
   ]);
   const [notes, setNotes] = useState("");
@@ -63,7 +78,7 @@ export default function QuotationPage() {
   // Add a state for the quotation number
   const [generatedQuotationNumber, setGeneratedQuotationNumber] =
     useState<string>("");
-    
+
   // Categories and products state
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<Record<string, string[]>>(
@@ -242,7 +257,7 @@ export default function QuotationPage() {
       hasFetchedData.current = true;
     }
   }, [taskId, fetchQuotation]);
-  
+
   // Improve product fetching with better category structure
   useEffect(() => {
     const fetchProducts = async () => {
@@ -260,11 +275,11 @@ export default function QuotationPage() {
 
         // Create a properly structured products object
         const productsStructure: Record<string, Record<string, Product[]>> = {};
-        
+
         // Initialize the structure with all categories and subcategories
         (data.categories || []).forEach((category: string) => {
           productsStructure[category] = {};
-          
+
           // Add all subcategories for this category
           if (data.subcategories && data.subcategories[category]) {
             data.subcategories[category].forEach((subcategory: string) => {
@@ -272,21 +287,21 @@ export default function QuotationPage() {
             });
           }
         });
-        
+
         // Populate with products from allProducts array
         data.allProducts.forEach((product: any) => {
           const category = product.category;
           const subcategory = product.subcategory;
-          
+
           // Ensure the category and subcategory arrays exist
           if (!productsStructure[category]) {
             productsStructure[category] = {};
           }
-          
+
           if (!productsStructure[category][subcategory]) {
             productsStructure[category][subcategory] = [];
           }
-          
+
           // Add the product to the appropriate category and subcategory
           productsStructure[category][subcategory].push({
             id: String(product.id),
@@ -298,7 +313,7 @@ export default function QuotationPage() {
             // Add any other necessary properties
           });
         });
-        
+
         console.log("Structured products:", productsStructure);
         setProducts(productsStructure);
 
@@ -318,10 +333,11 @@ export default function QuotationPage() {
           };
         });
         setProductLookup(productMap);
-        
       } catch (error) {
         console.error("Error fetching products:", error);
-        setProductsError("Failed to load products from database. Please refresh and try again.");
+        setProductsError(
+          "Failed to load products from database. Please refresh and try again.",
+        );
       } finally {
         setLoadingProducts(false);
       }
@@ -359,7 +375,8 @@ export default function QuotationPage() {
     setItems([
       ...items,
       {
-        id: crypto.randomUUID(),
+        // id: crypto.randomUUID(),
+        id: generateUUID(),
         productId: "", // Use string for product ID
         category: "",
         subcategory: "",
@@ -370,18 +387,19 @@ export default function QuotationPage() {
         unitPrice: 0, // Not undefined
         total: 0, // Not undefined
         note: "",
-        discount: 0
+        discount: 0,
       },
     ]);
   };
 
   // Add a new item after the specified item
   const addItemAfter = (id: string) => {
-    const index = items.findIndex(item => item.id === id);
+    const index = items.findIndex((item) => item.id === id);
     if (index === -1) return;
-    
+
     const newItem: QuotationItem = {
-      id: crypto.randomUUID(),
+      // id: crypto.randomUUID(),
+      id: generateUUID(),
       productId: "", // Use string for product ID
       category: "",
       subcategory: "",
@@ -392,15 +410,15 @@ export default function QuotationPage() {
       unitPrice: 0,
       total: 0,
       note: "",
-      discount: 0
+      discount: 0,
     };
-    
+
     const newItems = [
       ...items.slice(0, index + 1),
       newItem,
-      ...items.slice(index + 1)
+      ...items.slice(index + 1),
     ];
-    
+
     setItems(newItems);
   };
 
@@ -439,14 +457,16 @@ export default function QuotationPage() {
 
     try {
       // Always check if a quotation exists for this task ID in the database
-      const checkResponse = await fetch(`/api/sales/quotation?taskId=${taskId}`);
+      const checkResponse = await fetch(
+        `/api/sales/quotation?taskId=${taskId}`,
+      );
       let existingQuotation = null;
-      
+
       if (checkResponse.ok) {
         const checkData = await checkResponse.json();
         if (checkData.quotation) {
           existingQuotation = checkData.quotation;
-          
+
           // If we didn't have the quotation loaded yet, update our state
           if (!quotation || quotation.id !== existingQuotation.id) {
             setQuotation(existingQuotation);
@@ -454,7 +474,7 @@ export default function QuotationPage() {
             setNotes(existingQuotation.notes || "");
             setTerms(existingQuotation.terms || terms);
             setTax(existingQuotation.tax || 0);
-            
+
             // Show notification
             alert("Found existing quotation. Loaded for editing.");
             return;
@@ -483,7 +503,8 @@ export default function QuotationPage() {
           .join(", "),
         quotation_date: today,
         valid_until: validUntilString,
-        sales_representative: quotation?.salesRepresentative || task?.sales_name || "",
+        sales_representative:
+          quotation?.salesRepresentative || task?.sales_name || "",
         sales_uid: quotation?.salesUID || task?.sales_uid || "",
         items,
         subtotal,
@@ -502,7 +523,8 @@ export default function QuotationPage() {
           ...quotationData,
           id: existingQuotation.id,
           quote_ref: existingQuotation.quote_ref,
-          quotation_number: existingQuotation.quotation_number || generatedQuotationNumber,
+          quotation_number:
+            existingQuotation.quotation_number || generatedQuotationNumber,
         };
 
         // Update existing quotation
@@ -564,19 +586,33 @@ export default function QuotationPage() {
       }
 
       // Update task status if sent
+      // if (status === "sent" && task && task.status !== "Quotation") {
+      //   await fetch(`/api/sales/task/update`, {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       id: taskId,
+      //       status: "Quotation",
+      //       oldStatus: task.status,
+      //       notes: "Quotation sent to customer",
+      //       userName: "Current User", // Replace with actual username
+      //     }),
+      //   });
+      // }
+
       if (status === "sent" && task && task.status !== "Quotation") {
+        const formData = new FormData();
+        formData.append("id", taskId);
+        formData.append("status", "Quotation");
+        formData.append("oldStatus", task.status);
+        formData.append("notes", "Quotation sent to customer");
+        formData.append("userName", "Current User");
+
         await fetch(`/api/sales/task/update`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: taskId,
-            status: "Quotation",
-            oldStatus: task.status,
-            notes: "Quotation sent to customer",
-            userName: "Current User", // Replace with actual username
-          }),
+          body: formData,
         });
       }
     } catch (error) {
@@ -587,12 +623,13 @@ export default function QuotationPage() {
 
   // Generate PDF quotation
   const generatePDF = async () => {
-
     // if (!quotation) {
-      // Alert the user to save the quotation first
-      const confirmSave = confirm("You need to save the quotation before generating a PDF. Would you like to save now?");
-      
-      if (confirmSave) {
+    // Alert the user to save the quotation first
+    const confirmSave = confirm(
+      "You need to save the quotation before generating a PDF. Would you like to save now?",
+    );
+
+    if (confirmSave) {
       // Save as draft and then continue
       await saveQuotation("draft");
       // If quotation is still not available after saving, return
@@ -600,20 +637,20 @@ export default function QuotationPage() {
         alert("Unable to generate PDF. Please try saving again.");
         return;
       }
-      } else {
+    } else {
       // User declined to save, abort PDF generation
       return;
-      }
+    }
     // }
-    
+
     try {
       setGeneratingPdf(true);
-      
+
       // Prepare the data with proper formatting
       const pdfData = {
         quotation: {
           ...quotation,
-          items: items.map(item => ({
+          items: items.map((item) => ({
             category: item.category,
             subcategory: item.subcategory,
             product: item.productName,
@@ -623,8 +660,8 @@ export default function QuotationPage() {
             unitPrice: item.unitPrice,
             discount: item.discount || 0,
             total: item.total,
-            note: item.note
-          }))
+            note: item.note,
+          })),
         },
         company: {
           name: "CLASSYPRO Aluminium Kitchen",
@@ -641,23 +678,23 @@ export default function QuotationPage() {
           header: true,
           footer: true,
           tableLines: true,
-          currencySymbol: "RM"
-        }
-      };
-      
-      // Call the API endpoint to generate PDF
-      const response = await fetch('/api/sales/quotation/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+          currencySymbol: "RM",
         },
-        body: JSON.stringify(pdfData)
+      };
+
+      // Call the API endpoint to generate PDF
+      const response = await fetch("/api/sales/quotation/generate-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pdfData),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+        throw new Error("Failed to generate PDF");
       }
-      
+
       // Get PDF blob and trigger download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -667,10 +704,9 @@ export default function QuotationPage() {
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
       }, 1000);
-      
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
     } finally {
       setGeneratingPdf(false);
     }
@@ -724,42 +760,42 @@ export default function QuotationPage() {
     );
   };
 
-// Add this utility function
-const formatWithCommas = (value: number | string): string => {
-  // Convert to number if it's a string
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  
-  // Handle NaN and null values
-  if (isNaN(num) || num === null) return '0.00';
-  
-  // Format with 2 decimal places
-  const formattedValue = num.toFixed(2);
-  
-  // Only add commas if the number is 1000 or greater
-  if (num >= 1000) {
-    // Split into integer and decimal parts
-    const parts = formattedValue.split('.');
-    
-    // Add commas to the integer part
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    
-    // Join with the decimal part
-    return parts.join('.');
-  }
-  
-  // For numbers less than 1000, just return with 2 decimal places
-  return formattedValue;
-};
+  // Add this utility function
+  const formatWithCommas = (value: number | string): string => {
+    // Convert to number if it's a string
+    const num = typeof value === "string" ? parseFloat(value) : value;
+
+    // Handle NaN and null values
+    if (isNaN(num) || num === null) return "0.00";
+
+    // Format with 2 decimal places
+    const formattedValue = num.toFixed(2);
+
+    // Only add commas if the number is 1000 or greater
+    if (num >= 1000) {
+      // Split into integer and decimal parts
+      const parts = formattedValue.split(".");
+
+      // Add commas to the integer part
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+      // Join with the decimal part
+      return parts.join(".");
+    }
+
+    // For numbers less than 1000, just return with 2 decimal places
+    return formattedValue;
+  };
 
   // Add this useEffect to calculate total discount
   useEffect(() => {
     // Calculate subtotal and discount
     let subtotal = 0;
     let discount = 0;
-    
-    items.forEach(item => {
+
+    items.forEach((item) => {
       subtotal += Number(item.total) || 0;
-      
+
       // Calculate item discount if applicable
       if (item.productId && productLookup[item.productId]) {
         const product = productLookup[item.productId];
@@ -771,27 +807,27 @@ const formatWithCommas = (value: number | string): string => {
         }
       }
     });
-    
+
     setSubtotal(subtotal);
     setTotalDiscount(discount);
-    
-  // If subtotal is 0, set grand total to 0 regardless of other calculations
-  if (subtotal === 0) {
-    setGrandTotal(0);
-    setDisAmount(0);
-  } else {
-    // Otherwise calculate normally: subtotal - discount + tax
-    // Calculate the discount amount from percentage using the local discount variable
-    const discountAmount = subtotal * (discount / 100);
-    setDisAmount(discountAmount);
 
-    // Calculate the tax amount from percentage (applied after discount)
-    const taxAmount = (subtotal - discountAmount) * (tax / 100);
+    // If subtotal is 0, set grand total to 0 regardless of other calculations
+    if (subtotal === 0) {
+      setGrandTotal(0);
+      setDisAmount(0);
+    } else {
+      // Otherwise calculate normally: subtotal - discount + tax
+      // Calculate the discount amount from percentage using the local discount variable
+      const discountAmount = subtotal * (discount / 100);
+      setDisAmount(discountAmount);
 
-    // Calculate final amount
-    const finalAmount = subtotal + taxAmount;
-    setGrandTotal(finalAmount);
-  }
+      // Calculate the tax amount from percentage (applied after discount)
+      const taxAmount = (subtotal - discountAmount) * (tax / 100);
+
+      // Calculate final amount
+      const finalAmount = subtotal + taxAmount;
+      setGrandTotal(finalAmount);
+    }
   }, [items, productLookup, tax]);
 
   if (loading) {
@@ -1527,7 +1563,7 @@ const formatWithCommas = (value: number | string): string => {
                               // Create a new complete object rather than multiple updates
                               const updatedItem = {
                                 ...item,
-                                productId:"",
+                                productId: "",
                                 category,
                                 subcategory: "",
                                 productName: "",
@@ -1574,7 +1610,7 @@ const formatWithCommas = (value: number | string): string => {
                               // Update all dependent fields in one go
                               const updatedItem = {
                                 ...item,
-                                productId:"",
+                                productId: "",
                                 subcategory,
                                 productName: "",
                                 description: "",
@@ -1617,42 +1653,55 @@ const formatWithCommas = (value: number | string): string => {
                               e.stopPropagation(); // Prevent event bubbling
                               const productId = e.target.value;
                               console.log("Product selected:", productId);
-                              
+
                               // Create a complete updated item to avoid multiple state updates
                               const updatedItem = { ...item, productId };
-                              
+
                               if (productId && productLookup[productId]) {
                                 const product = productLookup[productId];
-                                console.log("Found product in lookup:", product);
-                                
+                                console.log(
+                                  "Found product in lookup:",
+                                  product,
+                                );
+
                                 // Update all relevant fields at once
                                 // updatedItem.description = product.name || "";
                                 updatedItem.productName = product.name || "";
-                                updatedItem.description = product.description || "";
+                                updatedItem.description =
+                                  product.description || "";
                                 updatedItem.unitPrice = product.price || 0;
                                 updatedItem.discount = product.discount || 0;
                                 updatedItem.unit = product.unit || "unit";
-                                
+
                                 // Calculate total
-                                const quantity = Number(updatedItem.quantity) || 1;
-                                updatedItem.total = quantity * updatedItem.unitPrice;
+                                const quantity =
+                                  Number(updatedItem.quantity) || 1;
+                                updatedItem.total =
+                                  quantity * updatedItem.unitPrice;
                               }
-                              
+
                               // Update the entire item at once
-                              const newItems = items.map(i => i.id === item.id ? updatedItem : i);
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
                               setItems(newItems);
                             }}
                             disabled={!item.category || !item.subcategory}
                             className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                           >
                             <option value="">Select Product</option>
-                            {item.category && 
-                             item.subcategory && 
-                             products[item.category]?.[item.subcategory]?.map((product) => (
-                              <option key={product.id} value={String(product.id)}>
-                                {product.name}
-                              </option>
-                            ))}
+                            {item.category &&
+                              item.subcategory &&
+                              products[item.category]?.[item.subcategory]?.map(
+                                (product) => (
+                                  <option
+                                    key={product.id}
+                                    value={String(product.id)}
+                                  >
+                                    {product.name}
+                                  </option>
+                                ),
+                              )}
                           </select>
                         </div>
 
@@ -1670,7 +1719,9 @@ const formatWithCommas = (value: number | string): string => {
                           type="number"
                           min="1"
                           step="0.1"
-                          value={item.quantity !== undefined ? item.quantity : 0}
+                          value={
+                            item.quantity !== undefined ? item.quantity : 0
+                          }
                           onChange={(e) => {
                             e.stopPropagation(); // Prevent event bubbling
                             // Parse the input value as a float
@@ -1697,21 +1748,31 @@ const formatWithCommas = (value: number | string): string => {
                       <td className="px-3 py-2">
                         <input
                           type="text"
-                          value={item.unitPrice ? formatWithCommas(item.unitPrice) : ""}
+                          value={
+                            item.unitPrice
+                              ? formatWithCommas(item.unitPrice)
+                              : ""
+                          }
                           onFocus={(e) => {
                             // When focused, show raw number for editing
                             e.target.value = item.unitPrice?.toString() || "";
                           }}
                           onBlur={(e) => {
                             // When blurred, update with formatted value
-                            const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+                            const rawValue = e.target.value.replace(
+                              /[^0-9.]/g,
+                              "",
+                            );
                             e.target.value = formatWithCommas(rawValue);
                           }}
                           onChange={(e) => {
                             // Remove any non-numeric characters except decimal point
-                            const value = e.target.value.replace(/[^0-9.]/g, "");
+                            const value = e.target.value.replace(
+                              /[^0-9.]/g,
+                              "",
+                            );
                             updateItem(item.id, "unitPrice", value);
-                            
+
                             // Update total based on quantity and unit price
                             const quantity = Number(item.quantity) || 0;
                             const unitPrice = Number(value) || 0;
@@ -1719,11 +1780,11 @@ const formatWithCommas = (value: number | string): string => {
                           }}
                           className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
-                      </td>                      
+                      </td>
 
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
-                          {formatWithCommas(item.total)||0}
+                          {formatWithCommas(item.total) || 0}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-center">
@@ -1749,7 +1810,7 @@ const formatWithCommas = (value: number | string): string => {
                               ></path>
                             </svg>
                           </button>
-                          
+
                           {/* Delete Button - Only show if there's more than one item */}
                           {items.length > 1 && (
                             <button
@@ -1816,19 +1877,19 @@ const formatWithCommas = (value: number | string): string => {
 
             {/* Summary */}
             <div className="mt-8 border-t border-gray-200 pt-2">
-              <h3 className="text-lg font-medium mb-2">Summary</h3>
+              <h3 className="mb-2 text-lg font-medium">Summary</h3>
               <div className="flex justify-end">
                 <div className="w-2/3">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
                     <span>{formatWithCommas(subtotal)}</span>
                   </div>
-                  
-                  <div className="flex justify-between border-b border-gray-200 py-2 text-danger">
+
+                  <div className="text-danger flex justify-between border-b border-gray-200 py-2">
                     <span>Discount: ({totalDiscount.toFixed(2)})%</span>
                     <span>- {formatWithCommas(disAmount)}</span>
                   </div>
-                  
+
                   {/* Tax Row (if applicable) */}
                   {taxLabel && (
                     <div className="flex justify-between border-b border-gray-200 py-1">
@@ -1836,7 +1897,7 @@ const formatWithCommas = (value: number | string): string => {
                       <span>{tax}%</span>
                     </div>
                   )}
-                  
+
                   {/* Grand Total */}
                   <div className="flex justify-between py-2 font-bold">
                     <span>Grand Total:</span>
@@ -1846,7 +1907,6 @@ const formatWithCommas = (value: number | string): string => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </DefaultLayout>

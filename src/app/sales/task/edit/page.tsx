@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import Image from "next/image";
 import { EventLog } from "@/types/sales-task";
 
 // Update the Task interface to match the API response structure
@@ -484,19 +485,24 @@ export default function TaskEditPage() {
                           <div className="mr-1.5 shrink-0">
                             {file.name.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                               <div className="border-stroke dark:border-strokedark h-5 w-5 overflow-hidden rounded-sm border">
-                                <img
+                                <Image
                                   src={`/api/sales/task/download?id=${taskId}&file=${file.name}`}
                                   alt={file.name}
                                   className="h-full w-full object-cover"
+                                  // Add width and height props
+                                  // These are required for the Image component to prevent layout shifts
+                                  // You'll need to determine appropriate values based on your expected image dimensions
+                                  width={500} // Example width
+                                  height={300} // Example height
                                   onError={(e) => {
                                     // Fallback to icon if image fails to load
                                     e.currentTarget.style.display = "none";
                                     if (e.currentTarget.parentElement) {
                                       e.currentTarget.parentElement.innerHTML = `
-                                        <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                      `;
+        <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      `;
                                     }
                                   }}
                                 />
