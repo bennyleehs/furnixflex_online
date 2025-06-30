@@ -1256,14 +1256,20 @@ export default function TaskEditPage() {
             </div>
 
             <div className="flex justify-center">
-              {previewFile.type === "image" ||
-              previewFile.type.startsWith("image/") ? (
+              {previewFile &&
+              previewFile.url &&
+              previewFile.type &&
+              (previewFile.type === "image" ||
+                previewFile.type.startsWith("image/")) &&
+              previewFile.url ? (
                 <img
                   src={previewFile.url}
                   alt={previewFile.name}
                   className="max-h-[70vh] max-w-full object-contain"
                 />
-              ) : previewFile.type === "pdf" ? (
+              ) : previewFile &&
+                previewFile.type === "pdf" &&
+                previewFile.url ? (
                 <div className="dark:bg-meta-4 w-full rounded-lg bg-gray-100 p-8 text-center">
                   <svg
                     className="mx-auto mb-4 h-16 w-16 text-red-500"

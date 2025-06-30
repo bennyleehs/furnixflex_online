@@ -141,17 +141,6 @@ export default function InvoicePage() {
     }
   });
   
-  // Fetch invoice data if editing
-  useEffect(() => {
-    if (invoiceId) {
-      fetchInvoice(invoiceId);
-    } else if (quotationId) {
-      fetchQuotationData(quotationId);
-    } else if (taskId) {
-      fetchCustomerData(taskId);
-    }
-  }, [invoiceId, quotationId, taskId]);
-  
   // Fetch invoice data for editing
   const fetchInvoice = async (id: string) => {
     try {

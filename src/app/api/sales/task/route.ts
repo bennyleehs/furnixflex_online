@@ -1,43 +1,42 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
-import { NextRequest } from "next/server";
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
     // Get parameters from URL query
     const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const status = searchParams.get('status') || null;
-    const search = searchParams.get('search') || null;
-    const id = searchParams.get('id') || null;
-     
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const status = searchParams.get("status") || null;
+    const search = searchParams.get("search") || null;
+    const id = searchParams.get("id") || null;
+
     // Calculate offset
     const offset = (page - 1) * limit;
-    
+
     const db = createPool();
 
     // Build WHERE clause
-    let whereClause = '';
+    let whereClause = "";
     const params: any[] = [];
 
     // If ID is provided, we prioritize it and ignore other filters
     if (id) {
-      whereClause = 'WHERE c.id = ?';
+      whereClause = "WHERE c.id = ?";
       params.push(id);
     } else {
       // Apply other filters only if ID is not provided
       if (status) {
-        whereClause = 'WHERE c.status = ?';
+        whereClause = "WHERE c.status = ?";
         params.push(status);
       }
-      
+
       // Add search condition to WHERE clause
       if (search) {
         // If we already have a WHERE clause, add AND
-        whereClause = whereClause ? `${whereClause} AND (` : 'WHERE (';
-        
+        whereClause = whereClause ? `${whereClause} AND (` : "WHERE (";
+
         // Add search conditions for each searchable column
         // Adjust column names based on your database schema
         whereClause += `
@@ -57,10 +56,11 @@ export async function GET(request: NextRequest) {
           e.uid LIKE ? OR
           c.created_at LIKE ?
         )`;
-        
+
         // Add search parameter for each column (with wildcard)
         const searchValue = `%${search}%`;
-        for (let i = 0; i < 15; i++) { // Updated to 12 searchable columns
+        for (let i = 0; i < 15; i++) {
+          // Updated to 12 searchable columns
           params.push(searchValue);
         }
       }
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN users e ON c.sales_id = e.id
       ${whereClause};
     `;
-    
+
     // Status counts query stays the same
     const statusCountSql = `
       SELECT c.status, COUNT(*) as count
@@ -99,41 +99,44 @@ export async function GET(request: NextRequest) {
 
     // Execute queries with appropriate parameters
     const [rows] = await db.query<RowDataPacket[]>(dataSql, params);
-    const [countResult] = await db.query<RowDataPacket[]>(countSql, params.slice(0, params.length - 2));
+    const [countResult] = await db.query<RowDataPacket[]>(
+      countSql,
+      params.slice(0, params.length - 2),
+    );
     const [statusCounts] = await db.query<RowDataPacket[]>(statusCountSql);
-    
+
     // Get total count from count query
     const totalCount = countResult[0].total;
-    
+
     // Format status counts into an object for easier consumption
-    const statusCountsObj = statusCounts.reduce((acc: Record<string, number>, curr: any) => {
-      acc[curr.status] = curr.count;
-      return acc;
-    }, {});
+    const statusCountsObj = statusCounts.reduce(
+      (acc: Record<string, number>, curr: any) => {
+        acc[curr.status] = curr.count;
+        return acc;
+      },
+      {},
+    );
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         listTask: rows,
         totalCount: totalCount,
         page: page,
         limit: limit,
         totalPages: Math.ceil(totalCount / limit),
-        statusCounts: statusCountsObj
-      }), 
+        statusCounts: statusCountsObj,
+      }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("Error fetching leads:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }), 
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 // not used ? -- commented: bcs causing error
@@ -142,28 +145,28 @@ export async function GET(request: NextRequest) {
 //   { params }: { params: { taskId: string } }
 // ) {
 //   const taskId = params.taskId;
-  
+
 //   try {
 //     // Handle file upload for the specific task
 //     const formData = await request.formData();
 //     const file = formData.get('file') as File;
-    
+
 //     if (!file) {
 //       return NextResponse.json(
 //         { error: 'No file provided' },
 //         { status: 400 }
 //       );
 //     }
-    
+
 //     // Process the file upload
 //     // ...file processing logic...
-    
-//     return NextResponse.json({ 
+
+//     return NextResponse.json({
 //       success: true,
 //       message: 'File uploaded successfully1',
 //       taskId
 //     });
-    
+
 //   } catch (error) {
 //     console.error('Error uploading file:', error);
 //     return NextResponse.json(
