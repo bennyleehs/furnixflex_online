@@ -26,7 +26,7 @@
         "route": "#",
         "children": [
           {
-            "label": "Branche",
+            "label": "Branches",
             "id": "1.1",
             "route": "/admin/branch"
           },
