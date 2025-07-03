@@ -16,13 +16,16 @@ export default function Page() {
   const [hasMore, setHasMore] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
-  const [selectedStatus, setSelectedStatus] = useState("All"); // Initialize with "All" to see all statuses
+  // const [selectedStatus, setSelectedStatus] = useState("All"); // Initialize with "All" to see all statuses
+  const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
   const fetchData = useCallback(async () => {
     try {
+      // const statusParam =
+      //   selectedStatus !== "All" ? `&status=${selectedStatus}` : ""; // Add status filter to API request if not "All"
       const statusParam =
-        selectedStatus !== "All" ? `&status=${selectedStatus}` : ""; // Add status filter to API request if not "All"
+        filteredStatus !== "All" ? `&status=${filteredStatus}` : "";
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
         : ""; // Add search query parameter
@@ -51,7 +54,9 @@ export default function Page() {
       // setData((prev) => [...prev, ...formattedRows]);
       setData((prev) => {
         const seen = new Set(prev.map((p) => p.id));
-        const uniqueNew = formattedRows.filter((row: { id: any; }) => !seen.has(row.id));
+        const uniqueNew = formattedRows.filter(
+          (row: { id: any }) => !seen.has(row.id),
+        );
         return [...prev, ...uniqueNew];
       });
       setHasMore(formattedRows.length === itemsPerPage);
@@ -66,7 +71,7 @@ export default function Page() {
   }, [
     currentPage,
     itemsPerPage,
-    selectedStatus,
+    // selectedStatus,
     searchQuery,
     title,
     capitalizedTitle,
@@ -82,15 +87,15 @@ export default function Page() {
     }
   }, [fetchData]);
 
-  const handleFilterChange = (key: string, value: string) => {
-    if (key === "status") {
-      setSelectedStatus(value);
-      setCurrentPage(1); // Reset to page 1
-      setData([]);
-      setHasMore(true);
-      hasFetchedData.current = false; // Force reload data
-    }
-  };
+  // const handleFilterChange = (key: string, value: string) => {
+  //   if (key === "status") {
+  //     setSelectedStatus(value);
+  //     setCurrentPage(1); // Reset to page 1
+  //     setData([]);
+  //     setHasMore(true);
+  //     hasFetchedData.current = false; // Force reload data
+  //   }
+  // }; //not used? bcs define the function inside table on  the onFilterChange
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -121,9 +126,16 @@ export default function Page() {
         statusCounts={statusCounts}
         totalItems={totalItems}
         pageName={`${capitalizedTitle} List`}
-        selectedStatus={selectedStatus}
-        onFilterChange={handleFilterChange}
-        onSearchChange={handleSearchChange}
+        // selectedStatus={selectedStatus}
+        // onFilterChange={handleFilterChange}
+        // onSearchChange={handleSearchChange}
+        selectedStatus={filteredStatus}
+        onFilterChange={(key, val) => {
+          if (key === "status") setFilteredStatus(val);
+        }}
+        onSearchChange={(query) => {
+          setSearchQuery(query);
+        }}
       />
       {hasMore && !loading && (
         <div className="mt-4 text-center">

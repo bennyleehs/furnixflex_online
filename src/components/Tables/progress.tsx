@@ -7,7 +7,7 @@ interface ProgressTableProps {
   statusCounts: Record<string, number>;
   totalItems: number;
   pageName: string;
-  selectedStatus?: string
+  selectedStatus?: string;
   onFilterChange?: (key: string, value: string) => void;
   onSearchChange?: (query: string) => void;
 }
@@ -144,6 +144,10 @@ export default function ProgressTable({
       });
     }
 
+    if (selectedStatus !== "All") {
+      filtered = filtered.filter((task) => task.status === selectedStatus);
+    }
+
     // Apply search query if provided
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
@@ -167,7 +171,7 @@ export default function ProgressTable({
     );
 
     return filtered;
-  // }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
+    // }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
   }, [tasksWithProgress, selectedPIC, searchQuery]);
 
   const uniqueDisplayedTasks = useMemo(() => {
@@ -198,7 +202,8 @@ export default function ProgressTable({
             let bgColorClass = "bg-primary";
             let textColorClass = "text-white";
 
-            if (info.stage === "Job Done") bgColorClass = "bg-success";
+            if (info.stage === "Job Done")
+              bgColorClass = "bg-success dark:bg-green-500";
             else if (
               ["Deposit", "Production", "Installation"].includes(info.stage)
             ) {
@@ -215,7 +220,10 @@ export default function ProgressTable({
                   //   selectedStage === info.stage ? null : info.stage,
                   // );
                   // onFilterChange?.("status", info.stage);
-                  onFilterChange?.("status", selectedStatus === info.stage ? "All" : info.stage)
+                  onFilterChange?.(
+                    "status",
+                    selectedStatus === info.stage ? "All" : info.stage,
+                  );
                 }}
               >
                 {/* Circular count indicator with dark-mode compatible border highlight */}
@@ -223,10 +231,10 @@ export default function ProgressTable({
                   <div
                     className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-sm font-medium shadow-md ${
                       // selectedStage === info.stage
-                      selectedStatus  === info.stage
+                      selectedStatus === info.stage
                         ? `dark:ring-offset-boxdark scale-110 transform ring-4 ring-offset-2 ring-offset-white ${
                             info.stage === "Job Done"
-                              ? "ring-success"
+                              ? "ring-success dark:ring-green-500"
                               : [
                                     "Deposit",
                                     "Production",
@@ -277,14 +285,17 @@ export default function ProgressTable({
                   // setSelectedStage(
                   //   selectedStage === info.stage ? null : info.stage,
                   // )
-                  onFilterChange?.("status", selectedStatus === info.stage ? "All" : info.stage)
+                  onFilterChange?.(
+                    "status",
+                    selectedStatus === info.stage ? "All" : info.stage,
+                  )
                 }
               >
                 {/* Compact display for mobile */}
                 <div
                   className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-xs font-medium shadow-md ${
                     // selectedStage === info.stage
-                    selectedStatus  === info.stage
+                    selectedStatus === info.stage
                       ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
                           info.stage === "Job Done"
                             ? "ring-success"
@@ -442,14 +453,15 @@ export default function ProgressTable({
         </span>
       </h4>
 
-      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
         {/* {displayedTasks.map((task) => { */}
         {Array.from(
           new Map(uniqueDisplayedTasks.map((t) => [t.id, t])).values(),
         ).map((task) => {
           // Determine color based on progress
           let colorClass = "bg-primary";
-          if (task.progressPercentage >= 100) colorClass = "bg-success";
+          if (task.progressPercentage >= 100)
+            colorClass = "bg-success dark:bg-green-500";
           else if (task.progressPercentage >= 60) colorClass = "bg-meta-11";
 
           // Parse composite fields into components
@@ -471,9 +483,9 @@ export default function ProgressTable({
               key={task.id}
               className="dark:bg-form-input border-stroke dark:border-strokedark rounded-md border bg-white p-3"
             >
-              {/* Enhanced header with name, NRIC, and contact details inline */}
               <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div className="flex-1">
+                  {/* First line - always shows name, nric, phone1, and update button */}
                   <div className="flex flex-wrap items-center gap-2">
                     <h5 className="font-medium text-black dark:text-white">
                       {name}
@@ -483,7 +495,6 @@ export default function ProgressTable({
                         {nric}
                       </span>
                     )}
-
                     {phone1 && (
                       <span className="flex items-center text-sm">
                         <svg
@@ -496,34 +507,45 @@ export default function ProgressTable({
                         {phone1}
                       </span>
                     )}
-                    {phone2 && (
-                      <span className="flex items-center text-sm">
-                        <svg
-                          className="mr-1 h-3.5 w-3.5 text-gray-400"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                        </svg>
-                        {phone2}
-                      </span>
-                    )}
-
-                    {email && (
-                      <span className="flex items-center text-sm">
-                        <svg
-                          className="mr-1 h-3.5 w-3.5 text-gray-400"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                        </svg>
-                        <span className="max-w-[150px] truncate">{email}</span>
-                      </span>
-                    )}
                   </div>
-
+                  {/* Second line - fix the position phone2 and email even null */}
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="flex items-center text-sm">
+                      {phone2 ? (
+                        <>
+                          <svg
+                            className="mr-1 h-3.5 w-3.5 text-gray-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                          </svg>
+                          {phone2}
+                        </>
+                      ) : (
+                        <span className="invisible h-0 w-0"></span>
+                      )}
+                    </span>
+                    <span className="flex items-center text-sm">
+                      {email ? (
+                        <>
+                          <svg
+                            className="mr-1 h-3.5 w-3.5 text-gray-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          <span className="max-w-[150px] truncate">
+                            {email}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="invisible h-0 w-0"></span>
+                      )}
+                    </span>
+                  </div>
                   {task.address && (
                     <div className="mt-1.5 flex items-start text-sm">
                       <svg
@@ -541,32 +563,31 @@ export default function ProgressTable({
                     </div>
                   )}
                 </div>
-
                 <div className="flex items-center">
-                  <button
-                    className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
-                      task.status === "Job Done"
-                        ? "bg-success/20 text-success hover:bg-success/30 dark:bg-success/30 dark:hover:bg-success/40"
-                        : ["Deposit", "Production", "Installation"].includes(
-                              task.status,
-                            )
+                  {task.status !== "Job Done" && (
+                    <button
+                      className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
+                        ["Deposit", "Production", "Installation"].includes(
+                          task.status,
+                        )
                           ? "bg-meta-11/20 text-warning hover:bg-meta-11/30 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
                           : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-700/30 dark:text-indigo-300 dark:hover:bg-indigo-700/40"
-                    } transition-colors`}
-                    onClick={() =>
-                      (window.location.href = `/sales/task/edit?id=${task.id}`)
-                    }
-                    title="Update task status"
-                  >
-                    <svg
-                      className="h-3 w-3"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
+                      } transition-colors`}
+                      onClick={() =>
+                        (window.location.href = `/sales/task/edit?id=${task.id}`)
+                      }
+                      title="Update task status"
                     >
-                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
-                    Update
-                  </button>
+                      <svg
+                        className="h-3 w-3"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                      Update
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -579,7 +600,7 @@ export default function ProgressTable({
                 </span>
               </div>
 
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-300">
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
                 <div
                   className={`h-full ${colorClass} rounded-full transition-all duration-300`}
                   style={{ width: `${task.progressPercentage}%` }}
@@ -591,7 +612,7 @@ export default function ProgressTable({
                 {pipelineStages.map((stage, index) => (
                   <div
                     key={stage}
-                    className={`h-1.5 w-1.5 rounded-full ${index <= task.stageIndex ? colorClass : "bg-gray-200 dark:bg-gray-300"}`}
+                    className={`h-1.5 w-1.5 rounded-full ${index <= task.stageIndex ? colorClass : "bg-gray-200 dark:bg-gray-400"}`}
                     title={stage}
                   />
                 ))}
@@ -599,10 +620,14 @@ export default function ProgressTable({
 
               {/* Person-In-Charge bottom */}
               <div className="border-stroke dark:border-strokedark mt-3 border-t pt-3 text-xs">
-                <div className="flex items-center justify-between">
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-black dark:text-white">
-                    <span>ID: {task.id}</span>
+                {/* First row - ID and PIC */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center">
+                    <span className="text-sm text-black dark:text-white">
+                      ID: {task.id}
+                    </span>
                   </div>
+
                   <div className="flex items-center">
                     <svg
                       className="mr-1 h-3 w-3 text-gray-400"
@@ -623,6 +648,9 @@ export default function ProgressTable({
                       </span>
                     )}
                   </div>
+                </div>
+                {/* Second row - Status (centered) */}
+                <div className="mt-2 flex justify-center md:justify-end">
                   <span
                     className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
                       task.status === "Job Done"
