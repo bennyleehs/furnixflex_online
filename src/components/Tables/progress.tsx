@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-// import "./styles.css"; // Import the CSS file
 
 interface ProgressTableProps {
   data: any[];
   statusCounts: Record<string, number>;
   totalItems: number;
   pageName: string;
+  selectedStatus?: string
+  onFilterChange?: (key: string, value: string) => void;
+  onSearchChange?: (query: string) => void;
 }
 
 export default function ProgressTable({
@@ -15,6 +17,9 @@ export default function ProgressTable({
   statusCounts,
   totalItems,
   pageName,
+  selectedStatus,
+  onFilterChange,
+  onSearchChange,
 }: ProgressTableProps) {
   // Memoize the pipeline stages array
   const pipelineStages = useMemo(
@@ -31,12 +36,9 @@ export default function ProgressTable({
     [],
   ); // Empty dependency array since stages are static
 
-  // State for task filtering
-  const [selectedStage, setSelectedStage] = useState<string | null>(null);
-  // Add a new state for PIC filtering
-  const [selectedPIC, setSelectedPIC] = useState<string | null>(null);
-  // Add this after the existing useState declarations
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  // const [selectedStage, setSelectedStage] = useState<string | null>(null); // State for task filtering
+  const [selectedPIC, setSelectedPIC] = useState<string | null>(null); // Add a new state for PIC filtering
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Add this after the existing useState declarations
 
   // Extract unique PICs from the data
   const uniquePICs = useMemo(() => {
@@ -51,9 +53,8 @@ export default function ProgressTable({
     return Array.from(picSet).sort();
   }, [data]);
 
-  // Calculate stage percentages and prepare data
+  // Calculate stage percentages and prepare data // Initialize with zeros
   const stageData = useMemo(() => {
-    // Initialize with zeros
     const counts = pipelineStages.reduce(
       (acc, stage) => {
         acc[stage] = 0;
@@ -70,15 +71,13 @@ export default function ProgressTable({
       }
     });
 
-    // Calculate relative position in pipeline for each task
-    let totalTasks = 0;
+    let totalTasks = 0; // Calculate relative position in pipeline for each task
     const stageInfo = pipelineStages.map((stage, index) => {
       const count = counts[stage] || 0;
       totalTasks += count;
 
       // Percentage of tasks at this stage
       const percentage = totalItems > 0 ? (count / totalItems) * 100 : 0;
-
       // Progress weighting: earlier stages have less weight in overall progress
       const progressWeight = (index + 1) / pipelineStages.length;
       const weightedProgress = count * progressWeight;
@@ -133,9 +132,9 @@ export default function ProgressTable({
     let filtered = tasksWithProgress;
 
     // Apply stage filter if selected
-    if (selectedStage) {
-      filtered = filtered.filter((task) => task.status === selectedStage);
-    }
+    // if (selectedStage) {
+    //   filtered = filtered.filter((task) => task.status === selectedStage);
+    // }
 
     // Apply PIC filter if selected
     if (selectedPIC) {
@@ -160,23 +159,31 @@ export default function ProgressTable({
         );
       });
     }
-
     // Limit results if no filters are applied
-    if (!selectedStage && !selectedPIC && !searchQuery) {
-      filtered = filtered.slice(0, 12);
-    }
+    // if (!selectedStage && !selectedPIC && !searchQuery) {filtered = filtered.slice(0, 12); }
+    console.log(
+      "📦 displayedTasks IDs",
+      filtered.map((task) => task.id),
+    );
 
     return filtered;
-  }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
+  // }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
+  }, [tasksWithProgress, selectedPIC, searchQuery]);
+
+  const uniqueDisplayedTasks = useMemo(() => {
+    const seen = new Set();
+    return displayedTasks.filter((task) => {
+      if (seen.has(task.id)) return false;
+      seen.add(task.id);
+      return true;
+    });
+  }, [displayedTasks]);
 
   return (
     <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-5 rounded-lg border bg-gray-50 p-5">
       {/* Header with Pipeline Flow title and breadcrumb on right */}
       <div className="mb-4 flex flex-wrap items-center justify-between">
-        {/* Title on left */}
         <h4 className="text-md font-medium">Pipeline Flow</h4>
-
-        {/* Breadcrumb on right */}
         <div className="text-sm">
           <Breadcrumb pageName={pageName} noHeader={true} />
         </div>
@@ -202,17 +209,21 @@ export default function ProgressTable({
               <div
                 key={info.stage}
                 className="flex min-w-0 flex-1 cursor-pointer flex-col items-center px-1 text-center"
-                onClick={() =>
-                  setSelectedStage(
-                    selectedStage === info.stage ? null : info.stage,
-                  )
-                }
+                // onClick={() => setSelectedStage(selectedStage === info.stage ? null : info.stage,  )}
+                onClick={() => {
+                  // setSelectedStage(
+                  //   selectedStage === info.stage ? null : info.stage,
+                  // );
+                  // onFilterChange?.("status", info.stage);
+                  onFilterChange?.("status", selectedStatus === info.stage ? "All" : info.stage)
+                }}
               >
                 {/* Circular count indicator with dark-mode compatible border highlight */}
                 <div className="relative">
                   <div
                     className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-sm font-medium shadow-md ${
-                      selectedStage === info.stage
+                      // selectedStage === info.stage
+                      selectedStatus  === info.stage
                         ? `dark:ring-offset-boxdark scale-110 transform ring-4 ring-offset-2 ring-offset-white ${
                             info.stage === "Job Done"
                               ? "ring-success"
@@ -232,12 +243,6 @@ export default function ProgressTable({
                 </div>
 
                 {/* Stage connection line */}
-                {/* {index < stageData.stageInfo.length - 1 && (
-                  <div className="absolute h-0.5 bg-gray-200 dark:bg-gray-600 w-1/2 right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/4"></div>
-                )} */}
-                {/* {index > 0 && (
-                  <div className="absolute h-0.5 bg-gray-200 dark:bg-gray-600 w-1/2 left-0 top-1/2 transform -translate-y-1/2 translate-x-1/4"></div>
-                )} */}
 
                 {/* Vertical stage label directly under the circle */}
                 <div className="mt-2 flex w-full flex-col items-center text-sm text-black dark:text-white">
@@ -254,8 +259,7 @@ export default function ProgressTable({
         {/* Mobile view - condensed pipeline */}
         <div className="border-stroke dark:border-strokedark mb-1 flex flex-wrap justify-center gap-6 border-b py-4 md:hidden">
           {stageData.stageInfo.map((info, index) => {
-            // Determine color based on stage
-            let bgColorClass = "bg-primary";
+            let bgColorClass = "bg-primary"; // Determine color based on stage
             let textColorClass = "text-white";
 
             if (info.stage === "Job Done") bgColorClass = "bg-success";
@@ -270,15 +274,17 @@ export default function ProgressTable({
                 key={info.stage}
                 className="flex cursor-pointer flex-col items-center"
                 onClick={() =>
-                  setSelectedStage(
-                    selectedStage === info.stage ? null : info.stage,
-                  )
+                  // setSelectedStage(
+                  //   selectedStage === info.stage ? null : info.stage,
+                  // )
+                  onFilterChange?.("status", selectedStatus === info.stage ? "All" : info.stage)
                 }
               >
                 {/* Compact display for mobile */}
                 <div
                   className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-xs font-medium shadow-md ${
-                    selectedStage === info.stage
+                    // selectedStage === info.stage
+                    selectedStatus  === info.stage
                       ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
                           info.stage === "Job Done"
                             ? "ring-success"
@@ -295,7 +301,7 @@ export default function ProgressTable({
                 >
                   {index + 1}
                 </div>
-                <div className="mt-1 max-w-[60px] text-wrap text-center text-[10px] text-black dark:text-white">
+                <div className="mt-1 max-w-[60px] text-center text-[10px] text-wrap text-black dark:text-white">
                   {info.stage}
                 </div>
                 <div className="text-[10px] font-bold">{info.count}</div>
@@ -357,13 +363,17 @@ export default function ProgressTable({
           </div>
 
           {/* Search input - right side */}
-          <div className="relative w-full lg:mt-0  md:mt-4 md:w-auto md:min-w-[200px]">
+          <div className="relative w-full md:mt-4 md:w-auto md:min-w-[200px] lg:mt-0">
             <input
               type="text"
               placeholder="Search tasks..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-1 text-sm border border-stroke dark:border-strokedark rounded-md focus:outline-hidden focus:border-primary dark:bg-meta-4 dark:text-white"
+              // onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                onSearchChange?.(e.target.value); // trigger parent state reset
+              }}
+              className="border-stroke dark:border-strokedark focus:border-primary dark:bg-meta-4 w-full rounded-md border px-3 py-1 text-sm focus:outline-hidden dark:text-white"
             />
             {searchQuery && (
               <button
@@ -407,7 +417,7 @@ export default function ProgressTable({
       </div>
 
       {/* Individual task progress */}
-      <h4 className="text-md mb-3 font-medium text-black dark:text-white">
+      {/* <h4 className="text-md mb-3 font-medium text-black dark:text-white">
         {selectedStage && selectedPIC
           ? `Tasks for ${selectedPIC} in ${selectedStage} Stage`
           : selectedStage
@@ -418,11 +428,25 @@ export default function ProgressTable({
         <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
           ({displayedTasks.length} tasks)
         </span>
+      </h4> */}
+      <h4 className="text-md mb-3 font-medium text-black dark:text-white">
+        {selectedStatus && selectedPIC
+          ? `Tasks for ${selectedPIC} in ${selectedStatus} Stage`
+          : selectedStatus
+            ? `Tasks in ${selectedStatus} Stage`
+            : selectedPIC
+              ? `Tasks for ${selectedPIC}`
+              : "Recent Tasks Progress"}
+        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+          ({uniqueDisplayedTasks.length} tasks)
+        </span>
       </h4>
 
-      {/* Changed from space-y-3 to grid with 2 columns */}
-      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2">
-        {displayedTasks.map((task) => {
+      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-3">
+        {/* {displayedTasks.map((task) => { */}
+        {Array.from(
+          new Map(uniqueDisplayedTasks.map((t) => [t.id, t])).values(),
+        ).map((task) => {
           // Determine color based on progress
           let colorClass = "bg-primary";
           if (task.progressPercentage >= 100) colorClass = "bg-success";
@@ -450,7 +474,6 @@ export default function ProgressTable({
               {/* Enhanced header with name, NRIC, and contact details inline */}
               <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div className="flex-1">
-                  {/* Name and NRIC line with contact details */}
                   <div className="flex flex-wrap items-center gap-2">
                     <h5 className="font-medium text-black dark:text-white">
                       {name}
@@ -461,7 +484,6 @@ export default function ProgressTable({
                       </span>
                     )}
 
-                    {/* Contact details inline */}
                     {phone1 && (
                       <span className="flex items-center text-sm">
                         <svg
@@ -502,18 +524,8 @@ export default function ProgressTable({
                     )}
                   </div>
 
-                  {/* Full address on its own row */}
                   {task.address && (
                     <div className="mt-1.5 flex items-start text-sm">
-                      {/* <svg
-                        className="mt-0.5 mr-1.5 h-3.5 w-3.5 shrink-0 text-red-500"
-                        fill="currentColor"
-                        width="800px"
-                        height="800px"
-                        viewBox="0 0 256 256"
-                      >
-                        <path d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971ZM128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" />
-                      </svg> */}
                       <svg
                         className="mt-0.5 mr-1.5 h-3.5 w-3.5 text-red-500"
                         fill="currentColor"
@@ -559,27 +571,6 @@ export default function ProgressTable({
               </div>
 
               {/* Source Info - horizontal and inline layout */}
-              {/* <div className="dark:bg-meta-4 rounded-sm bg-gray-50 px-3 py-2">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-sm font-medium">Source Info: </span>
-                  {sourceName && (
-                    <span className="text-gray-700 dark:text-gray-300">
-                      {sourceName} /
-                    </span>
-                  )}
-                  {interested && (
-                    <span className="text-gray-700 dark:text-gray-300">
-                      {interested} /
-                    </span>
-                  )}
-                  {addInfo && (
-                    <span className="text-gray-700 dark:text-gray-300">
-                      {addInfo}
-                    </span>
-                  )}
-                </div>
-              </div> */}
-
               {/* Progress section */}
               <div className="my-2 flex items-center justify-between">
                 <span className="text-sm font-medium">Progress</span>
@@ -606,10 +597,9 @@ export default function ProgressTable({
                 ))}
               </div>
 
-              {/* Person-In-Charge moved to bottom */}
+              {/* Person-In-Charge bottom */}
               <div className="border-stroke dark:border-strokedark mt-3 border-t pt-3 text-xs">
                 <div className="flex items-center justify-between">
-                  {/* ID, date and UID line */}
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-black dark:text-white">
                     <span>ID: {task.id}</span>
                   </div>
@@ -652,21 +642,12 @@ export default function ProgressTable({
           );
         })}
 
-        {displayedTasks.length === 0 && (
+        {uniqueDisplayedTasks.length === 0 && (
           <div className="col-span-2 py-8 text-center text-gray-500">
             No tasks found in this stage.
           </div>
         )}
       </div>
-
-      {/* Show more link */}
-      {!selectedStage && tasksWithProgress.length > 12 && (
-        <div className="mt-4 text-center">
-          <Link href="/sales/task" className="text-primary hover:underline">
-            View all {tasksWithProgress.length} tasks
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

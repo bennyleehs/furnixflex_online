@@ -557,7 +557,7 @@ export default function TaskEditPage() {
                           <div className="mr-1.5 shrink-0">
                             {file.type.startsWith("image/") ? (
                               <div className="border-stroke dark:border-strokedark h-5 w-5 overflow-hidden rounded-sm border">
-                                <img
+                               <Image
                                   src={URL.createObjectURL(file)}
                                   alt={file.name}
                                   className="h-full w-full object-cover"
@@ -908,7 +908,7 @@ export default function TaskEditPage() {
                         >
                           {file.type.startsWith("image/") ? (
                             <div className="border-stroke dark:border-strokedark h-10 w-10 shrink-0 overflow-hidden rounded-sm border">
-                              <img
+                              <Image
                                 src={URL.createObjectURL(file)}
                                 alt={file.name}
                                 className="h-full w-full object-cover"
@@ -1268,7 +1268,7 @@ export default function TaskEditPage() {
               (previewFile.type === "image" ||
                 previewFile.type.startsWith("image/")) &&
               previewFile.url ? (
-                <img
+                <Image
                   src={previewFile.url}
                   alt={previewFile.name}
                   className="max-h-[70vh] max-w-full object-contain"

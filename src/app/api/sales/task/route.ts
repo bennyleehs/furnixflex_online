@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
         // Add search parameter for each column (with wildcard)
         const searchValue = `%${search}%`;
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 14; i++) {
           // Updated to 12 searchable columns
           params.push(searchValue);
         }
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       FROM customers c
       LEFT JOIN users e ON c.sales_id = e.id
       ${whereClause}
-      ORDER BY c.id DESC 
+      ORDER BY c.created_at DESC, c.id DESC 
       LIMIT ? OFFSET ?;
     `;
 
@@ -139,39 +139,3 @@ export async function GET(request: NextRequest) {
     });
   }
 }
-// not used ? -- commented: bcs causing error
-// export async function POST(
-//   request: Request,
-//   { params }: { params: { taskId: string } }
-// ) {
-//   const taskId = params.taskId;
-
-//   try {
-//     // Handle file upload for the specific task
-//     const formData = await request.formData();
-//     const file = formData.get('file') as File;
-
-//     if (!file) {
-//       return NextResponse.json(
-//         { error: 'No file provided' },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Process the file upload
-//     // ...file processing logic...
-
-//     return NextResponse.json({
-//       success: true,
-//       message: 'File uploaded successfully1',
-//       taskId
-//     });
-
-//   } catch (error) {
-//     console.error('Error uploading file:', error);
-//     return NextResponse.json(
-//       { error: 'Failed to upload file' },
-//       { status: 500 }
-//     );
-//   }
-// }
