@@ -161,6 +161,7 @@ export default function ProductsPage() {
       const subcategoryToUse = showNewSubcategory
         ? newSubcategory
         : formData.subcategory;
+      const unitToUse = showNewUnit ? newUnit : formData.unit;
 
       if (
         !categoryToUse ||
@@ -176,6 +177,7 @@ export default function ProductsPage() {
         ...formData,
         category: categoryToUse,
         subcategory: subcategoryToUse,
+        unit: unitToUse,
         price:
           typeof formData.price === "string"
             ? parseFloat(formData.price) || 0
@@ -528,14 +530,10 @@ export default function ProductsPage() {
                       }
                       className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm transition outline-none"
                     >
+                      <option value="unit">Unit</option>
                       <option value="set">Set</option>
                       <option value="feet">Feet</option>
-                      <option value="ft²">ft² (Square Feet)</option>
-                      <option value="unit">Unit</option>
-                      <option value="lot">Lot</option>
-                      <option value="nos">NOS</option>
-                      <option value="sqft">Sq.ft</option>
-                      <option value="pcs">Pcs</option>
+                      <option value="trip">Trip</option>
                     </select>
                     <button
                       type="button"
