@@ -71,6 +71,7 @@ export default function Page() {
   }, [
     currentPage,
     itemsPerPage,
+    filteredStatus,
     // selectedStatus,
     searchQuery,
     title,

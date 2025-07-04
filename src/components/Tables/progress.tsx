@@ -172,7 +172,7 @@ export default function ProgressTable({
 
     return filtered;
     // }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
-  }, [tasksWithProgress, selectedPIC, searchQuery]);
+  }, [tasksWithProgress, selectedStatus, selectedPIC, searchQuery]);
 
   const uniqueDisplayedTasks = useMemo(() => {
     const seen = new Set();

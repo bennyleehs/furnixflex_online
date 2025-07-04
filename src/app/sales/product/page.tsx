@@ -768,20 +768,20 @@ export default function ProductsPage() {
 
       {/* Products Table */}
       <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-sm border bg-white px-5 pt-6 pb-2.5">
-        <div className="max-w-full overflow-x-auto">
+        <div className="relative max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
               <tr className="dark:bg-meta-4 bg-gray-50 text-left">
                 <th className="px-4 py-4 font-medium text-black dark:text-white">
                   Category
                 </th>
-                <th className="px-4 py-4 font-medium text-black dark:text-white">
+                <th className="min-w-[180px] px-4 py-4 font-medium text-black dark:text-white">
                   Subcategory
                 </th>
-                <th className="px-4 py-4 font-medium text-black dark:text-white">
+                <th className="min-w-[300px] px-4 py-4 font-medium text-black dark:text-white">
                   Product
                 </th>
-                <th className="px-4 py-4 text-right font-medium text-black dark:text-white">
+                <th className="min-w-[140px] px-4 py-4 text-right font-medium text-black dark:text-white">
                   Price (RM)
                 </th>
                 <th className="px-4 py-4 text-center font-medium text-black dark:text-white">
@@ -793,10 +793,10 @@ export default function ProductsPage() {
                 <th className="px-4 py-4 font-medium text-black dark:text-white">
                   Effective Duration
                 </th>
-                <th className="px-4 py-4 font-medium text-black dark:text-white">
+                <th className="min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
                   Task ID
                 </th>
-                <th className="px-4 py-4 text-center font-medium text-black dark:text-white">
+                <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[140px] px-4 py-4 text-center font-medium text-black dark:text-white">
                   Actions
                 </th>
               </tr>
@@ -904,7 +904,7 @@ export default function ProductsPage() {
                         <span className="text-sm text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-4 py-4 text-center">
+                    <td className="dark:border-strokedark dark:bg-boxdark sticky right-0 z-10 border-b border-[#eee] bg-white px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3.5">
                         {!loadingPermissions && ( // Only render buttons if permissions are loaded
                           <>

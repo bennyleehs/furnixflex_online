@@ -5,7 +5,11 @@ import "./styles.css"; // Import the CSS file
 import usePermissions from "@/hooks/usePermissions";
 
 interface TableProps {
-  columns: { key: string; title: string }[]; // Defines column keys & titles
+  columns: {
+    width: string;
+    key: string;
+    title: string;
+  }[]; // Defines column keys & titles
   data: Record<string, any>[]; // Rows of data
   createLink?: string;
   filterKeys: string[]; // Keys to filter the data (e.g., ["country", "status"])
@@ -484,21 +488,23 @@ export default function Tables({
       </div>
 
       {/* Table */}
-      <div className="max-w-full overflow-x-auto">
+      <div className="relative max-w-full overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 dark:bg-meta-4 text-left">
-              {columns.map((col, index) => (
+              {columns.map((col) => (
                 <th
                   key={col.key}
-                  style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
-                  className="px-2 py-4 font-medium text-black xl:pl-6 dark:text-white"
+                  // style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
+                  // className="px-2 py-4 font-medium text-black min-w-[180px] xl:pl-6 dark:text-white"
+                  // className={`px-2 py-4 font-medium text-black min-w-[180px] xl:pl-6 dark:text-white ${col.width || 'min-w-[180px]'}`}
+                  className={`px-2 py-4 font-medium text-black xl:pl-6 dark:text-white ${col.width}`}
                 >
                   {col.title}
                 </th>
               ))}
-              <th className="min-w-[140px] px-2 py-4 font-medium text-black xl:pl-6 dark:text-white">
-                Overview/Options
+              <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[140px] px-4 py-4 text-center font-medium text-black dark:text-white">
+                Overview
               </th>
             </tr>
           </thead>
@@ -508,14 +514,20 @@ export default function Tables({
                 {columns.map((col, index) => (
                   <td
                     key={col.key}
-                    style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
-                    className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6"
+                    // style={{ minWidth: `${columnWidths[index]}px` }} // Apply calculated width
+                    // className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6"
+                    // className={`dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6 ${
+                    //   col.width || "min-w-[180px]"
+                    // }`}
+                    className={`dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6 ${
+                      col.width
+                    }`}
                   >
                     {row[col.key]}
                   </td>
                 ))}
                 {/* action */}
-                <td className="dark:border-strokedark border-b border-[#eee] px-2 py-5 xl:pl-6">
+                <td className="dark:border-strokedark dark:bg-boxdark sticky right-0 z-10 border-b border-[#eee] bg-white px-4 py-4 text-center">
                   <div className="flex items-center space-x-6">
                     {!loadingPermissions && ( // Only render buttons if permissions are loaded
                       <>

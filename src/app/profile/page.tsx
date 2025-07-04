@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useAuth } from "@/context/AuthContext";
+import ComingSoon from "@/components/DisplayPage/ComingSoon";
 
 interface Users {}
 
@@ -30,7 +31,7 @@ const Profile = () => {
   return (
     <DefaultLayout>
       <div>
-        <Breadcrumb pageName="Profile" />
+        <Breadcrumb pageName="Profile" noHeader={true} />
 
         <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white">
           <div className="border-stroke dark:border-strokedark border-b p-6">
@@ -145,9 +146,12 @@ const Profile = () => {
             <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
               {user?.name}
             </h3>
-            <p className="font-medium">{user?.uid || "None"}</p>
+            {/* <p className="font-medium">{user?.uid || "None"}</p> */}
+            <p className="font-medium">Employee&apos;s Information</p>
           </div>
         </div>
+        <div className="p-4"></div>
+        <ComingSoon/>
       </div>
     </DefaultLayout>
   );
