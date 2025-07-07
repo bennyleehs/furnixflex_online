@@ -671,7 +671,7 @@ export default function ProgressTable({
         })}
 
         {uniqueDisplayedTasks.length === 0 && (
-          <div className="col-span-2 py-8 text-center text-gray-500">
+          <div className="col-span-4 py-8 text-center text-gray-500">
             No tasks found in this stage.
           </div>
         )}

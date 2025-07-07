@@ -39,10 +39,10 @@ export default function DepartmentPage() {
     { title: "REF", inputType: "text", valueKey: "ref" },
     { title: "Status", inputType: "select", valueKey: "status",
        options: [
-      { value: "active", label: "Active" },
-      { value: "inactive", label: "Inactive" },
-      { value: "pending", label: "Pending" },
-      { value: "history", label: "History" }
+      { value: "Active", label: "Active" },
+      { value: "Inactive", label: "Inactive" },
+      { value: "Pending", label: "Pending" },
+      { value: "History", label: "History" }
     ] },
   ];
 
