@@ -16,22 +16,25 @@ export default function Page() {
   const [hasMore, setHasMore] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
-  // const [selectedStatus, setSelectedStatus] = useState("All"); // Initialize with "All" to see all statuses
-  const [filteredStatus, setFilteredStatus] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All"); // Initialize with "All" to see all statuses
+  // const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
   const fetchData = useCallback(async () => {
     try {
       // const statusParam =
       //   selectedStatus !== "All" ? `&status=${selectedStatus}` : ""; // Add status filter to API request if not "All"
-      const statusParam =
-        filteredStatus !== "All" ? `&status=${filteredStatus}` : "";
+      // const statusParam =
+      //   filteredStatus !== "All" ? `&status=${filteredStatus}` : "";
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
         : ""; // Add search query parameter
+      // const res = await fetch(
+      //   `/api/sales/${title}?page=${currentPage}&limit=${itemsPerPage}${statusParam}${searchParam}`,
+      // );
       const res = await fetch(
-        `/api/sales/${title}?page=${currentPage}&limit=${itemsPerPage}${statusParam}${searchParam}`,
-      );
+    `/api/sales/${title}?page=${currentPage}&limit=${itemsPerPage}${searchParam}`,
+  );
       if (!res.ok) throw new Error(`Failed to fetch ${capitalizedTitle}`);
 
       const response = await res.json();
@@ -71,7 +74,7 @@ export default function Page() {
   }, [
     currentPage,
     itemsPerPage,
-    filteredStatus,
+    // filteredStatus,
     // selectedStatus,
     searchQuery,
     title,
@@ -127,12 +130,13 @@ export default function Page() {
         statusCounts={statusCounts}
         totalItems={totalItems}
         pageName={`${capitalizedTitle} List`}
-        // selectedStatus={selectedStatus}
+        selectedStatus={selectedStatus}
         // onFilterChange={handleFilterChange}
         // onSearchChange={handleSearchChange}
-        selectedStatus={filteredStatus}
+        // selectedStatus={filteredStatus}
         onFilterChange={(key, val) => {
-          if (key === "status") setFilteredStatus(val);
+          // if (key === "status") setFilteredStatus(val);
+          if (key === "status") setSelectedStatus(val);
         }}
         onSearchChange={(query) => {
           setSearchQuery(query);

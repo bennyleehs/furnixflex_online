@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
+import { createPool } from "@/lib/db";
 
 // Clear interface definition for EventLog
 interface EventLog {
@@ -223,25 +224,22 @@ export async function GET(request: NextRequest) {
 }
 
 // Add function to update task status in database
-// async function updateTaskInDatabase(taskId: string, newStatus: string) {
-//   try {
-//     const conn = createPool();
+async function updateTaskInDatabase(taskId: string, newStatus: string) {
+  try {
+    const conn = createPool();
     
-//     // Update the task status in the customer1 table
-//     const [result] = await conn.execute(
-//       'UPDATE customers SET status = ? WHERE id = ?',
-//       [newStatus, taskId]
-//     );
-    
-//     // Log for debugging
-//     console.log(`Database updated: Task #${taskId} status set to "${newStatus}"`);
-    
-//     return true;
-//   } catch (error) {
-//     console.error('Error updating database:', error);
-//     throw new Error('Failed to update task status in database');
-//   }
-// }
+    // Update the task status in the customer1 table
+    const [result] = await conn.execute(
+      'UPDATE customers SET status = ?, updated_at = NOW() WHERE id = ?',
+      [newStatus, taskId]
+    );
+    console.log(`Database updated: Task #${taskId} status set to "${newStatus}"`);
+    return true;
+  } catch (error) {
+    console.error('Error updating database:', error);
+    throw new Error('Failed to update task status in database');
+  }
+}
 
 // POST handler for task updates and file uploads
 export async function POST(request: NextRequest) {
@@ -256,15 +254,13 @@ export async function POST(request: NextRequest) {
     const userName = formData.get('userName') as string || 'System';
     
     // Get files from form data
-    const files = formData.getAll('files') as File[];
-    
+    const files = formData.getAll('files') as File[];    
     console.log(`Updating task ${taskId} from ${oldStatus} to ${newStatus}`);
     
     // Only update database if status actually changed
-    // if (newStatus !== oldStatus) {
-    //   // Update database first to ensure data consistency
-    //   await updateTaskInDatabase(taskId, newStatus);
-    // }
+    if (newStatus !== oldStatus) {
+      await updateTaskInDatabase(taskId, newStatus);
+    }
     
     // Process file uploads - completely separate from notes
     const uploadedFiles = [];
@@ -281,11 +277,9 @@ export async function POST(request: NextRequest) {
       user: userName,
       action: 'Status Update',
       oldValue: oldStatus,
-      newValue: newStatus,
-      // Only include notes if they exist and aren't empty
-      notes: notes?.trim() ? notes.trim() : undefined,
-      // Only include filesName if files were uploaded
-      filesName: uploadedFiles.length > 0 ? uploadedFiles : undefined
+      newValue: newStatus,      
+      notes: notes?.trim() ? notes.trim() : undefined,// Only include notes if they exist and aren't empty
+     filesName: uploadedFiles.length > 0 ? uploadedFiles : undefined // Only include filesName if files were uploaded
     };
     
     await saveEventLog(taskId, logEntry);

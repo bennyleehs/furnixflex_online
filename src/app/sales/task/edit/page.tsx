@@ -166,15 +166,16 @@ export default function TaskEditPage() {
   const nric = task?.nric || "";
   const contact = task?.phone1 || null;
 
+  const oldStatusRef = useRef<string | undefined>(task?.status); // Store the old status in a ref
+
   // Handle status update
   const handleStatusUpdate = async (newStatus: string) => {
     try {
       if (!task || !taskId) return;
 
-      // Optimistic UI update
-      const oldStatus = task.status;
-
-      // Update task in UI first
+      // Store the current status in the ref before updating
+      oldStatusRef.current = task.status;
+      // Optimistic UI update & Update task in UI first
       setTask({
         ...task,
         status: newStatus,
@@ -185,11 +186,10 @@ export default function TaskEditPage() {
         ),
       });
 
-      // Create FormData for file uploads
-      const formData = new FormData();
+      const formData = new FormData(); // Create FormData for file uploads
       formData.append("id", taskId);
       formData.append("status", newStatus);
-      formData.append("oldStatus", oldStatus);
+      formData.append("oldStatus", oldStatusRef.current); // Use the ref value
       formData.append("notes", updateNote);
       formData.append("userName", "Current User"); // Replace with actual username
 
@@ -207,7 +207,7 @@ export default function TaskEditPage() {
         user: "Current User", // Replace with actual user
         action:
           files.length > 0 ? "Status Update with Attachments" : "Status Update",
-        oldValue: oldStatus,
+        oldValue: oldStatusRef.current, // Use the ref value
         newValue: newStatus,
         notes: updateNote,
       };
@@ -229,40 +229,54 @@ export default function TaskEditPage() {
 
       // Fetch updated logs from FTP
       fetchFtpLogs();
+      fetchTaskFiles(); // Add this line to refresh file list after update
 
-      // Add this line to refresh file list after update
-      fetchTaskFiles();
-
-      // If status is changed to Quotation, navigate to quotation page
+      // If status is changed to Quotation, navigate to quotation page. Handle Quotation status redirect
       if (newStatus === "Quotation") {
         // Check if sales representative is assigned before redirecting
         if (!task.sales_uid || !task.sales_name) {
-          // Show error or warning notification
           window.alert(
             "Sales Representative Required: Please assign a sales representative before creating a quotation.",
-          );
-
+          ); // Show error or warning notification
           // Optionally revert the status change
           setTask({
             ...task,
-            status: oldStatus,
-            stageIndex: pipelineStages.indexOf(oldStatus),
+            status: oldStatusRef.current, // Use the ref value
+            stageIndex: pipelineStages.indexOf(oldStatusRef.current || ""),
             progressPercentage: Math.round(
-              ((pipelineStages.indexOf(oldStatus) + 1) /
+              ((pipelineStages.indexOf(oldStatusRef.current || "") + 1) /
                 pipelineStages.length) *
                 100,
             ),
           });
         } else {
-          // Add a small delay to allow users to see the status change before redirect
           setTimeout(() => {
+            // Add a small delay to allow users to see the status change before redirect
             router.push(`/sales/quotation/auto?taskId=${taskId}`);
           }, 500);
         }
+      } else {
+        // For all other status updates, redirect to task list
+        window.alert("Task updated successfully!");
+        setTimeout(() => {
+          router.push("/sales/task");
+        }, 1000);
       }
     } catch (error) {
       console.error("Error updating task:", error);
-      // Show error notification
+      if (task && oldStatusRef.current) {
+        setTask({
+          ...task,
+          status: oldStatusRef.current,
+          stageIndex: pipelineStages.indexOf(oldStatusRef.current),
+          progressPercentage: Math.round(
+            ((pipelineStages.indexOf(oldStatusRef.current) + 1) /
+              pipelineStages.length) *
+              100,
+          ),
+        });
+      }
+      window.alert("Failed to update task status. Please try again.");
     }
   };
 
@@ -557,7 +571,7 @@ export default function TaskEditPage() {
                           <div className="mr-1.5 shrink-0">
                             {file.type.startsWith("image/") ? (
                               <div className="border-stroke dark:border-strokedark h-5 w-5 overflow-hidden rounded-sm border">
-                               <Image
+                                <Image
                                   src={URL.createObjectURL(file)}
                                   alt={file.name}
                                   className="h-full w-full object-cover"
