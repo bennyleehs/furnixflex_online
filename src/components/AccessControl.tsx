@@ -1,6 +1,5 @@
 //src/components/AccessControl.tsx
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -9,7 +8,10 @@ interface AccessControlProps {
   fallback?: React.ReactNode;
 }
 
-export default function AccessControl({ children, fallback }: AccessControlProps) {
+export default function AccessControl({
+  children,
+  fallback,
+}: AccessControlProps) {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();

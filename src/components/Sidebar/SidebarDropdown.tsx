@@ -1,3 +1,4 @@
+// src/components/Sidebar/SidebarDropdown.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
