@@ -28,7 +28,7 @@ export default function ProgressTable({
       "Follow Up",
       "Visit Showroom",
       "Quotation",
-      "Deposit",
+      "Payment",
       "Production",
       "Installation",
       "Job Done",
@@ -205,7 +205,7 @@ export default function ProgressTable({
             if (info.stage === "Job Done")
               bgColorClass = "bg-success dark:bg-green-500";
             else if (
-              ["Deposit", "Production", "Installation"].includes(info.stage)
+              ["Payment", "Production", "Installation"].includes(info.stage)
             ) {
               bgColorClass = "bg-meta-11";
             }
@@ -236,7 +236,7 @@ export default function ProgressTable({
                             info.stage === "Job Done"
                               ? "ring-success dark:ring-green-500"
                               : [
-                                    "Deposit",
+                                    "Payment",
                                     "Production",
                                     "Installation",
                                   ].includes(info.stage)
@@ -272,7 +272,7 @@ export default function ProgressTable({
 
             if (info.stage === "Job Done") bgColorClass = "bg-success";
             else if (
-              ["Deposit", "Production", "Installation"].includes(info.stage)
+              ["Payment", "Production", "Installation"].includes(info.stage)
             ) {
               bgColorClass = "bg-meta-11";
             }
@@ -300,7 +300,7 @@ export default function ProgressTable({
                           info.stage === "Job Done"
                             ? "ring-success"
                             : [
-                                  "Deposit",
+                                  "Payment",
                                   "Production",
                                   "Installation",
                                 ].includes(info.stage)
@@ -471,9 +471,6 @@ export default function ProgressTable({
           const [phone1, phone2, email] = (task.contact || "")
             .split("/")
             .map((s: string) => s.trim());
-          const [sourceName, interested, addInfo] = (task.source || "")
-            .split("/")
-            .map((s: string) => s.trim());
           const [salesName, salesUid] = (task.pic || "")
             .split("/")
             .map((s: string) => s.trim());
@@ -481,154 +478,178 @@ export default function ProgressTable({
           return (
             <div
               key={task.id}
-              className="dark:bg-form-input border-stroke dark:border-strokedark rounded-md border bg-white p-3"
+              className="dark:bg-form-input border-stroke dark:border-strokedark flex h-full flex-col rounded-md border bg-white p-3"
             >
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                <div className="flex-1">
-                  {/* First line - always shows name, nric, phone1, and update button */}
-                  <div className="flex flex-wrap items-center gap-2">
+              {/* Customer info section with better containment */}
+              <div className="dark:bg-meta-4/30 border-stroke dark:border-strokedark mb-4 rounded-md border bg-gray-50 p-2">
+                {/* Customer header with name and action button */}
+                <div className="mb-2 flex items-start justify-between">
+                  <div className="flex items-center gap-2">
                     <h5 className="font-medium text-black dark:text-white">
                       {name}
                     </h5>
                     {nric && (
-                      <span className="dark:bg-meta-4 border-stroke dark:border-strokedark rounded-sm border bg-gray-50 px-1.5 py-0.5 text-xs">
+                      <span className="dark:bg-meta-4 border-stroke dark:border-strokedark rounded-sm border bg-white px-1.5 py-0.5 text-xs">
                         {nric}
                       </span>
                     )}
-                    {phone1 && (
-                      <span className="flex items-center text-sm">
+                  </div>
+                  <div>
+                    {task.status !== "Job Done" && (
+                      <button
+                        className={`flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium whitespace-nowrap ${
+                          ["Payment", "Production", "Installation"].includes(
+                            task.status,
+                          )
+                            ? "bg-meta-11/20 text-meta-11 hover:bg-meta-11/30 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
+                            : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-700/30 dark:text-indigo-300 dark:hover:bg-indigo-700/40"
+                        } transition-colors`}
+                        onClick={() =>
+                          (window.location.href = `/sales/task/edit?id=${task.id}`)
+                        }
+                        title="Update task status"
+                      >
                         <svg
-                          className="mr-1 h-3.5 w-3.5 text-green-500"
-                          viewBox="0 0 24 24"
+                          className="h-3 w-3"
+                          viewBox="0 0 20 20"
                           fill="currentColor"
                         >
-                          <path d="m15.271 13.21c.578.185 1.078.416 1.543.7l-.031-.018c.529.235.986.51 1.403.833l-.015-.011c.02.061.032.13.032.203 0 .011 0 .021-.001.032v-.001c-.015.429-.11.832-.271 1.199l.008-.021c-.231.463-.616.82-1.087 1.01l-.014.005c-.459.243-1.001.393-1.576.411h-.006c-1.1-.146-2.094-.484-2.988-.982l.043.022c-1.022-.468-1.895-1.083-2.636-1.829l-.001-.001c-.824-.857-1.579-1.795-2.248-2.794l-.047-.074c-.636-.829-1.041-1.866-1.1-2.995l-.001-.013v-.124c.032-.975.468-1.843 1.144-2.447l.003-.003c.207-.206.491-.335.805-.341h.001c.101.003.198.011.292.025l-.013-.002c.087.013.188.021.292.023h.003c.019-.002.04-.003.062-.003.13 0 .251.039.352.105l-.002-.001c.107.118.189.261.238.418l.002.008q.124.31.512 1.364c.135.314.267.701.373 1.099l.014.063c-.076.361-.268.668-.533.889l-.003.002q-.535.566-.535.72c.004.088.034.168.081.234l-.001-.001c.405.829.936 1.533 1.576 2.119l.005.005c.675.609 1.446 1.132 2.282 1.54l.059.026c.097.063.213.103.339.109h.002q.233 0 .838-.752t.804-.752zm-3.147 8.216h.022c1.357 0 2.647-.285 3.814-.799l-.061.024c2.356-.994 4.193-2.831 5.163-5.124l.024-.063c.49-1.113.775-2.411.775-3.775s-.285-2.662-.799-3.837l.024.062c-.994-2.356-2.831-4.193-5.124-5.163l-.063-.024c-1.113-.49-2.411-.775-3.775-.775s-2.662.285-3.837.799l.062-.024c-2.356.994-4.193 2.831-5.163 5.124l-.024.063c-.49 1.117-.775 2.419-.775 3.787 0 2.141.698 4.12 1.879 5.72l-.019-.026-1.225 3.613 3.752-1.194c1.49 1.01 3.327 1.612 5.305 1.612h.047zm0-21.426h.033c1.628 0 3.176.342 4.575.959l-.073-.029c2.825 1.197 5.028 3.4 6.196 6.149l.029.076c.588 1.337.93 2.896.93 4.535s-.342 3.198-.959 4.609l.029-.074c-1.197 2.825-3.4 5.028-6.149 6.196l-.076.029c-1.327.588-2.875.93-4.503.93-.011 0-.023 0-.034 0h.002c-.016 0-.034 0-.053 0-2.059 0-3.992-.541-5.664-1.488l.057.03-6.465 2.078 2.109-6.279c-1.051-1.714-1.674-3.789-1.674-6.01 0-1.646.342-3.212.959-4.631l-.029.075c1.197-2.825 3.4-5.028 6.149-6.196l.076-.029c1.327-.588 2.875-.93 4.503-.93h.033-.002z" />
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                         </svg>
-                        {phone1}
-                      </span>
+                        Update
+                      </button>
                     )}
                   </div>
-                  {/* Second line - fix the position phone2 and email even null */}
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                </div>
+
+                {/* Contact information section */}
+                <div className="space-y-1.5">
+                  {/* Primary phone */}
+                  {phone1 && (
                     <span className="flex items-center text-sm">
-                      {phone2 ? (
-                        <>
-                          <svg
-                            className="mr-1 h-3.5 w-3.5 text-gray-400"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                          </svg>
-                          {phone2}
-                        </>
-                      ) : (
-                        <span className="invisible h-0 w-0"></span>
-                      )}
-                    </span>
-                    <span className="flex items-center text-sm">
-                      {email ? (
-                        <>
-                          <svg
-                            className="mr-1 h-3.5 w-3.5 text-gray-400"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                          </svg>
-                          <span className="max-w-[150px] truncate">
-                            {email}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="invisible h-0 w-0"></span>
-                      )}
-                    </span>
-                  </div>
-                  {task.address && (
-                    <div className="mt-1.5 flex items-start text-sm">
                       <svg
-                        className="mt-0.5 mr-1.5 h-3.5 w-3.5 text-red-500"
+                        className="mr-1 h-3.5 w-3.5 flex-shrink-0 text-green-500"
+                        viewBox="0 0 24 24"
                         fill="currentColor"
-                        width="800px"
-                        height="800px"
+                      >
+                        <path d="m15.271 13.21c.578.185 1.078.416 1.543.7l-.031-.018c.529.235.986.51 1.403.833l-.015-.011c.02.061.032.13.032.203 0 .011 0 .021-.001.032v-.001c-.015.429-.11.832-.271 1.199l.008-.021c-.231.463-.616.82-1.087 1.01l-.014.005c-.459.243-1.001.393-1.576.411h-.006c-1.1-.146-2.094-.484-2.988-.982l.043.022c-1.022-.468-1.895-1.083-2.636-1.829l-.001-.001c-.824-.857-1.579-1.795-2.248-2.794l-.047-.074c-.636-.829-1.041-1.866-1.1-2.995l-.001-.013v-.124c.032-.975.468-1.843 1.144-2.447l.003-.003c.207-.206.491-.335.805-.341h.001c.101.003.198.011.292.025l-.013-.002c.087.013.188.021.292.023h.003c.019-.002.04-.003.062-.003.13 0 .251.039.352.105l-.002-.001c.107.118.189.261.238.418l.002.008q.124.31.512 1.364c.135.314.267.701.373 1.099l.014.063c-.076.361-.268.668-.533.889l-.003.002q-.535.566-.535.72c.004.088.034.168.081.234l-.001-.001c.405.829.936 1.533 1.576 2.119l.005.005c.675.609 1.446 1.132 2.282 1.54l.059.026c.097.063.213.103.339.109h.002q.233 0 .838-.752t.804-.752zm-3.147 8.216h.022c1.357 0 2.647-.285 3.814-.799l-.061.024c2.356-.994 4.193-2.831 5.163-5.124l.024-.063c.49-1.113.775-2.411.775-3.775s-.285-2.662-.799-3.837l.024.062c-.994-2.356-2.831-4.193-5.124-5.163l-.063-.024c-1.113-.49-2.411-.775-3.775-.775s-2.662.285-3.837.799l.062-.024c-2.356.994-4.193 2.831-5.163 5.124l-.024.063c-.49 1.117-.775 2.419-.775 3.787 0 2.141.698 4.12 1.879 5.72l-.019-.026-1.225 3.613 3.752-1.194c1.49 1.01 3.327 1.612 5.305 1.612h.047zm0-21.426h.033c1.628 0 3.176.342 4.575.959l-.073-.029c2.825 1.197 5.028 3.4 6.196 6.149l.029.076c.588 1.337.93 2.896.93 4.535s-.342 3.198-.959 4.609l.029-.074c-1.197 2.825-3.4 5.028-6.149 6.196l-.076.029c-1.327.588-2.875.93-4.503.93-.011 0-.023 0-.034 0h.002c-.016 0-.034 0-.053 0-2.059 0-3.992-.541-5.664-1.488l.057.03-6.465 2.078 2.109-6.279c-1.051-1.714-1.674-3.789-1.674-6.01 0-1.646.342-3.212.959-4.631l-.029.075c1.197-2.825 3.4-5.028 6.149-6.196l.076-.029c1.327-.588 2.875-.93 4.503-.93h.033-.002z" />
+                      </svg>
+                      {phone1}
+                    </span>
+                  )}
+
+                  {/* Secondary phone */}
+                  {phone2 && (
+                    <div className="flex items-center text-sm">
+                      <svg
+                        className="mr-1.5 h-3.5 w-3.5 flex-shrink-0 text-gray-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                      </svg>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {phone2}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Email */}
+                  {email && (
+                    <div className="flex items-center text-sm">
+                      <svg
+                        className="mr-1.5 h-3.5 w-3.5 flex-shrink-0 text-gray-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                      <span className="max-w-[180px] truncate text-gray-700 dark:text-gray-300">
+                        {email}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Address */}
+                  {task.address && (
+                    <div className="flex items-start text-sm">
+                      <svg
+                        className="mt-0.5 mr-1.5 h-3.5 w-3.5 flex-shrink-0 text-red-500"
+                        fill="currentColor"
                         viewBox="0 0 320 512"
                       >
                         <path d="M16 144a144 144 0 1 1 288 0A144 144 0 1 1 16 144zM160 80c8.8 0 16-7.2 16-16s-7.2-16-16-16c-53 0-96 43-96 96c0 8.8 7.2 16 16 16s16-7.2 16-16c0-35.3 28.7-64 64-64zM128 480l0-162.9c10.4 1.9 21.1 2.9 32 2.9s21.6-1 32-2.9L192 480c0 17.7-14.3 32-32 32s-32-14.3-32-32z" />
                       </svg>
-                      <span className="break-words text-gray-600 dark:text-gray-300">
+                      <span className="line-clamp-2 break-words text-gray-700 dark:text-gray-300">
                         {task.address}
                       </span>
                     </div>
                   )}
                 </div>
-                <div className="flex items-center">
-                  {task.status !== "Job Done" && (
-                    <button
-                      className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
-                        ["Deposit", "Production", "Installation"].includes(
-                          task.status,
-                        )
-                          ? "bg-meta-11/20 text-warning hover:bg-meta-11/30 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
-                          : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-700/30 dark:text-indigo-300 dark:hover:bg-indigo-700/40"
-                      } transition-colors`}
-                      onClick={() =>
-                        (window.location.href = `/sales/task/edit?id=${task.id}`)
-                      }
-                      title="Update task status"
-                    >
-                      <svg
-                        className="h-3 w-3"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                      Update
-                    </button>
-                  )}
+              </div>
+
+              {/* Spacer to push progress bar to bottom */}
+              <div className="flex-grow"></div>
+
+              {/* Bottom section with progress bar and PIC info */}
+              <div className="mt-auto">
+                {/* Progress section */}
+                <div className="my-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">Progress</span>
+                  <span className="text-sm font-medium">
+                    {task.progressPercentage}%
+                  </span>
                 </div>
-              </div>
 
-              {/* Source Info - horizontal and inline layout */}
-              {/* Progress section */}
-              <div className="my-2 flex items-center justify-between">
-                <span className="text-sm font-medium">Progress</span>
-                <span className="text-sm font-medium">
-                  {task.progressPercentage}%
-                </span>
-              </div>
-
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
-                <div
-                  className={`h-full ${colorClass} rounded-full transition-all duration-300`}
-                  style={{ width: `${task.progressPercentage}%` }}
-                />
-              </div>
-
-              {/* Pipeline position indicator */}
-              <div className="mt-2 mb-3 flex items-center justify-between">
-                {pipelineStages.map((stage, index) => (
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
                   <div
-                    key={stage}
-                    className={`h-1.5 w-1.5 rounded-full ${index <= task.stageIndex ? colorClass : "bg-gray-200 dark:bg-gray-400"}`}
-                    title={stage}
+                    className={`h-full ${colorClass} rounded-full transition-all duration-300`}
+                    style={{ width: `${task.progressPercentage}%` }}
                   />
-                ))}
-              </div>
+                </div>
 
-              {/* Person-In-Charge bottom */}
-              <div className="border-stroke dark:border-strokedark mt-3 border-t pt-3 text-xs">
-                {/* First row - ID and PIC */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center">
-                    <span className="text-sm text-black dark:text-white">
-                      ID: {task.id}
+                {/* Pipeline position indicator */}
+                <div className="mt-2 mb-3 flex items-center justify-between">
+                  {pipelineStages.map((stage, index) => (
+                    <div
+                      key={stage}
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        index <= task.stageIndex
+                          ? colorClass
+                          : "bg-gray-200 dark:bg-gray-400"
+                      }`}
+                      title={stage}
+                    />
+                  ))}
+                </div>
+
+                {/* Person-In-Charge section with status */}
+                <div className="border-stroke dark:border-strokedark mt-3 border-t pt-3 text-xs">
+                  <div className="flex flex-wrap items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="text-sm text-black dark:text-white">
+                        ID: {task.id}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
+                        task.status === "Job Done"
+                          ? "bg-success/10 text-success"
+                          : ["Payment", "Production", "Installation"].includes(
+                                task.status,
+                              )
+                            ? "bg-meta-11/10 text-meta-11"
+                            : "bg-primary/10 text-primary"
+                      }`}
+                    >
+                      {task.status}
                     </span>
                   </div>
 
-                  <div className="flex items-center">
+                  {/* PIC info */}
+                  <div className="mt-2 flex items-center">
                     <svg
                       className="mr-1 h-3 w-3 text-gray-400"
                       viewBox="0 0 20 20"
@@ -643,27 +664,11 @@ export default function ProgressTable({
                       {salesName || "Unassigned"}
                     </span>
                     {salesUid && (
-                      <span className="text-black dark:text-white">
-                        , {salesUid}
+                      <span className="ml-1 text-black dark:text-white">
+                        ({salesUid})
                       </span>
                     )}
                   </div>
-                </div>
-                {/* Second row - Status (centered) */}
-                <div className="mt-2 flex justify-center md:justify-end">
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
-                      task.status === "Job Done"
-                        ? "bg-success/10 text-success"
-                        : ["Deposit", "Production", "Installation"].includes(
-                              task.status,
-                            )
-                          ? "bg-meta-11/10 text-meta-11"
-                          : "bg-primary/10 text-primary"
-                    }`}
-                  >
-                    {task.status}
-                  </span>
                 </div>
               </div>
             </div>
