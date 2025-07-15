@@ -224,22 +224,22 @@ export async function GET(request: NextRequest) {
 }
 
 // Add function to update task status in database
-async function updateTaskInDatabase(taskId: string, newStatus: string) {
-  try {
-    const conn = createPool();
+// async function updateTaskInDatabase(taskId: string, newStatus: string) {
+//   try {
+//     const conn = createPool();
     
-    // Update the task status in the customer1 table
-    const [result] = await conn.execute(
-      'UPDATE customers SET status = ?, updated_at = NOW() WHERE id = ?',
-      [newStatus, taskId]
-    );
-    console.log(`Database updated: Task #${taskId} status set to "${newStatus}"`);
-    return true;
-  } catch (error) {
-    console.error('Error updating database:', error);
-    throw new Error('Failed to update task status in database');
-  }
-}
+//     // Update the task status in the customer1 table
+//     const [result] = await conn.execute(
+//       'UPDATE customers SET status = ?, updated_at = NOW() WHERE id = ?',
+//       [newStatus, taskId]
+//     );
+//     console.log(`Database updated: Task #${taskId} status set to "${newStatus}"`);
+//     return true;
+//   } catch (error) {
+//     console.error('Error updating database:', error);
+//     throw new Error('Failed to update task status in database');
+//   }
+// }
 
 // POST handler for task updates and file uploads
 export async function POST(request: NextRequest) {
@@ -258,9 +258,9 @@ export async function POST(request: NextRequest) {
     console.log(`Updating task ${taskId} from ${oldStatus} to ${newStatus}`);
     
     // Only update database if status actually changed
-    if (newStatus !== oldStatus) {
-      await updateTaskInDatabase(taskId, newStatus);
-    }
+    // if (newStatus !== oldStatus) {
+    //   await updateTaskInDatabase(taskId, newStatus);
+    // }
     
     // Process file uploads - completely separate from notes
     const uploadedFiles = [];

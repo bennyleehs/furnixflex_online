@@ -59,22 +59,44 @@ export interface QuotationItem {
 export interface Quotation {
   id: string;
   task_id: string;
-  customerName: string;
-  customerNric: string;
-  customerContact: string;
-  customerEmail: string;
-  customerAddress: string;
-  quotationDate: string;
-  validUntil: string;
-  salesRepresentative: string;
-  salesUID: string;
+  customer_name: string;
+  customer_nric: string;
+  customer_contact: string;
+  customer_email: string;
+  customer_address: string;
+  customer_property?: string; // Optional field for property
+  customer_guard?: string; // Optional field for guard
+  quotation_date: string;
+  valid_until: string;
+  installation_date: string;
+  sales_representative: string;
+  sales_uid: string;
   items: QuotationItem[];
   subtotal: number;
+  discount: number;
   tax: number;
   total: number;
+  paid: number;
+  balance: number;
   notes: string;
   terms: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: string;
   quote_ref: string; // New optional field
   quotation_number?: string; // Optional field for quotation number
+}
+
+// Payment record interface
+export interface PaymentRecord {
+  id?: string;
+  invoice_number: string;
+  quotation_number: string;
+  payment_reference?: string;
+  amount_inv: number;
+  balance: number;
+  payment_date: string;
+  payment_method: string;
+  notes?: string;
+  created_at?: string;
+  received?: boolean;
+  received_date?: string;
 }

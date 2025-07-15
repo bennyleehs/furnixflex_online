@@ -73,7 +73,7 @@ export default function TaskEditPage() {
     "Follow Up",
     "Visit Showroom",
     "Quotation",
-    "Deposit",
+    "Payment",
     "Production",
     "Installation",
     "Job Done",
@@ -166,7 +166,40 @@ export default function TaskEditPage() {
   const nric = task?.nric || "";
   const contact = task?.phone1 || null;
 
-  const oldStatusRef = useRef<string | undefined>(task?.status); // Store the old status in a ref
+  const oldStatus = useRef<string | undefined>(task?.status); // Store the old status as ref
+
+  // Updates a DB task's status
+  async function updateDBTaskStatus(
+    taskId: string,
+    newStatus: string,
+    oldStatus: string,
+  ) {
+    try {
+      const response = await fetch("/api/sales/task", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: taskId,
+          status: newStatus,
+          notes: `Status changed from ${oldStatus} to ${newStatus}`,
+          userName: "Current User", // Replace with actual user name from auth
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update status");
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error updating status:", error);
+      throw error;
+    }
+  }
 
   // Handle status update
   const handleStatusUpdate = async (newStatus: string) => {
@@ -174,7 +207,7 @@ export default function TaskEditPage() {
       if (!task || !taskId) return;
 
       // Store the current status in the ref before updating
-      oldStatusRef.current = task.status;
+      oldStatus.current = task.status;
       // Optimistic UI update & Update task in UI first
       setTask({
         ...task,
@@ -189,7 +222,7 @@ export default function TaskEditPage() {
       const formData = new FormData(); // Create FormData for file uploads
       formData.append("id", taskId);
       formData.append("status", newStatus);
-      formData.append("oldStatus", oldStatusRef.current); // Use the ref value
+      formData.append("oldStatus", oldStatus.current); // Use the ref value
       formData.append("notes", updateNote);
       formData.append("userName", "Current User"); // Replace with actual username
 
@@ -207,13 +240,19 @@ export default function TaskEditPage() {
         user: "Current User", // Replace with actual user
         action:
           files.length > 0 ? "Status Update with Attachments" : "Status Update",
-        oldValue: oldStatusRef.current, // Use the ref value
+        oldValue: oldStatus.current, // Use the ref value
         newValue: newStatus,
         notes: updateNote,
       };
 
       setEventLogs([newLog, ...eventLogs]);
       setUpdateNote("");
+      // First update the status in the database using the more efficient PATCH method
+      await updateDBTaskStatus(
+        taskId,
+        newStatus,
+        `Status changed from ${oldStatus} to ${newStatus}${updateNote ? "\n" + updateNote : ""}`,
+      );
 
       // API call to update backend
       const response = await fetch(`/api/sales/task/update`, {
@@ -241,10 +280,10 @@ export default function TaskEditPage() {
           // Optionally revert the status change
           setTask({
             ...task,
-            status: oldStatusRef.current, // Use the ref value
-            stageIndex: pipelineStages.indexOf(oldStatusRef.current || ""),
+            status: oldStatus.current, // Use the ref value
+            stageIndex: pipelineStages.indexOf(oldStatus.current || ""),
             progressPercentage: Math.round(
-              ((pipelineStages.indexOf(oldStatusRef.current || "") + 1) /
+              ((pipelineStages.indexOf(oldStatus.current || "") + 1) /
                 pipelineStages.length) *
                 100,
             ),
@@ -264,13 +303,13 @@ export default function TaskEditPage() {
       }
     } catch (error) {
       console.error("Error updating task:", error);
-      if (task && oldStatusRef.current) {
+      if (task && oldStatus.current) {
         setTask({
           ...task,
-          status: oldStatusRef.current,
-          stageIndex: pipelineStages.indexOf(oldStatusRef.current),
+          status: oldStatus.current,
+          stageIndex: pipelineStages.indexOf(oldStatus.current),
           progressPercentage: Math.round(
-            ((pipelineStages.indexOf(oldStatusRef.current) + 1) /
+            ((pipelineStages.indexOf(oldStatus.current) + 1) /
               pipelineStages.length) *
               100,
           ),
