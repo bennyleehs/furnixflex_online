@@ -25,7 +25,7 @@ export function loadAccessControl(): AccessControlMap {
   
   try {
     // Load the access control JSON file
-    const filePath = path.join(process.cwd(), 'src', 'data', 'access_control.json');
+    const filePath = path.join(process.cwd(), 'src', 'Json', 'access_control.json');
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const accessControl = JSON.parse(fileContent) as AccessControlMap;
     
