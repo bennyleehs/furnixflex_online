@@ -10,13 +10,11 @@ const SignIn = () => {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       const response = await fetch("/api/auth/signin", {
@@ -50,8 +48,6 @@ const SignIn = () => {
       setMessage("Something went wrong. Please try again later.");
       setIsError(true);
       console.error(error);
-    }finally {
-      setIsLoading(false); // Hide loading state
     }
   };
 
@@ -61,40 +57,67 @@ const SignIn = () => {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <div className="w-[100%] max-w-[360px] px-4">
-        <div className="rounded-lg bg-white shadow-md">
-          <form className="px-5 py-10" onSubmit={handleSubmit}>
-            <div className="mb-10 flex justify-center py-6">
-              <div className="group relative">
-                <div className="relative">
-                  <Image
-                    src="/images/logo/classy_logo_ori.svg"
-                    width={220}
-                    height={140}
-                    alt="Classy Logo"
-                    className="h-auto transform drop-shadow-sm transition duration-300 group-hover:scale-105"
-                    priority
-                    quality={100}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <label className="mb-2.5 block text-sm font-medium text-black">
+      <div className="container mx-auto sm:mx-40 md:mx-60 xl:mx-120 2xl:mx-180">
+        <div className="w-full max-w-full md:max-w-4xl">
+          <div className="flex justify-center sm:p-8 md:p-4 xl:p-6">
+            <Image
+              src="/images/logo/classy_icon.svg"
+              width={100}
+              height={50}
+              alt="Classy Logo"
+            />
+          </div>
+          <form className="p-4" onSubmit={handleSubmit}>
+            {/* <div className="mb-4">
+              <label className="mb-2.5 block font-medium text-black">
                 User ID
               </label>
               <div className="relative">
                 <input
                   type="text"
                   placeholder="UID"
-                  className="focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-3 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none"
+                  className="focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-2 pr-10 pl-10 text-black uppercase outline-hidden focus-visible:shadow-none"
                   disabled={false}
                   value={uid}
                   onChange={(e) => setUid(e.target.value)}
                   required
                 />
-                <span className="absolute top-3 left-2">
+
+                <span className="absolute top-2 left-2">
+                  <svg
+                    className="fill-current"
+                    width="28"
+                    height="28"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g opacity="0.5">
+                      <path d="M8.749,9.934c0,0.247-0.202,0.449-0.449,0.449H4.257c-0.247,0-0.449-0.202-0.449-0.449S4.01,9.484,4.257,9.484H8.3C8.547,9.484,8.749,9.687,8.749,9.934 M7.402,12.627H4.257c-0.247,0-0.449,0.202-0.449,0.449s0.202,0.449,0.449,0.449h3.145c0.247,0,0.449-0.202,0.449-0.449S7.648,12.627,7.402,12.627 M8.3,6.339H4.257c-0.247,0-0.449,0.202-0.449,0.449c0,0.247,0.202,0.449,0.449,0.449H8.3c0.247,0,0.449-0.202,0.449-0.449C8.749,6.541,8.547,6.339,8.3,6.339 M18.631,4.543v10.78c0,0.248-0.202,0.45-0.449,0.45H2.011c-0.247,0-0.449-0.202-0.449-0.45V4.543c0-0.247,0.202-0.449,0.449-0.449h16.17C18.429,4.094,18.631,4.296,18.631,4.543 M17.732,4.993H2.46v9.882h15.272V4.993z M16.371,13.078c0,0.247-0.202,0.449-0.449,0.449H9.646c-0.247,0-0.449-0.202-0.449-0.449c0-1.479,0.883-2.747,2.162-3.299c-0.434-0.418-0.714-1.008-0.714-1.642c0-1.197,0.997-2.246,2.133-2.246s2.134,1.049,2.134,2.246c0,0.634-0.28,1.224-0.714,1.642C15.475,10.331,16.371,11.6,16.371,13.078M11.542,8.137c0,0.622,0.539,1.348,1.235,1.348s1.235-0.726,1.235-1.348c0-0.622-0.539-1.348-1.235-1.348S11.542,7.515,11.542,8.137 M15.435,12.629c-0.214-1.273-1.323-2.246-2.657-2.246s-2.431,0.973-2.644,2.246H15.435z"></path>
+                    </g>
+                  </svg>
+                </span>
+              </div>
+            </div> */}
+            {/* floating label */}
+            <div className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  id="uid"
+                  placeholder=" "
+                  className="peer focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-2 pr-10 pl-10 text-black uppercase focus:outline-none"
+                  value={uid}
+                  onChange={(e) => setUid(e.target.value)}
+                  required
+                />
+                <label
+                  htmlFor="uid"
+                  className="peer-focus:text-primary absolute top-2 left-10 bg-white font-medium text-black transition-all duration-300 ease-in-out peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-translate-y-5 peer-focus:px-1 peer-focus:text-sm"
+                >
+                  User ID
+                </label>
+                <span className="absolute top-2 left-2">
                   <svg
                     className="fill-current"
                     width="28"
@@ -110,13 +133,21 @@ const SignIn = () => {
                 </span>
               </div>
             </div>
-
-            <div className="mb-14">
-              <label className="mb-2.5 block text-sm font-medium text-black">
+            <div className="mb-6">
+              <label className="mb-2.5 block font-medium text-black">
                 Password
               </label>
               <div className="relative">
-                <span className="absolute top-3 left-3">
+                <input
+                  type={showPassword ? "text" : "password"} // Use state for type
+                  placeholder="Password@1234"
+                  className="focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-2 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none"
+                  disabled={false}
+                  value={password}
+                  onChange={(e) => setPwd(e.target.value)}
+                  required
+                />
+                <span className="absolute top-2 left-3">
                   <svg
                     className="fill-current"
                     width="22"
@@ -137,19 +168,9 @@ const SignIn = () => {
                     </g>
                   </svg>
                 </span>
-                <input
-                  type={showPassword ? "text" : "password"} // Use state for type
-                  placeholder="John@1234"
-                  className="focus:border-primary w-full rounded-lg border border-neutral-300 bg-white py-3 pr-10 pl-10 text-black outline-hidden focus-visible:shadow-none"
-                  disabled={false}
-                  value={password}
-                  onChange={(e) => setPwd(e.target.value)}
-                  required
-                />
-
                 {/* Show/Hide Password Icon */}
                 <span
-                  className="absolute top-3 right-3 cursor-pointer"
+                  className="absolute top-2 right-3 cursor-pointer"
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
@@ -185,13 +206,11 @@ const SignIn = () => {
               </div>
             </div>
             <div className="mb-1">
-              <button
+              <input
                 type="submit"
-                disabled={isLoading}
-                className="bg-primary hover:bg-primarydark focus:ring-primarydark w-full cursor-pointer rounded-lg border p-3 font-semibold text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:opacity-70"
-              >
-                {isLoading ? "LOGGING IN..." : "LOG IN"}
-              </button>
+                value="LOG IN"
+                className="bg-primary hover:bg-primarydark w-full cursor-pointer rounded-lg border p-4 font-semibold text-white transition hover:text-white"
+              />
             </div>
             <div className="mt-2 text-center">
               <div className="h-6 sm:h-6 md:h-7">
@@ -205,12 +224,15 @@ const SignIn = () => {
                   </p>
                 )}
               </div>
+              {/* <!-- Footer --> */}
+              <p className="mt-auto py-4 text-center text-sm text-gray-400">
+                &copy; {new Date().getFullYear()} - Classy Project Marketing
+                Sdn. Bhd.
+              </p>
+              {/* <!-- Footer --> */}
             </div>
           </form>
         </div>
-        <p className="mt-auto py-4 text-center text-sm text-gray-400">
-          &copy; {new Date().getFullYear()} - Classy Project Marketing Sdn. Bhd.
-        </p>
       </div>
     </div>
   );
