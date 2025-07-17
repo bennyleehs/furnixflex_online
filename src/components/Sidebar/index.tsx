@@ -33,7 +33,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   useEffect(() => {
     const loadMenu = async () => {
-      const data = await import("@/data/sidebar_menu.json");
+      const data = await import("@/Json/sidebar_menu.json");
       setMenuGroups(data.default);
     };
     loadMenu();

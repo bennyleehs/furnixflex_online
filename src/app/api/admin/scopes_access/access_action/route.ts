@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-const filePath = path.resolve("src/data/access_action.json");
+const filePath = path.resolve("src/Json/access_action.json");
 
 export async function GET() {
   try {

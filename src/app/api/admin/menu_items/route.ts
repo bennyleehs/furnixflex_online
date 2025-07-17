@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-const filePath = path.resolve("src/data/sidebar_menu.json");
+const filePath = path.resolve("src/Json/sidebar_menu.json");
 
 export async function GET() {
   try {

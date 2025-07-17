@@ -4,7 +4,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { PoolConnection } from "mysql2/promise";
 
-const filePath = path.resolve("src/data/access_control.json");
+const filePath = path.resolve("src/Json/access_control.json");
 
 export async function regenerateAccessControl() {
   let connection: PoolConnection | undefined;

@@ -4,7 +4,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect, useMemo } from "react";
 import SelectDropdown from "@/components/SelectGroup/SelectDropdown";
-import sidebarMenu from "@/data/sidebar_menu.json";
+import sidebarMenu from "@/Json/sidebar_menu.json";
 import { MenuWithPath, SidebarMenu } from "@/types/sidebarMenu";
 
 const FormScopes2Access = () => {

@@ -2,7 +2,7 @@
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { cache } from "react";
-import sidebarData from "@/data/sidebar_menu.json"; 
+import sidebarData from "@/Json/sidebar_menu.json"; 
 
 function extractMenuItems(items: any[]): { value: number | string, route: string }[] {
   let result: { value: number | string, route: string }[] = [];

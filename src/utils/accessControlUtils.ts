@@ -1,7 +1,7 @@
 // utils/accessControlUtils.ts
 import fs from 'fs';
 import path from 'path';
-import sidebarData from "@/data/sidebar_menu.json";
+import sidebarData from "@/Json/sidebar_menu.json";
 import { DEFAULT_ACCESS_SECTIONS } from "./defaultAccess";
 
 // Define types
