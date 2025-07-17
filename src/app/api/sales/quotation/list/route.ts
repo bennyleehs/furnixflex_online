@@ -62,10 +62,12 @@ export async function GET(request: Request) {
     // Query for paginated list
     const [quotationRows] = await pool.query(
       `SELECT 
-        id, task_id, customer_name as customerName, customer_contact as customerContact,
-        quotation_date as quotationDate, valid_until as validUntil, 
-        sales_representative as salesRepresentative, sales_uid as salesUID,
-        subtotal, tax, total, status, quote_ref, quotation_number, created_at
+        id, task_id, quote_ref, quotation_number,
+        customer_name, customer_contact, customer_email, customer_address,
+        quotation_date, valid_until, installation_date,
+        sales_representative, sales_uid,
+        subtotal, tax, total, 
+        notes, terms, status, created_at
       FROM quotations
       ${whereClause}
       ORDER BY created_at DESC
@@ -96,3 +98,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

@@ -10,7 +10,6 @@ import {
   QuotationItem,
   Quotation,
 } from "@/types/sales-quotation";
-import { set } from "date-fns";
 
 export default function QuotationPage() {
   const searchParams = useSearchParams();
@@ -504,8 +503,8 @@ export default function QuotationPage() {
         quotation_date: today,
         valid_until: validUntilString,
         sales_representative:
-          quotation?.salesRepresentative || task?.sales_name || "",
-        sales_uid: quotation?.salesUID || task?.sales_uid || "",
+          quotation?.sales_representative || task?.sales_name || "",
+        sales_uid: quotation?.sales_uid || task?.sales_uid || "",
         items,
         subtotal,
         discount: totalDiscount || 0,
@@ -1274,9 +1273,9 @@ export default function QuotationPage() {
                       if (quotation) {
                         setQuotation({
                           ...quotation,
-                          customerName: task.name,
-                          customerContact: task.phone1 || "",
-                          customerAddress: [
+                          customer_name: task.name,
+                          customer_contact: task.phone1 || "",
+                          customer_address: [
                             task.address_line1,
                             task.address_line2,
                             task.city,
@@ -1446,13 +1445,13 @@ export default function QuotationPage() {
                   <input
                     type="text"
                     value={
-                      quotation?.salesRepresentative || task?.sales_name || ""
+                      quotation?.sales_representative || task?.sales_name || ""
                     }
                     onChange={(e) => {
                       if (quotation) {
                         setQuotation({
                           ...quotation,
-                          salesRepresentative: e.target.value,
+                          sales_representative: e.target.value,
                         });
                       }
                     }}
@@ -1467,12 +1466,12 @@ export default function QuotationPage() {
                   </label>
                   <input
                     type="text"
-                    value={quotation?.salesUID || task?.sales_uid || ""}
+                    value={quotation?.sales_uid || task?.sales_uid || ""}
                     onChange={(e) => {
                       if (quotation) {
                         setQuotation({
                           ...quotation,
-                          salesUID: e.target.value,
+                          sales_uid: e.target.value,
                         });
                       }
                     }}

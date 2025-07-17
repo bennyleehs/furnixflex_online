@@ -82,7 +82,7 @@ export interface Quotation {
   terms: string;
   status: string;
   quote_ref: string; // New optional field
-  quotation_number?: string; // Optional field for quotation number
+  quotation_number: string; // Optional field for quotation number
 }
 
 // Payment record interface

@@ -473,8 +473,8 @@ export default function QuotationPage() {
           .join(", "),
         quotation_date: today,
         valid_until: validUntilString,
-        sales_representative: quotation?.salesRepresentative || task?.sales_name || "",
-        sales_uid: quotation?.salesUID || task?.sales_uid || "",
+        sales_representative: quotation?.sales_representative || task?.sales_name || "",
+        sales_uid: quotation?.sales_uid || task?.sales_uid || "",
         items,
         subtotal,
         discount: totalDiscount || 0,
@@ -1158,9 +1158,9 @@ const formatWithCommas = (value: number | string): string => {
                       if (quotation) {
                         setQuotation({
                           ...quotation,
-                          customerName: task.name,
-                          customerContact: task.phone1 || "",
-                          customerAddress: [
+                          customer_name: task.name,
+                          customer_contact: task.phone1 || "",
+                          customer_address: [
                             task.address_line1,
                             task.address_line2,
                             task.city,
@@ -1330,13 +1330,13 @@ const formatWithCommas = (value: number | string): string => {
                   <input
                     type="text"
                     value={
-                      quotation?.salesRepresentative || task?.sales_name || ""
+                      quotation?.sales_representative || task?.sales_name || ""
                     }
                     onChange={(e) => {
                       if (quotation) {
                         setQuotation({
                           ...quotation,
-                          salesRepresentative: e.target.value,
+                          sales_representative: e.target.value,
                         });
                       }
                     }}
@@ -1351,12 +1351,12 @@ const formatWithCommas = (value: number | string): string => {
                   </label>
                   <input
                     type="text"
-                    value={quotation?.salesUID || task?.sales_uid || ""}
+                    value={quotation?.sales_uid || task?.sales_uid || ""}
                     onChange={(e) => {
                       if (quotation) {
                         setQuotation({
                           ...quotation,
-                          salesUID: e.target.value,
+                          sales_uid: e.target.value,
                         });
                       }
                     }}
