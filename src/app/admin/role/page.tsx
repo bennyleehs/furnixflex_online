@@ -11,7 +11,7 @@ const SUBMENU = "0";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function RolePage() {
-  const [data, setData] = useState([]);
+  const [role, setRole] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false); // Track if data has been fetched
@@ -25,12 +25,13 @@ export default function RolePage() {
 
       const data = await res.json();
       // Format rows to combine data
-      const formattedRows = data.listRole.map((role: any) => ({
-        ...role,
-        name: `${role.name} `,
-        status: `${role.status} `,
-      }));
-      setData(formattedRows); // Assign the formatted rows
+      // const formattedRows = data.listRole.map((role: any) => ({
+      //   ...role,
+      //   name: `${role.name} `,
+      //   status: `${role.status} `,
+      // }));
+      // setData(formattedRows); // Assign the formatted rows
+      setRole(data.listRole); // store raw data
     } catch (err) {
       setError("Error fetching data");
       console.error(err);
@@ -52,6 +53,12 @@ export default function RolePage() {
     { key: "status", title: "Status" },
   ];
 
+  const modalColumns = [
+    { group: "Basic Info", key: "id", title: "ID" },
+    { group: "Basic Info", key: "name", title: "Name" },
+    { group: "Basic Info", key: "status", title: "Status" },
+  ];
+
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Role List" />
@@ -60,14 +67,16 @@ export default function RolePage() {
       {!loading && !error && (
         <Tables
           columns={columns}
-          data={data}
-          filterKeys={["status"]}
+          modalColumns={modalColumns}
+          data={role}
           createLink="/admin/role/create"
+          filterKeys={["status"]}
           showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton
           createPermissionPrefix={PERMISSION_PREFIX}
           editPermissionPrefix={PERMISSION_PREFIX}
           deletePermissionPrefix={PERMISSION_PREFIX}
           monitorPermissionPrefix={PERMISSION_PREFIX}
+          infoEndpoint="/api/admin/role"
         />
       )}
     </DefaultLayout>

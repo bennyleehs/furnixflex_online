@@ -23,7 +23,7 @@ interface AccessRow {
 }
 
 export default function AccessList() {
-  const [data, setData] = useState<AccessRow[]>([]);
+  const [scopeAccess, setScopeAccess] = useState<AccessRow[]>([]);
   const [accessMap, setAccessMap] = useState<Record<string, string[]>>({});
   const [menuItems, setMenuItems] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,7 @@ export default function AccessList() {
       });
 
       setAccessMap(normalizedAccessMap);
-      setData(formatted);
+      setScopeAccess(formatted);
     } catch (error) {
       console.error("Error fetching data:", error);
       setError(
@@ -118,7 +118,33 @@ export default function AccessList() {
     { key: "branch", title: "Branch" },
     { key: "department", title: "Department" },
     { key: "role", title: "Role" },
-    { key: "accessPath", title: "Access Path" },
+  ];
+
+  const modalColumns = [
+    {
+      group: "Access Control",
+      key: "compositeKey",
+      title: "Composite Key",
+      format: (_: any, row: any) => row.originalKey.replace(/\./g, " - "),
+    },
+    {
+      group: "Permissions",
+      key: "accessPaths",
+      title: "Access Paths",
+      format: (_value: any, row: any) => {
+        const paths = row.accessPaths || [];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {paths.map((path: string, index: number) => (
+              <span key={path}>
+                {menuItems[path] || path}
+                {index < paths.length - 1 && ", "}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
   ];
 
   return (
@@ -129,15 +155,18 @@ export default function AccessList() {
       {!loading && !error && (
         <Tables
           columns={columns}
-          data={data}
-          filterKeys={["branch", "department", "role"]}
+          modalColumns={modalColumns}
+          data={scopeAccess}
+          externalData={accessMap}
           createLink="/admin/scopes_access/update"
+          filterKeys={["branch", "department", "role"]}
           idParam="key" // Changed to use "key" for ID parameter
           showCreateButton={false} // Set to false to hide the create button
           createPermissionPrefix={PERMISSION_PREFIX}
           editPermissionPrefix={PERMISSION_PREFIX}
           deletePermissionPrefix={PERMISSION_PREFIX}
           monitorPermissionPrefix={PERMISSION_PREFIX}
+          infoEndpoint="/api/admin/scope_access/access_path"
         />
       )}
     </DefaultLayout>

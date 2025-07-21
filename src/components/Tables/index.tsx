@@ -23,6 +23,7 @@ interface TableProps {
     group?: string;
     format?: (value: any, row?: any) => React.ReactNode;
   }[];
+  externalData?: Record<string, any>; //prop for scope_access page
 }
 
 export default function Tables({
@@ -38,6 +39,7 @@ export default function Tables({
   monitorPermissionPrefix,
   infoEndpoint,
   modalColumns,
+  externalData,
 }: TableProps) {
   const [tableData, setTableData] = useState(data);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
@@ -172,6 +174,7 @@ export default function Tables({
   const handleInfoClick = async (row: Record<string, any>) => {
     if (!infoEndpoint) return;
 
+    // Case 2: Standard API fetch (for branch)
     const idToUse = row.originalKey || row[idParam] || row.id;
     if (!idToUse) {
       console.error("No ID available for info:", row);
@@ -181,6 +184,16 @@ export default function Tables({
     try {
       setIsLoadingInfo(true);
       setInfoError(null);
+
+      // Case 1: Use externalData if provided (for scope_access)
+      if (externalData) {
+        setInfoData({
+          ...row, // Include all row data
+          accessPaths: externalData[row.key] || [], // Get from externalData
+        });
+        setIsInfoModalOpen(true);
+        return;
+      }
 
       const response = await fetch(
         `${infoEndpoint}?id=${encodeURIComponent(idToUse)}`,

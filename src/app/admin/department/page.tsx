@@ -11,7 +11,7 @@ const SUBMENU = "0";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function DepartmentPage() {
-  const [data, setData] = useState([]);
+  const [dept, setDept] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false); // Track if data has been fetched
@@ -25,13 +25,14 @@ export default function DepartmentPage() {
 
       const data = await res.json();
       // Format rows to combine data
-      const formattedRows = data.listDepartment.map((department: any) => ({
-        ...department,
-        name: `${department.name} `,
-        ref: `${department.ref} `,
-        status: `${department.status} `,
-      }));
-      setData(formattedRows); // Assign the formatted rows
+      // const formattedRows = data.listDepartment.map((department: any) => ({
+      //   ...department,
+      //   name: `${department.name} `,
+      //   ref: `${department.ref} `,
+      //   status: `${department.status} `,
+      // }));
+      // setData(formattedRows); // Assign the formatted rows
+      setDept(data.listDepartment); // store raw data
     } catch (err) {
       setError("Error fetching data");
       console.error(err);
@@ -50,8 +51,15 @@ export default function DepartmentPage() {
   const columns = [
     { key: "id", title: "ID" },
     { key: "name", title: "Name" },
-    { key: "ref", title: "REF" },
+    { key: "ref", title: "Reference" },
     { key: "status", title: "Status" },
+  ];
+
+  const modalColumns = [
+    { group: "Basic Info", key: "id", title: "ID" },
+    { group: "Basic Info", key: "name", title: "Name" },
+    { group: "Basic Info", key: "ref", title: "Reference Abbreviation" },
+    { group: "Basic Info", key: "status", title: "Status" },
   ];
 
   return (
@@ -62,14 +70,16 @@ export default function DepartmentPage() {
       {!loading && !error && (
         <Tables
           columns={columns}
-          data={data}
-          filterKeys={["status"]}
+          modalColumns={modalColumns}
+          data={dept}
           createLink="/admin/department/create"
+          filterKeys={["status"]}
           showCreateButton={!loadingPermissions && canCreateButton} // Conditionally set showCreateButton
           createPermissionPrefix={PERMISSION_PREFIX}
           editPermissionPrefix={PERMISSION_PREFIX}
           deletePermissionPrefix={PERMISSION_PREFIX}
           monitorPermissionPrefix={PERMISSION_PREFIX}
+          infoEndpoint="/api/admin/department"
         />
       )}
     </DefaultLayout>
