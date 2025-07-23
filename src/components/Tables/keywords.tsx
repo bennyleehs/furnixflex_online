@@ -26,6 +26,13 @@ interface TableProps {
   editPermissionPrefix?: string; // To control the edit button
   deletePermissionPrefix?: string; // To control the delete button
   monitorPermissionPrefix?: string; // To control overall visibility (hiding all buttons)
+  infoEndpoint?: string; // info prop
+  modalColumns?: {
+    key: string;
+    title: string;
+    group?: string;
+    format?: (value: any, row?: any) => React.ReactNode;
+  }[];
 }
 
 export default function Tables({
@@ -46,6 +53,8 @@ export default function Tables({
   editPermissionPrefix,
   deletePermissionPrefix,
   monitorPermissionPrefix,
+  infoEndpoint,
+  modalColumns,
 }: TableProps) {
   const [tableData, setTableData] = useState(data);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
@@ -70,6 +79,12 @@ export default function Tables({
     canMonitor,
     loadingPermissions,
   } = usePermissions();
+
+  //state for modal
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+    const [infoData, setInfoData] = useState<Record<string, any> | null>(null);
+    const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+    const [infoError, setInfoError] = useState<string | null>(null);
 
   const getMenuSubmenu = (
     permissionPrefix?: string,
@@ -177,6 +192,49 @@ export default function Tables({
 
   const handleEdit = (row: Record<string, any>) => {
     router.push(`${createLink || "/"}?id=${row.id}`);
+  };
+
+  // Function to handle info button click
+  const handleInfoClick = async (row: Record<string, any>) => {
+    if (!infoEndpoint) return;
+
+    const idToUse = row.id || row.originalKey;
+    // const idToUse = row.id;
+    if (!idToUse) {
+      console.error("No ID available for info:", row);
+      return;
+    }
+
+    try {
+      setIsLoadingInfo(true);
+      setInfoError(null);
+
+      const response = await fetch(
+        `${infoEndpoint}?id=${encodeURIComponent(idToUse)}`,
+      );
+      const dataRes = await response.json();
+      console.log("Info API Response:", dataRes); //here
+
+      if (!response.ok) {
+        throw new Error(dataRes.error || "Failed to fetch info");
+      }
+
+      // Extract the lead data from the response
+    const leadData = dataRes.listLead?.[0] || dataRes;
+    console.log("Lead Data to Display:", leadData); // Debug log
+
+    if (!leadData) {
+      throw new Error("No lead data found in response");
+    }
+
+      setInfoData(leadData);
+      setIsInfoModalOpen(true);
+    } catch (err) {
+      console.error("Info fetch error:", err);
+      setInfoError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoadingInfo(false);
+    }
   };
 
   // pagination
@@ -582,7 +640,9 @@ export default function Tables({
                           )}
                       </>
                     )}
-                    <button className="hover:text-primary">
+                    <button className="hover:text-primary" title="Info"
+                        onClick={() => handleInfoClick(row)}
+                        disabled={isLoadingInfo}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -604,6 +664,86 @@ export default function Tables({
           </tbody>
         </table>
       </div>
+
+      {/* Modal for Info */}
+      {isInfoModalOpen && infoData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+          <div className="dark:bg-boxdark relative mt-20 w-full max-w-4xl rounded-lg bg-white shadow-lg">
+            {/* Modal Header */}
+            <div className="dark:border-strokedark dark:bg-boxdark sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-white p-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                Branch Details
+              </h3>
+              <button onClick={() => setIsInfoModalOpen(false)}>×</button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="max-h-[65vh] overflow-y-auto p-4">
+              {modalColumns &&
+                Object.entries(
+                  modalColumns.reduce<Record<string, typeof modalColumns>>(
+                    (acc, column) => {
+                      const group = column.group || "Other";
+                      if (!acc[group]) acc[group] = [];
+                      acc[group].push(column);
+                      return acc;
+                    },
+                    {},
+                  ),
+                ).map(([group, fields]) => (
+                  <div key={group} className="mb-6">
+                    <h4 className="text-md mb-3 font-medium text-gray-700 dark:text-gray-300">
+                      {group}
+                    </h4>
+                    {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {fields.map((col) => (
+                        <div key={col.key}>
+                          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {col.title}
+                          </label>
+                          <div className="border-stroke dark:border-strokedark dark:bg-meta-4 rounded-md border bg-gray-50 px-3 py-2 text-sm">
+                            {col.format
+                              ? col.format(infoData[col.key], infoData)
+                              : infoData[col.key] || "-"}
+                          </div>
+                        </div>
+                      ))}
+                    </div> */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {fields.map((col) => {
+          const value = infoData[col.key];
+          return (
+            <div key={col.key}>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {col.title}
+              </label>
+              <div className="border-stroke dark:border-strokedark dark:bg-meta-4 rounded-md border bg-gray-50 px-3 py-2 text-sm">
+                {col.format
+                  ? col.format(value, infoData)
+                  : value !== null && value !== undefined
+                    ? value.toString()
+                    : "-"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="dark:border-strokedark dark:bg-boxdark sticky bottom-0 rounded-b-lg border-t bg-white p-4">
+              <button
+                onClick={() => setIsInfoModalOpen(false)}
+                className="dark:border-strokedark dark:hover:bg-meta-4 w-full rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:text-white"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       {renderPagination()}

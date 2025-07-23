@@ -402,7 +402,7 @@ export default function Tables({
       {/* Modal for Info */}
       {isInfoModalOpen && infoData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
-          <div className="dark:bg-boxdark relative mt-10 w-full max-w-4xl rounded-lg bg-white shadow-lg">
+          <div className="dark:bg-boxdark relative mt-20 w-full max-w-4xl rounded-lg bg-white shadow-lg">
             {/* Modal Header */}
             <div className="dark:border-strokedark dark:bg-boxdark sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-white p-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -412,7 +412,7 @@ export default function Tables({
             </div>
 
             {/* Modal Body */}
-            <div className="max-h-[70vh] overflow-y-auto p-4">
+            <div className="max-h-[65vh] overflow-y-auto p-4">
               {modalColumns &&
                 Object.entries(
                   modalColumns.reduce<Record<string, typeof modalColumns>>(

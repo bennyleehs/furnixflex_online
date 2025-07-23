@@ -4,6 +4,7 @@ import Tables from "@/components/Tables/keywords";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
+import { Lead } from "@/types/sales-lead";
 
 // const title = "Lead List";
 const MENU = "2";
@@ -11,7 +12,7 @@ const SUBMENU = "2";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function LeadPage() {
-  const [data, setData] = useState([]);
+  const [dataLead, setDataLead] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedData = useRef(false);
@@ -40,23 +41,54 @@ export default function LeadPage() {
       if (!res.ok) throw new Error(`Failed to fetch ${capitalizedTitle}`);
 
       const response = await res.json();
+      // const formattedRows = response[`list${capitalizedTitle}`].map(
+      //   (item: any) => ({
+      //     ...item,
+      //     id: `${item.id}`,
+      //     originalKey: item.id,
+      //     source: `${item.source} / ${item.interested} / ${item.add_info}`,
+      //     name: `${item.name}`,
+      //     nric: `${item.nric}`,
+      //     contact: `${item.phone1}`,
+      //     contact2: `${item.phone2}`,
+      //     email: `${item.email}`,
+      //     address: `${item.city}, ${item.state}, ${item.country}`,
+      //     type: `${item.property} / ${item.guard}`,
+      //     created_at: new Date(item.created_at).toLocaleDateString(), // Format date as needed
+      //     updated_at: new Date(item.updated_at).toLocaleDateString(), // Format date as needed
+      //     status: `${item.status}`,
+      //     pic: `${item.sales_name}`, // Assuming sales_id and sales_name are available
+      //     // source: `${item.source} / ${item.interested} / ${item.add_info}`,
+      //     // name: `${item.name} / ${item.nric}`,
+      //     // contact: `${item.phone1} / ${item.phone2} / ${item.email}`,
+      //     addressFull: `${item.address_line1}, ${item.address_line2}, ${item.city}, ${item.state}, ${item.country}`,
+      //     interested: `${item.interested}`,
+      //     add_info: `${item.add_info}`,
+      //     // type: `${item.property} / ${item.guard}`,
+      //     // date: new Date(item.created_at).toLocaleDateString(), // Format date as needed
+      //     // status: `${item.status}`,
+      //     picFull: `${item.sales_name} ( ${item.sales_uid} )`, // Assuming sales_id and sales_name are available
+      //     sales_name: `${item.add_info}`,
+      //     sales_uid: `${item.sales_uid}`,
+      //   }),
+      // );
+
       const formattedRows = response[`list${capitalizedTitle}`].map(
-        (item: any) => ({
+        (item: Lead) => ({
           ...item,
-          id: `${item.id}`,
-          source: `${item.source} / ${item.interested} / ${item.add_info}`,
-          name: `${item.name} / ${item.nric}`,
-          contact: `${item.phone1} / ${item.phone2} / ${item.email}`,
-          address: `${item.address_line1}, ${item.address_line2}, 
-                  ${item.city}, ${item.state}, ${item.country}`,
+          originalKey: item.id,
+          // Add computed fields for table display
+          contact: item.phone1,
+          address: `${item.city}, ${item.state}, ${item.country}`,
           type: `${item.property} / ${item.guard}`,
-          date: new Date(item.created_at).toLocaleDateString(), // Format date as needed
-          status: `${item.status}`,
-          pic: `${item.sales_name} / ${item.sales_uid}`, // Assuming sales_id and sales_name are available
+          pic: item.sales_name,
+          created_at: item.created_at
+            ? new Date(item.created_at).toLocaleDateString()
+            : "N/A",
         }),
       );
 
-      setData(formattedRows);
+      setDataLead(formattedRows);
       setTotalItems(response.totalCount || formattedRows.length);
       setStatusCounts(response.statusCounts || {});
     } catch (err) {
@@ -96,18 +128,137 @@ export default function LeadPage() {
     hasFetchedData.current = false; // Force reload data with new search
   };
 
+  // const columns = [
+  //   { key: "created_at", title: "Date", width: "w-32" },
+  //   { key: "name", title: "Name", width: "min-w-[140px]" },
+  //   { key: "contact", title: "Contact", width: "min-w-[180px]" },
+  //   { key: "address", title: "Address", width: "min-w-[260px]" },
+  //   { key: "type", title: "Type", width: "min-w-[180px]" },
+  //   { key: "status", title: "Status", width: "min-w-[140px]" },
+  //   { key: "pic", title: "PIC", width: "min-w-[180px]" },
+  // ];
+
   const columns = [
-    { key: "id", title: "ID", width: "w-10" },
-    { key: "source", title: "From", width: "min-w-[140px]" },
-    { key: "name", title: "Name / NRIC", width: "min-w-[140px]" },
+    { key: "created_at", title: "Date", width: "w-32" },
+    { key: "name", title: "Name", width: "min-w-[140px]" },
     { key: "contact", title: "Contact", width: "min-w-[180px]" },
     { key: "address", title: "Address", width: "min-w-[260px]" },
     { key: "type", title: "Type", width: "min-w-[180px]" },
-    { key: "date", title: "Date", width: "w-32" },
     { key: "status", title: "Status", width: "min-w-[140px]" },
     { key: "pic", title: "PIC", width: "min-w-[180px]" },
   ];
-  
+
+  // const modalColumns = [
+  //   { key: "id", group: "Basic Information", title: "Lead ID" },
+  //   { key: "source", group: "Basic Information", title: "Source" },
+  //   { key: "name", group: "Basic Information", title: "Full Name" },
+  //   { key: "nric", group: "Basic Information", title: "NRIC" },
+  //   { key: "status", group: "Basic Information", title: "Current Status" },
+  //   {
+  //     key: "created_at",
+  //     title: "Created Date",
+  //     group: "Basic Information",
+  //     format: (value: string) => new Date(value).toLocaleDateString(),
+  //   },
+  //   {
+  //     key: "updated_at",
+  //     title: "Last Updated",
+  //     group: "Basic Information",
+  //     format: (value: string) => new Date(value).toLocaleString(),
+  //   },
+
+  //   { key: "contact", group: "Contact Details", title: "Phone 1" },
+  //   { key: "contact2", group: "Contact Details", title: "Phone 2" },
+  //   { key: "email", group: "Contact Details", title: "Email" },
+  //   { key: "addressFull", group: "Address", title: "Full Address" },
+  //   // { key: "address_line1", group: "Address", title: "Address Line 1" },
+  //   // { key: "address_line2", group: "Address", title: "Address Line 2"},
+  //   // { key: "city", group: "Address", title: "City"},
+  //   // { key: "state", group: "Address", title: "State"},
+  //   // { key: "postcode", group: "Address", title: "Postcode"},
+  //   // { key: "country", group: "Address", title: "Country"},
+  //   { key: "type", group: "Property Interest", title: "Property Info" },
+  //   // { key: "property", group: "Property Interest", title: "Property Type"},
+  //   // { key: "guard", group: "Property Interest", title: "Gated/Guarded"},
+  //   { key: "interested", group: "Property Interest", title: "Interest Area" },
+  //   { key: "add_info", group: "Property Interest", title: "Additional Info" },
+
+  //   { key: "sales_name", group: "Person In-Charge", title: "PIC Name" },
+  //   { key: "sales_uid", group: "Person In-Charge", title: "PIC UID" },
+  //   // { key: "picFull", group: "Assignment", title: "Assigned PIC UID"},
+  // ];
+
+  const modalColumns = [
+    { key: "id", group: "Basic Information", title: "Lead ID" },
+    { key: "name", group: "Basic Information", title: "Full Name" },
+    { key: "source", group: "Basic Information", title: "Source" },
+    {
+      key: "nric",
+      group: "Basic Information",
+      title: "NRIC",
+      format: (value: string) => value || "Not provided",
+    },
+    { key: "status", group: "Basic Information", title: "Current Status" },
+    // {key: "created_at", group: "Basic Information", title: "Created Date"},
+    {
+      key: "created_at",
+      group: "Basic Information",
+      title: "Created Date",
+      // format: (value: Date) => value ? new Date(value).toLocaleDateString() : 'N/A'
+      format: (value: Date) => new Date(value).toLocaleDateString(),
+    },
+    // {
+    //   key: "updated_at",
+    //   group: "Basic Information",
+    //   title: "Last Updated",
+    //   format: (value: string) => new Date(value).toLocaleString()
+    // },
+    { key: "phone1", group: "Contact Details", title: "Phone 1" },
+    {
+      key: "phone2",
+      group: "Contact Details",
+      title: "Phone 2",
+      format: (value: string) => value || "Not provided",
+    },
+    {
+      key: "email",
+      group: "Contact Details",
+      title: "Email",
+      format: (value: string) => value || "Not provided",
+    },
+    {
+      group: "Address",
+      key: "full_address",
+      title: "Full Address",
+      format: (_: any, row: Lead) => (
+        <div className="whitespace-pre-line">
+          {`${row.address_line1}, ${row.address_line2}, ${row.city}, ${row.state} \n${row.postcode}, ${row.country}`}
+        </div>
+      ),
+    },
+    { key: "property", group: "Property", title: "Property Type" },
+    { key: "guard", group: "Property", title: "Gated/Guarded" },
+    { key: "interested", group: "Property", title: "Interested" },
+    {
+      key: "add_info",
+      group: "Property",
+      title: "Additional Info",
+      format: (value: string) => value || "Not provided",
+    },
+    {
+      key: "sales_name",
+      group: "PIC",
+      title: "Name",
+      format: (value: string) => value || "Not assigned yet",
+    },
+    {
+      key: "sales_uid",
+      group: "PIC",
+      title: "UID",
+      format: (value: string) => value || "Not assigned yet",
+    },
+  ];
+
   return (
     <DefaultLayout>
       {/* <Breadcrumb noHeader={true} pageName={`${capitalizedTitle} List`} /> */}
@@ -116,7 +267,8 @@ export default function LeadPage() {
       {error && <p className="text-red-500">{error}</p>}
       <Tables
         columns={columns}
-        data={data}
+        modalColumns={modalColumns}
+        data={dataLead}
         createLink={`/sales/${title}/create`}
         filterKeys={["status"]}
         statusCounts={statusCounts}
@@ -135,6 +287,7 @@ export default function LeadPage() {
         editPermissionPrefix={PERMISSION_PREFIX}
         deletePermissionPrefix={PERMISSION_PREFIX}
         monitorPermissionPrefix={PERMISSION_PREFIX}
+        infoEndpoint="/api/sales/lead"
       />
     </DefaultLayout>
   );
