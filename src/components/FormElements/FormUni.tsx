@@ -22,6 +22,8 @@ interface Column {
   ) => any;
   readOnly?: boolean;
   required?: boolean;
+  // Add a new property to handle validation
+  validate?: (value: string) => Promise<string | null>;
 }
 
 interface Props<T> {
@@ -53,6 +55,9 @@ const FormUni = <T extends Record<string, any>>({
   const [optionsLoaded, setOptionsLoaded] = useState(false); // Track when options are loaded
   const initializedRef = useRef(false); // Track initialization
   const router = useRouter();
+
+  // --- NEW: State for phone validation message ---
+  const [phoneValidation, setPhoneValidation] = useState<string | null>(null);
 
   // Use either the external state or internal state
   const formData = externalFormData || internalFormData;
@@ -112,13 +117,51 @@ const FormUni = <T extends Record<string, any>>({
     }
   }, [data, loading, optionsLoaded, columns, setFormData]);
 
+  // Function to check phone number existence
+  const checkPhoneNumber = async (phone: string) => {
+    if (!phone || phone.length < 5) {
+      setPhoneValidation(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/sales/lead/create/checkPhone?phone=${encodeURIComponent(phone)}`,
+      );
+
+      if (!response.ok) {
+        console.error("API Error:", response.statusText);
+        setPhoneValidation("Server error. Could not validate phone number.");
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result.exists) {
+        setPhoneValidation(
+          `This phone number belongs to existing customer: ${result.customer.name} (ID: ${result.customer.id})`,
+        );
+      } else {
+        setPhoneValidation(null);
+      }
+    } catch (error) {
+      console.error("Error validating phone number:", error);
+      setPhoneValidation(
+        "An error occurred. Please check the phone number manually.",
+      );
+    }
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
-    // console.log("Field changed:", name, value);
-
     const column = columns.find((col) => col.valueKey === name);
+
+    // Call the validation function if the changed field is 'phone1' or 'phone2'
+    if (name === "phone1" || name === "phone2") {
+      checkPhoneNumber(value);
+    }
 
     if (column?.transform) {
       const transformedValues = column.transform(
@@ -156,6 +199,16 @@ const FormUni = <T extends Record<string, any>>({
         `Please fill in the following required fields: ${missingRequiredFields.join(", ")}`,
       );
       return;
+    }
+
+    // Prevent submission if phone validation message exists and it's a new lead
+    if (phoneValidation && data.length === 0) {
+      const confirmSubmit = window.confirm(
+        "A record with this phone number already exists. Do you want to continue?",
+      );
+      if (!confirmSubmit) {
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -274,6 +327,11 @@ const FormUni = <T extends Record<string, any>>({
                         : ""
                     }`}
                   />
+                )}
+
+                {/* --- NEW: Display validation message here --- */}
+                {column.valueKey === "phone1" && phoneValidation && (
+                  <p className="text-meta-1 mt-2 text-sm">{phoneValidation}</p>
                 )}
               </div>
             );

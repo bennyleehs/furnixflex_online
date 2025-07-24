@@ -41,38 +41,6 @@ export default function LeadPage() {
       if (!res.ok) throw new Error(`Failed to fetch ${capitalizedTitle}`);
 
       const response = await res.json();
-      // const formattedRows = response[`list${capitalizedTitle}`].map(
-      //   (item: any) => ({
-      //     ...item,
-      //     id: `${item.id}`,
-      //     originalKey: item.id,
-      //     source: `${item.source} / ${item.interested} / ${item.add_info}`,
-      //     name: `${item.name}`,
-      //     nric: `${item.nric}`,
-      //     contact: `${item.phone1}`,
-      //     contact2: `${item.phone2}`,
-      //     email: `${item.email}`,
-      //     address: `${item.city}, ${item.state}, ${item.country}`,
-      //     type: `${item.property} / ${item.guard}`,
-      //     created_at: new Date(item.created_at).toLocaleDateString(), // Format date as needed
-      //     updated_at: new Date(item.updated_at).toLocaleDateString(), // Format date as needed
-      //     status: `${item.status}`,
-      //     pic: `${item.sales_name}`, // Assuming sales_id and sales_name are available
-      //     // source: `${item.source} / ${item.interested} / ${item.add_info}`,
-      //     // name: `${item.name} / ${item.nric}`,
-      //     // contact: `${item.phone1} / ${item.phone2} / ${item.email}`,
-      //     addressFull: `${item.address_line1}, ${item.address_line2}, ${item.city}, ${item.state}, ${item.country}`,
-      //     interested: `${item.interested}`,
-      //     add_info: `${item.add_info}`,
-      //     // type: `${item.property} / ${item.guard}`,
-      //     // date: new Date(item.created_at).toLocaleDateString(), // Format date as needed
-      //     // status: `${item.status}`,
-      //     picFull: `${item.sales_name} ( ${item.sales_uid} )`, // Assuming sales_id and sales_name are available
-      //     sales_name: `${item.add_info}`,
-      //     sales_uid: `${item.sales_uid}`,
-      //   }),
-      // );
-
       const formattedRows = response[`list${capitalizedTitle}`].map(
         (item: Lead) => ({
           ...item,
@@ -177,22 +145,6 @@ export default function LeadPage() {
       group: "Address",
       key: "full_address",
       title: "Full Address",
-      // format: (_: any, row: Lead) => {
-      //   const addressParts = [
-      //     row.address_line1,
-      //     row.address_line2,
-      //     [row.city, row.state].filter(Boolean).join(', '),
-      //     [row.postcode, row.country].filter(Boolean).join(', ')
-      //   ].filter(part => part && part.trim() !== '');
-
-      //   return addressParts.length > 0 ? (
-      //     <div className="whitespace-pre-line">
-      //       {addressParts.join('\n')}
-      //     </div>
-      //   ) : (
-      //     "Not provided"
-      //   );
-      // }
       format: (_: any, row: Lead) => {
         const parts = [
           row.address_line1 ? `${row.address_line1},` : "-",
