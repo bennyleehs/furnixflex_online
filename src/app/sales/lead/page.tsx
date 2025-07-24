@@ -78,10 +78,14 @@ export default function LeadPage() {
           ...item,
           originalKey: item.id,
           // Add computed fields for table display
-          contact: item.phone1,
-          address: `${item.city}, ${item.state}, ${item.country}`,
-          type: `${item.property} / ${item.guard}`,
-          pic: item.sales_name,
+          contact: item.phone1 || "Not Provided",
+          address:
+            [item.city, item.state, item.country].filter(Boolean).join(", ") ||
+            "Not Provided",
+          type:
+            [item.property, item.guard].filter(Boolean).join(" / ") ||
+            "Not Provided",
+          pic: item.sales_name || "Not Assigned",
           created_at: item.created_at
             ? new Date(item.created_at).toLocaleDateString()
             : "N/A",
@@ -128,16 +132,6 @@ export default function LeadPage() {
     hasFetchedData.current = false; // Force reload data with new search
   };
 
-  // const columns = [
-  //   { key: "created_at", title: "Date", width: "w-32" },
-  //   { key: "name", title: "Name", width: "min-w-[140px]" },
-  //   { key: "contact", title: "Contact", width: "min-w-[180px]" },
-  //   { key: "address", title: "Address", width: "min-w-[260px]" },
-  //   { key: "type", title: "Type", width: "min-w-[180px]" },
-  //   { key: "status", title: "Status", width: "min-w-[140px]" },
-  //   { key: "pic", title: "PIC", width: "min-w-[180px]" },
-  // ];
-
   const columns = [
     { key: "created_at", title: "Date", width: "w-32" },
     { key: "name", title: "Name", width: "min-w-[140px]" },
@@ -147,46 +141,6 @@ export default function LeadPage() {
     { key: "status", title: "Status", width: "min-w-[140px]" },
     { key: "pic", title: "PIC", width: "min-w-[180px]" },
   ];
-
-  // const modalColumns = [
-  //   { key: "id", group: "Basic Information", title: "Lead ID" },
-  //   { key: "source", group: "Basic Information", title: "Source" },
-  //   { key: "name", group: "Basic Information", title: "Full Name" },
-  //   { key: "nric", group: "Basic Information", title: "NRIC" },
-  //   { key: "status", group: "Basic Information", title: "Current Status" },
-  //   {
-  //     key: "created_at",
-  //     title: "Created Date",
-  //     group: "Basic Information",
-  //     format: (value: string) => new Date(value).toLocaleDateString(),
-  //   },
-  //   {
-  //     key: "updated_at",
-  //     title: "Last Updated",
-  //     group: "Basic Information",
-  //     format: (value: string) => new Date(value).toLocaleString(),
-  //   },
-
-  //   { key: "contact", group: "Contact Details", title: "Phone 1" },
-  //   { key: "contact2", group: "Contact Details", title: "Phone 2" },
-  //   { key: "email", group: "Contact Details", title: "Email" },
-  //   { key: "addressFull", group: "Address", title: "Full Address" },
-  //   // { key: "address_line1", group: "Address", title: "Address Line 1" },
-  //   // { key: "address_line2", group: "Address", title: "Address Line 2"},
-  //   // { key: "city", group: "Address", title: "City"},
-  //   // { key: "state", group: "Address", title: "State"},
-  //   // { key: "postcode", group: "Address", title: "Postcode"},
-  //   // { key: "country", group: "Address", title: "Country"},
-  //   { key: "type", group: "Property Interest", title: "Property Info" },
-  //   // { key: "property", group: "Property Interest", title: "Property Type"},
-  //   // { key: "guard", group: "Property Interest", title: "Gated/Guarded"},
-  //   { key: "interested", group: "Property Interest", title: "Interest Area" },
-  //   { key: "add_info", group: "Property Interest", title: "Additional Info" },
-
-  //   { key: "sales_name", group: "Person In-Charge", title: "PIC Name" },
-  //   { key: "sales_uid", group: "Person In-Charge", title: "PIC UID" },
-  //   // { key: "picFull", group: "Assignment", title: "Assigned PIC UID"},
-  // ];
 
   const modalColumns = [
     { key: "id", group: "Basic Information", title: "Lead ID" },
@@ -199,7 +153,6 @@ export default function LeadPage() {
       format: (value: string) => value || "Not provided",
     },
     { key: "status", group: "Basic Information", title: "Current Status" },
-    // {key: "created_at", group: "Basic Information", title: "Created Date"},
     {
       key: "created_at",
       group: "Basic Information",
@@ -207,12 +160,6 @@ export default function LeadPage() {
       // format: (value: Date) => value ? new Date(value).toLocaleDateString() : 'N/A'
       format: (value: Date) => new Date(value).toLocaleDateString(),
     },
-    // {
-    //   key: "updated_at",
-    //   group: "Basic Information",
-    //   title: "Last Updated",
-    //   format: (value: string) => new Date(value).toLocaleString()
-    // },
     { key: "phone1", group: "Contact Details", title: "Phone 1" },
     {
       key: "phone2",
@@ -230,11 +177,32 @@ export default function LeadPage() {
       group: "Address",
       key: "full_address",
       title: "Full Address",
-      format: (_: any, row: Lead) => (
-        <div className="whitespace-pre-line">
-          {`${row.address_line1}, ${row.address_line2}, ${row.city}, ${row.state} \n${row.postcode}, ${row.country}`}
-        </div>
-      ),
+      // format: (_: any, row: Lead) => {
+      //   const addressParts = [
+      //     row.address_line1,
+      //     row.address_line2,
+      //     [row.city, row.state].filter(Boolean).join(', '),
+      //     [row.postcode, row.country].filter(Boolean).join(', ')
+      //   ].filter(part => part && part.trim() !== '');
+
+      //   return addressParts.length > 0 ? (
+      //     <div className="whitespace-pre-line">
+      //       {addressParts.join('\n')}
+      //     </div>
+      //   ) : (
+      //     "Not provided"
+      //   );
+      // }
+      format: (_: any, row: Lead) => {
+        const parts = [
+          row.address_line1 ? `${row.address_line1},` : "-",
+          // row.address_line2 || "-",
+          [row.city, row.state].filter(Boolean).join(", ") || "-",
+          [row.postcode, row.country].filter(Boolean).join(", ") || "-",
+        ];
+
+        return <div className="whitespace-pre-line">{parts.join("\n")}</div>;
+      },
     },
     { key: "property", group: "Property", title: "Property Type" },
     { key: "guard", group: "Property", title: "Gated/Guarded" },

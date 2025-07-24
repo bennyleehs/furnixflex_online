@@ -5,14 +5,17 @@ import Form from "@/components/FormElements/FormUni";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
-// Enhanced Column interface
 interface Column {
   title: string;
   inputType?: string;
   valueKey: string;
   options?: OptionItem[];
   dependencies?: string[];
-  transform?: (value: any, allValues: Record<string, any>, options?: any[]) => any;
+  transform?: (
+    value: any,
+    allValues: Record<string, any>,
+    options?: any[],
+  ) => any;
   readOnly?: boolean;
   required?: boolean;
   defaultValue?: string;
@@ -55,34 +58,41 @@ export default function Page() {
     async function fetchPreData() {
       // If already fetching, don't start another fetch operation
       if (fetchingRef.current) return;
-      
+
       try {
         fetchingRef.current = true;
-        
+
         // Fetch countries data
         const countriesResponse = await fetch("/data/countries.json");
         if (!countriesResponse.ok) {
-          throw new Error(`Failed to fetch countries: ${countriesResponse.status}`);
+          throw new Error(
+            `Failed to fetch countries: ${countriesResponse.status}`,
+          );
         }
-        
+
         const countriesData = await countriesResponse.json();
         // console.log("Countries data loaded:", countriesData);
-        
+
         if (countriesData && Array.isArray(countriesData.countries)) {
           setCountries(countriesData.countries);
         } else {
-          console.error("Countries data is not in the expected format:", countriesData);
+          console.error(
+            "Countries data is not in the expected format:",
+            countriesData,
+          );
         }
 
         // Fetch sales representatives data
         const salesResponse = await fetch("/api/sales/lead/salesStaff");
         if (!salesResponse.ok) {
-          throw new Error(`Failed to fetch sales representatives: ${salesResponse.status}`);
+          throw new Error(
+            `Failed to fetch sales representatives: ${salesResponse.status}`,
+          );
         }
-        
+
         const salesData = await salesResponse.json();
         // console.log("Sales representatives loaded:", salesData);
-        
+
         if (salesData && Array.isArray(salesData.employees)) {
           setSalesReps(salesData.employees);
         } else {
@@ -94,7 +104,7 @@ export default function Page() {
         fetchingRef.current = false;
       }
     }
-    
+
     fetchPreData();
   }, []);
 
@@ -103,47 +113,47 @@ export default function Page() {
     if (countries.length === 0) {
       return [{ value: "", label: "Loading countries..." }];
     }
-    
-    return countries.map(country => ({
+
+    return countries.map((country) => ({
       value: country.name,
-      label: country.name
+      label: country.name,
     }));
   };
-  
+
   const getStateOptions = () => {
     if (!formData.country || countries.length === 0) {
       return [{ value: "", label: "Select country first" }];
     }
-    
-    const country = countries.find(c => c.name === formData.country);
+
+    const country = countries.find((c) => c.name === formData.country);
     if (!country) {
       return [{ value: "", label: "No states found" }];
     }
-    
-    return country.states.map(state => ({
+
+    return country.states.map((state) => ({
       value: state.name,
-      label: state.name
+      label: state.name,
     }));
   };
-  
+
   const getCityOptions = () => {
     if (!formData.country || !formData.state || countries.length === 0) {
       return [{ value: "", label: "Select state first" }];
     }
-    
-    const country = countries.find(c => c.name === formData.country);
+
+    const country = countries.find((c) => c.name === formData.country);
     if (!country) {
       return [{ value: "", label: "No cities found" }];
     }
-    
-    const state = country.states.find(s => s.name === formData.state);
+
+    const state = country.states.find((s) => s.name === formData.state);
     if (!state) {
       return [{ value: "", label: "No cities found" }];
     }
-    
-    return state.cities.map(city => ({
+
+    return state.cities.map((city) => ({
       value: city,
-      label: city
+      label: city,
     }));
   };
 
@@ -158,12 +168,12 @@ export default function Page() {
           if (!response.ok) {
             throw new Error("Failed to fetch lead data");
           }
-          
+
           const responseData = await response.json();
-          
+
           if (responseData.listLead && responseData.listLead.length > 0) {
-          // console.log("Lead data loaded:", [responseData.listLead[0]]);
-          setData([responseData.listLead[0]]);
+            // console.log("Lead data loaded:", [responseData.listLead[0]]);
+            setData([responseData.listLead[0]]);
           } else {
             throw new Error("No lead data found");
           }
@@ -212,20 +222,16 @@ export default function Page() {
       ],
     },
     {
-      title: "Additional Information",
-      inputType: "text",
-      valueKey: "add_info",
+      title: "Email",
+      inputType: "email",
+      valueKey: "email",
     },
+
     {
       title: "Name",
       inputType: "text",
       valueKey: "name",
       required: true,
-    },
-    {
-      title: "NRIC",
-      inputType: "text",
-      valueKey: "nric",
     },
     {
       title: "Primary Phone",
@@ -239,25 +245,46 @@ export default function Page() {
       valueKey: "phone2",
     },
     {
-      title: "Email",
-      inputType: "email",
-      valueKey: "email",
+      title: "NRIC",
+      inputType: "text",
+      valueKey: "nric",
     },
+
     {
-      title: "Address Line 1",
+      title: "Address Line",
       inputType: "text",
       valueKey: "address_line1",
-      required: true,
     },
-    {
-      title: "Address Line 2",
-      inputType: "text",
-      valueKey: "address_line2",
-    },
+    // {
+    //   title: "Address Line 2",
+    //   inputType: "text",
+    //   valueKey: "address_line2",
+    // },
     {
       title: "Postcode",
       inputType: "text",
       valueKey: "postcode",
+    },
+    {
+      title: "Country",
+      inputType: "select",
+      valueKey: "country",
+      // defaultValue: "Malaysia",
+      options: getCountryOptions(), // Use the country options function
+      required: true,
+    },
+    {
+      title: "State",
+      inputType: "select",
+      valueKey: "state",
+      options: getStateOptions(), // Use the state options function
+      required: true,
+    },
+    {
+      title: "City",
+      inputType: "select",
+      valueKey: "city",
+      options: getCityOptions(), // Use the city options function
     },
     {
       title: "Property Type",
@@ -280,23 +307,9 @@ export default function Page() {
       ],
     },
     {
-      title: "Country",
-      inputType: "select",
-      valueKey: "country",
-      // defaultValue: "Malaysia",
-      options: getCountryOptions(), // Use the country options function
-    },
-    {
-      title: "State",
-      inputType: "select",
-      valueKey: "state",
-      options: getStateOptions(), // Use the state options function
-    },
-    {
-      title: "City",
-      inputType: "select",
-      valueKey: "city",
-      options: getCityOptions(), // Use the city options function
+      title: "Additional Information",
+      inputType: "text",
+      valueKey: "add_info",
     },
     {
       title: "Status",
@@ -309,7 +322,7 @@ export default function Page() {
         { value: "Follow Up", label: "Follow UP" },
         { value: "Visit Showroom", label: "Visit Showroom" },
         { value: "Quotation", label: "Quotation" },
-        { value: "Deposit", label: "Deposit" },
+        { value: "Payment", label: "Payment" },
         { value: "Production", label: "Production" },
         { value: "Installation", label: "Installation" },
         { value: "Job Done", label: "Job Done" },
@@ -323,7 +336,7 @@ export default function Page() {
       inputType: "select",
       valueKey: "sales_id",
       defaultValue: "0", // Add this line to set default value
-      transform: (value: string, allValues: Record<string, any>) => {
+      transform: (value: string, _allValues: Record<string, any>) => {
         // When a valid sales representative is selected (not empty)
         if (value && value !== "") {
           // Return object to update status to "Follow Up"
@@ -343,7 +356,9 @@ export default function Page() {
   return (
     <DefaultLayout>
       <Breadcrumb
-        pageName={isEditMode ? `Edit Lead (${data[0]?.id || "N/A"})` : "New Lead"}
+        pageName={
+          isEditMode ? `Edit Lead (${data[0]?.id || "N/A"})` : "New Lead"
+        }
       />
       <Form
         columns={column}
@@ -356,4 +371,4 @@ export default function Page() {
       />
     </DefaultLayout>
   );
-};
+}
