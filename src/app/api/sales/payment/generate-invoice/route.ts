@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    console.log('Received data:', data);
+    // console.log('Received data:', data);
     if (!data || !data.invoice_number || !data.task_id) {
       return NextResponse.json({ error: 'Invalid data provided' }, { status: 400 });
     }
