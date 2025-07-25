@@ -3,27 +3,9 @@
     "name": "MENU",
     "menuItems": [
       {
-        "label": "Dashboard",
-        "route": "#",
-        "children": [
-          {
-            "label": "Sales",
-            "route": "/dashboard/jobsReport"
-          },
-          {
-            "label": "Finance",
-            "route": "/dashboard/finance"
-          },
-          {
-            "label": "Admin",
-            "route": "/dashboard/admin"
-          }
-        ]
-      },
-      {
         "label": "Administration",
         "id": "1",
-        "route": "#",
+        "route": "/admin",
         "children": [
           {
             "label": "Branches",
@@ -104,7 +86,7 @@
       {
         "label": "Sales",
         "id": "2",
-        "route": "#",
+        "route": "/sales",
         "children": [
           {
             "label": "Product",
@@ -133,9 +115,27 @@
           }
         ]
       },
+
+      {
+        "label": "Production",
+        "id": "3",
+        "route": "#",
+        "children": [
+          {
+            "label": "Parts",
+            "id": "3.1",
+            "route": "/production/parts"
+          },
+          {
+            "label": "Modular",
+            "id": "3.2",
+            "route": "/production/modular"
+          }
+        ]
+      },
       {
         "label": "Finance",
-        "id": "3",
+        "id": "4",
         "route": "#",
         "children": [
           {
@@ -148,34 +148,22 @@
                 "children": [
                   {
                     "label": "Indoor",
-                    "id": "3.1",
+                    "id": "4.1",
                     "route": "/finance/indoor"
                   },
                   {
                     "label": "Measurement",
-                    "id": "3.2",
+                    "id": "4.2",
                     "route": "/finance/measurement"
                   }
                 ]
               },
               {
                 "label": "Dealer",
-                "id": "3.3",
+                "id": "4.3",
                 "route": "/finance/dealer"
               }
             ]
-          }
-        ]
-      },
-      {
-        "label": "Production",
-        "id": "4",
-        "route": "#",
-        "children": [
-          {
-            "label": "ERP",
-            "id": "4.1",
-            "route": "/production/erp"
           }
         ]
       }
