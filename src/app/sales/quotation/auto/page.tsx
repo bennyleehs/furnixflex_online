@@ -1869,6 +1869,7 @@ export default function QuotationPage() {
                   value={terms}
                   onChange={(e) => setTerms(e.target.value)}
                   placeholder="Terms and conditions..."
+                  disabled
                   className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm outline-hidden transition"
                 ></textarea>
               </div>
