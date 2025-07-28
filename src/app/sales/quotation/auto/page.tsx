@@ -59,7 +59,7 @@ export default function QuotationPage() {
   ]);
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [notes, setNotes] = useState("");
-  const [termsWty, setTermsWty] = useState(TermsConditionsWarranty);
+  const [terms, setTerms] = useState(TermsConditionsWarranty);
   // const [warranty, setWarranty] = useState(Warranty)
   // const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(8);
@@ -164,7 +164,7 @@ export default function QuotationPage() {
             // Populate form with existing data
             setItems(data.quotation.items || []);
             setNotes(data.quotation.notes || "");
-            setTermsWty(data.quotation.termsWty || termsWty);
+            setTerms(data.quotation.terms || terms);
             setTax(data.quotation.tax || 0);
 
             // Show success notification
@@ -210,7 +210,7 @@ export default function QuotationPage() {
         setLoading(false);
       }
     },
-    [generateNewQuotationNumber, termsWty],
+    [generateNewQuotationNumber, terms],
   ); // Add missing dependencies
 
   // Fetch task data if taskId is provided
@@ -470,7 +470,7 @@ export default function QuotationPage() {
             setQuotation(existingQuotation);
             setItems(existingQuotation.items || []);
             setNotes(existingQuotation.notes || "");
-            setTermsWty(existingQuotation.terms || termsWty);
+            setTerms(existingQuotation.terms || terms);
             setTax(existingQuotation.tax || 0);
 
             // Show notification
@@ -510,7 +510,7 @@ export default function QuotationPage() {
         tax: tax || 0,
         total: grandTotal,
         notes,
-        termsWty,
+        terms,
         status,
       };
 
