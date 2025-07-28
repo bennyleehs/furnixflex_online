@@ -203,7 +203,7 @@ export default function Administration() {
               </div>
               <div className="ml-4 flex-1">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Today's Logins
+                  Today&apos;s Logins
                 </h3>
                 <div className="flex items-baseline">
                   <p className="text-2xl font-semibold text-gray-900 dark:text-white">
