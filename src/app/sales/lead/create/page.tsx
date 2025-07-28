@@ -210,24 +210,6 @@ export default function Page() {
       ],
     },
     {
-      title: "Insterested",
-      inputType: "select",
-      valueKey: "interested",
-      required: true,
-      options: [
-        { value: "Package", label: "Package" },
-        { value: "Non-package", label: "Non-package" },
-        { value: "Accessory", label: "Accessory" },
-        { value: "Other", label: "Other" },
-      ],
-    },
-    {
-      title: "Email",
-      inputType: "email",
-      valueKey: "email",
-    },
-
-    {
       title: "Name",
       inputType: "text",
       valueKey: "name",
@@ -245,6 +227,11 @@ export default function Page() {
       valueKey: "phone2",
     },
     {
+      title: "Email",
+      inputType: "email",
+      valueKey: "email",
+    },
+    {
       title: "NRIC",
       inputType: "text",
       valueKey: "nric",
@@ -255,11 +242,11 @@ export default function Page() {
       inputType: "text",
       valueKey: "address_line1",
     },
-    // {
-    //   title: "Address Line 2",
-    //   inputType: "text",
-    //   valueKey: "address_line2",
-    // },
+    {
+      title: "Address Line 2",
+      inputType: "text",
+      valueKey: "address_line2",
+    },
     {
       title: "Postcode",
       inputType: "text",
@@ -285,6 +272,18 @@ export default function Page() {
       inputType: "select",
       valueKey: "city",
       options: getCityOptions(), // Use the city options function
+    },
+    {
+      title: "Insterested",
+      inputType: "select",
+      valueKey: "interested",
+      required: true,
+      options: [
+        { value: "Package", label: "Package" },
+        { value: "Non-package", label: "Non-package" },
+        { value: "Accessory", label: "Accessory" },
+        { value: "Other", label: "Other" },
+      ],
     },
     {
       title: "Property Type",

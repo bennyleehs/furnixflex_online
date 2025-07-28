@@ -9,7 +9,6 @@ import {
   Product,
   QuotationItem,
   Quotation,
-  TermsConditionsWarranty,
 } from "@/types/sales-quotation";
 
 export default function QuotationPage() {
@@ -57,19 +56,21 @@ export default function QuotationPage() {
       discount: 0,
     },
   ]);
-  const [editingCustomer, setEditingCustomer] = useState(false);
   const [notes, setNotes] = useState("");
-  const [termsWty, setTermsWty] = useState(TermsConditionsWarranty);
-  // const [warranty, setWarranty] = useState(Warranty)
+  const [terms, setTerms] = useState(
+    "1. This quotation is valid for 14 days from the date of issue.\n2. 50% deposit required to confirm order.\n3. Balance payment due upon completion.",
+  );
   // const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(8);
-  const [taxLabel, setTaxLabel] = useState<string>("SST"); // Default tax label
   const [validDays, setValidDays] = useState(14);
+  const [editingCustomer, setEditingCustomer] = useState(false);
 
   // Add state variables for calculations
   const [subtotal, setSubtotal] = useState<number>(0);
   const [disAmount, setDisAmount] = useState<number>(0);
   const [grandTotal, setGrandTotal] = useState<number>(0);
+  const [taxLabel, setTaxLabel] = useState<string>("SST"); // Default tax label
+
   // Add this with your other state variables
   const [totalDiscount, setTotalDiscount] = useState<number>(0);
 
@@ -164,7 +165,7 @@ export default function QuotationPage() {
             // Populate form with existing data
             setItems(data.quotation.items || []);
             setNotes(data.quotation.notes || "");
-            setTermsWty(data.quotation.termsWty || termsWty);
+            setTerms(data.quotation.terms || terms);
             setTax(data.quotation.tax || 0);
 
             // Show success notification
@@ -210,7 +211,7 @@ export default function QuotationPage() {
         setLoading(false);
       }
     },
-    [generateNewQuotationNumber, termsWty],
+    [generateNewQuotationNumber, terms],
   ); // Add missing dependencies
 
   // Fetch task data if taskId is provided
@@ -470,7 +471,7 @@ export default function QuotationPage() {
             setQuotation(existingQuotation);
             setItems(existingQuotation.items || []);
             setNotes(existingQuotation.notes || "");
-            setTermsWty(existingQuotation.terms || termsWty);
+            setTerms(existingQuotation.terms || terms);
             setTax(existingQuotation.tax || 0);
 
             // Show notification
@@ -510,7 +511,7 @@ export default function QuotationPage() {
         tax: tax || 0,
         total: grandTotal,
         notes,
-        termsWty,
+        terms,
         status,
       };
 
@@ -1482,11 +1483,11 @@ export default function QuotationPage() {
             </div>
           </div>
 
-          {/* Main Quotation Items */}
+          {/* Quotation Items */}
           <div className="mb-8">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-black dark:text-white">
-                Package Quotation
+                Line Items
               </h3>
               <button
                 type="button"
@@ -1840,7 +1841,7 @@ export default function QuotationPage() {
               </table>
             </div>
           </div>
-          
+
           {/* Notes, Terms, and Totals */}
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="space-y-6">
@@ -1861,14 +1862,16 @@ export default function QuotationPage() {
               {/* Terms & Conditions */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-black dark:text-white">
-                  Order Policy & Warranty Coverage
+                  Terms & Conditions
                 </label>
-                <div
-                  className="border-stroke dark:border-strokedark dark:bg-form-input w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm whitespace-pre-wrap text-black dark:text-white"
-                  dangerouslySetInnerHTML={{
-                    __html: TermsConditionsWarranty.replace(/\n/g, "<br />"),
-                  }}
-                />
+                <textarea
+                  rows={4}
+                  value={terms}
+                  onChange={(e) => setTerms(e.target.value)}
+                  placeholder="Terms and conditions..."
+                  disabled
+                  className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm outline-hidden transition"
+                ></textarea>
               </div>
             </div>
 
