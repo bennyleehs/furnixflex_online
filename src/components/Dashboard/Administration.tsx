@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-// import AttendanceTracker from "@/components/Attendance/AttendanceTracker";
+import AttendanceTracker from "@/components/Attendance/AttendanceTracker";
 
 interface DashboardStats {
   users: {
@@ -281,10 +281,10 @@ export default function Administration() {
       </div>
 
       {/* Attendance Tracker - for current user */}
-      {/* <AttendanceTracker
+      <AttendanceTracker
         employeeId="current_user_id" // Replace with actual user ID from session
         employeeName="Current User Name" // Replace with actual user name from session
-      /> */}
+      />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -429,7 +429,7 @@ export default function Administration() {
                 </Link>
 
                 <Link
-                  href="/admin/departments"
+                  href="/admin/department"
                   className="block w-full rounded-lg bg-green-50 px-4 py-3 text-left transition-colors hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40"
                 >
                   <div className="flex items-center">
@@ -453,7 +453,7 @@ export default function Administration() {
                 </Link>
 
                 <Link
-                  href="/admin/roles"
+                  href="/admin/role"
                   className="block w-full rounded-lg bg-yellow-50 px-4 py-3 text-left transition-colors hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/40"
                 >
                   <div className="flex items-center">
