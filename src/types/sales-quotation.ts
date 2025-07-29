@@ -101,16 +101,38 @@ export interface PaymentRecord {
   received_date?: string;
 }
 
-export const TermsConditionsWarranty: string = 
-  `<strong>Terms and Conditions</strong>\n` +
-  `1. RM1,000 or 10% deposit upon confirmation (non-refundable; valid for 1 year).\n` +
-  `2. After 1 year, a new order and deposit will be required.\n` +
-  `3. 90% payment is required before production.\n` +
-  `4. Production will be completed within 14 working days after receiving payment.\n` +
-  `5. The remaining 10% balance must be paid before installation.\n` +
-  `6. No changes or cancellations are allowed after production starts.\n\n` +
+//Terms Conditions - use for quotation page & pdf
+export interface Section {
+  title: string;
+  content: string[];
+}
 
-  `<strong>Warranty</strong>\n` +
-  `• 20 years for aluminium cabinet body.\n` +
-  `• 2 years for door colour (covers discoloration or peeling under normal indoor use).\n` +
-  `• 1 year for hinges, drawer slides, sink, water tap, cooker hood, cooker hob, and dishrack.`;
+export const TermsConditionsWarrantySections: Section[] = [
+  {
+    title: "Terms and Conditions",
+    content: [
+      "RM1,000 or 10% deposit upon confirmation (non-refundable; valid for 1 year).",
+      "After 1 year, a new order and deposit will be required.",
+      "90% payment is required before production.",
+      "Production will be completed within 14 working days after receiving payment.",
+      "The remaining 10% balance must be paid before installation.",
+      "No changes or cancellations are allowed after production starts.",
+    ],
+  },
+  {
+    title: "Warranty Coverage",
+    content: [
+      "20 years for aluminium cabinet body.",
+      "2 years for door colour (covers discoloration or peeling under normal indoor use).",
+      "1 year for hinges, drawer slides, sink, water tap, cooker hood, cooker hob, and dishrack.",
+    ],
+  },
+];
+
+export const getTermsAsPlainText = (): string =>
+  TermsConditionsWarrantySections
+    .map(
+      (section) =>
+        `${section.title}\n${section.content.map((c, i) => `${i + 1}. ${c}`).join("\n")}`
+    )
+    .join("\n\n");

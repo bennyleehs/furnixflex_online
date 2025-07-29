@@ -9,7 +9,8 @@ import {
   Product,
   QuotationItem,
   Quotation,
-  TermsConditionsWarranty,
+  TermsConditionsWarrantySections,
+  getTermsAsPlainText,
 } from "@/types/sales-quotation";
 
 export default function QuotationPage() {
@@ -59,7 +60,8 @@ export default function QuotationPage() {
   ]);
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [notes, setNotes] = useState("");
-  const [terms, setTerms] = useState(TermsConditionsWarranty);
+  // const [terms, setTerms] = useState(TermsConditionsWarrantySections);
+  const [terms, setTerms] = useState(getTermsAsPlainText());
   // const [warranty, setWarranty] = useState(Warranty)
   // const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(8);
@@ -1840,7 +1842,7 @@ export default function QuotationPage() {
               </table>
             </div>
           </div>
-          
+
           {/* Notes, Terms, and Totals */}
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="space-y-6">
@@ -1863,12 +1865,18 @@ export default function QuotationPage() {
                 <label className="mb-2 block text-sm font-semibold text-black dark:text-white">
                   Order Policy & Warranty Coverage
                 </label>
-                <div
-                  className="border-stroke dark:border-strokedark dark:bg-form-input w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm whitespace-pre-wrap text-black dark:text-white"
-                  dangerouslySetInnerHTML={{
-                    __html: TermsConditionsWarranty.replace(/\n/g, "<br />"),
-                  }}
-                />
+                <div className="border-stroke dark:border-strokedark dark:bg-form-input w-full space-y-3 rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm text-black dark:text-white">
+                  {TermsConditionsWarrantySections.map((section) => (
+                    <div key={section.title}>
+                      <div className="mb-1 font-bold">{section.title}</div>
+                      <ul className="list-decimal space-y-1 pl-5">
+                        {section.content.map((line, idx) => (
+                          <li key={idx}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 

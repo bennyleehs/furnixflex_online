@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import fs from 'fs';
 import path from 'path';
 import 'jspdf-autotable';
+import { TermsConditionsWarrantySections } from "@/types/sales-quotation";
 
 export async function POST(request: Request) {
   try {
@@ -401,24 +402,42 @@ try {
     notesY += noteLines.length * 5 + 10;
   }
   
-  // ----- TERMS AND CONDITIONS SECTION -----
-  if (data.quotation.terms && data.quotation.terms.trim() !== '') {
-    // Check if we need to add a new page
-    if (notesY + 40 > pageHeight - margin) {
-      doc.addPage();
-      notesY = margin;
-    }
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Terms and Conditions:', margin, notesY);
-    doc.setFont('helvetica', 'normal');
-    
-    const termLines = doc.splitTextToSize(data.quotation.terms, pageWidth - (2 * margin));
-    doc.text(termLines, margin, notesY + 5);
-    
-    notesY += termLines.length * 5 + 10;
+  // --- TERMS AND CONDITIONS SECTION ---
+if (data.quotation.terms && data.quotation.terms.trim() !== '') {
+  if (notesY + 40 > pageHeight - margin) {
+    doc.addPage();
+    notesY = margin;
   }
+
+  // Main title
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Order Policy & Warranty Coverage:', margin, notesY);
+  notesY += 6;
+
+  TermsConditionsWarrantySections.forEach((section) => {
+    // Subsection title
+    doc.setFont('helvetica', 'bold');
+    doc.text(section.title, margin, notesY);
+    notesY += 5;
+
+    // List items
+    doc.setFont('helvetica', 'normal');
+    section.content.forEach((line, index) => {
+      const wrappedLines = doc.splitTextToSize(`${index + 1}. ${line}`, pageWidth - (2 * margin));
+      doc.text(wrappedLines, margin, notesY);
+      notesY += wrappedLines.length * 5;
+
+      // Auto page break
+      if (notesY > pageHeight - margin) {
+        doc.addPage();
+        notesY = margin;
+      }
+    });
+
+    notesY += 5;
+  });
+}
   
   // ----- FOOTER SECTION -----
   // Add a footer with page numbers
