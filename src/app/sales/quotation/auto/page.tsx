@@ -13,6 +13,72 @@ import {
   getTermsAsPlainText,
 } from "@/types/sales-quotation";
 
+// NEW: Import the filtering rules and function
+import { FILTER_RULES, getFilteredProducts } from "./product-filters";
+
+// A simple interface for the structured data
+interface StructuredProductData {
+  categories: string[];
+  subcategories: Record<string, string[]>;
+  productsStructure: Record<string, Record<string, Product[]>>;
+  productLookup: Record<string, Product>;
+}
+
+// Function to process a list of products into the structured format you need
+const processProductsData = (productsToProcess: Product[]): StructuredProductData => {
+  const categories: string[] = [];
+  const subcategories: Record<string, string[]> = {};
+  const productsStructure: Record<string, Record<string, Product[]>> = {};
+  const productLookup: Record<string, Product> = {};
+
+  productsToProcess.forEach((product: any) => {
+    const category = product.category;
+    const subcategory = product.subcategory;
+
+    if (!categories.includes(category)) {
+      categories.push(category);
+    }
+
+    if (!subcategories[category]) {
+      subcategories[category] = [];
+    }
+    if (!subcategories[category].includes(subcategory)) {
+      subcategories[category].push(subcategory);
+    }
+
+    if (!productsStructure[category]) {
+      productsStructure[category] = {};
+    }
+    if (!productsStructure[category][subcategory]) {
+      productsStructure[category][subcategory] = [];
+    }
+    productsStructure[category][subcategory].push({
+      id: String(product.id),
+      name: product.name,
+      description: product.description || "",
+      price: product.price,
+      unit: product.unit,
+      discount: product.discount || 0,
+      category: product.category,
+      subcategory: product.subcategory,
+    });
+
+    productLookup[String(product.id)] = {
+      id: String(product.id),
+      name: product.name,
+      description: product.description || "",
+      price: product.price,
+      unit: product.unit,
+      discount: product.discount || 0,
+      category: product.category,
+      subcategory: product.subcategory,
+    };
+  });
+
+  return { categories, subcategories, productsStructure, productLookup };
+};
+
+
 export default function QuotationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,21 +145,31 @@ export default function QuotationPage() {
   const [generatedQuotationNumber, setGeneratedQuotationNumber] =
     useState<string>("");
 
-  // Categories and products state
-  const [categories, setCategories] = useState<string[]>([]);
-  const [subcategories, setSubcategories] = useState<Record<string, string[]>>(
-    {},
-  );
-  const [products, setProducts] = useState<
-    Record<string, Record<string, Product[]>>
-  >({});
+  // ORIGINAL: Categories and products state
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
-
-  // Cache for product lookup
-  const [productLookup, setProductLookup] = useState<Record<string, Product>>(
-    {},
-  );
   const [productsError, setProductsError] = useState<string | null>(null);
+  
+  // NEW: Separate state for each section's products
+  const [packagesData, setPackagesData] = useState<StructuredProductData>({
+    categories: [],
+    subcategories: {},
+    productsStructure: {},
+    productLookup: {},
+  });
+  const [additionalItemsData, setAdditionalItemsData] = useState<StructuredProductData>({
+    categories: [],
+    subcategories: {},
+    productsStructure: {},
+    productLookup: {},
+  });
+  const [servicesData, setServicesData] = useState<StructuredProductData>({
+    categories: [],
+    subcategories: {},
+    productsStructure: {},
+    productLookup: {},
+  });
+
 
   // Calculate dates
   const today = new Date().toISOString().split("T")[0];
@@ -258,81 +334,16 @@ export default function QuotationPage() {
     }
   }, [taskId, fetchQuotation]);
 
-  // Improve product fetching with better category structure
+  // NEW: The single `useEffect` to fetch all products from the database once.
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchAllProducts = async () => {
       setLoadingProducts(true);
       try {
         const response = await fetch("/api/sales/products");
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const data = await response.json();
-        console.log("Raw API response:", data);
-
-        // Set categories and subcategories directly from API
-        setCategories(data.categories || []);
-        setSubcategories(data.subcategories || {});
-
-        // Create a properly structured products object
-        const productsStructure: Record<string, Record<string, Product[]>> = {};
-
-        // Initialize the structure with all categories and subcategories
-        (data.categories || []).forEach((category: string) => {
-          productsStructure[category] = {};
-
-          // Add all subcategories for this category
-          if (data.subcategories && data.subcategories[category]) {
-            data.subcategories[category].forEach((subcategory: string) => {
-              productsStructure[category][subcategory] = [];
-            });
-          }
-        });
-
-        // Populate with products from allProducts array
-        data.allProducts.forEach((product: any) => {
-          const category = product.category;
-          const subcategory = product.subcategory;
-
-          // Ensure the category and subcategory arrays exist
-          if (!productsStructure[category]) {
-            productsStructure[category] = {};
-          }
-
-          if (!productsStructure[category][subcategory]) {
-            productsStructure[category][subcategory] = [];
-          }
-
-          // Add the product to the appropriate category and subcategory
-          productsStructure[category][subcategory].push({
-            id: String(product.id),
-            name: product.name,
-            description: product.description || "",
-            price: product.price,
-            unit: product.unit,
-            discount: product.discount || 0,
-            // Add any other necessary properties
-          });
-        });
-
-        console.log("Structured products:", productsStructure);
-        setProducts(productsStructure);
-
-        // Build product lookup for quick reference
-        const productMap: Record<string, Product> = {};
-        data.allProducts.forEach((product: any) => {
-          productMap[String(product.id)] = {
-            id: String(product.id),
-            name: product.name,
-            description: product.description || "",
-            price: product.price,
-            unit: product.unit,
-            discount: product.discount || 0,
-            category: product.category,
-            subcategory: product.subcategory,
-            // Add any other necessary properties
-          };
-        });
-        setProductLookup(productMap);
+        setAllProducts(data.allProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
         setProductsError(
@@ -342,33 +353,36 @@ export default function QuotationPage() {
         setLoadingProducts(false);
       }
     };
-
-    fetchProducts();
+    fetchAllProducts();
   }, []);
+
+  // NEW: A separate `useEffect` that runs only when `allProducts` is loaded.
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      // Filter and process products for each section
+      const packages = getFilteredProducts(allProducts, FILTER_RULES.packages);
+      setPackagesData(processProductsData(packages));
+
+      const additionalItems = getFilteredProducts(allProducts, FILTER_RULES.additionalItems);
+      setAdditionalItemsData(processProductsData(additionalItems));
+
+      const services = getFilteredProducts(allProducts, FILTER_RULES.services);
+      setServicesData(processProductsData(services));
+    }
+  }, [allProducts]);
 
   // Enhanced logging for subcategories
   useEffect(() => {
-    if (Object.keys(subcategories).length > 0) {
-      console.log("Subcategories data loaded:");
-      Object.keys(subcategories).forEach((cat) => {
-        console.log(
-          `  - ${cat}: ${subcategories[cat]?.length || 0} subcategories`,
-        );
-      });
+    if (Object.keys(packagesData.subcategories).length > 0) {
+      console.log("Packages Subcategories data loaded:", packagesData.subcategories);
     }
-  }, [subcategories]);
-
-  // Add a useEffect to log product categories and subcategories
-  useEffect(() => {
-    // Log the first few keys of products to debug
-    console.log("Product categories:", Object.keys(products).slice(0, 3));
-    console.log(
-      "First category subcategories:",
-      Object.keys(products)[0]
-        ? Object.keys(products[Object.keys(products)[0]])
-        : "No categories",
-    );
-  }, [products]);
+    if (Object.keys(additionalItemsData.subcategories).length > 0) {
+      console.log("Additional Items Subcategories data loaded:", additionalItemsData.subcategories);
+    }
+    if (Object.keys(servicesData.subcategories).length > 0) {
+      console.log("Services Subcategories data loaded:", servicesData.subcategories);
+    }
+  }, [packagesData, additionalItemsData, servicesData]);
 
   // Add a new item to the quotation
   const addItem = () => {
@@ -721,9 +735,9 @@ export default function QuotationPage() {
   const logSubcategorySelection = (category: string) => {
     console.log({
       selectedCategory: category,
-      subcategoriesExist: Boolean(subcategories[category]),
-      availableSubcategories: subcategories[category],
-      allSubcategories: subcategories,
+      subcategoriesExist: Boolean(packagesData.subcategories[category]), // Use the appropriate state
+      availableSubcategories: packagesData.subcategories[category], // Use the appropriate state
+      allSubcategories: packagesData.subcategories, // Use the appropriate state
     });
   };
 
@@ -733,26 +747,26 @@ export default function QuotationPage() {
     console.log(`- Selected category: "${category}"`);
     console.log(`- Selected subcategory: "${subcategory}"`);
     console.log(
-      `- Category exists in products: ${Boolean(products[category])}`,
+      `- Category exists in products: ${Boolean(packagesData.productsStructure[category])}`,
     );
     console.log(
-      `- Subcategory exists in category: ${Boolean(products[category]?.[subcategory])}`,
+      `- Subcategory exists in category: ${Boolean(packagesData.productsStructure[category]?.[subcategory])}`,
     );
     console.log(
-      `- Products in this subcategory: ${products[category]?.[subcategory]?.length || 0}`,
+      `- Products in this subcategory: ${packagesData.productsStructure[category]?.[subcategory]?.length || 0}`,
     );
 
-    if (products[category]?.[subcategory]?.length > 0) {
+    if (packagesData.productsStructure[category]?.[subcategory]?.length > 0) {
       console.log(
         "- First product sample:",
-        products[category][subcategory][0],
+        packagesData.productsStructure[category][subcategory][0],
       );
     } else {
       console.log("- No products found in this category/subcategory");
     }
 
     // Check product lookup
-    const productsByCategory = Object.values(productLookup).filter(
+    const productsByCategory = Object.values(packagesData.productLookup).filter(
       (p) => p.category === category && p.subcategory === subcategory,
     );
     console.log(
@@ -797,12 +811,10 @@ export default function QuotationPage() {
       subtotal += Number(item.total) || 0;
 
       // Calculate item discount if applicable
-      if (item.productId && productLookup[item.productId]) {
-        const product = productLookup[item.productId];
-        if (product.discount && product.discount > 0) {
-          // Calculate discount amount based on item total and discount percentage
-          // const itemDiscount = (Number(item.total) || 0) * (product.discount / 100);
-          // discount += itemDiscount;
+      // Use the universal product lookup, which has all products
+      if (item.productId) {
+        const product = allProducts.find(p => String(p.id) === item.productId);
+        if (product && product.discount && product.discount > 0) {
           discount += product.discount;
         }
       }
@@ -828,7 +840,7 @@ export default function QuotationPage() {
       const finalAmount = subtotal + taxAmount;
       setGrandTotal(finalAmount);
     }
-  }, [items, productLookup, tax]);
+  }, [items, allProducts, tax]);
 
   if (loading) {
     return (
@@ -1484,11 +1496,11 @@ export default function QuotationPage() {
             </div>
           </div>
 
-          {/* Main Quotation Items */}
+          {/* Packages Quotation */}
           <div className="mb-8">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-black dark:text-white">
-                Package Quotation
+                Packages Quotation
               </h3>
               <button
                 type="button"
@@ -1585,7 +1597,7 @@ export default function QuotationPage() {
                             className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                           >
                             <option value="">Select Category</option>
-                            {categories.map((category) => (
+                            {packagesData.categories.map((category) => (
                               <option key={category} value={category}>
                                 {category}
                               </option>
@@ -1627,14 +1639,14 @@ export default function QuotationPage() {
                             }}
                             disabled={
                               !item.category ||
-                              !subcategories[item.category]?.length
+                              !packagesData.subcategories[item.category]?.length
                             }
                             className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
                           >
                             <option value="">Select Subcategory</option>
                             {item.category &&
-                            subcategories[item.category]?.length > 0 ? (
-                              subcategories[item.category].map((subcat) => (
+                            packagesData.subcategories[item.category]?.length > 0 ? (
+                              packagesData.subcategories[item.category].map((subcat) => (
                                 <option key={subcat} value={subcat}>
                                   {subcat}
                                 </option>
@@ -1657,8 +1669,8 @@ export default function QuotationPage() {
                               // Create a complete updated item to avoid multiple state updates
                               const updatedItem = { ...item, productId };
 
-                              if (productId && productLookup[productId]) {
-                                const product = productLookup[productId];
+                              if (productId && packagesData.productLookup[productId]) {
+                                const product = packagesData.productLookup[productId];
                                 console.log(
                                   "Found product in lookup:",
                                   product,
@@ -1692,7 +1704,725 @@ export default function QuotationPage() {
                             <option value="">Select Product</option>
                             {item.category &&
                               item.subcategory &&
-                              products[item.category]?.[item.subcategory]?.map(
+                              packagesData.productsStructure[item.category]?.[item.subcategory]?.map(
+                                (product) => (
+                                  <option
+                                    key={product.id}
+                                    value={String(product.id)}
+                                  >
+                                    {product.name}
+                                  </option>
+                                ),
+                              )}
+                          </select>
+                        </div>
+
+                        {/* Hidden display for the selected product description (optional) */}
+                        {item.description && (
+                          <div className="mt-1 truncate text-xs text-gray-500 italic dark:text-gray-400">
+                            {item.description}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Quantity Input with 0.1 Increment/Decrement */}
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.1"
+                          value={
+                            item.quantity !== undefined ? item.quantity : 0
+                          }
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent event bubbling
+                            // Parse the input value as a float
+                            const value = parseFloat(e.target.value);
+                            updateItem(item.id, "quantity", value);
+                          }}
+                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                        />
+                      </td>
+
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={item.unit || ""}
+                          onChange={(e) =>
+                            updateItem(item.id, "unit", e.target.value)
+                          }
+                          placeholder="unit"
+                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                        />
+                      </td>
+
+                      {/* Unit Price Column */}
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={
+                            item.unitPrice
+                              ? formatWithCommas(item.unitPrice)
+                              : ""
+                          }
+                          onFocus={(e) => {
+                            // When focused, show raw number for editing
+                            e.target.value = item.unitPrice?.toString() || "";
+                          }}
+                          onBlur={(e) => {
+                            // When blurred, update with formatted value
+                            const rawValue = e.target.value.replace(
+                              /[^0-9.]/g,
+                              "",
+                            );
+                            e.target.value = formatWithCommas(rawValue);
+                          }}
+                          onChange={(e) => {
+                            // Remove any non-numeric characters except decimal point
+                            const value = e.target.value.replace(
+                              /[^0-9.]/g,
+                              "",
+                            );
+                            updateItem(item.id, "unitPrice", value);
+
+                            // Update total based on quantity and unit price
+                            const quantity = Number(item.quantity) || 0;
+                            const unitPrice = Number(value) || 0;
+                            updateItem(item.id, "total", quantity * unitPrice);
+                          }}
+                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                        />
+                      </td>
+
+                      <td className="px-3 py-2">
+                        <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
+                          {formatWithCommas(item.total) || 0}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          {/* Add Item Button */}
+                          <button
+                            type="button"
+                            onClick={() => addItemAfter(item.id)}
+                            className="text-primary hover:text-primary/80"
+                            title="Add item after this row"
+                          >
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                              ></path>
+                            </svg>
+                          </button>
+
+                          {/* Delete Button - Only show if there's more than one item */}
+                          {items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="text-danger hover:text-danger/80"
+                              title="Remove this item"
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M6 18L18 6M6 6l12 12"
+                                ></path>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Additional Items Quotation */}
+          <div className="mb-8">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-black dark:text-white">
+                Additional Items
+              </h3>
+              <button
+                type="button"
+                onClick={addItem}
+                className="bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center rounded-md px-3 py-1.5 transition"
+              >
+                <svg
+                  className="mr-1 h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
+                </svg>
+                Add Item
+              </button>
+            </div>
+
+            <div className="border-stroke dark:border-strokedark overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-full">
+                <thead>
+                  <tr className="dark:bg-meta-4 bg-gray-100">
+                    <th className="w-8 px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      #
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Description
+                    </th>
+                    <th className="w-20 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Qty
+                    </th>
+                    <th className="w-20 px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Unit
+                    </th>
+                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Unit Price
+                    </th>
+                    {/* Remove the discount column header */}
+                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Amount
+                    </th>
+                    <th className="w-10 px-3 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase"></th>
+                  </tr>
+                </thead>
+                <tbody className="dark:divide-strokedark divide-y divide-gray-200">
+                  {items.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className={
+                        index % 2 === 1 ? "dark:bg-meta-4/30 bg-gray-50" : ""
+                      }
+                    >
+                      <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
+                        {index + 1}
+                      </td>
+
+                      <td className="px-3 py-2">
+                        <div className="grid grid-cols-3 gap-2">
+                          {/* Category Dropdown - Fixed Version */}
+                          <select
+                            value={item.category || ""}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const category = e.target.value;
+                              console.log("Selected category:", category);
+
+                              // Create a new complete object rather than multiple updates
+                              const updatedItem = {
+                                ...item,
+                                productId: "",
+                                category,
+                                subcategory: "",
+                                productName: "",
+                                description: "",
+                                unitPrice: 0,
+                                unit: "unit",
+                                total: 0,
+                              };
+
+                              // Replace just this one item in the items array
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+
+                              // Add logging for subcategory selection
+                              logSubcategorySelection(category);
+                            }}
+                            className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                          >
+                            <option value="">Select Category</option>
+                            {additionalItemsData.categories.map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Subcategory Dropdown - Fixed Version */}
+                          <select
+                            value={item.subcategory || ""}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const subcategory = e.target.value;
+                              console.log("Selected subcategory:", subcategory);
+
+                              // Add this line:
+                              if (subcategory)
+                                debugProductStructure(
+                                  item.category,
+                                  subcategory,
+                                );
+
+                              // Update all dependent fields in one go
+                              const updatedItem = {
+                                ...item,
+                                productId: "",
+                                subcategory,
+                                productName: "",
+                                description: "",
+                                unitPrice: 0,
+                                unit: "unit",
+                                total: 0,
+                              };
+
+                              // Replace just this one item in the items array
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                            }}
+                            disabled={
+                              !item.category ||
+                              !additionalItemsData.subcategories[item.category]?.length
+                            }
+                            className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                          >
+                            <option value="">Select Subcategory</option>
+                            {item.category &&
+                            additionalItemsData.subcategories[item.category]?.length > 0 ? (
+                              additionalItemsData.subcategories[item.category].map((subcat) => (
+                                <option key={subcat} value={subcat}>
+                                  {subcat}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="" disabled>
+                                No subcategories available
+                              </option>
+                            )}
+                          </select>
+
+                          {/* Product Dropdown - Fixed Version */}
+                          <select
+                            value={String(item.productId || "")}
+                            onChange={(e) => {
+                              e.stopPropagation(); // Prevent event bubbling
+                              const productId = e.target.value;
+                              console.log("Product selected:", productId);
+
+                              // Create a complete updated item to avoid multiple state updates
+                              const updatedItem = { ...item, productId };
+
+                              if (productId && additionalItemsData.productLookup[productId]) {
+                                const product = additionalItemsData.productLookup[productId];
+                                console.log(
+                                  "Found product in lookup:",
+                                  product,
+                                );
+
+                                // Update all relevant fields at once
+                                // updatedItem.description = product.name || "";
+                                updatedItem.productName = product.name || "";
+                                updatedItem.description =
+                                  product.description || "";
+                                updatedItem.unitPrice = product.price || 0;
+                                updatedItem.discount = product.discount || 0;
+                                updatedItem.unit = product.unit || "unit";
+
+                                // Calculate total
+                                const quantity =
+                                  Number(updatedItem.quantity) || 1;
+                                updatedItem.total =
+                                  quantity * updatedItem.unitPrice;
+                              }
+
+                              // Update the entire item at once
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                            }}
+                            disabled={!item.category || !item.subcategory}
+                            className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                          >
+                            <option value="">Select Product</option>
+                            {item.category &&
+                              item.subcategory &&
+                              additionalItemsData.productsStructure[item.category]?.[item.subcategory]?.map(
+                                (product) => (
+                                  <option
+                                    key={product.id}
+                                    value={String(product.id)}
+                                  >
+                                    {product.name}
+                                  </option>
+                                ),
+                              )}
+                          </select>
+                        </div>
+
+                        {/* Hidden display for the selected product description (optional) */}
+                        {item.description && (
+                          <div className="mt-1 truncate text-xs text-gray-500 italic dark:text-gray-400">
+                            {item.description}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Quantity Input with 0.1 Increment/Decrement */}
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.1"
+                          value={
+                            item.quantity !== undefined ? item.quantity : 0
+                          }
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent event bubbling
+                            // Parse the input value as a float
+                            const value = parseFloat(e.target.value);
+                            updateItem(item.id, "quantity", value);
+                          }}
+                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                        />
+                      </td>
+
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={item.unit || ""}
+                          onChange={(e) =>
+                            updateItem(item.id, "unit", e.target.value)
+                          }
+                          placeholder="unit"
+                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                        />
+                      </td>
+
+                      {/* Unit Price Column */}
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={
+                            item.unitPrice
+                              ? formatWithCommas(item.unitPrice)
+                              : ""
+                          }
+                          onFocus={(e) => {
+                            // When focused, show raw number for editing
+                            e.target.value = item.unitPrice?.toString() || "";
+                          }}
+                          onBlur={(e) => {
+                            // When blurred, update with formatted value
+                            const rawValue = e.target.value.replace(
+                              /[^0-9.]/g,
+                              "",
+                            );
+                            e.target.value = formatWithCommas(rawValue);
+                          }}
+                          onChange={(e) => {
+                            // Remove any non-numeric characters except decimal point
+                            const value = e.target.value.replace(
+                              /[^0-9.]/g,
+                              "",
+                            );
+                            updateItem(item.id, "unitPrice", value);
+
+                            // Update total based on quantity and unit price
+                            const quantity = Number(item.quantity) || 0;
+                            const unitPrice = Number(value) || 0;
+                            updateItem(item.id, "total", quantity * unitPrice);
+                          }}
+                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                        />
+                      </td>
+
+                      <td className="px-3 py-2">
+                        <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
+                          {formatWithCommas(item.total) || 0}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          {/* Add Item Button */}
+                          <button
+                            type="button"
+                            onClick={() => addItemAfter(item.id)}
+                            className="text-primary hover:text-primary/80"
+                            title="Add item after this row"
+                          >
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                              ></path>
+                            </svg>
+                          </button>
+
+                          {/* Delete Button - Only show if there's more than one item */}
+                          {items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="text-danger hover:text-danger/80"
+                              title="Remove this item"
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M6 18L18 6M6 6l12 12"
+                                ></path>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Services Quotation */}
+          <div className="mb-8">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-black dark:text-white">
+                Services
+              </h3>
+              <button
+                type="button"
+                onClick={addItem}
+                className="bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center rounded-md px-3 py-1.5 transition"
+              >
+                <svg
+                  className="mr-1 h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
+                </svg>
+                Add Item
+              </button>
+            </div>
+
+            <div className="border-stroke dark:border-strokedark overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-full">
+                <thead>
+                  <tr className="dark:bg-meta-4 bg-gray-100">
+                    <th className="w-8 px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      #
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Description
+                    </th>
+                    <th className="w-20 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Qty
+                    </th>
+                    <th className="w-20 px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Unit
+                    </th>
+                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Unit Price
+                    </th>
+                    {/* Remove the discount column header */}
+                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Amount
+                    </th>
+                    <th className="w-10 px-3 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase"></th>
+                  </tr>
+                </thead>
+                <tbody className="dark:divide-strokedark divide-y divide-gray-200">
+                  {items.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className={
+                        index % 2 === 1 ? "dark:bg-meta-4/30 bg-gray-50" : ""
+                      }
+                    >
+                      <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
+                        {index + 1}
+                      </td>
+
+                      <td className="px-3 py-2">
+                        <div className="grid grid-cols-3 gap-2">
+                          {/* Category Dropdown - Fixed Version */}
+                          <select
+                            value={item.category || ""}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const category = e.target.value;
+                              console.log("Selected category:", category);
+
+                              // Create a new complete object rather than multiple updates
+                              const updatedItem = {
+                                ...item,
+                                productId: "",
+                                category,
+                                subcategory: "",
+                                productName: "",
+                                description: "",
+                                unitPrice: 0,
+                                unit: "unit",
+                                total: 0,
+                              };
+
+                              // Replace just this one item in the items array
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+
+                              // Add logging for subcategory selection
+                              logSubcategorySelection(category);
+                            }}
+                            className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                          >
+                            <option value="">Select Category</option>
+                            {servicesData.categories.map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Subcategory Dropdown - Fixed Version */}
+                          <select
+                            value={item.subcategory || ""}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const subcategory = e.target.value;
+                              console.log("Selected subcategory:", subcategory);
+
+                              // Add this line:
+                              if (subcategory)
+                                debugProductStructure(
+                                  item.category,
+                                  subcategory,
+                                );
+
+                              // Update all dependent fields in one go
+                              const updatedItem = {
+                                ...item,
+                                productId: "",
+                                subcategory,
+                                productName: "",
+                                description: "",
+                                unitPrice: 0,
+                                unit: "unit",
+                                total: 0,
+                              };
+
+                              // Replace just this one item in the items array
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                            }}
+                            disabled={
+                              !item.category ||
+                              !servicesData.subcategories[item.category]?.length
+                            }
+                            className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                          >
+                            <option value="">Select Subcategory</option>
+                            {item.category &&
+                            servicesData.subcategories[item.category]?.length > 0 ? (
+                              servicesData.subcategories[item.category].map((subcat) => (
+                                <option key={subcat} value={subcat}>
+                                  {subcat}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="" disabled>
+                                No subcategories available
+                              </option>
+                            )}
+                          </select>
+
+                          {/* Product Dropdown - Fixed Version */}
+                          <select
+                            value={String(item.productId || "")}
+                            onChange={(e) => {
+                              e.stopPropagation(); // Prevent event bubbling
+                              const productId = e.target.value;
+                              console.log("Product selected:", productId);
+
+                              // Create a complete updated item to avoid multiple state updates
+                              const updatedItem = { ...item, productId };
+
+                              if (productId && servicesData.productLookup[productId]) {
+                                const product = servicesData.productLookup[productId];
+                                console.log(
+                                  "Found product in lookup:",
+                                  product,
+                                );
+
+                                // Update all relevant fields at once
+                                // updatedItem.description = product.name || "";
+                                updatedItem.productName = product.name || "";
+                                updatedItem.description =
+                                  product.description || "";
+                                updatedItem.unitPrice = product.price || 0;
+                                updatedItem.discount = product.discount || 0;
+                                updatedItem.unit = product.unit || "unit";
+
+                                // Calculate total
+                                const quantity =
+                                  Number(updatedItem.quantity) || 1;
+                                updatedItem.total =
+                                  quantity * updatedItem.unitPrice;
+                              }
+
+                              // Update the entire item at once
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                            }}
+                            disabled={!item.category || !item.subcategory}
+                            className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
+                          >
+                            <option value="">Select Product</option>
+                            {item.category &&
+                              item.subcategory &&
+                              servicesData.productsStructure[item.category]?.[item.subcategory]?.map(
                                 (product) => (
                                   <option
                                     key={product.id}
