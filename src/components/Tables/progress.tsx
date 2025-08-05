@@ -310,12 +310,12 @@ export default function ProgressTable({
                       : ""
                   } transition-all duration-200`}
                 >
-                  {index + 1}
+                  {info.count}
                 </div>
                 <div className="mt-1 max-w-[60px] text-center text-[10px] text-wrap text-black dark:text-white">
                   {info.stage}
                 </div>
-                <div className="text-[10px] font-bold">{info.count}</div>
+                <div className="text-[10px] font-bold">{index + 1}</div>
               </div>
             );
           })}
