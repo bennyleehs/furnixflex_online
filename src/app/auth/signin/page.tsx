@@ -33,10 +33,11 @@ const SignIn = () => {
 
       const data = await response.json();
       if (response.ok) {
-        // Store user data on successful login
+        // Store user data as object on successful login
         setUser({
           uid: data.uid,
           name: data.name || "User", // Assuming API returns user name or fallback
+          role: data.role,
         });
 
         setMessage(data.message || "Sign-in successful");
@@ -64,12 +65,12 @@ const SignIn = () => {
       <div className="w-[100%] max-w-[360px] px-4">
         <div className="rounded-lg bg-white shadow-md">
           <form className="px-5 py-10" onSubmit={handleSubmit}>
-            <div className="mb-10 flex justify-center py-6">
+            <div className="mb-10 flex justify-center py-2">
               <div className="group relative">
                 <div className="relative">
                   <Image
                     src="/images/logo/classy_logo_ori.svg"
-                    width={220}
+                    width={240}
                     height={140}
                     alt="Classy Logo"
                     className="h-auto transform drop-shadow-sm transition duration-300 group-hover:scale-105"
@@ -111,7 +112,7 @@ const SignIn = () => {
               </div>
             </div>
 
-            <div className="mb-14">
+            <div className="mb-10">
               <label className="mb-2.5 block text-sm font-medium text-black">
                 Password
               </label>
@@ -184,7 +185,7 @@ const SignIn = () => {
                 </span>
               </div>
             </div>
-            <div className="mb-1">
+            <div className="mb-6">
               <button
                 type="submit"
                 disabled={isLoading}
@@ -193,7 +194,7 @@ const SignIn = () => {
                 {isLoading ? "LOGGING IN..." : "LOG IN"}
               </button>
             </div>
-            <div className="mt-2 text-center">
+            <div className="text-center">
               <div className="h-6 sm:h-6 md:h-7">
                 {message && (
                   <p

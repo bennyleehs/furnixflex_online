@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     uid: user.uid,
     name: user.name, // You might want to use a different field for name if available
     // departmentName: user.departmentName,
-    // role: user.roleName
+    role: user.roleName
   });
   // res.headers.set(
   //   "Set-Cookie",
