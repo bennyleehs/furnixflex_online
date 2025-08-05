@@ -9,15 +9,48 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useAuth } from "@/context/AuthContext";
 import ComingSoon from "@/components/DisplayPage/ComingSoon";
 
-interface Users {}
+interface Users {
+  id: number; 
+  uid: string;
+  name: string;
+  nric: string;
+  phone: string;
+  email: string;
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  state: string;
+  country: string;
+  bank_name: string;
+  bank_account: string;
+  branchRef: string;
+  deptRef?: string;
+  branchName: string;
+  deptName: string;
+  roleName: string;
+  status: string;
+  profilePhoto?: string;
+}
+
+interface Document {
+  id: number;
+  name: string;
+  type: string;
+  size: number;
+  uploadDate: string;
+  url: string;
+}
 
 const Profile = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [employee, setEmployee] = useState<Users | null>(null);
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 

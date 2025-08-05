@@ -12,6 +12,9 @@ import {
 type User = {
   uid: string;
   name: string;
+  role: string;
+  departmentName?: string;
+  profileImage?: string; 
   // Add other user properties as needed
 };
 
@@ -19,7 +22,9 @@ type AuthContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
   logout: () => void;
+  updateProfileImage: (imageUrl: string) => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 };
 
 // Create the context
@@ -60,11 +65,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // fetch('/api/auth/logout', { method: 'POST' });
   };
 
+  // Function for AuthProvider - update profile img
+  const updateProfileImage = (imageUrl: string) => {
+    if (user) {
+      const updatedUser = {
+        ...user,
+        profileImage: imageUrl
+      };
+      setUser(updatedUser);
+    }
+  };
+
   const value = {
     user,
     setUser,
     logout,
+    updateProfileImage,
     isAuthenticated: !!user,
+    isLoading
   };
 
   return (
