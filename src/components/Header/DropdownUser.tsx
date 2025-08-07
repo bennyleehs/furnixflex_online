@@ -1,5 +1,5 @@
 //src/components/Header/DropdownUser.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
@@ -9,6 +9,12 @@ import { useAuth } from "@/context/AuthContext";
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useAuth(); // Get authenticated user from auth context
+  const [imageError, setImageError] = useState(false);
+
+  // Reset image error when user changes
+  useEffect(() => {
+    setImageError(false);
+  }, [user?.uid]);
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -23,16 +29,22 @@ const DropdownUser = () => {
           </span>
           <span className="block text-xs">{user?.name || "Guest User"}</span>
         </span>
-        <span className="h-12 w-12 rounded-full">
+        <span className="h-12 w-12 rounded-full overflow-hidden">
           <Image
             width={112}
             height={112}
-            src={"/images/logo/classy_icon.svg"}
+            src={user?.uid && !imageError 
+              ? `/admin/employee/${user.uid}/upload/profileImage${user.uid}.jpg?v=${Date.now()}` // Add cache-busting
+              : "/images/logo/classy_icon.svg"}
             style={{
-              width: "auto",
-              height: "auto",
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
             }}
             alt="User"
+            onError={(_e) => {
+              setImageError(true);
+            }}
           />
         </span>
 
@@ -66,7 +78,8 @@ const DropdownUser = () => {
           <ul className="border-stroke dark:border-strokedark flex flex-col gap-5 border-b px-6 py-7">
             <li>
               <Link
-                href="/profile"
+                // href="/profile"
+                href={`/profile?uid=${user?.uid || ''}`}
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
