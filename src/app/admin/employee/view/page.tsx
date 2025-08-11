@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 // Define the employee type
 interface Employee {
@@ -39,6 +40,7 @@ interface Document {
 }
 
 export default function EmployeeDetailPage() {
+  const { user, updateProfileImage } = useAuth();
   // Replace params with searchParams
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -130,12 +132,12 @@ export default function EmployeeDetailPage() {
   const handleBack = () => {
     router.push("/admin/employee");
   };
-  
+
   // Handle profile photo upload
   const handlePhotoUpload = () => {
     fileInputRef.current?.click();
   };
-  
+
   // Update uploadProfilePhoto function
   const uploadProfilePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -147,11 +149,11 @@ export default function EmployeeDetailPage() {
 
       // Create form data for upload
       const formData = new FormData();
-      formData.append("photo", file); // Note: still using 'photo' key
+      formData.append("photo", file);
       formData.append("employeeId", employee.id.toString());
       formData.append("employeeUid", employee.uid);
 
-      // Call API using the new combined endpoint
+      // Call API using the combined endpoint
       const response = await fetch("/api/admin/employee/upload", {
         method: "POST",
         body: formData,
@@ -166,29 +168,18 @@ export default function EmployeeDetailPage() {
 
       const data = await response.json();
 
+      // Create the profile photo URL with cache busting
+      const profilePhotoUrl = `/admin/employee/${employee.uid}/upload/profileImage${employee.uid}.jpg?v=${Date.now()}`;
+
       // Update employee state with new photo URL
       setEmployee({
         ...employee,
-        profilePhoto: data.photoUrl,
+        profilePhoto: profilePhotoUrl,
       });
 
-      // When uploading a photo, also update the employee record in the database
-      const updateResponse = await fetch("/api/admin/employee/updatePhoto", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId: employee.id,
-          photoUrl: data.photoUrl,
-        }),
-      });
-
-      if (!updateResponse.ok) {
-        const errorData = await updateResponse.json().catch(() => ({}));
-        throw new Error(
-          `Failed to update employee photo in database: ${errorData.message || updateResponse.statusText}`,
-        );
+      // Use the user from the hook that was called at the top level
+      if (user && user.uid === employee.uid) {
+        updateProfileImage(profilePhotoUrl);
       }
 
       setSuccessMessage("Profile photo updated successfully");
