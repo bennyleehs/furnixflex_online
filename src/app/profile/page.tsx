@@ -210,50 +210,54 @@ const Profile = () => {
   const uploadProfilePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !users) return;
-    
+
     try {
       setUploading(true);
       setUploadError(null);
-      
+
       // Create form data for upload
       const formData = new FormData();
-      formData.append('photo', file);
-      formData.append('usersId', users.id.toString());
-      formData.append('usersUid', users.uid);
-      
+      formData.append("photo", file);
+      formData.append("usersId", users.id.toString());
+      formData.append("usersUid", users.uid);
+
       // Call API using the combined endpoint
-      const response = await fetch('/api/profile/upload', {
-        method: 'POST',
-        body: formData
+      const response = await fetch("/api/profile/upload", {
+        method: "POST",
+        body: formData,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Failed to upload photo: ${errorData.message || response.statusText}`);
+        throw new Error(
+          `Failed to upload photo: ${errorData.message || response.statusText}`,
+        );
       }
-      
+
       const data = await response.json();
-      
+
       // Create the profile photo URL with cache busting
       const profilePhotoUrl = `/admin/employee/${users.uid}/upload/profileImage${users.uid}.jpg?v=${Date.now()}`;
-      
+
       // Update employee state with new photo URL
       setUsers({
         ...users,
-        profilePhoto: profilePhotoUrl
+        profilePhoto: profilePhotoUrl,
       });
-      
+
       // Use the user from the hook that was called at the top level
       if (user && user.uid === users.uid) {
         updateProfileImage(profilePhotoUrl);
       }
-      
+
       setSuccessMessage("Profile photo updated successfully");
       setTimeout(() => setSuccessMessage(null), 3000);
-      
     } catch (err) {
       console.error("Upload error details:", err);
-      setUploadError("Error uploading photo: " + (err instanceof Error ? err.message : String(err)));
+      setUploadError(
+        "Error uploading photo: " +
+          (err instanceof Error ? err.message : String(err)),
+      );
     } finally {
       setUploading(false);
     }
@@ -340,7 +344,7 @@ const Profile = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          employeeUid: users?.uid,
+          usersUid: users?.uid,
           documentId: docId,
         }),
       });
@@ -394,26 +398,28 @@ const Profile = () => {
 
         // Fetch documents for this employee
         if (data.uid) {
-          const docsRes = await fetch(`/api/admin/employee/upload?employeeUid=${data.uid}`);
+          const docsRes = await fetch(
+            `/api/admin/employee/upload?employeeUid=${data.uid}`,
+          );
           if (docsRes.ok) {
             const docsData = await docsRes.json();
             setDocuments(docsData.documents || []);
-            
+
             // If there's a profile photo and the employee doesn't have one set, update it
             if (docsData.profilePhoto && !data.profilePhoto) {
               setUsers({
                 ...data,
-                profilePhoto: docsData.profilePhoto
+                profilePhoto: docsData.profilePhoto,
               });
             }
           }
         }
-        
+
         if (data.profilePhoto) {
           // Force reload of profile image by appending timestamp
           setUsers({
             ...data,
-            profilePhoto: `${data.profilePhoto}${data.profilePhoto.includes('?') ? '&' : '?'}t=${Date.now()}`
+            profilePhoto: `${data.profilePhoto}${data.profilePhoto.includes("?") ? "&" : "?"}t=${Date.now()}`,
           });
         }
       } catch (err) {
@@ -434,342 +440,180 @@ const Profile = () => {
       <div>
         <Breadcrumb pageName="Profile" noHeader={true} />
 
-        <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white">
-          <div className="border-stroke border-b p-6 dark:border-white">
-            <div className="flex flex-col gap-6 md:flex-row">
-              <div className="flex flex-col items-center">
-                <div className="dark:border-boxdark relative mb-3 h-32 w-32 overflow-hidden rounded-full border-4 border-gray-100">
-                  {users?.profilePhoto? (
-                    <Image
-                      src={`${users.profilePhoto.includes('?') ? users.profilePhoto : `${users.profilePhoto}?v=${Date.now()}`}`}
-                      alt={users.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                  <div className="dark:bg-meta-4 flex h-full w-full items-center justify-center bg-gray-200">
-                    {/* people icon */}
-                    <svg
-                      className="h-16 w-16 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </div>
-                   )} 
-
-                  {/* Upload overlay */}
-                  <div
-                    className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
-                    onClick={handlePhotoUpload}
-                  >
-                    <svg
-                      className="h-8 w-8 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </div>
-
-                  {uploading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white"></div>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={uploadProfilePhoto}
-                />
-              </div>
-              {/* User Info */}
-              <div className="flex-1">
-                <h2 className="mb-1 text-2xl font-bold text-gray-800 dark:text-white">
-                  {users?.name}
-                </h2>
-                <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-300">
-                  <span>UID: {users?.uid}</span>
-                  <span className="h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400"></span>
-                  <span>{users?.name}</span>
-                  <span className="h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400"></span>
-                  <span>
-                    Status:
-                    <span
-                      className={`ml-1 rounded-full px-2 py-1 font-medium ${
-                        users?.status === "Active"
-                          ? "text-success dark:bg-success/60 bg-green-200/60 dark:text-green-100"
-                          : users?.status === "Inactive"
-                            ? "text-warning bg-warning/20 dark:bg-warning/60 dark:text-yellow-100"
-                            : "text-danger bg-danger/20 dark:bg-danger/60 dark:text-red-200"
-                      }`}
-                    >
-                      {users?.status}
-                    </span>
-                  </span>
-                </div>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {users?.email && (
-                    <div className="flex items-center text-sm">
-                      <svg
-                        className="mr-1 h-4 w-4 text-gray-500"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                      </svg>
-                      {users?.email}
-                    </div>
-                  )}
-
-                  {users?.phone && (
-                    <div className="flex items-center text-sm">
-                      <svg
-                        className="mr-1 h-4 w-4 text-gray-500"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                      </svg>
-                      {users?.phone}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Change Password button */}
-              <div className="flex w-full justify-center md:w-auto">
-                <button
-                  onClick={() => setIsChangePasswordModalOpen(true)}
-                  className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:w-auto md:px-4 dark:text-white dark:hover:text-white"
-                >
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    ></path>
-                  </svg>
-                  Change Password
-                </button>
-              </div>
-            </div>
+        {/* Success message */}
+        {successMessage && (
+          <div className="mb-4 flex items-center justify-between rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700">
+            <span>{successMessage}</span>
+            <button onClick={() => setSuccessMessage(null)}>
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+            </button>
           </div>
-          {/* User Info section */}
-          {/* <div className="p-6">
-            <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
-              {users?.name}
-            </h3>
-            <p className="font-medium">{user?.uid || "None"}</p>
-            <p className="font-medium">User&apos;s Information</p>
-          </div> */}
-          <div className="p-6">
-            <div className="mb-6">
-              <div className="border-stroke dark:border-strokedark border-b">
-                <ul className="-mb-px flex flex-wrap">
-                  <li className="mr-2">
-                    <button
-                      onClick={() => handleTabChange("details")}
-                      className={`inline-block border-b-2 px-4 py-2 font-medium ${
-                        activeTab === "details"
-                          ? "border-primary text-primary"
-                          : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                      }`}
-                    >
-                      User Profile
-                    </button>
-                  </li>
-                  <li className="mr-2">
-                    <button
-                      onClick={() => handleTabChange("documents")}
-                      className={`inline-block border-b-2 px-4 py-2 font-medium ${
-                        activeTab === "documents"
-                          ? "border-primary text-primary"
-                          : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                      }`}
-                    >
-                      Documents
-                      <span className="dark:bg-meta-4 ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs">
-                        {documents.length}
-                      </span>
-                    </button>
-                  </li>
-                </ul>
-              </div>
+        )}
+
+        <div ref={topRef} className="flex flex-col gap-5">
+          {/* Error state */}
+          {error && (
+            <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+              {error}
             </div>
+          )}
 
-            {/* Employee Details Section - Remove the ref from here */}
-            <div className="mb-8 grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 lg:grid-cols-3">
-              {/* Personal Details */}
-              <div>
-                <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
-                  Personal Details
-                </h3>
-                <ul className="space-y-1">
-                  <li className="flex">
-                    <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                      NRIC:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.nric || "-"}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Company Details */}
-              <div>
-                <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
-                  Company Details
-                </h3>
-                <ul className="space-y-1">
-                  <li className="flex">
-                    <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                      Branch:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.branchName || "-"}
-                    </span>
-                  </li>
-                  <li className="flex">
-                    <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                      Department:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.deptName || "-"}
-                    </span>
-                  </li>
-                  <li className="flex">
-                    <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                      Role:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.roleName || "-"}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Banking Details */}
-              <div>
-                <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
-                  Banking Details
-                </h3>
-                <ul className="space-y-1">
-                  <li className="flex">
-                    <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                      Bank:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.bank_name || "-"}
-                    </span>
-                  </li>
-                  <li className="flex">
-                    <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                      Account:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.bank_account || "-"}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Address Information - spans full width */}
-              <div className="lg:col-span-3">
-                <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
-                  Address
-                </h3>
-                <ul className="space-y-1">
-                  <li className="flex flex-col sm:flex-row">
-                    <span className="w-24 text-sm text-gray-500 sm:w-24 dark:text-gray-400">
-                      Line 1:
-                    </span>
-                    <span className="text-sm text-black dark:text-white">
-                      {users?.address_line1 || "-"}
-                    </span>
-                  </li>
-                  {users?.address_line2 && (
-                    <li className="flex flex-col sm:flex-row">
-                      <span className="w-24 text-sm text-gray-500 sm:w-24 dark:text-gray-400">
-                        Line 2:
-                      </span>
-                      <span className="text-sm text-black dark:text-white">
-                        {users?.address_line2}
-                      </span>
-                    </li>
-                  )}
-                  <li className="flex flex-wrap gap-x-4">
-                    <div className="flex">
-                      <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                        City:
-                      </span>
-                      <span className="text-sm text-black dark:text-white">
-                        {users?.city || "-"}
-                      </span>
-                    </div>
-                    <div className="flex">
-                      <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                        State:
-                      </span>
-                      <span className="text-sm text-black dark:text-white">
-                        {users?.state || "-"}
-                      </span>
-                    </div>
-                    <div className="flex">
-                      <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
-                        Country:
-                      </span>
-                      <span className="text-sm text-black dark:text-white">
-                        {users?.country || "-"}
-                      </span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Documents Section - Always visible with ref for scrolling */}
-            <div
-              ref={documentsSectionRef}
-              className="border-stroke dark:border-strokedark mt-6 border-t pt-6"
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  Documents
-                </h3>
-
-                <button
-                  onClick={handleDocumentUpload}
-                  className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:px-4 dark:text-white dark:hover:text-white"
-                  disabled={uploading}
+          {/* Upload error */}
+          {uploadError && (
+            <div className="mb-4 flex items-center justify-between rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+              <span>{uploadError}</span>
+              <button onClick={() => setUploadError(null)}>
+                <svg
+                  className="h-4 w-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
                 >
-                  {uploading ? (
-                    <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 dark:border-white"></div>
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* Loading state */}
+          {loading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"></div>
+            </div>
+          )}
+
+          {!loading && !error && users && (
+            <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white">
+              <div className="border-stroke border-b p-6 dark:border-white">
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <div className="flex flex-col items-center">
+                    <div className="dark:border-boxdark relative mb-3 h-32 w-32 overflow-hidden rounded-full border-4 border-gray-100">
+                      {users?.profilePhoto ? (
+                        <Image
+                          src={`${users.profilePhoto.includes("?") ? users.profilePhoto : `${users.profilePhoto}?v=${Date.now()}`}`}
+                          alt={users.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="dark:bg-meta-4 flex h-full w-full items-center justify-center bg-gray-200">
+                          {/* people icon */}
+                          <svg
+                            className="h-16 w-16 text-gray-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            ></path>
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Upload overlay */}
+                      <div
+                        className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
+                        onClick={handlePhotoUpload}
+                      >
+                        <svg
+                          className="h-8 w-8 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+
+                      {uploading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white"></div>
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={uploadProfilePhoto}
+                    />
+                  </div>
+                  {/* User Info */}
+                  <div className="flex-1">
+                    <h2 className="mb-1 text-2xl font-bold text-gray-800 dark:text-white">
+                      {users?.name}
+                    </h2>
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-300">
+                      <span>UID: {users?.uid}</span>
+                      <span className="h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400"></span>
+                      <span>{users?.roleName}</span>
+                      <span className="h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400"></span>
+                      <span>
+                        Status:
+                        <span
+                          className={`ml-1 rounded-full px-2 py-1 font-medium ${
+                            users?.status === "Active"
+                              ? "text-success dark:bg-success/60 bg-green-200/60 dark:text-green-100"
+                              : users?.status === "Inactive"
+                                ? "text-warning bg-warning/20 dark:bg-warning/60 dark:text-yellow-100"
+                                : "text-danger bg-danger/20 dark:bg-danger/60 dark:text-red-200"
+                          }`}
+                        >
+                          {users?.status}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {users?.email && (
+                        <div className="flex items-center text-sm">
+                          <svg
+                            className="mr-1 h-4 w-4 text-gray-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                          </svg>
+                          {users?.email}
+                        </div>
+                      )}
+
+                      {users?.phone && (
+                        <div className="flex items-center text-sm">
+                          <svg
+                            className="mr-1 h-4 w-4 text-gray-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                          </svg>
+                          {users?.phone}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Change Password button */}
+                  <div className="flex w-full justify-center md:w-auto">
+                    <button
+                      onClick={() => setIsChangePasswordModalOpen(true)}
+                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:w-auto md:px-4 dark:text-white dark:hover:text-white"
+                    >
                       <svg
                         className="mr-2 h-4 w-4"
                         fill="none"
@@ -779,178 +623,394 @@ const Profile = () => {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 4v16m8-8H4"
+                          strokeWidth="1.5"
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                         ></path>
                       </svg>
-                      Upload Document
-                    </>
-                  )}
-                </button>
-
-                {/* Hidden document input */}
-                <input
-                  type="file"
-                  ref={documentInputRef}
-                  className="hidden"
-                  onChange={uploadDocument}
-                />
-              </div>
-
-              {/* Documents list */}
-              {documents.length === 0 ? (
-                <div className="py-8 text-center text-gray-500">
-                  No documents found. Upload a document to get started.
+                      Change Password
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <div className="divide-stroke dark:divide-strokedark divide-y">
-                  {documents.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="flex items-center justify-between py-4"
-                    >
-                      <div className="flex items-center">
-                        {/* Document icon based on type */}
-                        <div className="dark:bg-meta-4 mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-                          {doc.type.includes("pdf") ? (
-                            <svg
-                              className="text-danger h-6 w-6"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          ) : doc.type.includes("word") ||
-                            doc.type.includes("document") ? (
-                            <svg
-                              className="text-primary h-6 w-6"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          ) : doc.type.includes("image") ? (
-                            <svg
-                              className="text-success h-6 w-6"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              className="h-6 w-6 text-gray-400"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          )}
-                        </div>
+              </div>
+              {/* User Info section */}
+              {/* <div className="p-6">
+            <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
+              {users?.name}
+            </h3>
+            <p className="font-medium">{user?.uid || "None"}</p>
+            <p className="font-medium">User&apos;s Information</p>
+          </div> */}
+              <div className="p-6">
+                <div className="mb-6">
+                  <div className="border-stroke dark:border-strokedark border-b">
+                    <ul className="-mb-px flex flex-wrap">
+                      <li className="mr-2">
+                        <button
+                          onClick={() => handleTabChange("details")}
+                          className={`inline-block border-b-2 px-4 py-2 font-medium ${
+                            activeTab === "details"
+                              ? "border-primary text-primary"
+                              : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                          }`}
+                        >
+                          User Profile
+                        </button>
+                      </li>
+                      <li className="mr-2">
+                        <button
+                          onClick={() => handleTabChange("documents")}
+                          className={`inline-block border-b-2 px-4 py-2 font-medium ${
+                            activeTab === "documents"
+                              ? "border-primary text-primary"
+                              : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                          }`}
+                        >
+                          Documents
+                          <span className="dark:bg-meta-4 ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs">
+                            {documents.length}
+                          </span>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
 
-                        <div>
-                          <h4 className="text-sm font-medium text-black dark:text-white">
-                            {doc.name}
-                          </h4>
-                          <div className="mt-1 flex items-center text-xs text-gray-500">
-                            <span>{formatFileSize(doc.size)}</span>
-                            <span className="mx-2">•</span>
-                            <span>Uploaded {doc.uploadDate}</span>
+                {/* Employee Details Section - Remove the ref from here */}
+                <div className="mb-8 grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 lg:grid-cols-3">
+                  {/* Personal Details */}
+                  <div>
+                    <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+                      Personal Details
+                    </h3>
+                    <ul className="space-y-1">
+                      <li className="flex">
+                        <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                          NRIC:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.nric || "-"}
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Company Details */}
+                  <div>
+                    <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+                      Company Details
+                    </h3>
+                    <ul className="space-y-1">
+                      <li className="flex">
+                        <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                          Branch:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.branchName || "-"}
+                        </span>
+                      </li>
+                      <li className="flex">
+                        <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                          Department:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.deptName || "-"}
+                        </span>
+                      </li>
+                      <li className="flex">
+                        <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                          Role:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.roleName || "-"}
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Banking Details */}
+                  <div>
+                    <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+                      Banking Details
+                    </h3>
+                    <ul className="space-y-1">
+                      <li className="flex">
+                        <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                          Bank:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.bank_name || "-"}
+                        </span>
+                      </li>
+                      <li className="flex">
+                        <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                          Account:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.bank_account || "-"}
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Address Information - spans full width */}
+                  <div className="lg:col-span-3">
+                    <h3 className="mb-2 text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+                      Address
+                    </h3>
+                    <ul className="space-y-1">
+                      <li className="flex flex-col sm:flex-row">
+                        <span className="w-24 text-sm text-gray-500 sm:w-24 dark:text-gray-400">
+                          Line 1:
+                        </span>
+                        <span className="text-sm text-black dark:text-white">
+                          {users?.address_line1 || "-"}
+                        </span>
+                      </li>
+                      {users?.address_line2 && (
+                        <li className="flex flex-col sm:flex-row">
+                          <span className="w-24 text-sm text-gray-500 sm:w-24 dark:text-gray-400">
+                            Line 2:
+                          </span>
+                          <span className="text-sm text-black dark:text-white">
+                            {users?.address_line2}
+                          </span>
+                        </li>
+                      )}
+                      <li className="flex flex-wrap gap-x-4">
+                        <div className="flex">
+                          <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                            City:
+                          </span>
+                          <span className="text-sm text-black dark:text-white">
+                            {users?.city || "-"}
+                          </span>
+                        </div>
+                        <div className="flex">
+                          <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                            State:
+                          </span>
+                          <span className="text-sm text-black dark:text-white">
+                            {users?.state || "-"}
+                          </span>
+                        </div>
+                        <div className="flex">
+                          <span className="w-24 text-sm text-gray-500 dark:text-gray-400">
+                            Country:
+                          </span>
+                          <span className="text-sm text-black dark:text-white">
+                            {users?.country || "-"}
+                          </span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Documents Section - Always visible with ref for scrolling */}
+                <div
+                  ref={documentsSectionRef}
+                  className="border-stroke dark:border-strokedark mt-6 border-t pt-6"
+                >
+                  <div className="mb-5 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      Documents
+                    </h3>
+
+                    <button
+                      onClick={handleDocumentUpload}
+                      className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:px-4 dark:text-white dark:hover:text-white"
+                      disabled={uploading}
+                    >
+                      {uploading ? (
+                        <>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 dark:border-white"></div>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="mr-2 h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 4v16m8-8H4"
+                            ></path>
+                          </svg>
+                          Upload Document
+                        </>
+                      )}
+                    </button>
+
+                    {/* Hidden document input */}
+                    <input
+                      type="file"
+                      ref={documentInputRef}
+                      className="hidden"
+                      onChange={uploadDocument}
+                    />
+                  </div>
+
+                  {/* Documents list */}
+                  {documents.length === 0 ? (
+                    <div className="py-8 text-center text-gray-500">
+                      No documents found. Upload a document to get started.
+                    </div>
+                  ) : (
+                    <div className="divide-stroke dark:divide-strokedark divide-y">
+                      {documents.map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between py-4"
+                        >
+                          <div className="flex items-center">
+                            {/* Document icon based on type */}
+                            <div className="dark:bg-meta-4 mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                              {doc.type.includes("pdf") ? (
+                                <svg
+                                  className="text-danger h-6 w-6"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              ) : doc.type.includes("word") ||
+                                doc.type.includes("document") ? (
+                                <svg
+                                  className="text-primary h-6 w-6"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              ) : doc.type.includes("image") ? (
+                                <svg
+                                  className="text-success h-6 w-6"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              ) : (
+                                <svg
+                                  className="h-6 w-6 text-gray-400"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+
+                            <div>
+                              <h4 className="text-sm font-medium text-black dark:text-white">
+                                {doc.name}
+                              </h4>
+                              <div className="mt-1 flex items-center text-xs text-gray-500">
+                                <span>{formatFileSize(doc.size)}</span>
+                                <span className="mx-2">•</span>
+                                <span>Uploaded {doc.uploadDate}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="dark:text-primary dark:hover:text-primary/80 text-blue-600 hover:text-blue-800"
+                              title="View document"
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                              </svg>
+                            </a>
+
+                            <a
+                              href={doc.url}
+                              download={doc.name}
+                              className="dark:text-primary dark:hover:text-primary/80 text-blue-600 hover:text-blue-800"
+                              title="Download document"
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                              </svg>
+                            </a>
+
+                            <button
+                              onClick={() => deleteDocument(doc.id)}
+                              className="text-danger hover:text-danger/80"
+                              title="Delete document"
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="dark:text-primary dark:hover:text-primary/80 text-blue-600 hover:text-blue-800"
-                          title="View document"
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        </a>
-
-                        <a
-                          href={doc.url}
-                          download={doc.name}
-                          className="dark:text-primary dark:hover:text-primary/80 text-blue-600 hover:text-blue-800"
-                          title="Download document"
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                            />
-                          </svg>
-                        </a>
-
-                        <button
-                          onClick={() => deleteDocument(doc.id)}
-                          className="text-danger hover:text-danger/80"
-                          title="Delete document"
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

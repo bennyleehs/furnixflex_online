@@ -10,13 +10,18 @@ const publicPaths = [
   "/api/auth/signup",
 ];
 
+// Match everything EXCEPT:
+// - api/auth routes
+// - _next assets
+// - favicon.ico
+// - any path with a file extension (static files)
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|images|favicon.ico).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
 };
 
-// Helper to decode base64url safely
+// Helper to decode base64url
 function base64UrlDecode(str: string): Uint8Array {
   const base64 = str.replace(/-/g, "+").replace(/_/g, "/") + "==".slice((str.length + 3) % 4);
   const binary = atob(base64);
@@ -26,7 +31,7 @@ function base64UrlDecode(str: string): Uint8Array {
   return bytes;
 }
 
-// JWT verification using Web Crypto API (Edge-compatible)
+// JWT verification (Edge-compatible, type-safe)
 async function verifyJwt(token: string): Promise<boolean> {
   const secret = process.env.JWT_SECRET;
   if (!secret) return false;
@@ -45,7 +50,13 @@ async function verifyJwt(token: string): Promise<boolean> {
 
   const data = encoder.encode(`${headerB64}.${payloadB64}`);
   const signature = base64UrlDecode(signatureB64);
-  const isValid = await crypto.subtle.verify("HMAC", key, signature, data);
+
+  const isValid = await crypto.subtle.verify(
+    "HMAC",
+    key,
+    new Uint8Array(signature),
+    new Uint8Array(data)
+  );
 
   if (!isValid) return false;
 
@@ -59,8 +70,10 @@ async function verifyJwt(token: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Skip public paths
   if (publicPaths.includes(pathname)) return NextResponse.next();
 
+  // Check JWT
   const token = request.cookies.get("authToken")?.value;
   if (!token || !(await verifyJwt(token))) {
     const url = new URL("/auth/signin", request.url);

@@ -528,7 +528,7 @@ export default function EmployeeDetailPage() {
         {/* Loading state */}
         {loading && (
           <div className="flex items-center justify-center py-8">
-            <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
+            <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"></div>
           </div>
         )}
 
