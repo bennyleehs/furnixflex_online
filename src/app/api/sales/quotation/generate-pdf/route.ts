@@ -107,7 +107,7 @@ async function generateQuotationPDF(
         "public",
         "images",
         "logo",
-        "classy_logo_ori.png",
+        "Classy_2023_horizontal.png",
       );
       if (fs.existsSync(logoPath)) {
         const logoData = fs.readFileSync(logoPath);

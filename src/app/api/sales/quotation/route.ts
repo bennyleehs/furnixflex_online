@@ -58,14 +58,20 @@ export async function GET(request: Request) {
         [quotation.quotation_number],
       )) as [any[], any];
 
-      // Map items to match the expected format for invoice items
+      // Map items to match in db and interface QuotationItem
       quotation.items = itemRows.map((item: any) => ({
-        description: item.description || item.productName || "",
-        quantity: parseFloat(item.quantity) || 0,
-        unit_price: parseFloat(item.unitPrice) || 0,
-        amount: parseFloat(item.total) || 0,
+        id: String(item.id),
+        productId: String(item.productId), // Ensure productId is a string
+        category: item.category || "",
+        subcategory: item.subcategory || "",
+        productName: item.productName || "",
+        description: item.description || "",
+        quantity: parseFloat(item.quantity) || 1,
         unit: item.unit || "",
-        id: item.id,
+        unitPrice: parseFloat(item.unitPrice) || 0,
+        discount: parseFloat(item.discount) || 0,
+        total: parseFloat(item.total) || 0,
+        note: item.note || "",
       }));
     } catch (itemError) {
       console.warn("Could not fetch quotation items:", itemError);

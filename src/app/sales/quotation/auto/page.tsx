@@ -623,7 +623,6 @@ export default function QuotationPage() {
 
   // Generate PDF quotation
   const generatePDF = async () => {
-    // if (!quotation) {
     // Alert the user to save the quotation first
     const confirmSave = confirm(
       "You need to save the quotation before generating a PDF. Would you like to save now?",
@@ -669,7 +668,7 @@ export default function QuotationPage() {
           phone: "+6016-8866001",
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
-          logo: "/images/logo/classy_logo_ori.png ", // Ensure this path is correct
+          logo: "/images/logo/Classy_2023_horizontal.png",
         },
         format: {
           pageSize: "A4",
@@ -787,48 +786,138 @@ export default function QuotationPage() {
     return formattedValue;
   };
 
-  // Add this useEffect to calculate total discount
+  // useEffect for calculation
   useEffect(() => {
-    // Calculate subtotal and discount
-    let subtotal = 0;
-    let discount = 0;
+    let packagesTotal = 0;
+    let addItemsTotal = 0;
 
+    // 1: Base totals (include ALL Additional Items here)
     items.forEach((item) => {
-      subtotal += Number(item.total) || 0;
-
-      // Calculate item discount if applicable
-      if (item.productId && productLookup[item.productId]) {
-        const product = productLookup[item.productId];
-        if (product.discount && product.discount > 0) {
-          // Calculate discount amount based on item total and discount percentage
-          // const itemDiscount = (Number(item.total) || 0) * (product.discount / 100);
-          // discount += itemDiscount;
-          discount += product.discount;
-        }
+      if (item.category === "Packages") {
+        packagesTotal += item.total;
+      } else if (item.category === "Additional Items") {
+        addItemsTotal += item.total;
+      } else if (item.category === "Deducted Accessories") {
+        packagesTotal += item.total; // already negative
       }
     });
 
+    // 2: Apply fixed amount discounts (total < 0)
+    items.forEach((item) => {
+      //Package fixed discount
+      if (
+        item.category === "Discount" &&
+        item.subcategory === "Packages" &&
+        item.total < 0
+      ) {
+        packagesTotal += item.total; // subtracts directly
+      }
+      // Add. On Item fixed discount (!== On-sites Services & Transportation Charges)
+      if (
+        item.category === "Discount" &&
+        item.subcategory === "Add-on Items" &&
+        item.total < 0
+      ) {
+        // Only subtract from eligible Additional Items (exclude On-site Services)
+        const eligibleAddItemsTotal = items
+          .filter(
+            (i) =>
+              i.category === "Additional Items" &&
+              i.subcategory !== "On-site Services" &&
+              i.subcategory !== "Transportation Charge",
+          )
+          .reduce((sum, i) => sum + i.total, 0);
+        // addItemsTotal += item.total * (eligibleAddItemsTotal / addItemsTotal); //v1.1
+        //avoid divide by 0
+        if (eligibleAddItemsTotal > 0) {
+          addItemsTotal += item.total;
+        }
+      } //sambung sini 14 ogos
+    });
+
+    // 3: Apply percentage discounts (discount > 0)
+    items.forEach((item) => {
+      //Package % discount
+      if (
+        item.category === "Discount" &&
+        item.subcategory === "Packages" &&
+        item.discount > 0
+      ) {
+        packagesTotal -= packagesTotal * (item.discount / 100);
+      }
+      // Add. On Item % discount (!== On-sites Services & Transportation Charges)
+      if (
+        item.category === "Discount" &&
+        item.subcategory === "Add-on Items" &&
+        item.discount > 0
+      ) {
+        // Apply only to eligible Additional Items
+        const eligibleAddItemsTotal = items
+          .filter(
+            (i) =>
+              i.category === "Additional Items" &&
+              i.subcategory !== "On-site Services" &&
+              i.subcategory !== "Transportation Charge",
+          )
+          .reduce((sum, i) => sum + i.total, 0);
+        addItemsTotal -= eligibleAddItemsTotal * (item.discount / 100);
+      }
+    });
+
+    // 4: Final totals
+    const subtotal = packagesTotal + addItemsTotal;
+    const taxAmount = subtotal * (tax / 100);
+    const grandTotal = subtotal + taxAmount;
+
     setSubtotal(subtotal);
-    setTotalDiscount(discount);
+    setGrandTotal(grandTotal);
+  }, [items, tax]);
 
-    // If subtotal is 0, set grand total to 0 regardless of other calculations
-    if (subtotal === 0) {
-      setGrandTotal(0);
-      setDisAmount(0);
-    } else {
-      // Otherwise calculate normally: subtotal - discount + tax
-      // Calculate the discount amount from percentage using the local discount variable
-      const discountAmount = subtotal * (discount / 100);
-      setDisAmount(discountAmount);
+  // Discount individual
+  //   // Detect *applied* package discounts
+  // const packageDiscounts = items.filter(
+  //   (item) =>
+  //     item.category === "Discount" &&
+  //     item.subcategory === "Packages" &&
+  //     (item.total < 0 || item.discount > 0) // must actually reduce total
+  // );
 
-      // Calculate the tax amount from percentage (applied after discount)
-      const taxAmount = (subtotal - discountAmount) * (tax / 100);
+  // // Detect *applied* additional item discounts
+  // const additionalItemDiscounts = items.filter(
+  //   (item) =>
+  //     item.category === "Discount" &&
+  //     item.subcategory === "Add-on Items" &&
+  //     (item.total < 0 || item.discount > 0) // must actually reduce total
+  // );
 
-      // Calculate final amount
-      const finalAmount = subtotal + taxAmount;
-      setGrandTotal(finalAmount);
-    }
-  }, [items, productLookup, tax]);
+  // Group and format discounts
+  const formatDiscounts = (discountItems: typeof items) => {
+    const percentage = discountItems
+      .filter((d) => d.discount > 0)
+      .map((d) => `${d.discount}%`);
+
+    const fixed = discountItems
+      .filter((d) => d.total < 0)
+      .map((d) => `RM ${formatWithCommas(Math.abs(d.total))}`);
+
+    // Combine both percentage and fixed discounts
+    return [...percentage, ...fixed].join(" + ");
+  };
+
+  // Detect applied discounts
+  const appliedPackageDiscounts = items.filter(
+    (item) =>
+      item.category === "Discount" &&
+      item.subcategory === "Packages" &&
+      (item.total < 0 || item.discount > 0),
+  );
+
+  const appliedAddItemDiscounts = items.filter(
+    (item) =>
+      item.category === "Discount" &&
+      item.subcategory === "Add-on Items" &&
+      (item.total < 0 || item.discount > 0),
+  );
 
   if (loading) {
     return (
@@ -1421,7 +1510,7 @@ export default function QuotationPage() {
 
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                    Expiry Date
+                    Installation Date
                   </label>
                   <input
                     type="date"
@@ -1717,16 +1806,23 @@ export default function QuotationPage() {
                       <td className="px-3 py-2">
                         <input
                           type="number"
-                          min="1"
+                          min="0.1"
                           step="0.1"
-                          value={
-                            item.quantity !== undefined ? item.quantity : 0
-                          }
+                          value={item.quantity ?? 1} // default to 1 if undefined or null
                           onChange={(e) => {
-                            e.stopPropagation(); // Prevent event bubbling
-                            // Parse the input value as a float
-                            const value = parseFloat(e.target.value);
-                            updateItem(item.id, "quantity", value);
+                            e.stopPropagation();
+                            const raw = e.target.value;
+
+                            // Allow empty string temporarily while typing
+                            if (raw === "") {
+                              updateItem(item.id, "quantity", "");
+                              return;
+                            }
+
+                            const value = parseFloat(raw);
+                            if (!isNaN(value)) {
+                              updateItem(item.id, "quantity", value);
+                            }
                           }}
                           className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
                         />
@@ -1890,12 +1986,55 @@ export default function QuotationPage() {
                     <span>{formatWithCommas(subtotal)}</span>
                   </div>
 
-                  <div className="text-danger flex justify-between border-b border-gray-200 py-2">
-                    <span>Discount: ({totalDiscount.toFixed(2)})%</span>
-                    <span>- {formatWithCommas(disAmount)}</span>
-                  </div>
+                  {/* Show package discounts only if applied */}
+                  {/* {packageDiscounts.length > 0 && (
+        <div className="text-red-600 flex justify-between border-b border-gray-200 py-1">
+          <span>Discounts for Packages:</span>
+          <span>
+            {packageDiscounts
+              .map((d) =>
+                d.discount > 0
+                  ? `${d.discount}%`
+                  : `RM ${formatWithCommas(Math.abs(d.total))}`
+              )
+              .join(", ")}
+          </span>
+        </div>
+      )} */}
 
-                  {/* Tax Row (if applicable) */}
+                  {/* Show additional item discounts only if applied */}
+                  {/* {additionalItemDiscounts.length > 0 && (
+        <div className="text-red-600 flex justify-between border-b border-gray-200 py-1">
+          <span>Discounts for Additional Items:</span>
+          <span>
+            {additionalItemDiscounts
+              .map((d) =>
+                d.discount > 0
+                  ? `${d.discount}%`
+                  : `RM ${formatWithCommas(Math.abs(d.total))}`
+              )
+              .join(", ")}
+          </span>
+        </div>
+      )} */}
+
+                  {/* Grouped package discounts */}
+                  {appliedPackageDiscounts.length > 0 && (
+                    <div className="flex justify-between py-1">
+                      <span>Packages Discounts:</span>
+                      <span className="text-red-600">-{formatDiscounts(appliedPackageDiscounts)}</span>
+                    </div>
+                  )}
+
+                  {/* Grouped additional item discounts */}
+                  {appliedAddItemDiscounts.length > 0 && (
+                    <div className="flex justify-between py-1">
+                      <span>Additional Items Discounts:</span>
+                      <span className="text-red-600">-{formatDiscounts(appliedAddItemDiscounts)}</span>
+                    </div>
+                  )}
+
+                  {/* Tax Row */}
                   {taxLabel && (
                     <div className="flex justify-between border-b border-gray-200 py-1">
                       <span>{taxLabel}:</span>
