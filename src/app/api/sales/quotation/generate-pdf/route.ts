@@ -87,7 +87,7 @@ async function generateQuotationPDF(
   });
 
   // Define margins
-  const margin = 15;
+  const margin = 6;
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
 
@@ -99,7 +99,7 @@ async function generateQuotationPDF(
     if (data.company.logo && data.company.logo.startsWith("data:image")) {
       // Logo is provided as base64 data URL
       const logoData = data.company.logo.split(",")[1];
-      doc.addImage(logoData, "PNG", margin, margin - 8, 40, 15);
+      doc.addImage(logoData, "PNG", margin, margin - 8, 28, 26);
     } else {
       // Use a default logo path
       const logoPath = path.join(
@@ -107,7 +107,7 @@ async function generateQuotationPDF(
         "public",
         "images",
         "logo",
-        "Classy_2023_horizontal.png",
+        "Classy_2023_vertical.png",
       );
       if (fs.existsSync(logoPath)) {
         const logoData = fs.readFileSync(logoPath);
@@ -116,9 +116,9 @@ async function generateQuotationPDF(
           `data:image/png;base64,${logoBase64}`,
           "PNG",
           margin,
-          margin - 8,
-          40,
-          15,
+          margin - 2,
+          28,
+          26,
         );
       }
     }
@@ -128,37 +128,43 @@ async function generateQuotationPDF(
   }
 
   // Company name with larger font
-  doc.setFontSize(20);
+  doc.setFontSize(16);
   // doc.setFont('courier', 'bold');
-  // doc.setFont('helvetica', 'bold');
-  doc.setFont("times", "bold");
+  doc.setFont("helvetica", "bold");
+  // doc.setFont("times", "bold");
   // doc.setFont('symbol', 'bold');
   // doc.setFont('zapfdingbats', 'bold');
-  doc.text(data.company.name, pageWidth / 2 + margin, margin - 2, {
+  doc.text(data.company.name, pageWidth / 2 + margin + 10, margin + 8, {
     align: "center",
   });
 
   // Company details with smaller font
-  doc.setFontSize(7);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(data.company.address, pageWidth / 2 + margin, margin + 3, {
+  doc.text(data.company.address, pageWidth / 2 + margin + 10, margin + 14, {
     align: "center",
   });
   doc.text(
-    `Tel: ${data.company.phone} | Email: ${data.company.email} | Email: ${data.company.website}`,
-    pageWidth / 2 + margin,
-    margin + 7,
+    `H/p: ${data.company.phone} | Tel: ${data.company.tel} | Email: ${data.company.email} | Website: ${data.company.website}`,
+    pageWidth / 2 + margin + 10,
+    margin + 18,
+    { align: "center" },
+  );
+  doc.text(
+    `Branches: ${data.company.branches}`,
+    pageWidth / 2 + margin + 10,
+    margin + 22,
     { align: "center" },
   );
 
   // Horizontal line separator
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.2);
-  doc.line(margin, margin + 10, pageWidth - margin, margin + 10);
+  doc.line(margin, margin + 26, pageWidth - margin, margin + 26);
 
   // ----- THREE-SECTION HEADER LAYOUT -----
   // Top position for all three sections
-  const sectionTop = margin + 16;
+  const sectionTop = margin + 34;
   // Calculate column widths and positions
   const columnWidth = (pageWidth - 2 * margin) / 3;
   const col1X = margin;
@@ -172,17 +178,17 @@ async function generateQuotationPDF(
 
   // Column Headers
   doc.setFontSize(12);
-  doc.setFont("courier", "bold"); // Using fontLable object
+  doc.setFont("helvetica", "bold"); // Using fontLable object
   doc.text("CUSTOMER", col1X, sectionTop);
-  doc.text("ADDRESS", col2X, sectionTop);
+  // doc.text("ADDRESS", col2X, sectionTop);
   doc.text("QUOTATION", col3X, sectionTop);
 
   // Add underlines for headers
-  const lineY = sectionTop + 1;
-  doc.setLineWidth(0.3);
-  doc.line(col1X, lineY, col1X + doc.getTextWidth("CUSTOMER:"), lineY);
-  doc.line(col2X, lineY, col2X + doc.getTextWidth("SHIP TO:"), lineY);
-  doc.line(col3X, lineY, col3X + doc.getTextWidth("QUOTATION:"), lineY);
+  // const lineY = sectionTop + 1;
+  // doc.setLineWidth(0.3);
+  // doc.line(col1X, lineY, col1X + doc.getTextWidth("CUSTOMER:"), lineY);
+  // doc.line(col2X, lineY, col2X + doc.getTextWidth("SHIP TO:"), lineY);
+  // doc.line(col3X, lineY, col3X + doc.getTextWidth("QUOTATION:"), lineY);
 
   // Column Labels
   doc.setFontSize(10);
@@ -192,8 +198,8 @@ async function generateQuotationPDF(
   doc.text("TEL:", col1X, sectionTop + 15);
   doc.text("Email:", col1X, sectionTop + 20);
 
-  doc.text("Property:", col2X, sectionTop + 20);
-  doc.text("Access:", col2X + 32, sectionTop + 20);
+  // doc.text("Property:", col2X, sectionTop + 20);
+  // doc.text("Access:", col2X + 32, sectionTop + 20);
 
   doc.text("REF:", labelX, sectionTop + 5);
   doc.text("Date:", labelX, sectionTop + 10);
@@ -208,56 +214,56 @@ async function generateQuotationPDF(
   doc.text(data.quotation.customer_contact, valueC1, sectionTop + 15);
   doc.text(data.quotation.customer_email || "", valueC1, sectionTop + 20);
 
-  doc.text(data.quotation.customer_property || "", col2X + 14, sectionTop + 20);
-  doc.text(data.quotation.customer_guard || "", col2X + 44, sectionTop + 20);
+  // doc.text(data.quotation.customer_property || "", col2X + 14, sectionTop + 20);
+  // doc.text(data.quotation.customer_guard || "", col2X + 44, sectionTop + 20);
 
   // Initialize addressLinesArray with an empty array
   let addressLinesArray = [];
   // Add shipping address if available
-  if (data.quotation.customer_address) {
-    const shipAddress = data.quotation.customer_address;
-    // First split by commas and trim each part
-    const addressParts = shipAddress
-      .split(",")
-      .map((part: string) => part.trim())
-      .filter((part: any) => part);
+  // if (data.quotation.customer_address) {
+  //   const shipAddress = data.quotation.customer_address;
+  //   // First split by commas and trim each part
+  //   const addressParts = shipAddress
+  //     .split(",")
+  //     .map((part: string) => part.trim())
+  //     .filter((part: any) => part);
 
-    // Format according to specific pattern:
-    // Line 1: First 2 parts
-    // Line 2: Next 3 parts
-    // Line 3: All remaining parts
+  //   // Format according to specific pattern:
+  //   // Line 1: First 2 parts
+  //   // Line 2: Next 3 parts
+  //   // Line 3: All remaining parts
 
-    if (addressParts.length > 0) {
-      // First line - first 2 parts with comma at end
-      const firstLine = addressParts.slice(0, 2).join(", ") + ",";
-      addressLinesArray.push(firstLine);
+  //   if (addressParts.length > 0) {
+  //     // First line - first 2 parts with comma at end
+  //     const firstLine = addressParts.slice(0, 2).join(", ") + ",";
+  //     addressLinesArray.push(firstLine);
 
-      // Second line - next 3 parts with comma at end
-      if (addressParts.length > 2) {
-        const secondLine = addressParts.slice(2, 5).join(", ") + ",";
-        addressLinesArray.push(secondLine);
+  //     // Second line - next 3 parts with comma at end
+  //     if (addressParts.length > 2) {
+  //       const secondLine = addressParts.slice(2, 5).join(", ") + ",";
+  //       addressLinesArray.push(secondLine);
 
-        // Third line - all remaining parts
-        if (addressParts.length > 5) {
-          const thirdLine = addressParts.slice(5).join(", ");
-          addressLinesArray.push(thirdLine);
-        }
-      }
+  //       // Third line - all remaining parts
+  //       if (addressParts.length > 5) {
+  //         const thirdLine = addressParts.slice(5).join(", ");
+  //         addressLinesArray.push(thirdLine);
+  //       }
+  //     }
 
-      // Display each line with proper spacing
-      addressLinesArray.forEach((line: string, index: number) => {
-        doc.text(line, col2X, sectionTop + 5 + index * 5);
-      });
-    } else {
-      // Default empty value if no address parts after filtering
-      doc.text("N/A", col2X, sectionTop + 5);
-      addressLinesArray = ["N/A"];
-    }
-  } else {
-    // Default empty value if no address is provided
-    doc.text("N/A", col2X, sectionTop + 5);
-    addressLinesArray = ["N/A"];
-  }
+  //     // Display each line with proper spacing
+  //     addressLinesArray.forEach((line: string, index: number) => {
+  //       doc.text(line, col2X, sectionTop + 5 + index * 5);
+  //     });
+  //   } else {
+  //     // Default empty value if no address parts after filtering
+  //     doc.text("N/A", col2X, sectionTop + 5);
+  //     addressLinesArray = ["N/A"];
+  //   }
+  // } else {
+  //   // Default empty value if no address is provided
+  //   doc.text("N/A", col2X, sectionTop + 5);
+  //   addressLinesArray = ["N/A"];
+  // }
 
   doc.text(data.quotation.quotation_number, valueC3, sectionTop + 5);
   doc.text(
@@ -288,7 +294,8 @@ async function generateQuotationPDF(
 
   // ----- ITEMS TABLE SECTION -----
   // Starting y position after the header information
-  let yPosition = margin + 38 + (addressLinesArray.length - 1) * 5;
+  // let yPosition = margin + 38 + (addressLinesArray.length - 1) * 5;
+  let yPosition = margin + 50;
 
   // Add items table header
   doc.setFontSize(11);
@@ -483,7 +490,7 @@ async function generateQuotationPDF(
   });
 
   // ----- NOTES SECTION -----
-  let notesY = Math.max(summaryY + 15, finalY + 10);
+  let notesY = Math.max(summaryY + 10, finalY + 5);
 
   // Add notes if present
   if (data.quotation.notes && data.quotation.notes.trim() !== "") {
@@ -502,23 +509,71 @@ async function generateQuotationPDF(
   }
 
   // --- TERMS AND CONDITIONS SECTION ---
+  // if (data.quotation.terms && data.quotation.terms.trim() !== "") {
+  //   if (notesY + 40 > pageHeight - margin) {
+  //     doc.addPage();
+  //     notesY = margin;
+  //   }
+
+  //   // Separator horizontal line top
+  //   const lineY = notesY + 60;
+  //   doc.setLineWidth(0.3);
+  //   doc.line(margin, lineY, pageWidth - margin, lineY);
+
+  //   // Main title
+  //   doc.setFontSize(7);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Order Policy & Warranty Coverage:", margin, notesY + 66);
+  //   notesY += 4;
+
+  //   TermsConditionsWarrantySections.forEach((section) => {
+  //     // Subsection title
+  //     doc.setFont("helvetica", "bold");
+  //     doc.text(section.title, margin, notesY + 66);
+  //     notesY += 5;
+
+  //     // List items
+  //     doc.setFont("helvetica", "normal");
+  //     section.content.forEach((line, index) => {
+  //       const wrappedLines = doc.splitTextToSize(
+  //         `${index + 1}. ${line}`,
+  //         pageWidth - 2 * margin,
+  //       );
+  //       doc.text(wrappedLines, margin + 3, notesY + 66);
+  //       notesY += wrappedLines.length * 4;
+
+  //       // Auto page break
+  //       if (notesY > pageHeight - margin) {
+  //         doc.addPage();
+  //         notesY = margin;
+  //       }
+  //     });
+
+  //     notesY += 2;
+  //   });
+  // }
+
+  // --- TERMS AND CONDITIONS SECTION ---
   if (data.quotation.terms && data.quotation.terms.trim() !== "") {
-    if (notesY + 40 > pageHeight - margin) {
-      doc.addPage();
-      notesY = margin;
-    }
+    const termsStartY = 232; // fixed position from top of page (mm)
+
+    // Separator horizontal line top
+    const lineY = termsStartY;
+    doc.setLineWidth(0.3);
+    doc.line(margin, lineY, pageWidth - margin, lineY);
 
     // Main title
-    doc.setFontSize(10);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
-    doc.text("Order Policy & Warranty Coverage:", margin, notesY);
-    notesY += 6;
+    doc.text("Order Policy & Warranty Coverage:", margin, termsStartY + 6);
+
+    let currentY = termsStartY + 10; // start content below title
 
     TermsConditionsWarrantySections.forEach((section) => {
       // Subsection title
       doc.setFont("helvetica", "bold");
-      doc.text(section.title, margin, notesY);
-      notesY += 5;
+      doc.text(section.title, margin, currentY);
+      currentY += 5;
 
       // List items
       doc.setFont("helvetica", "normal");
@@ -527,17 +582,11 @@ async function generateQuotationPDF(
           `${index + 1}. ${line}`,
           pageWidth - 2 * margin,
         );
-        doc.text(wrappedLines, margin, notesY);
-        notesY += wrappedLines.length * 5;
-
-        // Auto page break
-        if (notesY > pageHeight - margin) {
-          doc.addPage();
-          notesY = margin;
-        }
+        doc.text(wrappedLines, margin + 3, currentY);
+        currentY += wrappedLines.length * 4;
       });
 
-      notesY += 5;
+      currentY += 2;
     });
   }
 
@@ -552,25 +601,39 @@ async function generateQuotationPDF(
     doc.setLineWidth(0.5);
     doc.line(
       margin,
-      pageHeight - margin - 5,
+      pageHeight - margin - 2,
       pageWidth - margin,
-      pageHeight - margin - 5,
+      pageHeight - margin - 2,
+    );
+
+    // Add footer text
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "italic");
+    doc.text(
+      `This document is system-generated and does not require a signature. Please contact our sales team if you require further clarification.`,
+      margin,
+      pageHeight - margin + 2,
     );
 
     // Add page number
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
-    doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - margin, {
-      align: "center",
-    });
+    doc.text(
+      `Page ${i} of ${totalPages}`,
+      pageWidth - margin,
+      pageHeight - margin + 2,
+      {
+        align: "right",
+      },
+    );
 
     // Add website/copyright
-    doc.text(
-      data.company.website || "www.classyhome.com",
-      pageWidth - margin,
-      pageHeight - margin,
-      { align: "right" },
-    );
+    // doc.text(
+    //   data.company.website || "www.classyhome.com",
+    //   pageWidth - margin,
+    //   pageHeight - margin,
+    //   { align: "right" },
+    // );
   }
 
   // Convert the PDF to a buffer

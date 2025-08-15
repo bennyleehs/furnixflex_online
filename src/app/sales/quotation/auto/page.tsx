@@ -663,12 +663,14 @@ export default function QuotationPage() {
           })),
         },
         company: {
-          name: "CLASSYPRO Aluminium Kitchen",
-          address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          name: "CLASSY PROJECT MARKETING SDN BHD",
+          address: `No. 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
           phone: "+6016-8866001",
+          tel: "07-5104106",
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
-          logo: "/images/logo/Classy_2023_horizontal.png",
+          branches: "Kota Masai, Johor • Setia Alam, Selangor • Bukit Mertajam, Penang",
+          logo: "/images/logo/Classy_2023_vertical.png",
         },
         format: {
           pageSize: "A4",
@@ -786,39 +788,130 @@ export default function QuotationPage() {
     return formattedValue;
   };
 
-  // useEffect for calculation
-  useEffect(() => {
-    let packagesTotal = 0;
-    let addItemsTotal = 0;
+  // // useEffect for calculation
+  // useEffect(() => {
+  //   let packagesTotal = 0;
+  //   let addItemsTotal = 0;
 
-    // 1: Base totals (include ALL Additional Items here)
+  //   // 1: Base totals (include ALL Additional Items here)
+  //   items.forEach((item) => {
+  //     if (item.category === "Packages") {
+  //       packagesTotal += item.total;
+  //     } else if (item.category === "Additional Items") {
+  //       addItemsTotal += item.total;
+  //     } else if (item.category === "Deducted Accessories") {
+  //       packagesTotal += item.total; // already negative
+  //     }
+  //   });
+
+  //   // 2: Apply fixed amount discounts (total < 0)
+  //   items.forEach((item) => {
+  //     //Package fixed discount
+  //     if (
+  //       item.category === "Discount" &&
+  //       item.subcategory === "Packages" &&
+  //       item.total < 0
+  //     ) {
+  //       packagesTotal += item.total; // subtracts directly
+  //     }
+  //     // Add. On Item fixed discount (!== On-sites Services & Transportation Charges)
+  //     if (
+  //       item.category === "Discount" &&
+  //       item.subcategory === "Add-on Items" &&
+  //       item.total < 0
+  //     ) {
+  //       // Only subtract from eligible Additional Items (exclude On-site Services)
+  //       const eligibleAddItemsTotal = items
+  //         .filter(
+  //           (i) =>
+  //             i.category === "Additional Items" &&
+  //             i.subcategory !== "On-site Services" &&
+  //             i.subcategory !== "Transportation Charge",
+  //         )
+  //         .reduce((sum, i) => sum + i.total, 0);
+  //       // addItemsTotal += item.total * (eligibleAddItemsTotal / addItemsTotal); //v1.1
+  //       //avoid divide by 0
+  //       if (eligibleAddItemsTotal > 0) {
+  //         addItemsTotal += item.total;
+  //       }
+  //     } //sambung sini 14 ogos
+  //   });
+
+  //   // 3: Apply percentage discounts (discount > 0)
+  //   items.forEach((item) => {
+  //     //Package % discount
+  //     if (
+  //       item.category === "Discount" &&
+  //       item.subcategory === "Packages" &&
+  //       item.discount > 0
+  //     ) {
+  //       packagesTotal -= packagesTotal * (item.discount / 100);
+  //     }
+  //     // Add. On Item % discount (!== On-sites Services & Transportation Charges)
+  //     if (
+  //       item.category === "Discount" &&
+  //       item.subcategory === "Add-on Items" &&
+  //       item.discount > 0
+  //     ) {
+  //       // Apply only to eligible Additional Items
+  //       const eligibleAddItemsTotal = items
+  //         .filter(
+  //           (i) =>
+  //             i.category === "Additional Items" &&
+  //             i.subcategory !== "On-site Services" &&
+  //             i.subcategory !== "Transportation Charge",
+  //         )
+  //         .reduce((sum, i) => sum + i.total, 0);
+  //       addItemsTotal -= eligibleAddItemsTotal * (item.discount / 100);
+  //     }
+  //   });
+
+  //   // 4: Final totals
+  //   const subtotal = packagesTotal + addItemsTotal;
+  //   // const taxAmount = subtotal * (tax / 100); //for dealer
+  //   // const grandTotal = subtotal + taxAmount; //for dealer
+
+  //   setSubtotal(subtotal);
+  //   setGrandTotal(grandTotal);
+  // }, [items, tax]);
+
+  useEffect(() => {
+    let rawPackagesTotal = 0; // <-- raw without discounts
+    let rawAddItemsTotal = 0; // <-- raw without discounts
+
+    let packagesTotal = 0; // <-- discounted
+    let addItemsTotal = 0; // <-- discounted
+
+    // 1: Base totals
     items.forEach((item) => {
       if (item.category === "Packages") {
-        packagesTotal += item.total;
+        rawPackagesTotal += item.total; // raw
+        packagesTotal += item.total; // start discounted same as raw
       } else if (item.category === "Additional Items") {
-        addItemsTotal += item.total;
+        rawAddItemsTotal += item.total; // raw
+        addItemsTotal += item.total; // start discounted same as raw
       } else if (item.category === "Deducted Accessories") {
-        packagesTotal += item.total; // already negative
+        rawPackagesTotal += item.total; // already negative in raw
+        packagesTotal += item.total; // already negative in discounted
       }
     });
 
-    // 2: Apply fixed amount discounts (total < 0)
+    // 2: Apply fixed amount discounts
     items.forEach((item) => {
-      //Package fixed discount
+      // Packages fixed discount
       if (
         item.category === "Discount" &&
         item.subcategory === "Packages" &&
         item.total < 0
       ) {
-        packagesTotal += item.total; // subtracts directly
+        packagesTotal += item.total; // subtract from discounted
       }
-      // Add. On Item fixed discount (!== On-sites Services & Transportation Charges)
+      // Add. On Item fixed discount
       if (
         item.category === "Discount" &&
         item.subcategory === "Add-on Items" &&
         item.total < 0
       ) {
-        // Only subtract from eligible Additional Items (exclude On-site Services)
         const eligibleAddItemsTotal = items
           .filter(
             (i) =>
@@ -827,17 +920,16 @@ export default function QuotationPage() {
               i.subcategory !== "Transportation Charge",
           )
           .reduce((sum, i) => sum + i.total, 0);
-        // addItemsTotal += item.total * (eligibleAddItemsTotal / addItemsTotal); //v1.1
-        //avoid divide by 0
+
         if (eligibleAddItemsTotal > 0) {
-          addItemsTotal += item.total;
+          addItemsTotal += item.total; // subtract from discounted
         }
-      } //sambung sini 14 ogos
+      }
     });
 
-    // 3: Apply percentage discounts (discount > 0)
+    // 3: Apply percentage discounts
     items.forEach((item) => {
-      //Package % discount
+      // Packages % discount
       if (
         item.category === "Discount" &&
         item.subcategory === "Packages" &&
@@ -845,13 +937,12 @@ export default function QuotationPage() {
       ) {
         packagesTotal -= packagesTotal * (item.discount / 100);
       }
-      // Add. On Item % discount (!== On-sites Services & Transportation Charges)
+      // Add. On Item % discount
       if (
         item.category === "Discount" &&
         item.subcategory === "Add-on Items" &&
         item.discount > 0
       ) {
-        // Apply only to eligible Additional Items
         const eligibleAddItemsTotal = items
           .filter(
             (i) =>
@@ -860,14 +951,14 @@ export default function QuotationPage() {
               i.subcategory !== "Transportation Charge",
           )
           .reduce((sum, i) => sum + i.total, 0);
+
         addItemsTotal -= eligibleAddItemsTotal * (item.discount / 100);
       }
     });
 
     // 4: Final totals
-    const subtotal = packagesTotal + addItemsTotal;
-    const taxAmount = subtotal * (tax / 100);
-    const grandTotal = subtotal + taxAmount;
+    const subtotal = rawPackagesTotal + rawAddItemsTotal; // <-- no discounts
+    const grandTotal = packagesTotal + addItemsTotal; // <-- with discounts
 
     setSubtotal(subtotal);
     setGrandTotal(grandTotal);
@@ -2022,28 +2113,39 @@ export default function QuotationPage() {
                   {appliedPackageDiscounts.length > 0 && (
                     <div className="flex justify-between py-1">
                       <span>Packages Discounts:</span>
-                      <span className="text-red-600">-{formatDiscounts(appliedPackageDiscounts)}</span>
+                      <span className="text-red-600">
+                        -{formatDiscounts(appliedPackageDiscounts)}
+                      </span>
                     </div>
                   )}
 
                   {/* Grouped additional item discounts */}
-                  {appliedAddItemDiscounts.length > 0 && (
-                    <div className="flex justify-between py-1">
-                      <span>Additional Items Discounts:</span>
-                      <span className="text-red-600">-{formatDiscounts(appliedAddItemDiscounts)}</span>
-                    </div>
-                  )}
+{appliedAddItemDiscounts.length > 0 && (
+  <div className="py-1">
+    {/* Row: label + discount */}
+    <div className="flex justify-between">
+      <span>Additional Items Discounts:</span>
+      <span className="text-red-600">-{formatDiscounts(appliedAddItemDiscounts)}</span>
+    </div>
+
+    {/* Note below */}
+    <div className="text-sm italic text-gray-500">
+      (*On-site Services & Transportation Charge not included)
+    </div>
+  </div>
+)}
 
                   {/* Tax Row */}
-                  {taxLabel && (
+                  {/* for dealer */}
+                  {/* {taxLabel && (
                     <div className="flex justify-between border-b border-gray-200 py-1">
                       <span>{taxLabel}:</span>
                       <span>{tax}%</span>
                     </div>
-                  )}
+                  )} */}
 
                   {/* Grand Total */}
-                  <div className="flex justify-between py-2 font-bold">
+                  <div className="flex justify-between border-t border-gray-200 py-2 font-bold">
                     <span>Grand Total:</span>
                     <span>RM {formatWithCommas(grandTotal)}</span>
                   </div>
