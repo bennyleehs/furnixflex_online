@@ -81,10 +81,10 @@ export default function Tables({
   } = usePermissions();
 
   //state for modal
-    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-    const [infoData, setInfoData] = useState<Record<string, any> | null>(null);
-    const [isLoadingInfo, setIsLoadingInfo] = useState(false);
-    const [infoError, setInfoError] = useState<string | null>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [infoData, setInfoData] = useState<Record<string, any> | null>(null);
+  const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+  const [infoError, setInfoError] = useState<string | null>(null);
 
   const getMenuSubmenu = (
     permissionPrefix?: string,
@@ -220,12 +220,12 @@ export default function Tables({
       }
 
       // Extract the lead data from the response
-    const leadData = dataRes.listLead?.[0] || dataRes;
-    console.log("Lead Data to Display:", leadData); // Debug log
+      const leadData = dataRes.listLead?.[0] || dataRes;
+      console.log("Lead Data to Display:", leadData); // Debug log
 
-    if (!leadData) {
-      throw new Error("No lead data found in response");
-    }
+      if (!leadData) {
+        throw new Error("No lead data found in response");
+      }
 
       setInfoData(leadData);
       setIsInfoModalOpen(true);
@@ -640,9 +640,12 @@ export default function Tables({
                           )}
                       </>
                     )}
-                    <button className="hover:text-primary" title="Info"
-                        onClick={() => handleInfoClick(row)}
-                        disabled={isLoadingInfo}>
+                    <button
+                      className="hover:text-primary"
+                      title="Info"
+                      onClick={() => handleInfoClick(row)}
+                      disabled={isLoadingInfo}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -672,7 +675,7 @@ export default function Tables({
             {/* Modal Header */}
             <div className="dark:border-strokedark dark:bg-boxdark sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-white p-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Branch Details
+                Lead Details
               </h3>
               <button onClick={() => setIsInfoModalOpen(false)}>×</button>
             </div>
@@ -710,24 +713,24 @@ export default function Tables({
                       ))}
                     </div> */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {fields.map((col) => {
-          const value = infoData[col.key];
-          return (
-            <div key={col.key}>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {col.title}
-              </label>
-              <div className="border-stroke dark:border-strokedark dark:bg-meta-4 rounded-md border bg-gray-50 px-3 py-2 text-sm">
-                {col.format
-                  ? col.format(value, infoData)
-                  : value !== null && value !== undefined
-                    ? value.toString()
-                    : "-"}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                      {fields.map((col) => {
+                        const value = infoData[col.key];
+                        return (
+                          <div key={col.key}>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {col.title}
+                            </label>
+                            <div className="border-stroke dark:border-strokedark dark:bg-meta-4 rounded-md border bg-gray-50 px-3 py-2 text-sm">
+                              {col.format
+                                ? col.format(value, infoData)
+                                : value !== null && value !== undefined
+                                  ? value.toString()
+                                  : "-"}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
             </div>

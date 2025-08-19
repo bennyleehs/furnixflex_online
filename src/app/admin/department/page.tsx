@@ -70,6 +70,7 @@ export default function DepartmentPage() {
       {!loading && !error && (
         <Tables
           columns={columns}
+          modalTitle="Department"
           modalColumns={modalColumns}
           data={dept}
           createLink="/admin/department/create"

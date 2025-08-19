@@ -67,6 +67,7 @@ export default function RolePage() {
       {!loading && !error && (
         <Tables
           columns={columns}
+          modalTitle="Role"
           modalColumns={modalColumns}
           data={role}
           createLink="/admin/role/create"

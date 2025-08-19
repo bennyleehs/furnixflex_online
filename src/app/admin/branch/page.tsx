@@ -97,6 +97,7 @@ export default function BranchPage() {
       {error && <p className="text-red-500">{error}</p>}
       <Tables
         columns={columns}
+        modalTitle="Branch"
         modalColumns={modalColumns}
         data={branches}
         createLink="/admin/branch/create"
