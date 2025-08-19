@@ -51,6 +51,7 @@ export interface QuotationItem {
   discount: number; // Add discount field
   unit: string;
   unitPrice: number;
+  rounding: number;
   total: number;
   note: string;
 }

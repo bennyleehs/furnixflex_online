@@ -21,7 +21,6 @@ interface Product {
   task_id?: string;
   created_at?: string;
   updated_at?: string;
-  uid?: string;
 }
 
 const title = "Products Management";
@@ -52,7 +51,6 @@ export default function ProductsPage() {
       effective_start_date: Date | null;
       effective_end_date: Date | null;
       task_id?: string;
-      uid?: string;
     }
   >({
     name: "",
@@ -65,7 +63,6 @@ export default function ProductsPage() {
     effective_start_date: null,
     effective_end_date: null,
     task_id: "",
-    uid: "",
   });
 
   // New category/subcategory fields
@@ -146,7 +143,6 @@ export default function ProductsPage() {
       effective_start_date: null,
       effective_end_date: null,
       task_id: "",
-      uid: "",
     });
     setIsEditing(false);
     setShowNewCategory(false);
@@ -250,7 +246,6 @@ export default function ProductsPage() {
         ? new Date(product.effective_end_date)
         : null,
       task_id: product.task_id,
-      uid: product.uid,
     });
     setIsEditing(true);
     setShowForm(true);
@@ -656,21 +651,6 @@ export default function ProductsPage() {
               {/* <div className="mb-4"></div> */}
 
               {/* Add this new field block after the Task ID input field */}
-              <div className="mb-4">
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Salesperson UID
-                </label>
-                <input
-                  type="text"
-                  value={formData.uid || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, uid: e.target.value })
-                  }
-                  className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-sm uppercase transition outline-none"
-                  placeholder="Salesperson UID"
-                />
-              </div>
-
               {/* Description - Now placed in the same row but spans 3 columns */}
               <div className="mb-4 md:col-span-3">
                 <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -817,9 +797,6 @@ export default function ProductsPage() {
                 <th className="min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
                   Task ID
                 </th>
-                <th className="min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
-                  UID
-                </th>
                 <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[140px] px-4 py-4 text-center font-medium text-black dark:text-white">
                   Actions
                 </th>
@@ -923,15 +900,6 @@ export default function ProductsPage() {
                       {product.task_id ? (
                         <span className="bg-info/10 text-info rounded px-2 py-1 text-sm">
                           {product.task_id}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      {product.uid ? (
-                        <span className="bg-info/10 text-info rounded px-2 py-1 text-sm uppercase">
-                          {product.uid}
                         </span>
                       ) : (
                         <span className="text-sm text-gray-400">-</span>

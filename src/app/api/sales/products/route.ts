@@ -8,7 +8,7 @@ export async function GET() {
 
     // Fetch all products with the new fields
     const [productRows] = (await pool.query(
-      'SELECT id, name, description, category, subcategory, price, discount, unit, effective_start_date, effective_end_date, task_id, uid, created_at, updated_at, status FROM products WHERE status = "Active" ORDER BY category, subcategory, name',
+      'SELECT id, name, description, category, subcategory, price, discount, unit, effective_start_date, effective_end_date, task_id, created_at, updated_at, status FROM products WHERE status = "Active" ORDER BY category, subcategory, name',
     )) as [any[], any];
 
     // Extract unique categories and subcategories
@@ -52,7 +52,6 @@ export async function GET() {
           ? new Date(product.effective_end_date).toISOString()
           : null,
         task_id: product.task_id || "",
-        uid: product.uid || "",
         created_at: product.created_at,
         updated_at: product.updated_at,
         status: product.status,
@@ -94,7 +93,6 @@ export async function POST(request: Request) {
       effective_start_date,
       effective_end_date,
       task_id,
-      uid
     } = body;
 
     // Validate required fields
@@ -125,8 +123,8 @@ export async function POST(request: Request) {
     const [result] = (await pool.query(
       `INSERT INTO products (
         name, description, category, subcategory, price, discount, unit, 
-        effective_start_date, effective_end_date, task_id, uid, created_at, updated_at, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        effective_start_date, effective_end_date, task_id, created_at, updated_at, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         description || "",
@@ -138,7 +136,6 @@ export async function POST(request: Request) {
         startDate,
         endDate,
         task_id || "",
-        uid || "",
         now,
         now,
         "Active",
@@ -203,7 +200,6 @@ export async function PUT(request: Request) {
       effective_start_date,
       effective_end_date,
       task_id,
-      uid,
     } = body;
 
     // Validate required fields
@@ -243,7 +239,6 @@ export async function PUT(request: Request) {
         effective_start_date = ?,
         effective_end_date = ?,
         task_id = ?,
-        uid = ?,
         updated_at = ?,
         status = ?
        WHERE id = ?`,
@@ -258,7 +253,6 @@ export async function PUT(request: Request) {
         startDate,
         endDate,
         task_id || "",
-        uid || "",
         now,
         body.status || "Active",
         id,

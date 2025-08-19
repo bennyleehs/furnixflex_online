@@ -70,6 +70,7 @@ export async function GET(request: Request) {
         unit: item.unit || "",
         unitPrice: parseFloat(item.unitPrice) || 0,
         discount: parseFloat(item.discount) || 0,
+        rounding: parseFloat(item.rounding) || 0,
         total: parseFloat(item.total) || 0,
         note: item.note || "",
       }));
@@ -135,8 +136,8 @@ export async function POST(request: Request) {
         await pool.query(
           `INSERT INTO quotation_items 
            (quotation_number, task_id, productId, category, subcategory, productName, description,
-            quantity, unit, unitPrice, discount, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            quantity, unit, unitPrice, discount, rounding, total, note) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             body.quotation_number, // Save quotation_number
             body.task_id || "", // Save task_id from parent quotation
@@ -149,6 +150,7 @@ export async function POST(request: Request) {
             item.unit || "",
             item.unitPrice || 0,
             item.discount || 0,
+            item.rounding || 0,
             item.total || 0,
             item.note || "",
           ],
@@ -260,8 +262,8 @@ export async function PUT(request: Request) {
         await pool.query(
           `INSERT INTO quotation_items 
            (quotation_number, task_id, productId, category, subcategory, productName, description,
-            quantity, unit, unitPrice, discount, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            quantity, unit, unitPrice, discount, rounding, total, note) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             body.quotation_number, // Save quotation_number
             body.task_id || "", // Save task_id from parent quotation
@@ -274,6 +276,7 @@ export async function PUT(request: Request) {
             item.unit || "",
             item.unitPrice || 0,
             item.discount || 0,
+            item.rounding || 0,
             item.total || 0,
             item.note || "",
           ],

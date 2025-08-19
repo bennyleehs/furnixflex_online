@@ -53,6 +53,7 @@ export default function QuotationPage() {
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
+      rounding: 0,
       total: 0,
       note: "",
       discount: 0,
@@ -60,10 +61,7 @@ export default function QuotationPage() {
   ]);
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [notes, setNotes] = useState("");
-  // const [terms, setTerms] = useState(TermsConditionsWarrantySections);
   const [terms, setTerms] = useState(getTermsAsPlainText());
-  // const [warranty, setWarranty] = useState(Warranty)
-  // const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(8);
   const [taxLabel, setTaxLabel] = useState<string>("SST"); // Default tax label
   const [validDays, setValidDays] = useState(14);
@@ -385,6 +383,7 @@ export default function QuotationPage() {
         quantity: 1, // Not undefined
         unit: "unit", // Not undefined
         unitPrice: 0, // Not undefined
+        rounding: 0, // Not undefined
         total: 0, // Not undefined
         note: "",
         discount: 0,
@@ -408,6 +407,7 @@ export default function QuotationPage() {
       quantity: 1,
       unit: "unit",
       unitPrice: 0,
+      rounding: 0,
       total: 0,
       note: "",
       discount: 0,
@@ -584,23 +584,6 @@ export default function QuotationPage() {
 
         alert("Quotation created successfully");
       }
-
-      // Update task status if sent
-      // if (status === "sent" && task && task.status !== "Quotation") {
-      //   await fetch(`/api/sales/task/update`, {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       id: taskId,
-      //       status: "Quotation",
-      //       oldStatus: task.status,
-      //       notes: "Quotation sent to customer",
-      //       userName: "Current User", // Replace with actual username
-      //     }),
-      //   });
-      // }
 
       if (status === "sent" && task && task.status !== "Quotation") {
         const formData = new FormData();
@@ -789,6 +772,56 @@ export default function QuotationPage() {
     return formattedValue;
   };
 
+  // Add this new function inside your QuotationPage component
+  const handleRoundingChange = (
+    itemId: string,
+    value: number,
+    unitPrice: number,
+  ) => {
+    // Find the item being updated to check its properties
+    const currentItem = items.find((i) => i.id === itemId);
+    if (!currentItem) return;
+
+    // Only proceed if it's the specific sales discount item
+    if (
+      currentItem.category !== "SALES DISCOUNT" ||
+      currentItem.subcategory !== "Final Discount"
+    ) {
+      return; // Do nothing for other item types
+    }
+
+    const roundingValue = parseFloat(String(value));
+
+    // If the input is empty or not a valid number, reset rounding and total to 0
+    if (isNaN(roundingValue)) {
+      setItems(
+        items.map((item) =>
+          item.id === itemId ? { ...item, rounding: 0, total: 0 } : item,
+        ),
+      );
+      return;
+    }
+
+    // Validation: The absolute value of the discount cannot be larger than the absolute unit price
+    // This prevents deducting more than the item is worth (e.g., deducting -120 from a -100 item)
+    if (Math.abs(roundingValue) > Math.abs(unitPrice)) {
+      alert(
+        `Final discount cannot be more than the fixed unit price of RM ${Math.abs(unitPrice).toFixed(2)}.`,
+      );
+      return;
+    }
+
+    // Update both the 'rounding' and 'total' for this specific item.
+    // The 'total' for a sales discount is determined by this rounding input.
+    setItems(
+      items.map((item) =>
+        item.id === itemId
+          ? { ...item, rounding: roundingValue, total: roundingValue }
+          : item,
+      ),
+    );
+  };
+
   // useEffect for calculation
   useEffect(() => {
     let rawPackagesTotal = 0; // <-- raw without discounts
@@ -796,6 +829,9 @@ export default function QuotationPage() {
 
     let packagesTotal = 0; // <-- discounted
     let addItemsTotal = 0; // <-- discounted
+
+    let rawRounding = 0; // raw salespersons' discounts
+    let roundingTotal = 0; // salespersons' discounts
 
     // 1: Base totals
     items.forEach((item) => {
@@ -808,6 +844,9 @@ export default function QuotationPage() {
       } else if (item.category === "Deducted Accessories") {
         rawPackagesTotal += item.total; // already negative in raw
         packagesTotal += item.total; // already negative in discounted
+      } else if (item.category === "SALES DISCOUNT") {
+        rawRounding += item.total; // already negative in raw
+        roundingTotal += item.total; // already negative in discounted
       }
     });
 
@@ -873,7 +912,8 @@ export default function QuotationPage() {
 
     // 4: Final totals
     const subtotal = rawPackagesTotal + rawAddItemsTotal; // <-- no discounts
-    const grandTotal = packagesTotal + addItemsTotal; // <-- with discounts
+    // const grandTotal = packagesTotal + addItemsTotal; // <-- with discounts
+    const grandTotal = packagesTotal + addItemsTotal + roundingTotal; // <-- with discounts
 
     setSubtotal(subtotal);
     setGrandTotal(grandTotal);
@@ -906,6 +946,13 @@ export default function QuotationPage() {
       item.category === "Discount" &&
       item.subcategory === "Add-on Items" &&
       (item.total < 0 || item.discount > 0),
+  );
+
+  const appliedRoundingDiscounts = items.filter(
+    (item) =>
+      item.category === "SALES DISCOUNT" &&
+      item.subcategory === "Final Discount" &&
+      (item.total < 0 || item.rounding > 0),
   );
 
   if (loading) {
@@ -1609,7 +1656,9 @@ export default function QuotationPage() {
                     <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Unit Price
                     </th>
-                    {/* Remove the discount column header */}
+                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Rounding
+                    </th>
                     <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Amount
                     </th>
@@ -1792,7 +1841,7 @@ export default function QuotationPage() {
                       </td>
 
                       {/* Quantity Input with 0.1 Increment/Decrement */}
-                      <td className="px-3 py-2">
+                      <td className="py-2">
                         <input
                           type="number"
                           min="0.1"
@@ -1813,60 +1862,61 @@ export default function QuotationPage() {
                               updateItem(item.id, "quantity", value);
                             }
                           }}
-                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
+                          disabled={
+                            item.category === "SALES DISCOUNT" &&
+                            item.subcategory === "Final Discount"
+                          }
+                          className="focus:border-primary dark:disabled:bg-meta-4 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-center text-sm outline-hidden disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600"
                         />
                       </td>
 
                       <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={item.unit || ""}
-                          onChange={(e) =>
-                            updateItem(item.id, "unit", e.target.value)
-                          }
-                          placeholder="unit"
-                          className="focus:border-primary w-full border-b border-gray-300 bg-transparent px-1 py-1 text-sm outline-hidden dark:border-gray-600"
-                        />
+                        <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600">
+                          {item.unit}
+                        </div>
                       </td>
 
+                      {/* v1.2 */}
                       {/* Unit Price Column */}
                       <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={
-                            item.unitPrice
-                              ? formatWithCommas(item.unitPrice)
-                              : ""
-                          }
-                          onFocus={(e) => {
-                            // When focused, show raw number for editing
-                            e.target.value = item.unitPrice?.toString() || "";
-                          }}
-                          onBlur={(e) => {
-                            // When blurred, update with formatted value
-                            const rawValue = e.target.value.replace(
-                              /[^0-9.]/g,
-                              "",
-                            );
-                            e.target.value = formatWithCommas(rawValue);
-                          }}
-                          onChange={(e) => {
-                            // Remove any non-numeric characters except decimal point
-                            const value = e.target.value.replace(
-                              /[^0-9.]/g,
-                              "",
-                            );
-                            updateItem(item.id, "unitPrice", value);
-
-                            // Update total based on quantity and unit price
-                            const quantity = Number(item.quantity) || 0;
-                            const unitPrice = Number(value) || 0;
-                            updateItem(item.id, "total", quantity * unitPrice);
-                          }}
-                          className="focus:border-primary relative z-10 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden dark:border-gray-600"
-                        />
+                        <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
+                          {formatWithCommas(item.unitPrice) || 0}
+                        </div>
                       </td>
 
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={item.rounding}
+                          onChange={(e) => {
+                            let value = parseFloat(e.target.value);
+                            // Check if the input value is a positive number
+                            if (!isNaN(value) && value > 0) {
+                              // Automatically convert the positive number to negative
+                              value = -value;
+                            }
+                            handleRoundingChange(
+                              item.id,
+                              value,
+                              item.unitPrice,
+                            );
+                          }}
+                          disabled={
+                            !(
+                              item.category === "SALES DISCOUNT" &&
+                              item.subcategory === "Final Discount"
+                            )
+                          }
+                          placeholder={
+                            item.category === "SALES DISCOUNT" &&
+                            item.subcategory === "Final Discount"
+                              ? "e.g. -5.50" // A helpful placeholder
+                              : "N/A"
+                          }
+                          className="focus:border-primary dark:disabled:bg-meta-4 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm outline-hidden disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600"
+                        />
+                      </td>
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
                           {formatWithCommas(item.total) || 0}
@@ -2001,6 +2051,17 @@ export default function QuotationPage() {
                       <div className="text-sm text-gray-500 italic">
                         (*On-site Services & Transportation Charge not included)
                       </div>
+                    </div>
+                  )}
+
+                  {/* Show package discounts only if applied */}
+                  {/* Grouped package discounts */}
+                  {appliedRoundingDiscounts.length > 0 && (
+                    <div className="flex justify-between py-1">
+                      <span>Rounding Discounts:</span>
+                      <span className="text-red-600">
+                        -{formatDiscounts(appliedRoundingDiscounts)}
+                      </span>
                     </div>
                   )}
 
