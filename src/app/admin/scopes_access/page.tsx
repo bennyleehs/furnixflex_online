@@ -29,6 +29,7 @@ export default function AccessList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchAll = async () => {
     try {
@@ -113,6 +114,10 @@ export default function AccessList() {
     }
   }, []);
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const columns = [
     { key: "no", title: "No" },
     { key: "branch", title: "Branch" },
@@ -155,6 +160,7 @@ export default function AccessList() {
       {!loading && !error && (
         <Tables
           columns={columns}
+          modalTitle="Scopes Access"
           modalColumns={modalColumns}
           data={scopeAccess}
           externalData={accessMap}
@@ -166,6 +172,10 @@ export default function AccessList() {
           editPermissionPrefix={PERMISSION_PREFIX}
           deletePermissionPrefix={PERMISSION_PREFIX}
           monitorPermissionPrefix={PERMISSION_PREFIX}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          totalItems={scopeAccess.length}
+          itemsPerPage={10}
           infoEndpoint="/api/admin/scope_access/access_path"
         />
       )}

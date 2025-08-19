@@ -16,7 +16,12 @@ interface TableProps {
   editPermissionPrefix?: string; // To control the edit button
   deletePermissionPrefix?: string; // To control the delete button
   monitorPermissionPrefix?: string; // To control overall visibility (hiding all buttons)
+  currentPage?: number;
+  totalItems?: number;
+  itemsPerPage?: number;
+  onPageChange?: (page: number) => void;
   infoEndpoint?: string; // info prop
+  modalTitle?: string;
   modalColumns?: {
     key: string;
     title: string;
@@ -37,7 +42,12 @@ export default function Tables({
   editPermissionPrefix,
   deletePermissionPrefix,
   monitorPermissionPrefix,
+  currentPage = 1,
+  totalItems = 0,
+  itemsPerPage = 10,
+  onPageChange = () => {},
   infoEndpoint,
+  modalTitle,
   modalColumns,
   externalData,
 }: TableProps) {
@@ -214,6 +224,124 @@ export default function Tables({
     }
   };
 
+  // pagination
+  const renderPagination = () => {
+    if (!totalItems || !onPageChange) return null;
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return null;
+
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 5;
+
+    const addPage = (page: number | string) => pages.push(page);
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) addPage(i);
+    } else {
+      addPage(1);
+      const left = Math.max(currentPage - 1, 2);
+      const right = Math.min(currentPage + 1, totalPages - 1);
+
+      if (left > 2) addPage("...");
+
+      for (let i = left; i <= right; i++) addPage(i);
+
+      if (right < totalPages - 1) addPage("...");
+      addPage(totalPages);
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-between gap-4 py-4 sm:flex-row sm:items-center">
+        <div className="flex w-full flex-col space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2 sm:text-center md:items-start">
+          <p className="text-center text-sm font-bold text-gray-500 dark:text-gray-400">
+            Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}{" "}
+            to {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
+            <span className="text-primary">{totalItems} entries</span>
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-1">
+          {/* <button
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
+        >
+          First
+        </button> */}
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="bg-primary flex items-center rounded-sm py-1 pr-2 text-white hover:opacity-80 disabled:opacity-50"
+          >
+            <svg
+              className="h-5 w-5 text-white"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="m15 19-7-7 7-7"
+              />
+            </svg>
+            Prev
+          </button>
+
+          {pages.map((page, index) => (
+            <button
+              key={`${page}-${index}`}
+              onClick={() => typeof page === "number" && onPageChange(page)}
+              disabled={page === "..."}
+              className={`rounded px-3 py-1 ${
+                currentPage === page
+                  ? "bg-primary text-white"
+                  : typeof page === "string"
+                    ? "cursor-default bg-transparent text-gray-500"
+                    : "hover:bg-primary dark:bg-meta-4 dark:hover:bg-primary bg-gray-200 hover:text-white dark:hover:text-white"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="bg-primary flex items-center rounded-sm py-1 pl-2 text-white hover:opacity-80 disabled:opacity-50"
+          >
+            Next
+            <svg
+              className="h-5 w-5 text-white"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="m9 5 7 7-7 7"
+              />
+            </svg>
+          </button>
+          {/* <button
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="bg-primary rounded-sm px-3 py-1 text-white hover:opacity-80 disabled:opacity-50"
+        >
+          Last
+        </button> */}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-2">
       {/* Table Header with Create Button */}
@@ -291,7 +419,9 @@ export default function Tables({
           </thead>
           <tbody>
             {tableData.length > 0 ? (
-              tableData.map((row, rowIndex) => (
+              tableData
+              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)//for pagination
+              .map((row, rowIndex) => (
                 <tr
                   key={`row-${rowIndex}-${row.id || row.originalKey || row.key || rowIndex}`}
                 >
@@ -406,7 +536,7 @@ export default function Tables({
             {/* Modal Header */}
             <div className="dark:border-strokedark dark:bg-boxdark sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-white p-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Branch Details
+                {modalTitle} Details
               </h3>
               <button onClick={() => setIsInfoModalOpen(false)}>×</button>
             </div>
@@ -459,6 +589,8 @@ export default function Tables({
           </div>
         </div>
       )}
+      {/* Pagination */}
+      {renderPagination()}
     </div>
   );
 }
