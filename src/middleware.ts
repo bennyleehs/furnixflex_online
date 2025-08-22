@@ -10,20 +10,16 @@ const publicPaths = [
   "/api/auth/signup",
 ];
 
-// Match everything EXCEPT:
-// - api/auth routes
-// - _next assets
-// - favicon.ico
-// - any path with a file extension (static files)
 export const config = {
-  matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api/auth|_next/static|_next/image|images|favicon.ico).*)"],
+  // matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
 
 // Helper to decode base64url
 function base64UrlDecode(str: string): Uint8Array {
-  const base64 = str.replace(/-/g, "+").replace(/_/g, "/") + "==".slice((str.length + 3) % 4);
+  const base64 =
+    str.replace(/-/g, "+").replace(/_/g, "/") +
+    "==".slice((str.length + 3) % 4);
   const binary = atob(base64);
   const len = binary.length;
   const bytes = new Uint8Array(len);
@@ -45,7 +41,7 @@ async function verifyJwt(token: string): Promise<boolean> {
     encoder.encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["verify"]
+    ["verify"],
   );
 
   const data = encoder.encode(`${headerB64}.${payloadB64}`);
@@ -55,13 +51,15 @@ async function verifyJwt(token: string): Promise<boolean> {
     "HMAC",
     key,
     new Uint8Array(signature),
-    new Uint8Array(data)
+    new Uint8Array(data),
   );
 
   if (!isValid) return false;
 
   // Expiration check
-  const payload = JSON.parse(atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/")));
+  const payload = JSON.parse(
+    atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/")),
+  );
   if (payload.exp && payload.exp < Date.now() / 1000) return false;
 
   return true;
@@ -69,6 +67,21 @@ async function verifyJwt(token: string): Promise<boolean> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // // --- NEW CODE START ---
+  // // Check if the path is a static file (e.g., has a file extension)
+  // const isStaticFile = pathname.includes(".");
+  // if (isStaticFile) {
+  //   return NextResponse.next();
+  // }
+  // // --- NEW CODE END ---
+  // --- IMPORTANT NEW CODE ---
+  // If the path contains a file extension (e.g., .jpg), it's a static file.
+  // We must return early to prevent the authentication check from running.
+  if (/\./.test(pathname)) {
+    return NextResponse.next();
+  }
+  // --- END OF NEW CODE ---
 
   // Skip public paths
   if (publicPaths.includes(pathname)) return NextResponse.next();

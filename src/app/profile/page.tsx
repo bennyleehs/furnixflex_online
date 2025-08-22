@@ -72,8 +72,6 @@ const Profile = () => {
   const documentInputRef = useRef<HTMLInputElement>(null);
   // Add a ref for the documents section
   const documentsSectionRef = useRef<HTMLDivElement>(null);
-  // Add a new ref for the employee details section
-  const employeeDetailsSectionRef = useRef<HTMLDivElement>(null);
   // Add a ref for the very top of your content
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -228,6 +226,8 @@ const Profile = () => {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+      console.error("Server response text:", errorText);
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
           `Failed to upload photo: ${errorData.message || response.statusText}`,
@@ -237,8 +237,11 @@ const Profile = () => {
       const data = await response.json();
 
       // Create the profile photo URL with cache busting
-      const profilePhotoUrl = `/admin/employee/${users.uid}/upload/profileImage${users.uid}.jpg?v=${Date.now()}`;
+      // const profilePhotoUrl = `/admin/employee/${users.uid}/upload/profileImage${users.uid}.jpg?v=${Date.now()}`;
+      const profilePhotoUrl = data.profilePhotoUrl;
 
+      // CRITICAL FIX: Add a small delay to prevent the race condition
+      setTimeout(() => {
       // Update employee state with new photo URL
       setUsers({
         ...users,
@@ -252,15 +255,18 @@ const Profile = () => {
 
       setSuccessMessage("Profile photo updated successfully");
       setTimeout(() => setSuccessMessage(null), 3000);
+      setUploading(false);//move here
+      }, 500); // Wait for 500ms (0.5 seconds)
     } catch (err) {
       console.error("Upload error details:", err);
       setUploadError(
         "Error uploading photo: " +
           (err instanceof Error ? err.message : String(err)),
       );
-    } finally {
-      setUploading(false);
-    }
+    } 
+    // finally {
+    //   setUploading(false);//move up
+    // }
   };
 
   // Handle document upload
@@ -396,16 +402,17 @@ const Profile = () => {
         setUsers(data);
         console.log("Fetched user data:", data);
 
-        // Fetch documents for this employee
+        // Fetch documents for this user
         if (data.uid) {
           const docsRes = await fetch(
-            `/api/admin/employee/upload?employeeUid=${data.uid}`,
+            // `/api/admin/employee/upload?employeeUid=${data.uid}`,
+            `/api/profile/upload?usersUid=${data.uid}`,
           );
           if (docsRes.ok) {
             const docsData = await docsRes.json();
             setDocuments(docsData.documents || []);
 
-            // If there's a profile photo and the employee doesn't have one set, update it
+            // If there's a profile photo and the user doesn't have one set, update it
             if (docsData.profilePhoto && !data.profilePhoto) {
               setUsers({
                 ...data,

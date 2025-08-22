@@ -94,7 +94,8 @@ export async function POST(request: NextRequest) {
       await writeFile(filePath, buffer);
 
       // Return the URL to the uploaded file
-      const fileUrl = `/admin/employee/${employeeUid}/upload/${filename}`;
+      // const fileUrl = `/admin/employee/${employeeUid}/upload/${filename}`;
+      const fileUrl = `/admin/employee/${employeeUid}/upload/${filename}?v=${Date.now()}`;
 
       // If this is a photo upload, also update the employee record in the database
       if (fileType === "photo") {
@@ -106,7 +107,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         ...(fileType === "photo"
-          ? { photoUrl: fileUrl }
+          // ? { photoUrl: fileUrl }
+          ? { profilePhotoUrl: fileUrl }
           : { documentUrl: fileUrl }),
       });
     }

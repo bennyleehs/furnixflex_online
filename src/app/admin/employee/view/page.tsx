@@ -169,8 +169,11 @@ export default function EmployeeDetailPage() {
       const data = await response.json();
 
       // Create the profile photo URL with cache busting
-      const profilePhotoUrl = `/admin/employee/${employee.uid}/upload/profileImage${employee.uid}.jpg?v=${Date.now()}`;
+      // const profilePhotoUrl = `/admin/employee/${employee.uid}/upload/profileImage${employee.uid}.jpg?v=${Date.now()}`;
+      const profilePhotoUrl = data.profilePhotoUrl;
 
+      // CRITICAL FIX: Add a small delay to prevent the race condition
+      setTimeout(() => {
       // Update employee state with new photo URL
       setEmployee({
         ...employee,
@@ -184,15 +187,18 @@ export default function EmployeeDetailPage() {
 
       setSuccessMessage("Profile photo updated successfully");
       setTimeout(() => setSuccessMessage(null), 3000);
+      setUploading(false);//move here
+      }, 500); // Wait for 500ms (0.5 seconds)
     } catch (err) {
       console.error("Upload error details:", err);
       setUploadError(
         "Error uploading photo: " +
           (err instanceof Error ? err.message : String(err)),
       );
-    } finally {
-      setUploading(false);
-    }
+    } 
+    // finally {
+    //   setUploading(false);//move up
+    // }
   };
   // Handle document upload
   const handleDocumentUpload = () => {
