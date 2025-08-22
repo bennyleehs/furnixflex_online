@@ -31,6 +31,7 @@ export async function verifyToken(
 
     const { payload } = await jwtVerify(token, secretKey, {
       algorithms: ["HS256"],
+      typ: "JWT",
     });
 
     const {
@@ -83,6 +84,11 @@ export async function verifyToken(
       return { expired: true };
     }
 
+    if (err.code === "ERR_JWT_TYPE_INVALID") {
+      console.error("❌ Invalid token type (typ header missing or invalid).");
+      return null;
+    }
+
     console.error("❌ Invalid or expired token:", err);
     return null;
   }
@@ -116,7 +122,7 @@ export async function generateToken(
     // permissions, // Include permissions array in the token
     iat: now,
   })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setExpirationTime("1d")
     .sign(secretKey);
 }
