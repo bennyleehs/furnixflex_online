@@ -647,13 +647,13 @@ export default function QuotationPage() {
         },
         company: {
           name: "CLASSY PROJECT MARKETING SDN BHD",
-          address: `No. 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          address: `No. 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
           phone: "+6016-8866001",
           tel: "07-5104106",
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           branches:
-            "Kota Masai, Johor • Setia Alam, Selangor • Bukit Mertajam, Penang",
+            "Kota Masai, Johor • Puchong | Setia Alam, Selangor • Bukit Mertajam, Penang",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         format: {
@@ -1919,7 +1919,12 @@ export default function QuotationPage() {
                       </td>
                       <td className="px-3 py-2">
                         <div className="w-full border-b border-gray-300 bg-transparent px-1 py-1 text-right text-sm font-medium dark:border-gray-600">
-                          {formatWithCommas(item.total) || 0}
+                          {/* {formatWithCommas(item.total) || 0} */}
+                          {item.total
+                            ? formatWithCommas(item.total)
+                            : item.discount
+                              ? item.discount + "%"
+                              : 0}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-center">

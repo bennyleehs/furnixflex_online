@@ -129,9 +129,7 @@ async function generateQuotationPDF(
 
   // Company name with larger font
   doc.setFontSize(16);
-  // doc.setFont('courier', 'bold');
   doc.setFont("helvetica", "bold");
-  // doc.setFont("times", "bold");
   // doc.setFont('symbol', 'bold');
   // doc.setFont('zapfdingbats', 'bold');
   doc.text(data.company.name, pageWidth / 2 + margin + 10, margin + 8, {
@@ -145,7 +143,7 @@ async function generateQuotationPDF(
     align: "center",
   });
   doc.text(
-    `H/p: ${data.company.phone} | Tel: ${data.company.tel} | Email: ${data.company.email} | Website: ${data.company.website}`,
+    `H/p: ${data.company.phone} • Tel: ${data.company.tel} • Email: ${data.company.email} • Website: ${data.company.website}`,
     pageWidth / 2 + margin + 10,
     margin + 18,
     { align: "center" },
@@ -164,7 +162,7 @@ async function generateQuotationPDF(
 
   // ----- THREE-SECTION HEADER LAYOUT -----
   // Top position for all three sections
-  const sectionTop = margin + 34;
+  const sectionTop = margin + 32;
   // Calculate column widths and positions
   const columnWidth = (pageWidth - 2 * margin) / 3;
   const col1X = margin;
@@ -172,136 +170,137 @@ async function generateQuotationPDF(
   const col3X = margin + columnWidth * 2 + 12;
 
   // Quotation information with labels and values vertically aligned
-  const valueC1 = col1X + 11;
+  const valueC1 = col1X + 12;
   const labelX = col3X;
   const valueC3 = col3X + 10; // Offset for values
 
   // Column Headers
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold"); // Using fontLable object
-  doc.text("CUSTOMER", col1X, sectionTop);
-  // doc.text("ADDRESS", col2X, sectionTop);
-  doc.text("QUOTATION", col3X, sectionTop);
+  doc.setFont("helvetica", "bold");
+  doc.setFillColor(0, 0, 0);
+  doc.setTextColor(255, 255, 255);
+  // doc.setFillColor(255, 202, 122);//orange
+  // doc.setTextColor(0,0,0);
+  doc.rect(col1X, sectionTop - 4, 37, 7, "F");
+  doc.text(" Customer Details", col1X, sectionTop + 1);
 
-  // Add underlines for headers
-  // const lineY = sectionTop + 1;
-  // doc.setLineWidth(0.3);
-  // doc.line(col1X, lineY, col1X + doc.getTextWidth("CUSTOMER:"), lineY);
-  // doc.line(col2X, lineY, col2X + doc.getTextWidth("SHIP TO:"), lineY);
-  // doc.line(col3X, lineY, col3X + doc.getTextWidth("QUOTATION:"), lineY);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Address", col2X, sectionTop + 1);
 
-  // Column Labels
+  doc.setFontSize(18);
+  doc.text("QUOTATION", col3X, sectionTop + 2);
+
+  // Column Title header
   doc.setFontSize(10);
-  doc.setFont("times", "normal");
-  doc.text("Name:", col1X, sectionTop + 5);
-  doc.text("NRIC:", col1X, sectionTop + 10);
-  doc.text("TEL:", col1X, sectionTop + 15);
-  doc.text("Email:", col1X, sectionTop + 20);
+  doc.setFont("helvetica", "bold");
+  doc.text("Name:", col1X, sectionTop + 8);
+  doc.text("I/C:", col1X, sectionTop + 13);
+  doc.text("Phone:", col1X, sectionTop + 18);
+  doc.text("Email:", col1X, sectionTop + 23);
 
-  // doc.text("Property:", col2X, sectionTop + 20);
-  // doc.text("Access:", col2X + 32, sectionTop + 20);
+  doc.text("Property:", col2X, sectionTop + 23);
+  doc.text("Access:", col2X + 36, sectionTop + 23);
 
-  doc.text("REF:", labelX, sectionTop + 5);
-  doc.text("Date:", labelX, sectionTop + 10);
-  doc.text("PIC:", labelX, sectionTop + 15);
-  // doc.text('Terms :', labelX, sectionTop + 20);
+  doc.text("REF:", labelX, sectionTop + 8);
+  doc.text("Date:", labelX, sectionTop + 13);
+  doc.text("PIC:", labelX, sectionTop + 18);
 
   // Column Contents
+  // column 1 - Customer Details
   doc.setFontSize(10);
-  doc.setFont("times", "bold");
-  doc.text(data.quotation.customer_name, valueC1, sectionTop + 5);
-  doc.text(data.quotation.customer_nric || "", valueC1, sectionTop + 10);
-  doc.text(data.quotation.customer_contact, valueC1, sectionTop + 15);
-  doc.text(data.quotation.customer_email || "", valueC1, sectionTop + 20);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.quotation.customer_name, valueC1, sectionTop + 8);
+  doc.text(data.quotation.customer_nric || "", valueC1, sectionTop + 13);
+  doc.text(data.quotation.customer_contact, valueC1, sectionTop + 18);
+  doc.text(data.quotation.customer_email || "", valueC1, sectionTop + 23);
 
-  // doc.text(data.quotation.customer_property || "", col2X + 14, sectionTop + 20);
-  // doc.text(data.quotation.customer_guard || "", col2X + 44, sectionTop + 20);
+  // column 2 - Address
+  doc.text(data.quotation.customer_property || "", col2X + 16, sectionTop + 23);
+  doc.text(data.quotation.customer_guard || "", col2X + 50, sectionTop + 23);
 
   // Initialize addressLinesArray with an empty array
   let addressLinesArray = [];
   // Add shipping address if available
-  // if (data.quotation.customer_address) {
-  //   const shipAddress = data.quotation.customer_address;
-  //   // First split by commas and trim each part
-  //   const addressParts = shipAddress
-  //     .split(",")
-  //     .map((part: string) => part.trim())
-  //     .filter((part: any) => part);
+  if (data.quotation.customer_address) {
+    const shipAddress = data.quotation.customer_address;
+    // First split by commas and trim each part
+    const addressParts = shipAddress
+      .split(",")
+      .map((part: string) => part.trim())
+      .filter((part: any) => part);
 
-  //   // Format according to specific pattern:
-  //   // Line 1: First 2 parts
-  //   // Line 2: Next 3 parts
-  //   // Line 3: All remaining parts
+    // Format according to specific pattern:
+    // Line 1: First 2 parts
+    // Line 2: Next 3 parts
+    // Line 3: All remaining parts
 
-  //   if (addressParts.length > 0) {
-  //     // First line - first 2 parts with comma at end
-  //     const firstLine = addressParts.slice(0, 2).join(", ") + ",";
-  //     addressLinesArray.push(firstLine);
+    if (addressParts.length > 0) {
+      // First line - first 2 parts with comma at end
+      const firstLine = addressParts.slice(0, 2).join(", ") + ",";
+      addressLinesArray.push(firstLine);
 
-  //     // Second line - next 3 parts with comma at end
-  //     if (addressParts.length > 2) {
-  //       const secondLine = addressParts.slice(2, 5).join(", ") + ",";
-  //       addressLinesArray.push(secondLine);
+      // Second line - next 3 parts with comma at end
+      if (addressParts.length > 2) {
+        const secondLine = addressParts.slice(2, 5).join(", ") + ",";
+        addressLinesArray.push(secondLine);
 
-  //       // Third line - all remaining parts
-  //       if (addressParts.length > 5) {
-  //         const thirdLine = addressParts.slice(5).join(", ");
-  //         addressLinesArray.push(thirdLine);
-  //       }
-  //     }
+        // Third line - all remaining parts
+        if (addressParts.length > 5) {
+          const thirdLine = addressParts.slice(5).join(", ");
+          addressLinesArray.push(thirdLine);
+        }
+      }
 
-  //     // Display each line with proper spacing
-  //     addressLinesArray.forEach((line: string, index: number) => {
-  //       doc.text(line, col2X, sectionTop + 5 + index * 5);
-  //     });
-  //   } else {
-  //     // Default empty value if no address parts after filtering
-  //     doc.text("N/A", col2X, sectionTop + 5);
-  //     addressLinesArray = ["N/A"];
-  //   }
-  // } else {
-  //   // Default empty value if no address is provided
-  //   doc.text("N/A", col2X, sectionTop + 5);
-  //   addressLinesArray = ["N/A"];
-  // }
+      // Display each line with proper spacing
+      addressLinesArray.forEach((line: string, index: number) => {
+        doc.text(line, col2X, sectionTop + 8 + index * 5);
+      });
+    } else {
+      // Default empty value if no address parts after filtering
+      doc.text("N/A", col2X, sectionTop + 5);
+      addressLinesArray = ["N/A"];
+    }
+  } else {
+    // Default empty value if no address is provided
+    doc.text("N/A", col2X, sectionTop + 5);
+    addressLinesArray = ["N/A"];
+  }
 
-  doc.text(data.quotation.quotation_number, valueC3, sectionTop + 5);
+  // column 3 - Quotation
+  doc.text(data.quotation.quotation_number, valueC3, sectionTop + 8);
   doc.text(
     `-${fileIndex.toString()}`,
     valueC3 + doc.getTextWidth(data.quotation.quotation_number),
-    sectionTop + 5,
+    sectionTop + 8,
   );
   doc.text(
     new Date(data.quotation.quotation_date).toLocaleDateString(),
     valueC3,
-    sectionTop + 10,
+    sectionTop + 13,
   );
-  doc.text("~", valueC3 + 17, sectionTop + 10);
+  doc.text("~", valueC3 + 19, sectionTop + 13);
   doc.text(
     new Date(data.quotation.valid_until).toLocaleDateString(),
-    valueC3 + 20,
-    sectionTop + 10,
+    valueC3 + 22,
+    sectionTop + 13,
   );
-  doc.text(data.quotation.sales_representative, valueC3, sectionTop + 15);
+  doc.text(data.quotation.sales_representative, valueC3, sectionTop + 18);
   const salesRepWidth =
     doc.getTextWidth(data.quotation.sales_representative) + 1;
   doc.text(
     `(${data.quotation.sales_uid})`,
     valueC3 + salesRepWidth,
-    sectionTop + 15,
+    sectionTop + 18,
   );
-  // doc.text(data.quotation.payment_terms || '', valueC3, sectionTop + 20);
 
   // ----- ITEMS TABLE SECTION -----
   // Starting y position after the header information
   // let yPosition = margin + 38 + (addressLinesArray.length - 1) * 5;
-  let yPosition = margin + 50;
+  let yPosition = margin + 60;
 
   // Add items table header
   doc.setFontSize(11);
-  doc.setFont("helvetica", "bold");
-  // doc.text('Items:', margin, yPosition);
-  // yPosition += 5;
+  doc.setFont("helvetica", "normal");
 
   // Create a manual table since autoTable might not be working
   const colWidths = [10, 90, 15, 20, 30, 20];
@@ -320,20 +319,38 @@ async function generateQuotationPDF(
   ];
 
   // Table header
-  doc.setFillColor(80, 80, 80);
-  doc.setTextColor(255, 255, 255);
+  doc.setFillColor(255, 202, 122);
+  doc.setTextColor(0, 0, 0);
+  // Draw the filled background rectangle without a border
   doc.rect(margin, yPosition, pageWidth - 2 * margin, 7, "F");
 
-  doc.text("No", colPositions[0] + 2, yPosition + 5);
-  doc.text("Description", colPositions[1], yPosition + 5);
-  doc.text("Qty", colPositions[2], yPosition + 5);
-  doc.text("Unit", colPositions[3], yPosition + 5);
-  doc.text("Unit Price", colPositions[4], yPosition + 5);
-  doc.text("Total (RM)", colPositions[5] - 5, yPosition + 5);
+  // Set the line color for the borders
+  doc.setDrawColor(0, 0, 0);
 
-  yPosition += 10;
+  // Draw the top & bottom border line of the header
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  doc.line(margin, yPosition + 7, pageWidth - margin, yPosition + 7);
 
-  // Reset text color
+  // Draw the internal vertical lines
+  doc.line(colPositions[1] - 1, yPosition, colPositions[1] - 1, yPosition + 7);
+  doc.line(colPositions[2] + 4, yPosition, colPositions[2] + 4, yPosition + 7);
+  doc.line(colPositions[3] + 5, yPosition, colPositions[3] + 5, yPosition + 7);
+  doc.line(colPositions[4] + 6, yPosition, colPositions[4] + 6, yPosition + 7);
+  doc.line(colPositions[5] + 9, yPosition, colPositions[5] + 9, yPosition + 7);
+
+  // font for table header
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+
+  doc.text("No.", colPositions[0] + 2, yPosition + 5);
+  doc.text("Product Details", colPositions[1], yPosition + 5);
+  doc.text("Qty", colPositions[2] + 6, yPosition + 5);
+  doc.text("Unit", colPositions[3] + 8, yPosition + 5);
+  doc.text("Unit Price (RM)", colPositions[4] + 8, yPosition + 5);
+  doc.text("Total (RM)", colPositions[5] + 12, yPosition + 5);
+
+  yPosition += 7;
+  // Font, color for table contents
   doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -352,16 +369,16 @@ async function generateQuotationPDF(
       yPosition += 5;
 
       // Redraw table header
-      doc.setFillColor(80, 80, 80);
-      doc.setTextColor(255, 255, 255);
+      doc.setFillColor(255, 202, 122);
+      doc.setTextColor(0, 0, 0);
       doc.rect(margin, yPosition, pageWidth - 2 * margin, 7, "F");
 
-      doc.text("No", colPositions[0] + 2, yPosition + 5);
-      doc.text("Description", colPositions[1] + 2, yPosition + 5);
-      doc.text("Qty", colPositions[2], yPosition + 5);
-      doc.text("Unit", colPositions[3], yPosition + 5);
-      doc.text("Unit Price", colPositions[4], yPosition + 5);
-      doc.text("Total (RM)", colPositions[5], yPosition + 5);
+      doc.text("No.", colPositions[0] + 2, yPosition + 5);
+      doc.text("Product Details", colPositions[1], yPosition + 5);
+      doc.text("Qty", colPositions[2] + 6, yPosition + 5);
+      doc.text("Unit", colPositions[3] + 8, yPosition + 5);
+      doc.text("Unit Price (RM)", colPositions[4] + 8, yPosition + 5);
+      doc.text("Total (RM)", colPositions[5] + 12, yPosition + 5);
 
       yPosition += 10;
       doc.setTextColor(0, 0, 0);
@@ -369,32 +386,91 @@ async function generateQuotationPDF(
       doc.setFontSize(9);
     }
 
-    // Draw row lines
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, yPosition + 6, pageWidth - margin, yPosition + 6);
-
     // Format values
     const unitPrice = parseFloat(item.unitPrice).toFixed(2);
     const total = parseFloat(item.total).toFixed(2);
+    const productTitle = item.product || "";
+    const productDescription = item.description || "";
 
-    // Add row content
-    doc.text((index + 1).toString(), colPositions[0] + 2, yPosition + 4);
+    // Handle text wrapping for the description
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    const descLines = doc.splitTextToSize(productDescription, colWidths[1]);
+    // Reset font back for other drawing commands
+    doc.setFont("helvetica", "normal");
 
-    // Handle long descriptions with text wrapping
-    const description = item.description || item.product || "";
-    const descLines = doc.splitTextToSize(description, colWidths[1] - 4);
-    doc.text(descLines, colPositions[1], yPosition + 4);
+    const bottomPadding = 1;
 
-    const rowHeight = Math.max(6, descLines.length * 5);
+    // Calculate row height based on both lines of text
+    const titleHeight = 5; // Height for a single line of text
+    const descriptionHeight = descLines.length * 5; // 5 points per line of wrapped text
+    const rowHeight = titleHeight + descriptionHeight + bottomPadding;
 
-    // Right-aligned numeric values
-    doc.text(
-      item.quantity.toString(),
-      colPositions[2] + colWidths[2] - 8,
-      yPosition + 4,
-      { align: "right" },
+    // define the color for cell fill
+    doc.setFillColor(230, 230, 230);
+    doc.setTextColor(0, 0, 0);
+    doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, "F");
+
+    // Draw horizontal lines
+    if (index === 0) {
+      // If it's the first row, draw a black top line
+      doc.setDrawColor(0, 0, 0);
+    } else {
+      // For all other rows, draw a light gray top line
+      doc.setDrawColor(197, 197, 197);
+    }
+    // Draw the top horizontal line
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+
+    // Draw the bottom horizontal line only if it's NOT the last row
+    if (index < data.quotation.items.length - 1) {
+      doc.setDrawColor(197, 197, 197);
+      doc.line(
+        margin,
+        yPosition + rowHeight,
+        pageWidth - margin,
+        yPosition + rowHeight,
+      );
+    }
+
+    // Draw the vertical lines
+    doc.setDrawColor(115, 115, 115);
+    doc.line(
+      colPositions[1] - 1,
+      yPosition,
+      colPositions[1] - 1,
+      yPosition + rowHeight,
     );
-    doc.text(item.unit, colPositions[3] + 1, yPosition + 4);
+    doc.line(
+      colPositions[2] + 4,
+      yPosition,
+      colPositions[2] + 4,
+      yPosition + rowHeight,
+    );
+    doc.line(
+      colPositions[3] + 5,
+      yPosition,
+      colPositions[3] + 5,
+      yPosition + rowHeight,
+    );
+    doc.line(
+      colPositions[4] + 6,
+      yPosition,
+      colPositions[4] + 6,
+      yPosition + rowHeight,
+    );
+    doc.line(
+      colPositions[5] + 9,
+      yPosition,
+      colPositions[5] + 9,
+      yPosition + rowHeight,
+    );
+
+    // Reset font settings for the row content
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+
     // Format numbers with thousand separators
     const formattedUnitPrice = parseFloat(unitPrice).toLocaleString("en-US", {
       minimumFractionDigits: 2,
@@ -405,15 +481,41 @@ async function generateQuotationPDF(
       maximumFractionDigits: 2,
     });
 
+    // Add row content
+    doc.text((index + 1).toString(), colPositions[0] + 2 * 2, yPosition + 4, {
+      align: "center",
+    });
+
+    // Draw the Product Title (bold)
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text(productTitle, colPositions[1], yPosition + 4);
+
+    // Draw the Italicized Description (wrapped)
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.text(descLines, colPositions[1], yPosition + 4 + titleHeight);
+
+    //reset font back
+    doc.setFont("helvetica", "normal");
+
+    // Right-aligned numeric values
+    doc.text(
+      item.quantity.toString(),
+      colPositions[2] + colWidths[2] - 5,
+      yPosition + 4,
+      { align: "right" },
+    );
+    doc.text(item.unit, colPositions[3] + 9, yPosition + 4);
     doc.text(
       formattedUnitPrice,
-      colPositions[4] + colWidths[4] - 13,
+      colPositions[4] + colWidths[4] + 4,
       yPosition + 4,
       { align: "right" },
     );
     doc.text(
       formattedTotal,
-      colPositions[5] + colWidths[5] - 5,
+      colPositions[5] + colWidths[5] + 10,
       yPosition + 4,
       { align: "right" },
     );
@@ -421,15 +523,15 @@ async function generateQuotationPDF(
     yPosition += rowHeight;
   });
 
-  // Draw table bottom line
-  doc.setDrawColor(0, 0, 0);
-  doc.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
+  // // Draw table bottom line
+  // doc.setDrawColor(0, 0, 0);
+  // doc.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
 
   // ----- SUMMARY SECTION -----
-  const finalY = yPosition + 10;
+  const finalY = yPosition + 6;
 
   // Create a summary box on the right side
-  const summaryX = pageWidth - margin - 60;
+  const summaryX = pageWidth - margin - 66;
   const summaryWidth = 60;
   let summaryY = finalY;
 
@@ -437,13 +539,66 @@ async function generateQuotationPDF(
   doc.setFontSize(9);
 
   // Subtotal
-  doc.setFont("helvetica", "normal");
-  doc.text("Subtotal:", summaryX, summaryY);
+  doc.setFont("helvetica", "bold");
+  doc.text("SUBTOTAL:", summaryX, summaryY);
   const formattedSubtotal = parseFloat(data.quotation.subtotal).toLocaleString(
     "en-US",
     { minimumFractionDigits: 2, maximumFractionDigits: 2 },
   );
+  // reset font style
+  doc.setFont("helvetica", "normal");
   doc.text(formattedSubtotal, summaryX + summaryWidth, summaryY, {
+    align: "right",
+  });
+  summaryY += 5;
+
+  // Packages Discounts
+  doc.setFont("helvetica", "bold");
+  doc.text("Discounts", summaryX, summaryY);
+  summaryY += 5;
+
+  doc.text("Packages:", summaryX, summaryY);
+  const formattedPkgDiscount = parseFloat(
+    data.quotation.items.rounding,
+  ).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  // reset font style
+  doc.setFont("helvetica", "normal");
+  doc.text(formattedPkgDiscount, summaryX + summaryWidth, summaryY, {
+    align: "right",
+  });
+  summaryY += 5;
+
+  // Add on Item Discounts
+  doc.setFont("helvetica", "bold");
+  doc.text("Additional Items:", summaryX, summaryY);
+  const formattedAddItemDiscount = parseFloat(
+    data.quotation.items.rounding,
+  ).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  // reset font style
+  doc.setFont("helvetica", "normal");
+  doc.text(formattedAddItemDiscount, summaryX + summaryWidth, summaryY, {
+    align: "right",
+  });
+  summaryY += 5;
+
+  // Rounding
+  doc.setFont("helvetica", "bold");
+  doc.text("Rounding:", summaryX, summaryY);
+  const formattedRounding = parseFloat(
+    data.quotation.items.rounding,
+  ).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  // reset font style
+  doc.setFont("helvetica", "normal");
+  doc.text(formattedRounding, summaryX + summaryWidth, summaryY, {
     align: "right",
   });
   summaryY += 5;
@@ -461,16 +616,16 @@ async function generateQuotationPDF(
   }
 
   // Tax (if applicable)
-  if (parseFloat(data.quotation.tax) > 0) {
-    doc.text("SST:", summaryX, summaryY);
-    doc.text(
-      `${parseFloat(data.quotation.tax).toFixed(2)}%`,
-      summaryX + summaryWidth,
-      summaryY,
-      { align: "right" },
-    );
-    summaryY += 5;
-  }
+  // if (parseFloat(data.quotation.tax) > 0) {
+  //   doc.text("SST @ 8%:", summaryX, summaryY);
+  //   doc.text(
+  //     `${parseFloat(data.quotation.tax).toFixed(2)}%`,
+  //     summaryX + summaryWidth,
+  //     summaryY,
+  //     { align: "right" },
+  //   );
+  //   summaryY += 5;
+  // }
 
   // Draw line before total
   doc.setLineWidth(0.2);
@@ -480,7 +635,7 @@ async function generateQuotationPDF(
   // Total (bold)
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.text("Total:", summaryX, summaryY + 1);
+  doc.text("GRAND TOTAL (RM):", summaryX, summaryY + 1);
   const formattedTotal = parseFloat(data.quotation.total).toLocaleString(
     "en-US",
     { minimumFractionDigits: 2, maximumFractionDigits: 2 },
@@ -507,51 +662,6 @@ async function generateQuotationPDF(
 
     notesY += noteLines.length * 5 + 10;
   }
-
-  // --- TERMS AND CONDITIONS SECTION ---
-  // if (data.quotation.terms && data.quotation.terms.trim() !== "") {
-  //   if (notesY + 40 > pageHeight - margin) {
-  //     doc.addPage();
-  //     notesY = margin;
-  //   }
-
-  //   // Separator horizontal line top
-  //   const lineY = notesY + 60;
-  //   doc.setLineWidth(0.3);
-  //   doc.line(margin, lineY, pageWidth - margin, lineY);
-
-  //   // Main title
-  //   doc.setFontSize(7);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Order Policy & Warranty Coverage:", margin, notesY + 66);
-  //   notesY += 4;
-
-  //   TermsConditionsWarrantySections.forEach((section) => {
-  //     // Subsection title
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text(section.title, margin, notesY + 66);
-  //     notesY += 5;
-
-  //     // List items
-  //     doc.setFont("helvetica", "normal");
-  //     section.content.forEach((line, index) => {
-  //       const wrappedLines = doc.splitTextToSize(
-  //         `${index + 1}. ${line}`,
-  //         pageWidth - 2 * margin,
-  //       );
-  //       doc.text(wrappedLines, margin + 3, notesY + 66);
-  //       notesY += wrappedLines.length * 4;
-
-  //       // Auto page break
-  //       if (notesY > pageHeight - margin) {
-  //         doc.addPage();
-  //         notesY = margin;
-  //       }
-  //     });
-
-  //     notesY += 2;
-  //   });
-  // }
 
   // --- TERMS AND CONDITIONS SECTION ---
   if (data.quotation.terms && data.quotation.terms.trim() !== "") {
