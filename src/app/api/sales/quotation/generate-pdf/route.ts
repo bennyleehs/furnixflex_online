@@ -49,14 +49,6 @@ export async function POST(request: Request) {
     // Save the PDF to the file system
     fs.writeFileSync(filePath, pdfBuffer);
 
-    // Return success response with the file path
-    // return NextResponse.json({
-    //   success: true,
-    //   message: 'PDF saved successfully',
-    //   filePath: filePath.replace(process.cwd(), ''),
-    //   fileName: `Q-${safeFilename}.pdf`
-    // });
-
     // Return the PDF
     return new Response(pdfBuffer.buffer as ArrayBuffer, {
       headers: {
@@ -116,9 +108,9 @@ async function generateQuotationPDF(
           `data:image/png;base64,${logoBase64}`,
           "PNG",
           margin,
-          margin - 2,
-          28,
-          26,
+          margin - 4,
+          32,
+          30,
         );
       }
     }
@@ -127,13 +119,51 @@ async function generateQuotationPDF(
     // Continue without the logo if there's an error
   }
 
+  // // Company name with larger font
+  // doc.setFontSize(16);
+  // doc.setFont("helvetica", "bold");
+  // doc.text(data.company.name, pageWidth / 2 + margin + 10, margin + 8, {
+  //   align: "center",
+  // });
+
+  // // company reg. no.
+  // doc.setFontSize(10)
+  // doc.setFont("helvetica", "bold");
+  // doc.text(data.company.regNo, pageWidth / 2 + margin + 20, margin + 8, {
+  //   align: "right",
+  // });
+  //v1.2
+  // Define the space occupied by the logo and its margin
+  const logoWidth = 32; // Based on your addImage width
+  const logoMarginRight = 16; // A small buffer to the right of the logo
+  const textContentStartX = margin + logoWidth + logoMarginRight;
+
+  // Define the content area for the text, starting after the logo
+  const textContentWidth = pageWidth - textContentStartX - margin;
+
+  // Define the column widths based on the new content area
+  const companyNameWidth = textContentWidth * 0.8; // 80% of the available space
+  const regNoWidth = textContentWidth * 0.2; // 20% of the available space
+
+  // Set the y-coordinate for the top line of text
+  const yPos = margin + 8; // Adjust this if needed to align with your logo vertically
+
   // Company name with larger font
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  // doc.setFont('symbol', 'bold');
-  // doc.setFont('zapfdingbats', 'bold');
-  doc.text(data.company.name, pageWidth / 2 + margin + 10, margin + 8, {
-    align: "center",
+  // Position company name at the new starting point for text content
+  doc.text(data.company.name, textContentStartX, yPos, {
+    align: "left",
+    maxWidth: companyNameWidth,
+  });
+
+  // Company reg. no.
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  // Position registration number at the end of the text content area and align right
+  doc.text(data.company.regNo, pageWidth - margin - 14, yPos, {
+    align: "right",
+    maxWidth: regNoWidth,
   });
 
   // Company details with smaller font
@@ -158,7 +188,7 @@ async function generateQuotationPDF(
   // Horizontal line separator
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.2);
-  doc.line(margin, margin + 26, pageWidth - margin, margin + 26);
+  doc.line(margin, margin + 27, pageWidth - margin, margin + 27);
 
   // ----- THREE-SECTION HEADER LAYOUT -----
   // Top position for all three sections
@@ -179,8 +209,6 @@ async function generateQuotationPDF(
   doc.setFont("helvetica", "bold");
   doc.setFillColor(0, 0, 0);
   doc.setTextColor(255, 255, 255);
-  // doc.setFillColor(255, 202, 122);//orange
-  // doc.setTextColor(0,0,0);
   doc.rect(col1X, sectionTop - 4, 37, 7, "F");
   doc.text(" Customer Details", col1X, sectionTop + 1);
 
@@ -190,7 +218,7 @@ async function generateQuotationPDF(
   doc.setFontSize(18);
   doc.text("QUOTATION", col3X, sectionTop + 2);
 
-  // Column Title header
+  // Column Label header
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("Name:", col1X, sectionTop + 8);
@@ -295,7 +323,6 @@ async function generateQuotationPDF(
 
   // ----- ITEMS TABLE SECTION -----
   // Starting y position after the header information
-  // let yPosition = margin + 38 + (addressLinesArray.length - 1) * 5;
   let yPosition = margin + 60;
 
   // Add items table header
@@ -357,7 +384,7 @@ async function generateQuotationPDF(
 
   // Table rows
   data.quotation.items.forEach((item: any, index: number) => {
-    // Check if we need a new page
+    // Check if need a new page
     if (yPosition + 10 > pageHeight - margin * 2) {
       doc.addPage();
       yPosition = margin;
@@ -471,7 +498,7 @@ async function generateQuotationPDF(
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
 
-    // Format numbers with thousand separators
+    // Define data & Format numbers with thousand separators
     const formattedUnitPrice = parseFloat(unitPrice).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -523,21 +550,16 @@ async function generateQuotationPDF(
     yPosition += rowHeight;
   });
 
-  // // Draw table bottom line
-  // doc.setDrawColor(0, 0, 0);
-  // doc.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
-
   // ----- SUMMARY SECTION -----
   const finalY = yPosition + 6;
 
   // Create a summary box on the right side
-  const summaryX = pageWidth - margin - 66;
+  const summaryX = pageWidth - margin - 60;
   const summaryWidth = 60;
   let summaryY = finalY;
 
   // Draw summary box with totals
   doc.setFontSize(9);
-
   // Subtotal
   doc.setFont("helvetica", "bold");
   doc.text("SUBTOTAL:", summaryX, summaryY);
@@ -552,67 +574,76 @@ async function generateQuotationPDF(
   });
   summaryY += 5;
 
-  // Packages Discounts
+  // Title Discount
   doc.setFont("helvetica", "bold");
   doc.text("Discounts", summaryX, summaryY);
   summaryY += 5;
 
+  // Packages Discounts
   doc.text("Packages:", summaryX, summaryY);
-  const formattedPkgDiscount = parseFloat(
-    data.quotation.items.rounding,
-  ).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  // reset font style
-  doc.setFont("helvetica", "normal");
-  doc.text(formattedPkgDiscount, summaryX + summaryWidth, summaryY, {
-    align: "right",
-  });
+  // define and filter
+  const pkgDisc = data.quotation.items.find(
+    (item: any) =>
+      item.category === "Discount" && item.subcategory === "Packages",
+  );
+  if (pkgDisc) {
+    const formattedPkgDiscount = parseFloat(pkgDisc.total).toLocaleString(
+      "en-US",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    );
+    // reset font style
+    doc.setFont("helvetica", "normal");
+    doc.text(formattedPkgDiscount, summaryX + summaryWidth, summaryY, {
+      align: "right",
+    });
+  }
   summaryY += 5;
 
   // Add on Item Discounts
   doc.setFont("helvetica", "bold");
   doc.text("Additional Items:", summaryX, summaryY);
-  const formattedAddItemDiscount = parseFloat(
-    data.quotation.items.rounding,
-  ).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  // reset font style
-  doc.setFont("helvetica", "normal");
-  doc.text(formattedAddItemDiscount, summaryX + summaryWidth, summaryY, {
-    align: "right",
-  });
+  // define and filter
+  const addItemDisc = data.quotation.items.find(
+    (item: any) =>
+      item.category === "Discount" && item.subcategory === "Add-on Items",
+  );
+  if (addItemDisc) {
+    const formattedAddItemDiscount = parseInt(
+      parseFloat(addItemDisc.discount).toFixed(0),
+    );
+    // reset font style
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      "-" + formattedAddItemDiscount.toString() + "%",
+      summaryX + summaryWidth,
+      summaryY,
+      {
+        align: "right",
+      },
+    );
+  }
   summaryY += 5;
 
   // Rounding
   doc.setFont("helvetica", "bold");
   doc.text("Rounding:", summaryX, summaryY);
-  const formattedRounding = parseFloat(
-    data.quotation.items.rounding,
-  ).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  // reset font style
-  doc.setFont("helvetica", "normal");
-  doc.text(formattedRounding, summaryX + summaryWidth, summaryY, {
-    align: "right",
-  });
-  summaryY += 5;
-
-  // Discount (if applicable)
-  if (parseFloat(data.quotation.discount) > 0) {
-    doc.text("Discount:", summaryX, summaryY);
-    doc.text(
-      `- ${parseFloat(data.quotation.discount).toFixed(2)}%`,
-      summaryX + summaryWidth,
-      summaryY,
-      { align: "right" },
-    );
-    summaryY += 5;
+  // define and filter
+  const roundingDisc = data.quotation.items.find(
+    (item: any) =>
+      item.category === "SALES DISCOUNT" &&
+      item.subcategory === "Final Discount",
+  );
+  if (roundingDisc) {
+    const formattedRounding = parseFloat(roundingDisc.rounding).toFixed(2);
+    // reset font style
+    doc.setFont("helvetica", "normal");
+    doc.text(formattedRounding, summaryX + summaryWidth, summaryY, {
+      align: "right",
+    });
+    summaryY += 3;
   }
 
   // Tax (if applicable)
@@ -645,9 +676,10 @@ async function generateQuotationPDF(
   });
 
   // ----- NOTES SECTION -----
-  let notesY = Math.max(summaryY + 10, finalY + 5);
+  // let notesY = Math.max(summaryY , finalY);
+  const notePosY = yPosition + 6;
+  let notesY = notePosY;
 
-  // Add notes if present
   if (data.quotation.notes && data.quotation.notes.trim() !== "") {
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
@@ -656,28 +688,76 @@ async function generateQuotationPDF(
 
     const noteLines = doc.splitTextToSize(
       data.quotation.notes,
-      pageWidth - 2 * margin,
+      (pageWidth - 2 * margin)-80,
     );
     doc.text(noteLines, margin, notesY + 5);
 
+    // This variable now holds the Y position where the notes content ends.
     notesY += noteLines.length * 5 + 10;
   }
 
   // --- TERMS AND CONDITIONS SECTION ---
   if (data.quotation.terms && data.quotation.terms.trim() !== "") {
-    const termsStartY = 232; // fixed position from top of page (mm)
+    // Get page dimensions from jspdf
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Helper function to calculate the total height - for T&C block
+    const calculateTermsHeight = () => {
+      let totalHeight = 0;
+      // These values should match the font sizes and spacing used for drawing
+      const mainTitleHeight = 4;
+      const spaceAfterMainTitle = 4;
+      const subTitleHeight = 5;
+      const lineItemHeight = 4; // Height for each line of content
+      const spaceAfterSection = 2;
+      const topSeparatorHeight = 5; // Space for the top line and some padding
+
+      totalHeight += mainTitleHeight + spaceAfterMainTitle + topSeparatorHeight;
+
+      TermsConditionsWarrantySections.forEach((section) => {
+        totalHeight += subTitleHeight;
+        section.content.forEach((line, index) => {
+          const wrappedLines = doc.splitTextToSize(
+            `${index + 1}. ${line}`,
+            pageWidth - 2 * margin,
+          );
+          totalHeight += wrappedLines.length * lineItemHeight;
+        });
+        totalHeight += spaceAfterSection;
+      });
+      return totalHeight;
+    };
+
+    // 1. Calculate the required height
+    const termsHeight = calculateTermsHeight();
+
+    // Define a bottom margin to keep the block from hitting the page footer
+    const bottomMargin = 2;
+
+    // 2. Determine the ideal starting position to align the block at the bottom
+    let termsStartY = pageHeight - termsHeight - bottomMargin;
+
+    // 3. Check for overlap with the notes section. If notes end after the
+    // T&C should start, we need to move the T&C to a new page.
+    if (notesY > termsStartY) {
+      doc.addPage();
+      // Recalculate the starting Y for the new page
+      termsStartY = pageHeight - termsHeight - bottomMargin;
+    }
+
+    // --- Drawing Logic (uses the dynamically calculated 'termsStartY') ---
 
     // Separator horizontal line top
-    const lineY = termsStartY;
     doc.setLineWidth(0.3);
-    doc.line(margin, lineY, pageWidth - margin, lineY);
+    doc.line(margin, termsStartY + 2, pageWidth - margin, termsStartY + 2);
 
     // Main title
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.text("Order Policy & Warranty Coverage:", margin, termsStartY + 6);
 
-    let currentY = termsStartY + 10; // start content below title
+    let currentY = termsStartY + 10; // Start content below title
 
     TermsConditionsWarrantySections.forEach((section) => {
       // Subsection title
@@ -736,14 +816,6 @@ async function generateQuotationPDF(
         align: "right",
       },
     );
-
-    // Add website/copyright
-    // doc.text(
-    //   data.company.website || "www.classyhome.com",
-    //   pageWidth - margin,
-    //   pageHeight - margin,
-    //   { align: "right" },
-    // );
   }
 
   // Convert the PDF to a buffer
