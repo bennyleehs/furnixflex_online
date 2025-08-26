@@ -786,7 +786,7 @@ export default function QuotationPage() {
     // Only proceed if it's the specific sales discount item
     if (
       currentItem.category !== "SALES DISCOUNT" ||
-      currentItem.subcategory !== "Final Discount"
+      currentItem.subcategory !== "Special Sales Discount"
     ) {
       return; // Do nothing for other item types
     }
@@ -807,7 +807,7 @@ export default function QuotationPage() {
     // This prevents deducting more than the item is worth (e.g., deducting -120 from a -100 item)
     if (Math.abs(roundingValue) > Math.abs(unitPrice)) {
       alert(
-        `Final discount cannot be more than the fixed unit price of RM${Math.abs(unitPrice).toFixed(2)}.`,
+        `Special Sales Discount cannot be more than the fixed unit price of RM${Math.abs(unitPrice).toFixed(2)}.`,
       );
       return;
     }
@@ -952,7 +952,7 @@ export default function QuotationPage() {
   const appliedRoundingDiscounts = items.filter(
     (item) =>
       item.category === "SALES DISCOUNT" &&
-      item.subcategory === "Final Discount" &&
+      item.subcategory === "Special Sales Discount" &&
       (item.total < 0 || item.rounding > 0),
   );
 
@@ -1865,7 +1865,7 @@ export default function QuotationPage() {
                           }}
                           disabled={
                             item.category === "SALES DISCOUNT" &&
-                            item.subcategory === "Final Discount"
+                            item.subcategory === "Special Sales Discount"
                           }
                           className="focus:border-primary dark:disabled:bg-meta-4 w-full border-b border-gray-300 bg-transparent px-1 py-1 text-center text-sm outline-hidden disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600"
                         />
@@ -1906,12 +1906,12 @@ export default function QuotationPage() {
                           disabled={
                             !(
                               item.category === "SALES DISCOUNT" &&
-                              item.subcategory === "Final Discount"
+                              item.subcategory === "Special Sales Discount"
                             )
                           }
                           placeholder={
                             item.category === "SALES DISCOUNT" &&
-                            item.subcategory === "Final Discount"
+                            item.subcategory === "Special Sales Discount"
                               ? "e.g. -5.50" // A helpful placeholder
                               : "N/A"
                           }

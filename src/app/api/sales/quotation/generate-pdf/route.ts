@@ -416,8 +416,17 @@ async function generateQuotationPDF(
     // Format values
     const unitPrice = parseFloat(item.unitPrice).toFixed(2);
     const total = parseFloat(item.total).toFixed(2);
+    const productSubCtgy = item.subcategory;
     const productTitle = item.product || "";
     const productDescription = item.description || "";
+
+    let displayText = "";
+
+    if (item.category === "Packages") {
+      displayText = productTitle;
+    } else {
+      displayText = productSubCtgy + " " + productTitle;
+    }
 
     // Handle text wrapping for the description
     doc.setFontSize(9);
@@ -516,7 +525,7 @@ async function generateQuotationPDF(
     // Draw the Product Title (bold)
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text(productTitle, colPositions[1], yPosition + 4);
+    doc.text(displayText, colPositions[1], yPosition + 4);
 
     // Draw the Italicized Description (wrapped)
     doc.setFontSize(9);
@@ -586,7 +595,7 @@ async function generateQuotationPDF(
   const roundingDisc = data.quotation.items.find(
     (item: any) =>
       item.category === "SALES DISCOUNT" &&
-      item.subcategory === "Final Discount",
+      item.subcategory === "Special Sales Discount",
   );
 
   // Discounts header
