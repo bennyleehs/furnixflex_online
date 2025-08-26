@@ -774,7 +774,6 @@ export default function QuotationPage() {
     return formattedValue;
   };
 
-  // Add this new function inside your QuotationPage component
   const handleRoundingChange = (
     itemId: string,
     value: number,
@@ -808,7 +807,7 @@ export default function QuotationPage() {
     // This prevents deducting more than the item is worth (e.g., deducting -120 from a -100 item)
     if (Math.abs(roundingValue) > Math.abs(unitPrice)) {
       alert(
-        `Final discount cannot be more than the fixed unit price of RM ${Math.abs(unitPrice).toFixed(2)}.`,
+        `Final discount cannot be more than the fixed unit price of RM${Math.abs(unitPrice).toFixed(2)}.`,
       );
       return;
     }
@@ -929,7 +928,7 @@ export default function QuotationPage() {
 
     const fixed = discountItems
       .filter((d) => d.total < 0)
-      .map((d) => `RM ${formatWithCommas(Math.abs(d.total))}`);
+      .map((d) => `RM${formatWithCommas(Math.abs(d.total))}`);
 
     // Combine both percentage and fixed discounts
     return [...percentage, ...fixed].join(" + ");
@@ -960,8 +959,8 @@ export default function QuotationPage() {
   if (loading) {
     return (
       <DefaultLayout>
-        <div className="flex h-64 items-center justify-center">
-          <div className="border-primary h-16 w-16 animate-spin rounded-full border-t-2 border-b-2"></div>
+        <div className="flex items-center justify-center">
+          <div className="border-primary h-16 w-16 animate-spin rounded-full border-6 border-t-transparent"></div>
         </div>
       </DefaultLayout>
     );
@@ -1060,7 +1059,7 @@ export default function QuotationPage() {
                 <div className="space-y-1 text-sm">
                   {editingCustomer ? (
                     <>
-                      {/* Edit Mode - Name with NRIC below it */}
+                      {/* Edit Mode - Name with NRIC */}
                       <div className="mb-2">
                         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                           Name
@@ -1088,7 +1087,7 @@ export default function QuotationPage() {
                         />
                       </div>
 
-                      {/* Phone with Email below it */}
+                      {/* Phone with Email */}
                       <div className="mb-2">
                         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                           Phone
@@ -1721,7 +1720,7 @@ export default function QuotationPage() {
                             ))}
                           </select>
 
-                          {/* Subcategory Dropdown - Fixed Version */}
+                          {/* Subcategory Dropdown */}
                           <select
                             value={item.subcategory || ""}
                             onChange={(e) => {
@@ -1775,7 +1774,7 @@ export default function QuotationPage() {
                             )}
                           </select>
 
-                          {/* Product Dropdown - Fixed Version */}
+                          {/* Product Dropdown */}
                           <select
                             value={String(item.productId || "")}
                             onChange={(e) => {
@@ -2029,7 +2028,7 @@ export default function QuotationPage() {
                 <div className="w-2/3">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>{formatWithCommas(subtotal)}</span>
+                    <span>RM{formatWithCommas(subtotal)}</span>
                   </div>
 
                   {/* Show package discounts only if applied */}

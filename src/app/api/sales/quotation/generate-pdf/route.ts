@@ -569,48 +569,65 @@ async function generateQuotationPDF(
   );
   // reset font style
   doc.setFont("helvetica", "normal");
-  doc.text(formattedSubtotal, summaryX + summaryWidth, summaryY, {
+  doc.text("RM" + formattedSubtotal, summaryX + summaryWidth, summaryY, {
     align: "right",
   });
   summaryY += 5;
 
-  // Title Discount
-  doc.setFont("helvetica", "bold");
-  doc.text("Discounts", summaryX, summaryY);
-  summaryY += 5;
-
-  // Packages Discounts
-  doc.text("Packages:", summaryX, summaryY);
-  // define and filter
+  // Define function and filter for each types of discounts
   const pkgDisc = data.quotation.items.find(
     (item: any) =>
       item.category === "Discount" && item.subcategory === "Packages",
   );
-  if (pkgDisc) {
-    const formattedPkgDiscount = parseFloat(pkgDisc.total).toLocaleString(
-      "en-US",
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      },
-    );
-    // reset font style
-    doc.setFont("helvetica", "normal");
-    doc.text(formattedPkgDiscount, summaryX + summaryWidth, summaryY, {
-      align: "right",
-    });
-  }
-  summaryY += 5;
-
-  // Add on Item Discounts
-  doc.setFont("helvetica", "bold");
-  doc.text("Additional Items:", summaryX, summaryY);
-  // define and filter
   const addItemDisc = data.quotation.items.find(
     (item: any) =>
       item.category === "Discount" && item.subcategory === "Add-on Items",
   );
+  const roundingDisc = data.quotation.items.find(
+    (item: any) =>
+      item.category === "SALES DISCOUNT" &&
+      item.subcategory === "Final Discount",
+  );
+
+  // Discounts header
+  if (pkgDisc || addItemDisc || roundingDisc) {
+    // Title Discount
+    doc.setFont("helvetica", "bold");
+    doc.text("Discounts", summaryX, summaryY);
+    summaryY += 5;
+  }
+
+  // Package Discounts
+  if (pkgDisc) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Packages:", summaryX, summaryY);
+    // Format the total with two decimal places
+    const formattedPkgDiscount = parseFloat(pkgDisc.total).toFixed(2);
+    // reset font style
+    doc.setFont("helvetica", "normal");
+    if (formattedPkgDiscount.startsWith("-")) {
+      // If it's negative, add "RM" after the negative sign
+      doc.text(
+        `-RM${formattedPkgDiscount.substring(1)}`,
+        summaryX + summaryWidth,
+        summaryY,
+        {
+          align: "right",
+        },
+      );
+    } else {
+      // add "RM"
+      doc.text(`RM${formattedPkgDiscount}`, summaryX + summaryWidth, summaryY, {
+        align: "right",
+      });
+    }
+    summaryY += 5;
+  }
+
+  // Add on Item Discounts
   if (addItemDisc) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Additional Items:", summaryX, summaryY);
     const formattedAddItemDiscount = parseInt(
       parseFloat(addItemDisc.discount).toFixed(0),
     );
@@ -624,26 +641,34 @@ async function generateQuotationPDF(
         align: "right",
       },
     );
+    summaryY += 5;
   }
-  summaryY += 5;
 
-  // Rounding
-  doc.setFont("helvetica", "bold");
-  doc.text("Rounding:", summaryX, summaryY);
-  // define and filter
-  const roundingDisc = data.quotation.items.find(
-    (item: any) =>
-      item.category === "SALES DISCOUNT" &&
-      item.subcategory === "Final Discount",
-  );
+  // Rounding Discounts
   if (roundingDisc) {
-    const formattedRounding = parseFloat(roundingDisc.rounding).toFixed(2);
+    doc.setFont("helvetica", "bold");
+    doc.text("Rounding:", summaryX, summaryY);
+    // Format the total with two decimal places
+    const formattedRounding = parseFloat(roundingDisc.total).toFixed(2);
     // reset font style
     doc.setFont("helvetica", "normal");
-    doc.text(formattedRounding, summaryX + summaryWidth, summaryY, {
-      align: "right",
-    });
-    summaryY += 3;
+    if (formattedRounding.startsWith("-")) {
+      // If it's negative, add "RM" after the negative sign
+      doc.text(
+        `-RM${formattedRounding.substring(1)}`,
+        summaryX + summaryWidth,
+        summaryY,
+        {
+          align: "right",
+        },
+      );
+    } else {
+      // add "RM"
+      doc.text(`RM${formattedRounding}`, summaryX + summaryWidth, summaryY, {
+        align: "right",
+      });
+    }
+    summaryY += 5;
   }
 
   // Tax (if applicable)
@@ -676,7 +701,6 @@ async function generateQuotationPDF(
   });
 
   // ----- NOTES SECTION -----
-  // let notesY = Math.max(summaryY , finalY);
   const notePosY = yPosition + 6;
   let notesY = notePosY;
 
@@ -688,12 +712,16 @@ async function generateQuotationPDF(
 
     const noteLines = doc.splitTextToSize(
       data.quotation.notes,
-      (pageWidth - 2 * margin)-80,
+      pageWidth - 2 * margin - 80,
     );
-    doc.text(noteLines, margin, notesY + 5);
+    // doc.text(noteLines, margin, notesY + 5);
+    doc.text(noteLines, margin, notesY + 5, { lineHeightFactor: 1.5 });
 
     // This variable now holds the Y position where the notes content ends.
-    notesY += noteLines.length * 5 + 10;
+    // notesY += noteLines.length * 5 + 10;
+    const lineHeight = 5; // The base height of your line
+    const totalNoteHeight = noteLines.length * lineHeight * 1.5;
+    notesY += totalNoteHeight + 10;
   }
 
   // --- TERMS AND CONDITIONS SECTION ---
