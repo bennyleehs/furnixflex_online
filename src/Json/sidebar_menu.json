@@ -186,19 +186,14 @@
         "route": "#",
         "children": [
           {
-            "label": "Customer",
+            "label": "Product",
             "id": "5.1",
-            "route": "/history/customer"
+            "route": "/history/product"
           },
           {
-            "label": "Task",
+            "label": "Lead",
             "id": "5.2",
-            "route": "/history/task"
-          },
-          {
-            "label": "Job",
-            "id": "5.3",
-            "route": "/history/job"
+            "route": "/history/lead"
           }
         ]
       }
