@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   const { uid, password } = await req.json();
   // query from input to the db - only get necessary user info
   const [rows] = await db.query(
+    // "SELECT id as user_id, uid, name, roleName, deptName as departmentName, branchRef, email, password FROM users WHERE uid = ?",
     "SELECT id, uid, name, roleName, deptName as departmentName, branchRef, email, password FROM users WHERE uid = ?",
     [uid],
   );
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
   // fetch data
   const user = (
     rows as (IUser & {
-      // id: number;
+      // user_id: number,// id: number;
       name: string;
       uid: string;
       roleName: string;
@@ -45,10 +46,12 @@ export async function POST(req: NextRequest) {
 
   const res = NextResponse.json({
     success: true,
+    // user_id: user.user_id,
     uid: user.uid,
     name: user.name, // You might want to use a different field for name if available
     // departmentName: user.departmentName,
-    role: user.roleName
+    role: user.roleName,
+    department: user.departmentName
   });
   // res.headers.set(
   //   "Set-Cookie",

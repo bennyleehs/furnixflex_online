@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     // Check if specific employee was requested but not found
     if ((id || uid) && rows.length === 0) {
       return NextResponse.json(
-        { message: "Employee not found" },
+        { message: "User not found" },
         { status: 404 },
       );
     }
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
       status: 200,
     });
   } catch (error) {
-    console.error("Error fetching employees:", error);
+    console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
