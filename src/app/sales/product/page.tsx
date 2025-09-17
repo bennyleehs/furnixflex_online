@@ -797,7 +797,7 @@ export default function ProductsPage() {
                 <th className="min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
                   Task ID
                 </th>
-                <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[140px] px-4 py-4 text-center font-medium text-black dark:text-white">
+                <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[120px] px-4 py-4 text-center font-medium text-black dark:text-white">
                   Actions
                 </th>
               </tr>
@@ -906,7 +906,7 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="dark:border-strokedark dark:bg-boxdark sticky right-0 z-10 border-b border-[#eee] bg-white px-4 py-4 text-center">
-                      <div className="flex items-center justify-center space-x-3.5">
+                      <div className="flex items-center justify-center space-x-2">
                         {!loadingPermissions && ( // Only render buttons if permissions are loaded
                           <>
                             {editMenuSubmenu &&

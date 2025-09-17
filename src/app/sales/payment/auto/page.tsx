@@ -1467,11 +1467,13 @@ export default function PaymentAutoPage() {
                                     Pending
                                   </span>
                                 )}
-                                {payment.received && payment.received_date && (
+                                {payment.received && payment.received_date ? (
                                   <div className="text-xxs mt-1 text-gray-500">
                                     {formatDate(payment.received_date)}
                                   </div>
-                                )}
+                                ): <div className="text-xxs mt-1 text-gray-500">
+                                    Requires follow up
+                                  </div>}
                               </td>
                               <td className="flex items-center gap-2 px-4 py-2.5 text-xs">
                                 {/* Conditional PDF button based on existence */}

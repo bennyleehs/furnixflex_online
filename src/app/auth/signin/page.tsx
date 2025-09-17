@@ -35,9 +35,11 @@ const SignIn = () => {
       if (response.ok) {
         // Store user data as object on successful login
         setUser({
+          // user_id: data.user_id,
           uid: data.uid,
           name: data.name || "User", // Assuming API returns user name or fallback
           role: data.role,
+          // department: data.department
         });
 
         setMessage(data.message || "Sign-in successful");

@@ -10,10 +10,11 @@ import {
 
 // Define user type
 type User = {
+  // user_id: number
   uid: string;
   name: string;
   role: string;
-  departmentName?: string;
+  // department: string;
   profileImage?: string; 
   // Add other user properties as needed
 };

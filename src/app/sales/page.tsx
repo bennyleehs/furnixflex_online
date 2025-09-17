@@ -235,7 +235,6 @@ export default function Home() {
         />
       </Head>
       <DefaultLayout>
-        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6 2xl:p-10">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-black dark:text-white">
               Sales Dashboard
@@ -764,7 +763,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
       </DefaultLayout>
     </>
   );
