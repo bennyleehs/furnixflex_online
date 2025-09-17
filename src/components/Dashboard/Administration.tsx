@@ -64,8 +64,8 @@ export default function Administration() {
 
   if (loading) {
     return (
-      <div className="flex min-h-96 items-center justify-center">
-        <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
+      <div className="flex items-center justify-center py-8">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-2 border-t-transparent"></div>
       </div>
     );
   }
@@ -282,8 +282,8 @@ export default function Administration() {
 
       {/* Attendance Tracker - for current user */}
       <AttendanceTracker
-        employeeId="current_user_id" // Replace with actual user ID from session
-        employeeName="Current User Name" // Replace with actual user name from session
+      // employeeId="current_user_id" // Replace with actual user ID from session
+      // employeeName="Current User Name" // Replace with actual user name from session
       />
 
       {/* Main Content Grid */}
