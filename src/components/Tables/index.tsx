@@ -412,7 +412,7 @@ export default function Tables({
                   {col.title}
                 </th>
               ))}
-              <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[140px] px-4 py-4 font-medium text-black xl:pl-6 dark:text-white">
+              <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[120px] px-4 py-4 font-medium text-center text-black xl:pl-6 dark:text-white">
                 Actions
               </th>
             </tr>
@@ -436,7 +436,7 @@ export default function Tables({
                   ))}
                   {/* Action buttons - sticky column */}
                   <td className="dark:border-strokedark dark:bg-boxdark sticky right-0 z-10 border-b border-[#eee] bg-white px-4 py-5 xl:pl-6">
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center justify-center space-x-2">
                       {!loadingPermissions && ( // Only render buttons if permissions are loaded
                         <>
                           {/* Edit Button */}
