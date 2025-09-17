@@ -63,30 +63,6 @@ export function getCurrentLocation(): Promise<LocationData> {
   });
 }
 
-// Reverse geocoding to get address from coordinates
-export async function getAddressFromCoordinates(
-  latitude: number, 
-  longitude: number
-): Promise<string> {
-  try {
-    // Using a free geocoding service (you may want to use Google Maps API for production)
-    const response = await fetch(
-      `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY`
-    );
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        return data.results[0].formatted;
-      }
-    }
-    
-    return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-  } catch (error) {
-    console.error('Error getting address:', error);
-    return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-  }
-}
 
 // Get device information
 export function getDeviceInfo(): DeviceInfo {
@@ -119,16 +95,4 @@ export function getDeviceInfo(): DeviceInfo {
     screenResolution: `${screen.width}x${screen.height}`,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   };
-}
-
-// Check if location is within office premises
-export function isWithinOfficeLocation(
-  userLat: number,
-  userLon: number,
-  officeLat: number,
-  officeLon: number,
-  allowedRadius: number
-): boolean {
-  const distance = calculateDistance(userLat, userLon, officeLat, officeLon);
-  return distance <= allowedRadius;
 }
