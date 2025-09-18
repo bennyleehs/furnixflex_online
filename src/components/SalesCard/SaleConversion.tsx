@@ -27,57 +27,57 @@ export default function SalesConversion() {
 
   const uid = user?.uid;
 
-  const fetchData = async () => {
-    if (!uid) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1; // getMonth() is 0-indexed
-    const currentYear = today.getFullYear();
-
-    try {
-      const res = await fetch(
-        `/api/sales-stats/sales-conversion?uid=${uid}&month=${currentMonth}&year=${currentYear}`,
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch sales conversion data");
-      }
-
-      const data = await res.json();
-      // Use the nullish coalescing operator to default to 0
-      const quotationLeads = data.quotationLeads ?? 0;
-      const paymentLeads = data.paymentLeads ?? 0;
-
-      const rate =
-        quotationLeads > 0
-          ? ((paymentLeads / quotationLeads) * 100).toFixed(2) + "%"
-          : "0.00%";
-
-      setConversionData({
-        quotationLeads,
-        paymentLeads,
-        rate,
-      });
-    } catch (err) {
-      console.error("Error fetching sales data:", err);
-      setError("Error fetching data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!isAuthLoading && !hasFetchedData.current && uid) {
+      const fetchData = async () => {
+        if (!uid) {
+          setLoading(false);
+          return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // getMonth() is 0-indexed
+        const currentYear = today.getFullYear();
+
+        try {
+          const res = await fetch(
+            `/api/sales-stats/sales-conversion?uid=${uid}&month=${currentMonth}&year=${currentYear}`,
+          );
+
+          if (!res.ok) {
+            throw new Error("Failed to fetch sales conversion data");
+          }
+
+          const data = await res.json();
+          // Use the nullish coalescing operator to default to 0
+          const quotationLeads = data.quotationLeads ?? 0;
+          const paymentLeads = data.paymentLeads ?? 0;
+
+          const rate =
+            quotationLeads > 0
+              ? ((paymentLeads / quotationLeads) * 100).toFixed(2) + "%"
+              : "0.00%";
+
+          setConversionData({
+            quotationLeads,
+            paymentLeads,
+            rate,
+          });
+        } catch (err) {
+          console.error("Error fetching sales data:", err);
+          setError("Error fetching data");
+        } finally {
+          setLoading(false);
+        }
+      };
+
       fetchData();
       hasFetchedData.current = true;
     }
-  }, [uid, isAuthLoading, fetchData]);
+  }, [uid, isAuthLoading]);
 
   // Handle different states: loading, error, and success
   if (isAuthLoading || loading) {

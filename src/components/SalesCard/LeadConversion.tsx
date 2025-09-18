@@ -26,56 +26,56 @@ export default function LeadsConversion() {
 
   const uid = user?.uid;
 
-  const fetchData = async () => {
-    if (!uid) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1; // getMonth() is 0-indexed
-    const currentYear = today.getFullYear();
-
-    try {
-      const res = await fetch(
-        `/api/sales-stats/leads-conversion?uid=${uid}&month=${currentMonth}&year=${currentYear}`,
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch leads data");
-      }
-
-      const data = await res.json();
-      const totalLeads = data.totalLeads;
-      const quotationLeads = data.quotationLeads ?? 0;
-
-      const rate =
-        totalLeads > 0
-          ? ((quotationLeads / totalLeads) * 100).toFixed(2) + "%"
-          : "0.00%";
-
-      setConversionData({
-        totalLeads,
-        quotationLeads,
-        rate,
-      });
-    } catch (err) {
-      console.error("Error fetching leads data:", err);
-      setError("Error fetching data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!isAuthLoading && !hasFetchedData.current && uid) {
+      const fetchData = async () => {
+        if (!uid) {
+          setLoading(false);
+          return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // getMonth() is 0-indexed
+        const currentYear = today.getFullYear();
+
+        try {
+          const res = await fetch(
+            `/api/sales-stats/leads-conversion?uid=${uid}&month=${currentMonth}&year=${currentYear}`,
+          );
+
+          if (!res.ok) {
+            throw new Error("Failed to fetch leads data");
+          }
+
+          const data = await res.json();
+          const totalLeads = data.totalLeads;
+          const quotationLeads = data.quotationLeads ?? 0;
+
+          const rate =
+            totalLeads > 0
+              ? ((quotationLeads / totalLeads) * 100).toFixed(2) + "%"
+              : "0.00%";
+
+          setConversionData({
+            totalLeads,
+            quotationLeads,
+            rate,
+          });
+        } catch (err) {
+          console.error("Error fetching leads data:", err);
+          setError("Error fetching data");
+        } finally {
+          setLoading(false);
+        }
+      };
+
       fetchData();
       hasFetchedData.current = true;
     }
-  }, [uid, isAuthLoading, fetchData]);
+  }, [uid, isAuthLoading]);
 
   // Handle different states: loading, error, and success
   if (isAuthLoading || loading) {
