@@ -1,5 +1,3 @@
-//v1.2 -gemini
-// src/components/SalesCard/SaleConversion.tsx
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";

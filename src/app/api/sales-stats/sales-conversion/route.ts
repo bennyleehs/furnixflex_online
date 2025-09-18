@@ -1,4 +1,3 @@
-// src/app/api/sales-stats/sales-conversion/route.ts
 import { createPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
