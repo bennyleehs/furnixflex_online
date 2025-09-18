@@ -30,6 +30,7 @@ const FormScopesAccess = () => {
   const [sectionCodes, setSectionCodes] = useState<Record<string, string[]>>(
     {},
   );
+  const typedSidebarMenu = sidebarMenu as SidebarMenu;
 
   // Fetch current access paths when component mounts
   useEffect(() => {
@@ -138,7 +139,7 @@ const FormScopesAccess = () => {
       }
     };
     fetchData();
-  }, [key]);
+  }, [key,typedSidebarMenu]);
 
   // Helper function to parse access control codes
   const parsePath = (path: string): [string, string] => {
@@ -250,7 +251,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-  const typedSidebarMenu = sidebarMenu as SidebarMenu;
   // Process menu items to extract all items with IDs and their full paths
   const menuItemsWithPaths = useMemo(() => {
     const result: MenuWithPath[] = [];
