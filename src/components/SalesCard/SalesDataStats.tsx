@@ -36,7 +36,7 @@ const SalesDataStats: React.FC<SalesDataStatsProps> = ({
           </div>
         </div>
       </div>
-      <div className="my-4 border-b-2 border-primary">
+      <div className="border-primary my-4 border-b-2">
         <h4 className="text-center font-bold text-black dark:text-white">
           {title}
         </h4>

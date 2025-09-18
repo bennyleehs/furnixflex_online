@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     name: user.name, // You might want to use a different field for name if available
     // departmentName: user.departmentName,
     role: user.roleName,
-    department: user.departmentName
+    department: user.departmentName,
   });
   // res.headers.set(
   //   "Set-Cookie",
@@ -60,12 +60,12 @@ export async function POST(req: NextRequest) {
   // );
 
   (await cookies()).set("authToken", token, {
-  httpOnly: true,
-  maxAge: 60 * 60 * 24, // 1 day
-  path: "/",
-  sameSite: "lax",
-  // secure: true, // enable in production (HTTPS)
-});
+    httpOnly: true,
+    maxAge: 60 * 60 * 24, // 1 day
+    path: "/",
+    sameSite: "lax",
+    // secure: true, // enable in production (HTTPS)
+  });
 
   console.log("✅ Token set successfully");
 

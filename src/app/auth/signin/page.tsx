@@ -53,7 +53,7 @@ const SignIn = () => {
       setMessage("Something went wrong. Please try again later.");
       setIsError(true);
       console.error(error);
-    }finally {
+    } finally {
       setIsLoading(false); // Hide loading state
     }
   };

@@ -33,18 +33,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Execute the query with the appropriate parameter
-    const [rows] = id 
+    const [rows] = id
       ? await db.query<RowDataPacket[]>(sql, [id])
-      : uid 
+      : uid
         ? await db.query<RowDataPacket[]>(sql, [uid])
         : await db.query<RowDataPacket[]>(sql);
 
     // Check if specific employee was requested but not found
     if ((id || uid) && rows.length === 0) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Return the raw rows directly

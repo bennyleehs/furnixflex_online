@@ -89,42 +89,44 @@ const FormScopesAccess = () => {
         //     initialSelectedActions[menuId] = thirdDigit;
         //   }
         // Initialize the selectedActions state with the parsed values
-      const initialSelectedActions: Record<string, string> = {};
+        const initialSelectedActions: Record<string, string> = {};
 
-      foundPaths.forEach((path) => {
-        // Correctly parse the three-digit code
-        const parts = path.split(".");
+        foundPaths.forEach((path) => {
+          // Correctly parse the three-digit code
+          const parts = path.split(".");
 
-        // // Ensure the path has the correct format
-        // if (parts.length === 3) {
-        //   const menuId = `${parts[0]}.${parts[1]}`; // This is the correct ID, e.g., "2.2"
-        //   const action = parts[2]; // This is the action, e.g., "2"
+          // // Ensure the path has the correct format
+          // if (parts.length === 3) {
+          //   const menuId = `${parts[0]}.${parts[1]}`; // This is the correct ID, e.g., "2.2"
+          //   const action = parts[2]; // This is the action, e.g., "2"
 
-        //   // Set the initial value for the dropdown
-        //   initialSelectedActions[menuId] = action;
-        // }
+          //   // Set the initial value for the dropdown
+          //   initialSelectedActions[menuId] = action;
+          // }
 
-        //v1.3
-        if (parts.length === 3) {
-          const [parentMenu, subMenu, action] = parts;
+          //v1.3
+          if (parts.length === 3) {
+            const [parentMenu, subMenu, action] = parts;
 
-          // 💡 New logic to handle consolidated paths (e.g., "2.0.1")
-          if (subMenu === "0") {
-            // Find all sub-menus for this parent from sidebarMenu.json
-            const parent = typedSidebarMenu.flatMap(s => s.menuItems).find(m => m.id === parentMenu);
-            if (parent && parent.children) {
-              parent.children.forEach(child => {
-                if (child.id) {
-                  initialSelectedActions[child.id] = action;
-                }
-              });
+            // 💡 New logic to handle consolidated paths (e.g., "2.0.1")
+            if (subMenu === "0") {
+              // Find all sub-menus for this parent from sidebarMenu.json
+              const parent = typedSidebarMenu
+                .flatMap((s) => s.menuItems)
+                .find((m) => m.id === parentMenu);
+              if (parent && parent.children) {
+                parent.children.forEach((child) => {
+                  if (child.id) {
+                    initialSelectedActions[child.id] = action;
+                  }
+                });
+              }
+            } else {
+              // For individual paths (e.g., "2.2.2"), set the action directly
+              const menuId = `${parentMenu}.${subMenu}`;
+              initialSelectedActions[menuId] = action;
             }
-          } else {
-            // For individual paths (e.g., "2.2.2"), set the action directly
-            const menuId = `${parentMenu}.${subMenu}`;
-            initialSelectedActions[menuId] = action;
           }
-        }
         });
 
         setSelectedActions(initialSelectedActions);
@@ -139,7 +141,7 @@ const FormScopesAccess = () => {
       }
     };
     fetchData();
-  }, [key,typedSidebarMenu]);
+  }, [key, typedSidebarMenu]);
 
   // Helper function to parse access control codes
   const parsePath = (path: string): [string, string] => {
@@ -176,80 +178,82 @@ const FormScopesAccess = () => {
     }));
   };
 
-//v1.4
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  //v1.4
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (!key) {
-    setIsError(true);
-    setMessage("No key provided");
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const updatedPaths: string[] = [];
-
-    // Iterate through the current state of selectedActions
-    Object.entries(selectedActions).forEach(([menuId, action]) => {
-      // The menuId is like "1.1", and the action is like "2"
-      // We only want to include paths that have a non-zero action.
-      if (action && action !== "0") {
-        const [sectionId, subId] = menuId.split(".");
-        // Construct the three-digit code path and add it to the array
-        updatedPaths.push(`${sectionId}.${subId}.${action}`);
-      }
-    });
-
-    // Sort the paths to ensure they are in numerical order
-    updatedPaths.sort((a, b) => {
-      // Split the paths into their number components
-      const aParts = a.split(".").map(Number);
-      const bParts = b.split(".").map(Number);
-
-      // Compare the first part (e.g., "2" vs "3")
-      if (aParts[0] !== bParts[0]) {
-        return aParts[0] - bParts[0];
-      }
-      // If the first parts are the same, compare the second part
-      if (aParts[1] !== bParts[1]) {
-        return aParts[1] - bParts[1];
-      }
-      // If the first two parts are the same, compare the third part
-      return aParts[2] - bParts[2];
-    });
-
-    const response = await fetch("/api/admin/scopes_access/access_path", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        key,
-        accessPath: updatedPaths,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Failed to update access paths");
+    if (!key) {
+      setIsError(true);
+      setMessage("No key provided");
+      return;
     }
 
-    setIsError(false);
-    setMessage("Access paths updated successfully");
+    setLoading(true);
+    try {
+      const updatedPaths: string[] = [];
 
-    router.push("/admin/scopes_access");
-  } catch (error) {
-    console.error("Error updating access paths:", error);
-    setIsError(true);
-    setMessage(
-      error instanceof Error ? error.message : "Failed to update access paths",
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      // Iterate through the current state of selectedActions
+      Object.entries(selectedActions).forEach(([menuId, action]) => {
+        // The menuId is like "1.1", and the action is like "2"
+        // We only want to include paths that have a non-zero action.
+        if (action && action !== "0") {
+          const [sectionId, subId] = menuId.split(".");
+          // Construct the three-digit code path and add it to the array
+          updatedPaths.push(`${sectionId}.${subId}.${action}`);
+        }
+      });
+
+      // Sort the paths to ensure they are in numerical order
+      updatedPaths.sort((a, b) => {
+        // Split the paths into their number components
+        const aParts = a.split(".").map(Number);
+        const bParts = b.split(".").map(Number);
+
+        // Compare the first part (e.g., "2" vs "3")
+        if (aParts[0] !== bParts[0]) {
+          return aParts[0] - bParts[0];
+        }
+        // If the first parts are the same, compare the second part
+        if (aParts[1] !== bParts[1]) {
+          return aParts[1] - bParts[1];
+        }
+        // If the first two parts are the same, compare the third part
+        return aParts[2] - bParts[2];
+      });
+
+      const response = await fetch("/api/admin/scopes_access/access_path", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key,
+          accessPath: updatedPaths,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to update access paths");
+      }
+
+      setIsError(false);
+      setMessage("Access paths updated successfully");
+
+      router.push("/admin/scopes_access");
+    } catch (error) {
+      console.error("Error updating access paths:", error);
+      setIsError(true);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to update access paths",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Process menu items to extract all items with IDs and their full paths
   const menuItemsWithPaths = useMemo(() => {
@@ -379,7 +383,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 {items.map((item) => (
                   <div key={item.id}>
                     <SelectDropdown
-                     key={`${key}-${item.id}`}
+                      key={`${key}-${item.id}`}
                       subSectionId={item.id}
                       path={item.path}
                       section={item.section}

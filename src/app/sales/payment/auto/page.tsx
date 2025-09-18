@@ -1471,9 +1471,11 @@ export default function PaymentAutoPage() {
                                   <div className="text-xxs mt-1 text-gray-500">
                                     {formatDate(payment.received_date)}
                                   </div>
-                                ): <div className="text-xxs mt-1 text-gray-500">
+                                ) : (
+                                  <div className="text-xxs mt-1 text-gray-500">
                                     Requires follow up
-                                  </div>}
+                                  </div>
+                                )}
                               </td>
                               <td className="flex items-center gap-2 px-4 py-2.5 text-xs">
                                 {/* Conditional PDF button based on existence */}
@@ -1958,8 +1960,8 @@ export default function PaymentAutoPage() {
               Quotation Not Found
             </h5>
             <p className="text-center text-gray-500 dark:text-gray-400">
-              The quotation you&apos;re looking for could not be found. It may have
-              been deleted or the ID is incorrect.
+              The quotation you&apos;re looking for could not be found. It may
+              have been deleted or the ID is incorrect.
             </p>
             <Link
               href="/sales/quotation"

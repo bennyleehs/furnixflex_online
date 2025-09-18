@@ -15,7 +15,7 @@ type User = {
   name: string;
   role: string;
   // department: string;
-  profileImage?: string; 
+  profileImage?: string;
   // Add other user properties as needed
 };
 
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) {
       const updatedUser = {
         ...user,
-        profileImage: imageUrl
+        profileImage: imageUrl,
       };
       setUser(updatedUser);
     }
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     updateProfileImage,
     isAuthenticated: !!user,
-    isLoading
+    isLoading,
   };
 
   return (
