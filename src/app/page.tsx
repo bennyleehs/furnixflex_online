@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import ComingSoon from "@/components/DisplayPage/ComingSoon";
 import AttendanceTracker from "@/components/Attendance/AttendanceTracker";
 import SalesCard from "@/components/SalesCard";
 
@@ -14,8 +13,8 @@ export default function Home() {
   return (
     <>
       <DefaultLayout>
-        <AttendanceTracker/>
-        <SalesCard/>
+        <AttendanceTracker />
+        <SalesCard />
       </DefaultLayout>
     </>
   );
