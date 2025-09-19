@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
     }
     // --- END OF FIX ---
 
-    const officeLat = 1.48212;
-    const officeLon = 103.57796;
+    const officeLat = 1.46881;
+    const officeLon = 103.57751;
     const maxDistanceInMeters = 50;
 
     let checkin_address_status = "Remote Location";
