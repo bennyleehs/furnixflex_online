@@ -696,7 +696,7 @@ export default function ProductsPage() {
       )}
 
       {/* Search and Filter */}
-      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-sm border bg-white p-5">
+      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-lg border bg-white p-5">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -768,7 +768,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Table */}
-      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-sm border bg-white px-5 pt-6 pb-2.5">
+      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5">
         <div className="relative max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>

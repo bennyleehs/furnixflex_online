@@ -184,7 +184,7 @@ export default function ProgressTable({
   }, [displayedTasks]);
 
   return (
-    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-5 rounded-lg border bg-gray-50 p-5">
+    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-5 rounded-lg border bg-white p-5">
       {/* Header with Pipeline Flow title and breadcrumb on right */}
       <div className="mb-4 flex flex-wrap items-center justify-between">
         <h4 className="text-md font-medium">Pipeline Flow</h4>
@@ -384,7 +384,7 @@ export default function ProgressTable({
                 setSearchQuery(e.target.value);
                 onSearchChange?.(e.target.value); // trigger parent state reset
               }}
-              className="border-stroke dark:border-strokedark focus:border-primary dark:bg-meta-4 w-full rounded-md border px-3 py-1 text-sm focus:outline-hidden dark:text-white"
+              className="border-stroke dark:border-strokedark focus:border-primary dark:bg-meta-4 w-full rounded border px-3 py-1 text-sm focus:outline-hidden dark:text-white"
             />
             {searchQuery && (
               <button
@@ -478,10 +478,10 @@ export default function ProgressTable({
           return (
             <div
               key={task.id}
-              className="dark:bg-form-input border-stroke dark:border-strokedark flex h-full flex-col rounded-md border bg-white p-3"
+              className="dark:bg-form-input border-stroke dark:border-strokedark flex h-full flex-col rounded-md border bg-white p-3 shadow-xl dark:shadow-lg dark:shadow-white/20"
             >
               {/* Customer info section with better containment */}
-              <div className="dark:bg-meta-4/30 border-stroke dark:border-strokedark mb-4 rounded-md border bg-gray-50 p-2">
+              <div className="dark:bg-meta-4/30 border-stroke dark:border-stroke/40 mb-4 rounded-md border bg-gray-100 p-2">
                 {/* Customer header with name and action button */}
                 <div className="mb-2 flex items-start justify-between">
                   <div className="flex items-center gap-2">
@@ -501,8 +501,8 @@ export default function ProgressTable({
                           ["Payment", "Production", "Installation"].includes(
                             task.status,
                           )
-                            ? "bg-meta-11/20 text-meta-11 hover:bg-meta-11/30 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
-                            : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-700/30 dark:text-indigo-300 dark:hover:bg-indigo-700/40"
+                            ? "bg-meta-11/20 text-meta-11 hover:bg-meta-11/35 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
+                            : "bg-primary/20 text-primary hover:bg-primary/35 dark:bg-primarydark/20 dark:text-primarydark dark:hover:bg-primarydark/40"
                         } transition-colors`}
                         onClick={() =>
                           (window.location.href = `/sales/task/edit?id=${task.id}`)
@@ -632,7 +632,7 @@ export default function ProgressTable({
                 </div>
 
                 {/* Person-In-Charge section with status */}
-                <div className="border-stroke dark:border-strokedark mt-3 border-t pt-3 text-xs">
+                <div className="border-stroke mt-3 border-t pt-3 text-xs dark:border-white/40">
                   <div className="flex flex-wrap items-center justify-between">
                     <div className="flex items-center">
                       <span className="text-sm text-black dark:text-white">

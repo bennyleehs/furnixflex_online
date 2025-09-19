@@ -675,7 +675,7 @@ export default function TaskEditPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Left column - Task details with vertical flex layout */}
         <div className="md:col-span-2">
-          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-xs border bg-white p-6">
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
             {/* Customer header section */}
             <div className="border-stroke dark:border-strokedark border-b pb-5">
               <div className="flex flex-col gap-3">
@@ -1032,7 +1032,7 @@ export default function TaskEditPage() {
 
         {/* Right column - Event log */}
         <div className="col-span-1">
-          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark h-full rounded-xs border bg-white">
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark h-full rounded-lg border bg-white">
             <div className="border-stroke dark:border-strokedark flex items-center justify-between border-b px-4 py-4">
               <h5 className="font-medium text-black dark:text-white">
                 Event Log
