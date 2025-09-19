@@ -13,6 +13,7 @@
     "@types/pdfkit": "^0.14.0",
     "@types/qrcode": "^1.5.5",
     "@types/react-datepicker": "^7.0.0",
+    "@yusifaliyevpro/countries": "^2.2.2",
     "apexcharts": "^4.7.0",
     "basic-ftp": "^5.0.5",
     "bcrypt": "^5.1.1",
