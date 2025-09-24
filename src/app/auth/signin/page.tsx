@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 const SignIn = () => {
@@ -70,15 +71,21 @@ const SignIn = () => {
             <div className="mb-10 flex justify-center py-2">
               <div className="group relative">
                 <div className="relative">
-                  <Image
-                    src="/images/logo/classy_logo_ori.svg"
-                    width={240}
-                    height={140}
-                    alt="Classy Logo"
-                    className="h-auto transform drop-shadow-sm transition duration-300 group-hover:scale-105"
-                    priority
-                    quality={100}
-                  />
+                  <Link
+                    href={"https://classy-pro.com/"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Image
+                      src="/images/logo/classy_logo_ori.svg"
+                      width={240}
+                      height={140}
+                      alt="Classy Logo"
+                      className="h-auto transform drop-shadow-sm transition duration-300 group-hover:scale-105"
+                      priority
+                      quality={100}
+                    />
+                  </Link>
                 </div>
               </div>
             </div>

@@ -315,8 +315,9 @@ export default function Page() {
       inputType: "select",
       valueKey: "status",
       required: true,
-      defaultValue: "Assign PIC",
+      defaultValue: "Not Assign",
       options: [
+        { value: "Not Assign", label: "Not Assign" },
         { value: "Assign PIC", label: "Assign PIC" },
         { value: "Follow Up", label: "Follow UP" },
         { value: "Visit Showroom", label: "Visit Showroom" },
@@ -340,7 +341,7 @@ export default function Page() {
         if (value && value !== "") {
           // Return object to update status to "Follow Up"
           return {
-            status: "Follow Up",
+            status: "Assign PIC",
           };
         }
         return {}; // No changes if no rep selected
