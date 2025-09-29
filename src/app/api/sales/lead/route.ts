@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || null;
     const search = searchParams.get("search") || null;
     const id = searchParams.get("id") || null;
+    const salesUid = searchParams.get("salesUid") || null; // <--- Get the new parameter
 
     const db = createPool();
 
@@ -23,11 +24,26 @@ export async function GET(request: NextRequest) {
       whereClause = "WHERE c.id = ?";
       params.push(id);
     } else {
-      // Apply other filters only if ID is not provided
+      //v1.2 -gemini
+      // 1. Apply salesUid filter first (if present)
+      if (salesUid) {
+          whereClause = "WHERE e.uid = ?";
+          params.push(salesUid);
+      }
+      
+      // 2. Apply status filter (check if whereClause exists)
       if (status && status !== "All") {
-        whereClause = "WHERE c.status = ?";
+        whereClause = whereClause 
+          ? `${whereClause} AND c.status = ?` // Append if salesUid is present
+          : "WHERE c.status = ?"; // Start new if salesUid is not present
         params.push(status);
       }
+
+      // // Apply other filters only if ID is not provided
+      // if (status && status !== "All") {
+      //   whereClause = "WHERE c.status = ?";
+      //   params.push(status);
+      // }
 
       // Add search condition to WHERE clause
       if (search) {

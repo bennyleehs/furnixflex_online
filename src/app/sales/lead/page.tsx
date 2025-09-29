@@ -5,6 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
 import { Lead } from "@/types/sales-lead";
+import { useAuth } from "@/context/AuthContext";
 
 // const title = "Lead List";
 const MENU = "2";
@@ -12,6 +13,7 @@ const SUBMENU = "2";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function LeadPage() {
+  const { user } = useAuth(); 
   const [dataLead, setDataLead] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,14 +31,30 @@ export default function LeadPage() {
   const canCreateButton = canCreate(MENU, SUBMENU);
 
   const fetchData = useCallback(async () => {
+    // 1. Determine the sales_uid to use for filtering
+    // If the user is an 'Admin' (or another designated role), they see all leads.
+    // Otherwise, filter by their own UID.
+    // const userRole = user?.role.toLowerCase() || "";
+    const userRole = user?.role || "";
+    const isSalesPerson = !["Supervisor", "Assistant Manager"].includes(userRole); // Adjust roles as needed
+    
+    // Use the logged-in user's UID for filtering if they are a sales person
+    const filterSalesUid = isSalesPerson ? user?.uid : null; 
+    
+    const salesUidParam = filterSalesUid
+      ? `&salesUid=${encodeURIComponent(filterSalesUid)}`
+      : ""; // <--- New salesUid parameter
     try {
       const statusParam =
         selectedStatus !== "All" ? `&status=${selectedStatus}` : ""; // Add status filter to API request if not "All"
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
         : ""; // Add search query parameter
+      // const res = await fetch(
+      //   `/api/sales/${title}?page=${currentPage}&limit=${itemsPerPage}${statusParam}${searchParam}`,
+      // );
       const res = await fetch(
-        `/api/sales/${title}?page=${currentPage}&limit=${itemsPerPage}${statusParam}${searchParam}`,
+        `/api/sales/${title}?page=${currentPage}&limit=${itemsPerPage}${statusParam}${searchParam}${salesUidParam}`,
       );
       if (!res.ok) throw new Error(`Failed to fetch ${capitalizedTitle}`);
 
@@ -75,6 +93,7 @@ export default function LeadPage() {
     selectedStatus,
     searchQuery,
     capitalizedTitle,
+    user
   ]);
 
   useEffect(() => {
