@@ -343,11 +343,11 @@ export default function QuotationListPage() {
 
   return (
     <DefaultLayout>
-      {/* <div className="mb-6 flex flex-col items-center justify-between md:flex-row"> */}
+      <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
         {/* <Breadcrumb pageName="Quotations" noHeader={true}/> */}
         <Breadcrumb pageName="Quotations" />
 
-        {/* <div className="mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0">
           <Link
             href="/sales/quotation/auto"
             className="bg-primary hover:bg-primary/90 inline-flex items-center rounded-md px-4 py-2 text-white transition"
@@ -367,8 +367,8 @@ export default function QuotationListPage() {
             </svg>
             Create New Quotation
           </Link>
-        </div> */}
-      {/* </div> */}
+        </div>
+      </div>
 
       {/* Search and Filters */}
       <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-xs border bg-white p-5">
