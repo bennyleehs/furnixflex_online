@@ -4,6 +4,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Form from "@/components/FormElements/FormUni";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 interface Column {
   title: string;
@@ -40,6 +41,7 @@ interface StateData {
 }
 
 export default function Page() {
+  const { user } = useAuth(); //new code added
   const [data, setData] = useState<Record<string, any>[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,18 @@ export default function Page() {
     async function fetchPreData() {
       // If already fetching, don't start another fetch operation
       if (fetchingRef.current) return;
+
+      const userRole = user?.role || "";
+      const isSalesPerson = !["Supervisor", "Assistant Manager"].includes(
+        userRole,
+      );
+
+      // use logged-in user's UID - filtering sales person
+      const filterSalesUid = isSalesPerson ? user?.uid : null;
+
+      const salesUidParam = filterSalesUid
+        ? `?salesUid=${encodeURIComponent(filterSalesUid)}` //use '?' if it's the first param
+        : "";
 
       try {
         fetchingRef.current = true;
@@ -83,7 +97,7 @@ export default function Page() {
         }
 
         // Fetch sales representatives data
-        const salesResponse = await fetch("/api/sales/lead/salesStaff");
+        const salesResponse = await fetch(`/api/sales/lead/salesStaff${salesUidParam}`); //-- new code added --
         if (!salesResponse.ok) {
           throw new Error(
             `Failed to fetch sales representatives: ${salesResponse.status}`,
@@ -106,7 +120,7 @@ export default function Page() {
     }
 
     fetchPreData();
-  }, []);
+  }, [user]);
 
   // Create option getter functions
   const getCountryOptions = () => {
