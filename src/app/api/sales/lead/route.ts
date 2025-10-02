@@ -19,105 +19,123 @@ export async function GET(request: NextRequest) {
     let whereClause = "";
     const params: any[] = []; // KEEP THIS DECLARATION
 
+    //v1.2 -gemini
     // If ID is provided, we prioritize it and ignore other filters
     if (id) {
       whereClause = "WHERE c.id = ?";
       params.push(id);
-    } else {
-      //v1.2 -gemini
-      // 1. Apply salesUid filter first (if present)
-      if (salesUid) {
-          whereClause = "WHERE e.uid = ?";
-          params.push(salesUid);
-      }
-      
-      // 2. Apply status filter (check if whereClause exists)
-      if (status && status !== "All") {
-        whereClause = whereClause 
-          ? `${whereClause} AND c.status = ?` // Append if salesUid is present
-          : "WHERE c.status = ?"; // Start new if salesUid is not present
-        params.push(status);
-      }
-
-      // // Apply other filters only if ID is not provided
-      // if (status && status !== "All") {
-      //   whereClause = "WHERE c.status = ?";
-      //   params.push(status);
-      // }
-
-      // Add search condition to WHERE clause
-      if (search) {
-        // If we already have a WHERE clause, add AND
-        whereClause = whereClause ? `${whereClause} AND (` : "WHERE (";
-
-        // Define searchable fields
-        const searchFields = [
-          "c.name",
-          "c.nric",
-          "c.phone1",
-          "c.phone2",
-          "c.email",
-          "c.source",
-          "c.address_line1",
-          "c.address_line2",
-          "c.city",
-          "c.state",
-          "c.country",
-          "c.property",
-          "c.guard",
-          "c.interested",
-          "c.add_info",
-          "c.created_at",
-        ];
-
-        // Build search conditions
-        whereClause += searchFields
-          .map((field) => `${field} LIKE ?`)
-          .join(" OR ");
-        whereClause += ")";
-
-        // Add search parameter for each field
-        const searchPattern = `%${search}%`;
-        searchFields.forEach(() => params.push(searchPattern));
-      }
     }
 
-    // Calculate LIMIT and OFFSET values
+    // Apply salesUid filter first
+    if (salesUid) {
+      whereClause = "WHERE u.uid = ?"; // Filter by sales person's UID
+      params.push(salesUid);
+    }
+
+    // Apply 'status filter logic' (check if whereClause exists)
+    if (status && status !== "All") {
+      whereClause = whereClause
+        ? `${whereClause} AND c.status = ?` // Append if salesUid is present
+        : "WHERE c.status = ?"; // Start new if salesUid is not present
+      params.push(status);
+    }
+
+    // Add 'search filter logic' condition to WHERE clause
+    if (search) {
+      // If already have a WHERE clause, add AND
+      whereClause = whereClause ? `${whereClause} AND (` : "WHERE (";
+
+      // Define searchable fields
+      const searchFields = [
+        "c.name",
+        "c.nric",
+        "c.phone1",
+        "c.phone2",
+        "c.email",
+        "c.source",
+        "c.address_line1",
+        "c.address_line2",
+        "c.city",
+        "c.state",
+        "c.country",
+        "c.property",
+        "c.guard",
+        "c.interested",
+        "c.add_info",
+        "c.created_at",
+      ];
+
+      // Build search conditions
+      whereClause += searchFields
+        .map((field) => `${field} LIKE ?`)
+        .join(" OR ");
+      whereClause += ")";
+
+      // Add search parameter for each field
+      const searchPattern = `%${search}%`;
+      searchFields.forEach(() => params.push(searchPattern));
+    }
+
+    // === START: Logic for the 'status count query' (statusCountSql) ===
+    // Only need the salesUid filter here, NOT the status or search filter.
+    let statusCountWhereClause = "";
+    const statusCountParams: any[] = [];
+
+    if (salesUid) {
+      statusCountWhereClause = "WHERE u.uid = ?";
+      statusCountParams.push(salesUid);
+    }
+    // === END: Logic for the status count query ===
+
+    // Calculate LIMIT and OFFSET values for pagination
     const limitValue = parseInt(limit);
     const offsetValue = (parseInt(page) - 1) * limitValue;
 
-    // Build SQL queries
+    // Query to fetch lead data
     const dataSql = `
-      SELECT 
-        c.*,
-        e.name AS sales_name,
-        e.uid AS sales_uid
-      FROM customers c
-      LEFT JOIN users e ON c.sales_id = e.id
-      ${whereClause}
-      ORDER BY c.id DESC 
-      LIMIT ${limitValue} OFFSET ${offsetValue};
+        SELECT
+            c.*,
+            u.name as sales_name, 
+            u.uid AS sales_uid
+        FROM customers c
+        LEFT JOIN users u ON c.sales_id = u.id
+        ${whereClause}
+        ORDER BY c.id DESC
+        LIMIT ${limitValue} OFFSET ${offsetValue};
     `;
 
-    // Add a filtered count query to your GET handler
+    // Query to count total leads
     const countSql = `
-      SELECT COUNT(*) AS total
-      FROM customers c
-      LEFT JOIN users e ON c.sales_id = e.id
-      ${whereClause};
+        SELECT COUNT(*) as total
+        FROM customers c
+        LEFT JOIN users u ON c.sales_id = u.id
+        ${whereClause}
     `;
+    //^:  ${whereClause} // Uses the full filter (UID + Status + Search)
 
-    // Status counts query stays the same
+    // Query to count leads by status
     const statusCountSql = `
-      SELECT c.status, COUNT(*) as count
-      FROM customers c
-      GROUP BY c.status;
+        SELECT c.status, COUNT(*) as count 
+        FROM customers c
+        LEFT JOIN users u ON c.sales_id = u.id
+        ${statusCountWhereClause}
+        GROUP BY c.status
     `;
+    //^: ${statusCountWhereClause} // Uses only the UID filter
+
+    // Add pagination parameters to the main query parameters
+    // params.push((parseInt(page) - 1) * parseInt(limit), parseInt(limit));
 
     // Execute queries
     const [rows] = await db.query<RowDataPacket[]>(dataSql, params);
     const [countResult] = await db.query<RowDataPacket[]>(countSql, params);
-    const [statusCounts] = await db.query<RowDataPacket[]>(statusCountSql);
+    // const [rows] = await db.query<RowDataPacket[]>(dataSql);
+    // const [countResult] = await db.query<RowDataPacket[]>(countSql);
+    //^: use dedicated statusCountParams - for status count query
+    const [statusCounts] = await db.query<RowDataPacket[]>(
+      statusCountSql,
+      statusCountParams, // <-- IMPORTANT: Use the dedicated parameters
+    );
 
     // Get total from the count query
     const totalFilteredItems = countResult[0]?.total || 0;
