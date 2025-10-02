@@ -379,9 +379,7 @@
   "SK.SALES.Staff": [],
   "SK.SALES.Supervisor": [],
   "SK.TECHNOLOGY.Assistant Manager": [],
-  "SK.TECHNOLOGY.Chief Officer": [
-    "1.0.4"
-  ],
+  "SK.TECHNOLOGY.Chief Officer": [],
   "SK.TECHNOLOGY.Director": [],
   "SK.TECHNOLOGY.Manager": [],
   "SK.TECHNOLOGY.Managing Director": [],
