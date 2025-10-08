@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
@@ -69,15 +69,18 @@ export default function TaskEditPage() {
   const [groupedTasks, setGroupedTasks] = useState<Record<string, Task>>({});
 
   // Pipeline stages from your existing app
-  const pipelineStages = [
-    "Follow Up",
-    "Visit Showroom",
-    "Quotation",
-    "Payment",
-    "Production",
-    "Installation",
-    "Job Done",
-  ];
+  const pipelineStages = useMemo(
+    () => [
+      "Follow Up",
+      "Visit Showroom",
+      "Quotation",
+      "Payment",
+      "Production",
+      "Installation",
+      "Job Done",
+    ],
+    [],
+  );
 
   // Wrap fetchFtpLogs and fetchTaskFiles in useCallback
   const fetchFtpLogs = useCallback(async () => {
@@ -347,12 +350,23 @@ export default function TaskEditPage() {
     setPreviews(previews.filter((_, i) => i !== index));
   };
 
-  // Update useEffect to initialize selectedStatus from task
+  // Update useEffect to initialize selectedStatus from task | v1.2 gemini
   useEffect(() => {
     if (task) {
-      setSelectedStatus(task.status);
+      // Check if the task status is one of the pipeline stages.
+      // If not, default to the first pipeline stage ("Follow Up").
+      const initialStatus = pipelineStages.includes(task.status)
+        ? task.status
+        : pipelineStages[0]; // pipelineStages[0] is "Follow Up"
+
+      setSelectedStatus(initialStatus);
+
+      // Also, update the task object's status in the state if we defaulted it,
+      // so the logic in handleStatusUpdate correctly compares oldStatus/newStatus.
+      // However, to keep task data pristine, we'll rely on the user clicking update.
+      // For now, only update selectedStatus.
     }
-  }, [task]);
+  }, [task, pipelineStages]); // Added pipelineStages to dependency array for correctness
 
   if (loading) {
     return (
