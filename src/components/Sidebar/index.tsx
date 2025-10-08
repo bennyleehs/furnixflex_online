@@ -29,7 +29,10 @@ interface MenuGroup {
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [menuGroups, setMenuGroups] = useState<MenuGroup[]>([]);
-  const [pageName, setPageName] = useLocalStorage("selectedMenu", "ui elements");
+  const [pageName, setPageName] = useLocalStorage(
+    "selectedMenu",
+    "ui elements",
+  );
 
   useEffect(() => {
     const loadMenu = async () => {
@@ -42,7 +45,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`absolute left-0 top-0 z-9999 flex h-screen w-65 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+        className={`dark:bg-boxdark absolute top-0 left-0 z-9999 flex h-screen w-65 flex-col overflow-y-hidden bg-black duration-300 ease-linear lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -62,7 +65,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             aria-controls="sidebar"
             className="block lg:hidden"
           >
-            {/* svg here */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
         {/* SIDEBAR HEADER */}
@@ -72,7 +88,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
-                <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                <h3 className="text-bodydark2 mb-4 ml-4 text-sm font-semibold">
                   {group.name}
                 </h3>
                 <ul className="mb-6 flex flex-col gap-1.5">
@@ -88,7 +104,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </div>
             ))}
           </nav>
-          {/* Sidebar Menu */}          
+          {/* Sidebar Menu */}
         </div>
         {/* <!-- Footer --> */}
 
