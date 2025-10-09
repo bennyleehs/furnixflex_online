@@ -1678,7 +1678,7 @@ export default function QuotationPage() {
                         {index + 1}
                       </td>
 
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 min-w-125">
                         <div className="grid grid-cols-3 gap-2">
                           {/* Category Dropdown - Fixed Version */}
                           <select
