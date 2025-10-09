@@ -59,9 +59,6 @@ const FormUni = <T extends Record<string, any>>({
   const initializedRef = useRef(false); // Track initialization
   const router = useRouter();
 
-  // // --- NEW: State for phone validation message ---
-  // const [phoneValidation, setPhoneValidation] = useState<string | null>(null);
-  // --- MODIFIED: Changed phoneValidation state to an object to hold multiple messages ---
   const [phoneValidation, setPhoneValidation] = useState<
     Record<string, string | null>
   >({});
@@ -89,37 +86,6 @@ const FormUni = <T extends Record<string, any>>({
       const initialData: Record<string, any> =
         data.length > 0 ? { ...data[0] } : {};
 
-      // // Apply default values for all fields that don't have values
-      // columns.forEach((column) => {
-      //   const valueKey = column.valueKey;
-      //   const currentValue = initialData[valueKey];
-
-      //   // Don't apply defaults to section headers
-      //   if (column.inputType === "section") {
-      //     return;
-      //   }
-
-      //   // If field doesn't have a value but has a defaultValue, use the defaultValue
-      //   if (
-      //     (currentValue === undefined ||
-      //       currentValue === null ||
-      //       currentValue === "") &&
-      //     column.defaultValue !== undefined
-      //   ) {
-      //     initialData[valueKey] = column.defaultValue;
-      //   }
-
-      //   // Format dropdown values to strings
-      //   if (
-      //     column.inputType === "select" &&
-      //     initialData[valueKey] !== undefined
-      //   ) {
-      //     initialData[valueKey] = String(initialData[valueKey]);
-      //   }
-      // });
-
-      //v1.2 gemini
-      // --- START: MODIFIED LOGIC TO INCLUDE SUBFIELDS ---
       const processColumnDefaults = (column: Column) => {
         const valueKey = column.valueKey;
         const currentValue = initialData[valueKey];
@@ -154,7 +120,6 @@ const FormUni = <T extends Record<string, any>>({
           column.subFields.forEach(processColumnDefaults);
         }
       });
-      // --- END: MODIFIED LOGIC ---
 
       // console.log("Initializing form with data:", initialData);
       initializedRef.current = true;
@@ -162,43 +127,7 @@ const FormUni = <T extends Record<string, any>>({
     }
   }, [data, loading, optionsLoaded, columns, setFormData]);
 
-  // // Function to check phone number existence
-  // const checkPhoneNumber = async (phone: string) => {
-  //   if (!phone || phone.length < 5) {
-  //     setPhoneValidation(null);
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await fetch(
-  //       `/api/sales/lead/create/checkPhone?phone=${encodeURIComponent(phone)}`,
-  //     );
-
-  //     if (!response.ok) {
-  //       console.error("API Error:", response.statusText);
-  //       setPhoneValidation("Server error. Could not validate phone number.");
-  //       return;
-  //     }
-
-  //     const result = await response.json();
-
-  //     if (result.exists) {
-  //       setPhoneValidation(
-  //         `This phone number belongs to existing customer: ${result.customer.name} (ID: ${result.customer.id})`,
-  //       );
-  //     } else {
-  //       setPhoneValidation(null);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error validating phone number:", error);
-  //     setPhoneValidation(
-  //       "An error occurred. Please check the phone number manually.",
-  //     );
-  //   }
-  // };
-
-  //v1.2
-  // --- MODIFIED: The function now accepts a fieldKey ('phone1' or 'phone2') ---
+  // The function for fieldKey ('phone1' or 'phone2')
   const checkPhoneNumber = async (
     phone: string,
     fieldKey: "phone1" | "phone2",
@@ -234,85 +163,7 @@ const FormUni = <T extends Record<string, any>>({
     }
   };
 
-  // const handleChange = (
-  //   e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
-  // ) => {
-  //   const { name, value } = e.target;
-  //   const column = columns.find((col) => col.valueKey === name);
-
-  //   // Call the validation function if the changed field is 'phone1' or 'phone2'
-  //   if (name === "phone1" || name === "phone2") {
-  //     checkPhoneNumber(value);
-  //   }
-
-  //   if (column?.transform) {
-  //     const transformedValues = column.transform(
-  //       value,
-  //       formData || {},
-  //       column.options,
-  //     );
-  //     setFormData((prevData) => ({
-  //       ...prevData,
-  //       ...transformedValues,
-  //       [name]: value,
-  //     }));
-  //   } else {
-  //     setFormData((prevData) => ({
-  //       ...prevData,
-  //       [name]: value,
-  //     }));
-  //   }
-  // };
-
-//   //v1.2 gemini
-//   const handleChange = (
-//   e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
-// ) => {
-//   const { name, value } = e.target;
-//   let columnDefinition: Column | undefined; //column & sb-fields
-
-//   // Search through all columns and their sub-fields to find the one that changed.
-//   for (const col of columns) {
-//     if (col.valueKey === name) {
-//       columnDefinition = col;
-//       break;
-//     }
-//     if (col.inputType === "composite" && col.subFields) {
-//       const subField = col.subFields.find((sf) => sf.valueKey === name);
-//       if (subField) {
-//         columnDefinition = subField;
-//         break;
-//       }
-//     }
-//   }
-
-//   if (columnDefinition?.transform) {
-//     const transformedValues = columnDefinition.transform(
-//       value,
-//       formData || {},
-//       columnDefinition.options,
-//     );
-
-//     // After transforming, check if phone1 was updated and trigger validation.
-//     if (transformedValues.phone1) {
-//       checkPhoneNumber(transformedValues.phone1);
-//     }
-
-//     setFormData((prevData) => ({
-//       ...prevData,
-//       ...transformedValues,
-//       [name]: value,
-//     }));
-//   } else {
-//     setFormData((prevData) => ({
-//       ...prevData,
-//       [name]: value,
-//     }));
-//   }
-// };
-
-//v1.3 gemini
-// --- MODIFIED: handleChange now checks for both phone1 and phone2 ---
+// handleChange checks for both phone1 and phone2
   const handleChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
   ) => {
@@ -365,25 +216,6 @@ const FormUni = <T extends Record<string, any>>({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // // Check for required fields
-    // const missingRequiredFields = columns
-    //   .filter(
-    //     (col) =>
-    //       col.required &&
-    //       (!formData[col.valueKey] || formData[col.valueKey] === ""),
-    //   )
-    //   .map((col) => col.title);
-
-    // if (missingRequiredFields.length > 0) {
-    //   alert(
-    //     `Please fill in the following required fields: ${missingRequiredFields.join(", ")}`,
-    //   );
-    //   return;
-    // }
-
-    //v1.2 gemini
-    // --- START: MODIFIED VALIDATION LOGIC ---
     const missingRequiredFields: string[] = [];
 
     columns.forEach((col) => {
@@ -417,20 +249,8 @@ const FormUni = <T extends Record<string, any>>({
       );
       return;
     }
-    // --- END: MODIFIED VALIDATION LOGIC ---
-
-    // // Prevent submission if phone validation message exists and it's a new lead
-    // if (phoneValidation && data.length === 0) {
-    //   const confirmSubmit = window.confirm(
-    //     "A record with this phone number already exists. Do you want to continue?",
-    //   );
-    //   if (!confirmSubmit) {
-    //     return;
-    //   }
-    // }
-
-    //v1.2 gemini
-    // --- MODIFIED: Check both phone fields for validation issues before submitting ---
+    
+    // Check both phone fields for validation issues before submitting
     if ((phoneValidation.phone1 || phoneValidation.phone2) && data.length === 0) {
       const confirmSubmit = window.confirm(
         "A record with one of these phone numbers may already exist. Do you want to continue?",
@@ -502,14 +322,7 @@ const FormUni = <T extends Record<string, any>>({
                 </div>
               );
             }
-            // // Check if phone validation should be shown for this column or its sub-fields
-            // const showPhoneValidation =
-            //   column.valueKey === "phone1" ||
-            //   (column.inputType === "composite" &&
-            //     column.subFields?.some((sf) => sf.valueKey === "phone1"));
-
-            //v1.2 gemini
-            // --- MODIFIED: Determine which validation message key to use ---
+            //validation phone no
             let validationMessageKey: 'phone1' | 'phone2' | null = null;
             if (column.valueKey === 'primary_phone_composite') {
               validationMessageKey = 'phone1';
@@ -529,7 +342,7 @@ const FormUni = <T extends Record<string, any>>({
                   )}
                 </label>
 
-                {/* --- NEW: Composite Field Rendering Logic --- */}
+                {/* Composite Field Rendering Logic */}
                 {column.inputType === "composite" ? (
                   <div className="flex w-full items-start space-x-2">
                     {column.subFields?.map((subField, subIndex) => {
@@ -594,17 +407,7 @@ const FormUni = <T extends Record<string, any>>({
                       </option>
                     ))}
                   </select>
-                ) : column.inputType === "textarea" ? (
-                  <textarea
-                    id={column.valueKey}
-                    name={column.valueKey}
-                    value={currentValue}
-                    // onChange={handleChange}
-                    rows={4}
-                    required={column.required}
-                    className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white"
-                  />
-                ) : (
+                )  : (
                   <input
                     type={column.inputType || "text"}
                     id={column.valueKey}
@@ -621,18 +424,7 @@ const FormUni = <T extends Record<string, any>>({
                   />
                 )}
 
-                {/* --- NEW: Display validation message here --- */}
-                {/* {column.valueKey === "phone1" && phoneValidation && (
-                  <p className="text-meta-1 mt-2 text-sm">{phoneValidation}</p>
-                )} */}
-                {/* v1.2 gemini */}
-                {/* --- CORRECTED: Display validation message here --- */}
-                {/* {showPhoneValidation && phoneValidation && (
-                  <p className="text-meta-1 mt-2 text-sm">{phoneValidation}</p>
-                )} */}
-
-                {/* //v1.3 gemini */}
-                {/* --- MODIFIED: Display the correct validation message for the correct field --- */}
+                {/* Display validation message for the correct field */}
                 {validationMessageKey && phoneValidation[validationMessageKey] && (
                   <p className="text-meta-1 mt-2 text-sm">
                     {phoneValidation[validationMessageKey]}

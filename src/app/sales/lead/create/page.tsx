@@ -102,7 +102,7 @@ export default function Page() {
         // Fetch sales representatives data
         const salesResponse = await fetch(
           `/api/sales/lead/salesStaff${salesUidParam}`,
-        ); //-- new code added --
+        );
         if (!salesResponse.ok) {
           throw new Error(
             `Failed to fetch sales representatives: ${salesResponse.status}`,
@@ -128,7 +128,6 @@ export default function Page() {
   }, [user]);
 
   // Create option getter functions
-
   const getPhoneCodeOptions = (): OptionItem[] => {
     if (countries.length === 0) {
       return [{ value: "", label: "Loading codes..." }];
@@ -241,49 +240,50 @@ export default function Page() {
   }, [searchParams]);
 
   useEffect(() => {
-  // Run this logic only in edit mode when data and countries are available
-  if (isEditMode && data.length > 0 && countries.length > 0) {
-    const leadData = data[0];
-    const initialFormData = { ...leadData }; // Start with all fetched data
+    // Run this logic only in edit mode when data and countries are available
+    if (isEditMode && data.length > 0 && countries.length > 0) {
+      const leadData = data[0];
+      const initialFormData = { ...leadData };
 
-    // Get all possible country codes and sort them by length, longest first.
-    // This is crucial to correctly match "+60" instead of just "+6".
-    const allIdds = countries
-      .map((c) => c.idd)
-      .filter(Boolean) // Remove any empty/null IDDs
-      .sort((a, b) => b.length - a.length);
+      // Get all possible country codes and sort by length, longest first.Crucial to correctly match "+60" instead of just "+6".
+      const allIdds = countries
+        .map((c) => c.idd)
+        .filter(Boolean) // Remove any empty/null IDDs
+        .sort((a, b) => b.length - a.length);
 
-    // --- PARSING LOGIC FOR Primary Phone (phone1) ---
-    if (leadData.phone1) {
-      const foundIdd = allIdds.find((idd) => leadData.phone1.startsWith(idd));
+      // --- PARSING LOGIC FOR Primary Phone (phone1) ---
+      if (leadData.phone1) {
+        const foundIdd = allIdds.find((idd) => leadData.phone1.startsWith(idd));
 
-      if (foundIdd) {
-        initialFormData.phone_idd = foundIdd;
-        initialFormData.phone_no = leadData.phone1.substring(foundIdd.length);
-      } else {
-        // Fallback if no matching country code is found
-        initialFormData.phone_no = leadData.phone1;
+        if (foundIdd) {
+          initialFormData.phone_idd = foundIdd;
+          initialFormData.phone_no = leadData.phone1.substring(foundIdd.length);
+        } else {
+          // Fallback if no matching country code is found
+          initialFormData.phone_no = leadData.phone1;
+        }
       }
-    }
 
-    // --- PARSING LOGIC FOR Secondary Phone (phone2) ---
-    if (leadData.phone2) {
-      const foundIdd2 = allIdds.find((idd) => leadData.phone2.startsWith(idd));
-
-      if (foundIdd2) {
-        initialFormData.phone_idd2 = foundIdd2;
-        initialFormData.phone_no2 = leadData.phone2.substring(
-          foundIdd2.length,
+      // --- PARSING LOGIC FOR Secondary Phone (phone2) ---
+      if (leadData.phone2) {
+        const foundIdd2 = allIdds.find((idd) =>
+          leadData.phone2.startsWith(idd),
         );
-      } else {
-        // Fallback for the secondary number
-        initialFormData.phone_no2 = leadData.phone2;
-      }
-    }
 
-    setFormData(initialFormData);
-  }
-}, [data, countries, isEditMode]); // This effect depends on these states
+        if (foundIdd2) {
+          initialFormData.phone_idd2 = foundIdd2;
+          initialFormData.phone_no2 = leadData.phone2.substring(
+            foundIdd2.length,
+          );
+        } else {
+          // Fallback
+          initialFormData.phone_no2 = leadData.phone2;
+        }
+      }
+
+      setFormData(initialFormData);
+    }
+  }, [data, countries, isEditMode]); // This effect depends on these states
 
   const column: Column[] = [
     {
@@ -308,53 +308,6 @@ export default function Page() {
       valueKey: "name",
       required: true,
     },
-
-    // {
-    //   title: "Primary Phone",
-    //   inputType: "text",
-    //   valueKey: "phone1",
-    //   required: true,
-    // },
-    // // New Phone Code column for Primary Phone
-    // {
-    //   title: "P. Code",
-    //   inputType: "select",
-    //   valueKey: "phone_code1", // New valueKey
-    //   defaultValue:
-    //     countries.find((c) => c.name === formData.country)?.idd || "+60", // Default to +60 if country is Malaysia or not set
-    //   options: getPhoneCodeOptions(), // Use the new function
-    //   required: true,
-    //   transform: (value: string, allValues: Record<string, any>) => {
-    //     // Find the country associated with the selected phone code (best effort)
-    //     const country = countries.find((c) => c.idd === value);
-
-    //     // If a country is found and the current country is empty, set the country
-    //     if (country && !allValues.country) {
-    //       return {
-    //         country: country.name,
-    //       };
-    //     }
-    //     return {};
-    //   },
-    // },
-    // {
-    //   title: "Primary Phone",
-    //   inputType: "text",
-    //   valueKey: "phone1", // Changed valueKey to avoid conflict
-    //   required: true,
-    //   dependencies: ["phone_code1"], // This field depends on phone_code1
-    //   transform: (value: string, allValues: Record<string, any>) => {
-    //     // Construct the full phone number for storage
-    //     const fullNumber = `${allValues.phone_code1}${value.replace(/^0+/, "")}`; // Remove leading zeros from phone number
-
-    //     // Return object to update the final phone number field in the form data
-    //     return {
-    //       phone_number: fullNumber, // This key will be used for the final submission data
-    //     };
-    //   },
-    // },
-    // 3 Oct
-    // --- ADD THIS NEW BLOCK ---
     {
       title: "Primary Phone",
       inputType: "composite",
@@ -369,33 +322,12 @@ export default function Page() {
             countries.find((c) => c.name === formData.country)?.idd || "+60",
           options: getPhoneCodeOptions(),
           required: true,
-          // transform: (value: string, allValues: Record<string, any>) => {
-          //   const country = countries.find((c) => c.idd === value);
-          //   if (country && !allValues.country) {
-          //     return {
-          //       country: country.name,
-          //     };
-          //   }
-          //   return {};
-          // },
-          //v1.2 gemini
           transform: (value: string, allValues: Record<string, any>) => {
             // When IDD changes, update the combined 'phone1' field
             const combinedPhone = `${value}${allValues.phone_no || ""}`.replace(
               /^0+/,
               "",
             );
-
-            // const updates: Record<string, any> = {
-            //   phone1: combinedPhone,
-            // };
-
-            // const country = countries.find((c) => c.idd === value);
-            // if (country && !allValues.country) {
-            //   updates.country = country.name;
-            // }
-            // return updates;
-            // The logic to update the country has been REMOVED.
             return {
               phone1: combinedPhone,
             };
@@ -407,17 +339,6 @@ export default function Page() {
           inputType: "text",
           valueKey: "phone_no",
           required: true,
-          // dependencies: ["phone_code1"],
-          // transform: (value: string, allValues: Record<string, any>) => {
-          //   const fullNumber = `${allValues.phone_code1}${value.replace(
-          //     /^0+/,
-          //     "",
-          //   )}`;
-          //   return {
-          //     phone_number: fullNumber,
-          //   };
-          // },
-          //v1.2 gemini
           transform: (value: string, allValues: Record<string, any>) => {
             // When the local number changes, update the combined 'phone1' field
             const combinedPhone =
@@ -430,12 +351,6 @@ export default function Page() {
         },
       ],
     },
-    // ----------------------------
-    // {
-    //   title: "Secondary Phone",
-    //   inputType: "text",
-    //   valueKey: "phone2",
-    // },
     {
       title: "Secondary Phone",
       inputType: "composite",
@@ -449,35 +364,20 @@ export default function Page() {
             countries.find((c) => c.name === formData.country)?.idd || "+60",
           options: getPhoneCodeOptions(),
           required: true,
-
-          //v1.2 gemini
           transform: (value: string, allValues: Record<string, any>) => {
             // When IDD changes, update the combined 'phone2' field
             const combinedPhone2 =
               `${value}${allValues.phone_no || ""}`.replace(/^0+/, "");
-
-            // const updates: Record<string, any> = {
-            //   phone2: combinedPhone2,
-            // };
-
-            // const country = countries.find((c) => c.idd === value);
-            // if (country && !allValues.country) {
-            //   updates.country = country.name;
-            // }
-            // return updates;
-            // The logic to update the country has been REMOVED.
             return {
               phone2: combinedPhone2,
             };
           },
-          className: "flex-none w-28", // Sets a fixed width for the dropdown
+          className: "flex-none w-28",
         },
         {
           title: "Secondary Phone Number",
           inputType: "text",
           valueKey: "phone_no2",
-
-          //v1.2 gemini
           transform: (value: string, allValues: Record<string, any>) => {
             // When the local number changes, update the combined 'phone2' field
             const combinedPhone2 =
