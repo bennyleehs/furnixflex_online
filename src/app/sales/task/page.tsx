@@ -161,7 +161,7 @@ export default function Page() {
         <div className="mt-4 text-center">
           <button
             onClick={handleLoadMore}
-            className="border-primary bg-primary dark:bg-primarydark hover:bg-opacity-90 w-sm cursor-pointer rounded-lg border p-3 font-semibold text-white transition"
+            className="border-primary bg-primary hover:bg-primarydark w-sm cursor-pointer rounded-lg border p-3 font-semibold text-white transition"
           >
             Load More ({data.length}/{totalItems})
           </button>

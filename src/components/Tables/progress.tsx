@@ -199,15 +199,17 @@ export default function ProgressTable({
         <div className="border-stroke dark:border-strokedark relative mb-1 hidden border-b py-4 md:flex">
           {stageData.stageInfo.map((info, index) => {
             // Determine color based on stage
-            let bgColorClass = "bg-primary";
+            let bgColorClass = "bg-meta-8";
             let textColorClass = "text-white";
 
             if (info.stage === "Job Done")
               bgColorClass = "bg-success dark:bg-green-500";
             else if (
-              ["Payment", "Production", "Installation"].includes(info.stage)
+              ["Quotation", "Payment", "Production", "Installation"].includes(
+                info.stage,
+              )
             ) {
-              bgColorClass = "bg-meta-11";
+              bgColorClass = "bg-meta-10";
             }
 
             return (
@@ -229,19 +231,20 @@ export default function ProgressTable({
                 {/* Circular count indicator with dark-mode compatible border highlight */}
                 <div className="relative">
                   <div
-                    className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-sm font-medium shadow-md ${
+                    className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-lg font-medium shadow-md ${
                       // selectedStage === info.stage
                       selectedStatus === info.stage
                         ? `dark:ring-offset-boxdark scale-110 transform ring-4 ring-offset-2 ring-offset-white ${
                             info.stage === "Job Done"
                               ? "ring-success dark:ring-green-500"
                               : [
+                                    "Quotation",
                                     "Payment",
                                     "Production",
                                     "Installation",
                                   ].includes(info.stage)
-                                ? "ring-meta-11"
-                                : "ring-primary"
+                                ? "ring-meta-10"
+                                : "ring-meta-8"
                           }`
                         : ""
                     } transition-all duration-200`}
@@ -267,14 +270,16 @@ export default function ProgressTable({
         {/* Mobile view - condensed pipeline */}
         <div className="border-stroke dark:border-strokedark mb-1 flex flex-wrap justify-center gap-6 border-b py-4 md:hidden">
           {stageData.stageInfo.map((info, index) => {
-            let bgColorClass = "bg-primary"; // Determine color based on stage
+            let bgColorClass = "bg-meta-8"; // Determine color based on stage
             let textColorClass = "text-white";
 
-            if (info.stage === "Job Done") bgColorClass = "bg-success";
+            if (info.stage === "Job Done") bgColorClass = "bg-success dark:bg-green-500";
             else if (
-              ["Payment", "Production", "Installation"].includes(info.stage)
+              ["Quotation", "Payment", "Production", "Installation"].includes(
+                info.stage,
+              )
             ) {
-              bgColorClass = "bg-meta-11";
+              bgColorClass = "bg-meta-10";
             }
 
             return (
@@ -293,19 +298,20 @@ export default function ProgressTable({
               >
                 {/* Compact display for mobile */}
                 <div
-                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-xs font-medium shadow-md ${
+                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-md font-medium shadow-md ${
                     // selectedStage === info.stage
                     selectedStatus === info.stage
                       ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
                           info.stage === "Job Done"
-                            ? "ring-success"
+                            ? "ring-success dark:ring-green-500"
                             : [
+                                  "Quotation",
                                   "Payment",
                                   "Production",
                                   "Installation",
                                 ].includes(info.stage)
-                              ? "ring-meta-11"
-                              : "ring-primary"
+                              ? "ring-meta-10"
+                              : "ring-meta-8"
                         }`
                       : ""
                   } transition-all duration-200`}
@@ -459,10 +465,10 @@ export default function ProgressTable({
           new Map(uniqueDisplayedTasks.map((t) => [t.id, t])).values(),
         ).map((task) => {
           // Determine color based on progress
-          let colorClass = "bg-primary";
+          let colorClass = "bg-meta-8";
           if (task.progressPercentage >= 100)
             colorClass = "bg-success dark:bg-green-500";
-          else if (task.progressPercentage >= 60) colorClass = "bg-meta-11";
+          else if (task.progressPercentage >= 50) colorClass = "bg-meta-10";
 
           // Parse composite fields into components
           const [name, nric] = (task.name || "")
@@ -497,13 +503,7 @@ export default function ProgressTable({
                   <div>
                     {task.status !== "Job Done" && (
                       <button
-                        className={`flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium whitespace-nowrap ${
-                          ["Payment", "Production", "Installation"].includes(
-                            task.status,
-                          )
-                            ? "bg-meta-11/20 text-meta-11 hover:bg-meta-11/35 dark:bg-meta-11/30 dark:hover:bg-meta-11/40"
-                            : "bg-primary/20 text-primary hover:bg-primary/35 dark:bg-primarydark/20 dark:text-primarydark dark:hover:bg-primarydark/40"
-                        } transition-colors`}
+                        className="bg-primary hover:bg-primarydark dark:bg-primary dark:hover:bg-primarydark flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium whitespace-nowrap text-white transition-colors"
                         onClick={() =>
                           (window.location.href = `/sales/task/edit?id=${task.id}`)
                         }
@@ -643,12 +643,15 @@ export default function ProgressTable({
                     <span
                       className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
                         task.status === "Job Done"
-                          ? "bg-success/10 text-success"
-                          : ["Payment", "Production", "Installation"].includes(
-                                task.status,
-                              )
-                            ? "bg-meta-11/10 text-meta-11"
-                            : "bg-primary/10 text-primary"
+                          ? "bg-success/10 text-success border border-success"
+                          : [
+                                "Quotation",
+                                "Payment",
+                                "Production",
+                                "Installation",
+                              ].includes(task.status)
+                            ? "bg-meta-10/10 text-meta-10 border border-meta-10"
+                            : "bg-meta-8/10 text-meta-8 border border-meta-8"
                       }`}
                     >
                       {task.status}
