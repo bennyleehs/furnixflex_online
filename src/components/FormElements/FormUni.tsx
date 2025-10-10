@@ -79,54 +79,6 @@ const FormUni = <T extends Record<string, any>>({
     setOptionsLoaded(true);
   }, [columns]);
 
-  // IMPORTANT: Initialize form data when in edit mode (data exists)
-  useEffect(() => {
-    if (!initializedRef.current && optionsLoaded && !loading) {
-      // Create initial data object - either from existing data or empty object
-      const initialData: Record<string, any> =
-        data.length > 0 ? { ...data[0] } : {};
-
-      const processColumnDefaults = (column: Column) => {
-        const valueKey = column.valueKey;
-        const currentValue = initialData[valueKey];
-
-        if (column.inputType === "section") {
-          return;
-        }
-
-        if (
-          (currentValue === undefined ||
-            currentValue === null ||
-            currentValue === "") &&
-          column.defaultValue !== undefined
-        ) {
-          initialData[valueKey] = column.defaultValue;
-        }
-
-        if (
-          column.inputType === "select" &&
-          initialData[valueKey] !== undefined
-        ) {
-          initialData[valueKey] = String(initialData[valueKey]);
-        }
-      };
-
-      columns.forEach((column) => {
-        // Process the main column
-        processColumnDefaults(column);
-
-        // If the column is composite, process its subfields as well
-        if (column.inputType === "composite" && column.subFields) {
-          column.subFields.forEach(processColumnDefaults);
-        }
-      });
-
-      // console.log("Initializing form with data:", initialData);
-      initializedRef.current = true;
-      setFormData(initialData);
-    }
-  }, [data, loading, optionsLoaded, columns, setFormData]);
-
   // The function for fieldKey ('phone1' or 'phone2')
   const checkPhoneNumber = async (
     phone: string,
@@ -364,7 +316,7 @@ const FormUni = <T extends Record<string, any>>({
                               required={subField.required}
                               className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white"
                             >
-                              <option value="">Select an option</option>
+                              <option value="" disabled>Select an option</option>
                               {subField.options?.map((option, idx) => (
                                 <option key={idx} value={option.value}>
                                   {option.label}

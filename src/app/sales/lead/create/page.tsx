@@ -2,7 +2,7 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Form from "@/components/FormElements/FormUni";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
@@ -57,6 +57,7 @@ export default function Page() {
 
   // Flag to track whether we're in edit mode
   const isEditMode = Boolean(searchParams.get("id"));
+  const hasInitialized = useRef(false);
 
   // Fetch pre-required data
   useEffect(() => {
@@ -127,83 +128,6 @@ export default function Page() {
     fetchPreData();
   }, [user]);
 
-  // Create option getter functions
-  const getPhoneCodeOptions = (): OptionItem[] => {
-    if (countries.length === 0) {
-      return [{ value: "", label: "Loading codes..." }];
-    }
-
-    // 1. Get all IDDs
-    const allIdds = countries
-      .map((country) => country.idd)
-      .filter((idd): idd is string => !!idd);
-
-    // 2. Filter for unique IDDs (e.g., Singapore, Malaysia, Philippines all have GMT+8 but different IDDs)
-    const uniqueIdds = Array.from(new Set(allIdds));
-
-    // 3. Map to OptionItem format
-    const options: OptionItem[] = uniqueIdds.map((idd) => ({
-      value: idd,
-      label: idd,
-    }));
-
-    // Optional: Sort them if you like
-    options.sort((a, b) => a.label.localeCompare(b.label));
-
-    // Optional: Add a default 'Select Code' option at the top
-    // options.unshift({ value: "", label: "Select Code" });
-
-    return options;
-  };
-
-  const getCountryOptions = () => {
-    if (countries.length === 0) {
-      return [{ value: "", label: "Loading countries..." }];
-    }
-
-    return countries.map((country) => ({
-      value: country.name,
-      label: country.name,
-    }));
-  };
-
-  const getStateOptions = () => {
-    if (!formData.country || countries.length === 0) {
-      return [{ value: "", label: "Select country first" }];
-    }
-
-    const country = countries.find((c) => c.name === formData.country);
-    if (!country) {
-      return [{ value: "", label: "No states found" }];
-    }
-
-    return country.states.map((state) => ({
-      value: state.name,
-      label: state.name,
-    }));
-  };
-
-  const getCityOptions = () => {
-    if (!formData.country || !formData.state || countries.length === 0) {
-      return [{ value: "", label: "Select state first" }];
-    }
-
-    const country = countries.find((c) => c.name === formData.country);
-    if (!country) {
-      return [{ value: "", label: "No cities found" }];
-    }
-
-    const state = country.states.find((s) => s.name === formData.state);
-    if (!state) {
-      return [{ value: "", label: "No cities found" }];
-    }
-
-    return state.cities.map((city) => ({
-      value: city,
-      label: city,
-    }));
-  };
-
   // Fetch lead data
   useEffect(() => {
     const id = searchParams.get("id");
@@ -239,283 +163,367 @@ export default function Page() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    // Run this logic only in edit mode when data and countries are available
-    if (isEditMode && data.length > 0 && countries.length > 0) {
-      const leadData = data[0];
-      const initialFormData = { ...leadData };
+  const column: Column[] = useMemo(() => {
+    // Option getter functions inside useMemo
+    const getPhoneCodeOptions = (): OptionItem[] => {
+      if (countries.length === 0) {
+        return [{ value: "", label: "Loading codes..." }];
+      }
+      const allIdds = countries
+        .map((country) => country.idd)
+        .filter((idd): idd is string => !!idd);
+      const uniqueIdds = Array.from(new Set(allIdds));
+      const options: OptionItem[] = uniqueIdds.map((idd) => ({
+        value: idd,
+        label: idd,
+      }));
+      options.sort((a, b) => a.label.localeCompare(b.label));
+      return options;
+    };
 
-      // Get all possible country codes and sort by length, longest first.Crucial to correctly match "+60" instead of just "+6".
+    const getCountryOptions = () => {
+      if (countries.length === 0) {
+        return [{ value: "", label: "Loading countries..." }];
+      }
+      return countries.map((country) => ({
+        value: country.name,
+        label: country.name,
+      }));
+    };
+
+    const getStateOptions = () => {
+      if (!formData.country || countries.length === 0) {
+        return [{ value: "", label: "Select country first" }];
+      }
+      const country = countries.find((c) => c.name === formData.country);
+      if (!country) {
+        return [{ value: "", label: "No states found" }];
+      }
+      return country.states.map((state) => ({
+        value: state.name,
+        label: state.name,
+      }));
+    };
+
+    const getCityOptions = () => {
+      if (!formData.country || !formData.state || countries.length === 0) {
+        return [{ value: "", label: "Select state first" }];
+      }
+      const country = countries.find((c) => c.name === formData.country);
+      if (!country) {
+        return [{ value: "", label: "No cities found" }];
+      }
+      const state = country.states.find((s) => s.name === formData.state);
+      if (!state) {
+        return [{ value: "", label: "No cities found" }];
+      }
+      return state.cities.map((city) => ({
+        value: city,
+        label: city,
+      }));
+    };
+
+    return [
+      {
+        title: "Source",
+        inputType: "select",
+        valueKey: "source",
+        required: true,
+        options: [
+          { value: "FB", label: "FB" },
+          { value: "TikTok", label: "TikTok" },
+          { value: "小红书", label: "小红书" },
+          { value: "Website", label: "Website" },
+          { value: "Walk-in", label: "Walk-in" },
+          { value: "Referral", label: "Referral" },
+          { value: "Dealer", label: "Dealer" },
+          { value: "Other", label: "Other" },
+        ],
+      },
+      {
+        title: "Name",
+        inputType: "text",
+        valueKey: "name",
+        required: true,
+      },
+      {
+        title: "Primary Phone",
+        inputType: "composite",
+        valueKey: "primary_phone_composite", // A unique key for the group
+        required: true,
+        subFields: [
+          {
+            title: "P. Code",
+            inputType: "select",
+            valueKey: "phone_idd",
+            defaultValue:
+              countries.find((c) => c.name === formData.country)?.idd || "+60",
+            options: getPhoneCodeOptions(),
+            required: true,
+            transform: (value: string, allValues: Record<string, any>) => {
+              // When IDD changes, update the combined 'phone1' field
+              const combinedPhone =
+                `${value}${allValues.phone_no || ""}`.replace(/^0+/, "");
+              return {
+                phone1: combinedPhone,
+              };
+            },
+            className: "flex-none w-28", // Sets a fixed width for the dropdown
+          },
+          {
+            title: "Primary Phone Number",
+            inputType: "text",
+            valueKey: "phone_no",
+            required: true,
+            transform: (value: string, allValues: Record<string, any>) => {
+              // When the local number changes, update the combined 'phone1' field
+              const combinedPhone =
+                `${allValues.phone_idd || ""}${value}`.replace(/^0+/, "");
+              return {
+                phone1: combinedPhone,
+              };
+            },
+            className: "flex-grow", // Allows the text input to fill remaining space
+          },
+        ],
+      },
+      {
+        title: "Secondary Phone",
+        inputType: "composite",
+        valueKey: "secondary_phone_composite", // A unique key for the group
+        subFields: [
+          {
+            title: "S. Code",
+            inputType: "select",
+            valueKey: "phone_idd2",
+            defaultValue:
+              countries.find((c) => c.name === formData.country)?.idd || "+60",
+            options: getPhoneCodeOptions(),
+            required: true,
+            transform: (value: string, allValues: Record<string, any>) => {
+              // When IDD changes, update the combined 'phone2' field
+              const combinedPhone2 =
+                `${value}${allValues.phone_no2 || ""}`.replace(/^0+/, "");
+              return {
+                phone2: combinedPhone2,
+              };
+            },
+            className: "flex-none w-28",
+          },
+          {
+            title: "Secondary Phone Number",
+            inputType: "text",
+            valueKey: "phone_no2",
+            transform: (value: string, allValues: Record<string, any>) => {
+              // When the local number changes, update the combined 'phone2' field
+              const combinedPhone2 =
+                `${allValues.phone_idd2 || ""}${value}`.replace(/^0+/, "");
+              return {
+                phone2: combinedPhone2,
+              };
+            },
+            className: "flex-grow",
+          },
+        ],
+      },
+      {
+        title: "Email",
+        inputType: "email",
+        valueKey: "email",
+      },
+      {
+        title: "NRIC",
+        inputType: "text",
+        valueKey: "nric",
+      },
+
+      {
+        title: "Address Line",
+        inputType: "text",
+        valueKey: "address_line1",
+      },
+      {
+        title: "Address Line 2",
+        inputType: "text",
+        valueKey: "address_line2",
+      },
+      {
+        title: "Postcode",
+        inputType: "text",
+        valueKey: "postcode",
+      },
+      {
+        title: "Country",
+        inputType: "select",
+        valueKey: "country",
+        // defaultValue: "Malaysia",
+        options: getCountryOptions(), // Use the country options function
+        required: true,
+      },
+      {
+        title: "State",
+        inputType: "select",
+        valueKey: "state",
+        options: getStateOptions(), // Use the state options function
+        required: true,
+      },
+      {
+        title: "City",
+        inputType: "select",
+        valueKey: "city",
+        options: getCityOptions(), // Use the city options function
+      },
+      {
+        title: "Insterested",
+        inputType: "select",
+        valueKey: "interested",
+        required: true,
+        options: [
+          { value: "Package", label: "Package" },
+          { value: "Non-package", label: "Non-package" },
+          { value: "Accessory", label: "Accessory" },
+          { value: "Other", label: "Other" },
+        ],
+      },
+      {
+        title: "Property Type",
+        inputType: "select",
+        valueKey: "property",
+        defaultValue: "High-Rise",
+        options: [
+          { value: "Landed", label: "Landed" },
+          { value: "High-Rise", label: "High-Rise" },
+        ],
+      },
+      {
+        title: "Gated Guarded",
+        inputType: "select",
+        valueKey: "guard",
+        defaultValue: "Guarded",
+        options: [
+          { value: "Guarded", label: "Guarded" },
+          { value: "No-Guard", label: "No-Guard" },
+        ],
+      },
+      {
+        title: "Additional Information",
+        inputType: "text",
+        valueKey: "add_info",
+      },
+      {
+        title: "Status",
+        inputType: "select",
+        valueKey: "status",
+        required: true,
+        defaultValue: "Not Assign",
+        options: [
+          { value: "Not Assign", label: "Not Assign" },
+          { value: "Assign PIC", label: "Assign PIC" },
+          { value: "Follow Up", label: "Follow UP" },
+          { value: "Visit Showroom", label: "Visit Showroom" },
+          { value: "Quotation", label: "Quotation" },
+          { value: "Payment", label: "Payment" },
+          { value: "Production", label: "Production" },
+          { value: "Installation", label: "Installation" },
+          { value: "Job Done", label: "Job Done" },
+          { value: "Over Budget", label: "Over Budget" },
+          { value: "Others Design", label: "Others Design" },
+          { value: "Drop Interest", label: "Drop Interest" },
+        ],
+      },
+      {
+        title: "Sales Representative",
+        inputType: "select",
+        valueKey: "sales_id",
+        defaultValue: "0", // Add this line to set default value
+        transform: (value: string, _allValues: Record<string, any>) => {
+          // When a valid sales representative is selected (not empty)
+          if (value && value !== "") {
+            // Return object to update status to "Follow Up"
+            return {
+              status: "Assign PIC",
+            };
+          }
+          return {}; // No changes if no rep selected
+        },
+        options: salesReps.map((rep) => ({
+          value: rep.id,
+          label: `${rep.uid} ${rep.name} (${rep.task_count || 0})`,
+        })) || [{ value: "", label: "Loading sales representatives..." }],
+      },
+    ];
+  }, [formData, countries, salesReps]);
+
+  //v1.4 gemini
+  useEffect(() => {
+    // This guard ensures the logic runs only once when all necessary data is ready.
+    if (
+      loading ||
+      hasInitialized.current ||
+      countries.length === 0 ||
+      salesReps.length === 0
+    ) {
+      return;
+    }
+    // For edit mode, we must wait for data to be loaded.
+    if (isEditMode && data.length === 0) {
+      return;
+    }
+
+    // Step 1: Establish the base data (either from a fetched record or an empty object)
+    const initialValues = isEditMode ? { ...data[0] } : {};
+
+    // Step 2: Apply default values from your column definitions to any fields that are empty.
+    // This is the key step that will put "+60" into the formData state.
+    const applyDefaults = (col: Column) => {
+      // Use `== null` to catch both undefined and null, but not an empty string ""
+      if (col.defaultValue && initialValues[col.valueKey] == null) {
+        initialValues[col.valueKey] = col.defaultValue;
+      }
+      col.subFields?.forEach(applyDefaults); // Recursively apply to sub-fields
+    };
+    column.forEach(applyDefaults);
+
+    // Step 3: Now, parse the phone numbers if they exist from the fetched data.
+    if (isEditMode) {
       const allIdds = countries
         .map((c) => c.idd)
-        .filter(Boolean) // Remove any empty/null IDDs
+        .filter(Boolean)
         .sort((a, b) => b.length - a.length);
 
-      // --- PARSING LOGIC FOR Primary Phone (phone1) ---
-      if (leadData.phone1) {
-        const foundIdd = allIdds.find((idd) => leadData.phone1.startsWith(idd));
-
+      if (initialValues.phone1) {
+        const foundIdd = allIdds.find((idd) =>
+          initialValues.phone1.startsWith(idd),
+        );
         if (foundIdd) {
-          initialFormData.phone_idd = foundIdd;
-          initialFormData.phone_no = leadData.phone1.substring(foundIdd.length);
+          initialValues.phone_idd = foundIdd;
+          initialValues.phone_no = initialValues.phone1.substring(
+            foundIdd.length,
+          );
         } else {
-          // Fallback if no matching country code is found
-          initialFormData.phone_no = leadData.phone1;
+          initialValues.phone_no = initialValues.phone1;
         }
       }
 
-      // --- PARSING LOGIC FOR Secondary Phone (phone2) ---
-      if (leadData.phone2) {
+      if (initialValues.phone2) {
         const foundIdd2 = allIdds.find((idd) =>
-          leadData.phone2.startsWith(idd),
+          initialValues.phone2.startsWith(idd),
         );
-
         if (foundIdd2) {
-          initialFormData.phone_idd2 = foundIdd2;
-          initialFormData.phone_no2 = leadData.phone2.substring(
+          initialValues.phone_idd2 = foundIdd2;
+          initialValues.phone_no2 = initialValues.phone2.substring(
             foundIdd2.length,
           );
         } else {
-          // Fallback
-          initialFormData.phone_no2 = leadData.phone2;
+          initialValues.phone_no2 = initialValues.phone2;
         }
       }
-
-      setFormData(initialFormData);
     }
-  }, [data, countries, isEditMode]); // This effect depends on these states
 
-  const column: Column[] = [
-    {
-      title: "Source",
-      inputType: "select",
-      valueKey: "source",
-      required: true,
-      options: [
-        { value: "FB", label: "FB" },
-        { value: "TikTok", label: "TikTok" },
-        { value: "小红书", label: "小红书" },
-        { value: "Website", label: "Website" },
-        { value: "Walk-in", label: "Walk-in" },
-        { value: "Referral", label: "Referral" },
-        { value: "Dealer", label: "Dealer" },
-        { value: "Other", label: "Other" },
-      ],
-    },
-    {
-      title: "Name",
-      inputType: "text",
-      valueKey: "name",
-      required: true,
-    },
-    {
-      title: "Primary Phone",
-      inputType: "composite",
-      valueKey: "primary_phone_composite", // A unique key for the group
-      required: true,
-      subFields: [
-        {
-          title: "P. Code",
-          inputType: "select",
-          valueKey: "phone_idd",
-          defaultValue:
-            countries.find((c) => c.name === formData.country)?.idd || "+60",
-          options: getPhoneCodeOptions(),
-          required: true,
-          transform: (value: string, allValues: Record<string, any>) => {
-            // When IDD changes, update the combined 'phone1' field
-            const combinedPhone = `${value}${allValues.phone_no || ""}`.replace(
-              /^0+/,
-              "",
-            );
-            return {
-              phone1: combinedPhone,
-            };
-          },
-          className: "flex-none w-28", // Sets a fixed width for the dropdown
-        },
-        {
-          title: "Primary Phone Number",
-          inputType: "text",
-          valueKey: "phone_no",
-          required: true,
-          transform: (value: string, allValues: Record<string, any>) => {
-            // When the local number changes, update the combined 'phone1' field
-            const combinedPhone =
-              `${allValues.phone_idd || ""}${value}`.replace(/^0+/, "");
-            return {
-              phone1: combinedPhone,
-            };
-          },
-          className: "flex-grow", // Allows the text input to fill remaining space
-        },
-      ],
-    },
-    {
-      title: "Secondary Phone",
-      inputType: "composite",
-      valueKey: "secondary_phone_composite", // A unique key for the group
-      subFields: [
-        {
-          title: "S. Code",
-          inputType: "select",
-          valueKey: "phone_idd2",
-          defaultValue:
-            countries.find((c) => c.name === formData.country)?.idd || "+60",
-          options: getPhoneCodeOptions(),
-          required: true,
-          transform: (value: string, allValues: Record<string, any>) => {
-            // When IDD changes, update the combined 'phone2' field
-            const combinedPhone2 =
-              `${value}${allValues.phone_no || ""}`.replace(/^0+/, "");
-            return {
-              phone2: combinedPhone2,
-            };
-          },
-          className: "flex-none w-28",
-        },
-        {
-          title: "Secondary Phone Number",
-          inputType: "text",
-          valueKey: "phone_no2",
-          transform: (value: string, allValues: Record<string, any>) => {
-            // When the local number changes, update the combined 'phone2' field
-            const combinedPhone2 =
-              `${allValues.phone_idd2 || ""}${value}`.replace(/^0+/, "");
-            return {
-              phone2: combinedPhone2,
-            };
-          },
-          className: "flex-grow",
-        },
-      ],
-    },
-    {
-      title: "Email",
-      inputType: "email",
-      valueKey: "email",
-    },
-    {
-      title: "NRIC",
-      inputType: "text",
-      valueKey: "nric",
-    },
-
-    {
-      title: "Address Line",
-      inputType: "text",
-      valueKey: "address_line1",
-    },
-    {
-      title: "Address Line 2",
-      inputType: "text",
-      valueKey: "address_line2",
-    },
-    {
-      title: "Postcode",
-      inputType: "text",
-      valueKey: "postcode",
-    },
-    {
-      title: "Country",
-      inputType: "select",
-      valueKey: "country",
-      // defaultValue: "Malaysia",
-      options: getCountryOptions(), // Use the country options function
-      required: true,
-    },
-    {
-      title: "State",
-      inputType: "select",
-      valueKey: "state",
-      options: getStateOptions(), // Use the state options function
-      required: true,
-    },
-    {
-      title: "City",
-      inputType: "select",
-      valueKey: "city",
-      options: getCityOptions(), // Use the city options function
-    },
-    {
-      title: "Insterested",
-      inputType: "select",
-      valueKey: "interested",
-      required: true,
-      options: [
-        { value: "Package", label: "Package" },
-        { value: "Non-package", label: "Non-package" },
-        { value: "Accessory", label: "Accessory" },
-        { value: "Other", label: "Other" },
-      ],
-    },
-    {
-      title: "Property Type",
-      inputType: "select",
-      valueKey: "property",
-      defaultValue: "High-Rise",
-      options: [
-        { value: "Landed", label: "Landed" },
-        { value: "High-Rise", label: "High-Rise" },
-      ],
-    },
-    {
-      title: "Gated Guarded",
-      inputType: "select",
-      valueKey: "guard",
-      defaultValue: "Guarded",
-      options: [
-        { value: "Guarded", label: "Guarded" },
-        { value: "No-Guard", label: "No-Guard" },
-      ],
-    },
-    {
-      title: "Additional Information",
-      inputType: "text",
-      valueKey: "add_info",
-    },
-    {
-      title: "Status",
-      inputType: "select",
-      valueKey: "status",
-      required: true,
-      defaultValue: "Not Assign",
-      options: [
-        { value: "Not Assign", label: "Not Assign" },
-        { value: "Assign PIC", label: "Assign PIC" },
-        { value: "Follow Up", label: "Follow UP" },
-        { value: "Visit Showroom", label: "Visit Showroom" },
-        { value: "Quotation", label: "Quotation" },
-        { value: "Payment", label: "Payment" },
-        { value: "Production", label: "Production" },
-        { value: "Installation", label: "Installation" },
-        { value: "Job Done", label: "Job Done" },
-        { value: "Over Budget", label: "Over Budget" },
-        { value: "Others Design", label: "Others Design" },
-        { value: "Drop Interest", label: "Drop Interest" },
-      ],
-    },
-    {
-      title: "Sales Representative",
-      inputType: "select",
-      valueKey: "sales_id",
-      defaultValue: "0", // Add this line to set default value
-      transform: (value: string, _allValues: Record<string, any>) => {
-        // When a valid sales representative is selected (not empty)
-        if (value && value !== "") {
-          // Return object to update status to "Follow Up"
-          return {
-            status: "Assign PIC",
-          };
-        }
-        return {}; // No changes if no rep selected
-      },
-      options: salesReps.map((rep) => ({
-        value: rep.id,
-        label: `${rep.uid} ${rep.name} (${rep.task_count || 0})`,
-      })) || [{ value: "", label: "Loading sales representatives..." }],
-    },
-  ];
+    // Step 4: Set the fully prepared state and mark initialization as complete.
+    setFormData(initialValues);
+    hasInitialized.current = true;
+  }, [isEditMode, data, countries, salesReps, loading, column]);
 
   return (
     <DefaultLayout>

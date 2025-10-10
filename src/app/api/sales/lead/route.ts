@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
         "c.interested",
         "c.add_info",
         "c.created_at",
+        "u.name",
       ];
 
       // Build search conditions
