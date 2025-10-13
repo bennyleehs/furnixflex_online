@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import AttendanceTracker from "@/components/Attendance/AttendanceTracker";
+import AttendanceList from "../Attendance/AttendanceList";
 
 interface DashboardStats {
   users: {
@@ -99,9 +100,9 @@ export default function Administration() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"> */}
         {/* Total Users */}
-        <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
+        {/* <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -140,10 +141,10 @@ export default function Administration() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Departments */}
-        <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
+        {/* <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -178,10 +179,10 @@ export default function Administration() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* System Logins */}
-        <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
+        {/* <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -216,10 +217,10 @@ export default function Administration() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Storage Usage */}
-        <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
+        {/* <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -277,20 +278,21 @@ export default function Administration() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
 
       {/* Attendance Tracker - for current user */}
-      <AttendanceTracker
+      {/* <AttendanceTracker
       // employeeId="current_user_id" // Replace with actual user ID from session
       // employeeName="Current User Name" // Replace with actual user name from session
-      />
+      /> */}
 
       {/* Main Content Grid */}
+      <AttendanceList/>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Activities */}
         <div className="lg:col-span-2">
-          <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
+          <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-lg border bg-white">
             <div className="border-stroke dark:border-strokedark border-b px-6 py-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Recent Activities
@@ -396,7 +398,7 @@ export default function Administration() {
 
         {/* Quick Actions */}
         <div className="lg:col-span-1">
-          <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-sm border bg-white">
+          <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default rounded-lg border bg-white">
             <div className="border-stroke dark:border-strokedark border-b px-6 py-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Quick Actions
@@ -405,7 +407,7 @@ export default function Administration() {
             <div className="p-6">
               <div className="space-y-3">
                 <Link
-                  href="/admin/users/new"
+                  href="/admin/employee?action=new"
                   className="block w-full rounded-lg bg-blue-50 px-4 py-3 text-left transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
                 >
                   <div className="flex items-center">
@@ -423,7 +425,7 @@ export default function Administration() {
                       />
                     </svg>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      Add New User
+                      New Employee
                     </span>
                   </div>
                 </Link>
@@ -500,7 +502,7 @@ export default function Administration() {
                   </div>
                 </Link>
 
-                <Link
+                {/* <Link
                   href="/admin/backup"
                   className="block w-full rounded-lg bg-red-50 px-4 py-3 text-left transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40"
                 >
@@ -522,13 +524,13 @@ export default function Administration() {
                       Backup & Restore
                     </span>
                   </div>
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
 
           {/* System Status */}
-          <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default mt-6 rounded-sm border bg-white">
+          {/* <div className="dark:bg-boxdark border-stroke dark:border-strokedark shadow-default mt-6 rounded-sm border bg-white">
             <div className="border-stroke dark:border-strokedark border-b px-6 py-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 System Status
@@ -570,7 +572,7 @@ export default function Administration() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

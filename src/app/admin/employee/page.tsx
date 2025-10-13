@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const MENU = "1";
 const SUBMENU = "4";
@@ -42,6 +42,9 @@ interface Employee {
 
 export default function EmployeePage() {
   const router = useRouter();
+  // Call useSearchParams to read the URL
+  const searchParams = useSearchParams();
+  const initialAction = searchParams.get("action");
 
   // Data states
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -51,7 +54,12 @@ export default function EmployeePage() {
   const hasFetchedData = useRef(false);
 
   // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  //v1.2 gemini
+  // Modal states - INITIALIZE using the URL parameter
+  const [isModalOpen, setIsModalOpen] = useState(
+    initialAction === "new" ? true : false,
+  );
 
   // Form state
   const [formData, setFormData] = useState({
@@ -539,6 +547,37 @@ export default function EmployeePage() {
     setDepartmentFilter("");
     setStatusFilter("");
   };
+
+  //v1.1 gemini
+  // New useEffect to handle form initialization when opening via URL query
+  useEffect(() => {
+    // We only care about the URL action on initial mount
+    if (initialAction === "new") {
+      // This logic mimics what openCreateModal does, ensuring a clean slate
+      setFormData({
+        uid: "",
+        name: "",
+        nric: "",
+        phone: "",
+        email: "",
+        address_line1: "",
+        address_line2: "",
+        city: "",
+        state: "",
+        country: "",
+        bank_name: "",
+        bank_account: "",
+        branchRef: "",
+        branch: "",
+        department: "",
+        role: "",
+        status: "",
+      });
+      setCurrentEmployee(null);
+      setIsEditMode(false);
+      // Note: isModalOpen is already true due to initialization
+    }
+  }, [initialAction]); // Only run this once on mount based on the initial URL
 
   // Apply filters whenever they change
   useEffect(() => {
