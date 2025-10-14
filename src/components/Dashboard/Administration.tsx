@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AttendanceTracker from "@/components/Attendance/AttendanceTracker";
 import AttendanceList from "../Attendance/AttendanceList";
 
 interface DashboardStats {

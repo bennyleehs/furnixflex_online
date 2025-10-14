@@ -24,7 +24,7 @@ interface TableProps {
   modalTitle?: string;
   modalColumns?: {
     key: string;
-    title: string;
+    title?: string;
     group?: string;
     format?: (value: any, row?: any) => React.ReactNode;
   }[];
