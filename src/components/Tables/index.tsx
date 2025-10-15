@@ -271,7 +271,7 @@ export default function Tables({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="bg-primary flex items-center rounded-sm py-1 pr-2 text-white hover:opacity-80 disabled:opacity-50"
+            className="bg-primary flex cursor-pointer items-center rounded-sm py-1 pr-2 text-white hover:opacity-80 disabled:opacity-50"
           >
             <svg
               className="h-5 w-5 text-white"
@@ -296,7 +296,7 @@ export default function Tables({
               key={`${page}-${index}`}
               onClick={() => typeof page === "number" && onPageChange(page)}
               disabled={page === "..."}
-              className={`rounded px-3 py-1 ${
+              className={`cursor-pointer rounded px-3 py-1 ${
                 currentPage === page
                   ? "bg-primary text-white"
                   : typeof page === "string"
@@ -311,7 +311,7 @@ export default function Tables({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="bg-primary flex items-center rounded-sm py-1 pl-2 text-white hover:opacity-80 disabled:opacity-50"
+            className="bg-primary flex cursor-pointer items-center rounded-sm py-1 pl-2 text-white hover:opacity-80 disabled:opacity-50"
           >
             Next
             <svg
@@ -506,7 +506,7 @@ export default function Tables({
                         )}
                         {/* Info Button (always visible, or controlled by its own permission if desired) */}
                         <button
-                          className="hover:text-primary"
+                          className="hover:text-primary cursor-pointer"
                           title="Info"
                           onClick={() => handleInfoClick(row)}
                           disabled={isLoadingInfo}
@@ -544,14 +544,19 @@ export default function Tables({
 
       {/* Modal for Info */}
       {isInfoModalOpen && infoData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
           <div className="dark:bg-boxdark relative mt-20 w-full max-w-4xl rounded-lg bg-white shadow-lg">
             {/* Modal Header */}
             <div className="dark:border-strokedark dark:bg-boxdark sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-white p-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                 {modalTitle} Details
               </h3>
-              <button onClick={() => setIsInfoModalOpen(false)}>×</button>
+              <button
+                onClick={() => setIsInfoModalOpen(false)}
+                className="text-primary cursor-pointer text-2xl"
+              >
+                ×
+              </button>
             </div>
 
             {/* Modal Body */}
@@ -594,9 +599,9 @@ export default function Tables({
             <div className="dark:border-strokedark dark:bg-boxdark sticky bottom-0 rounded-b-lg border-t bg-white p-4">
               <button
                 onClick={() => setIsInfoModalOpen(false)}
-                className="dark:border-strokedark dark:hover:bg-meta-4 w-full rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:text-white"
+                className="bg-primary hover:bg-primarydark dark:border-strokedark w-full cursor-pointer rounded-md px-4 py-2 font-medium text-white"
               >
-                Close
+                CLOSE
               </button>
             </div>
           </div>

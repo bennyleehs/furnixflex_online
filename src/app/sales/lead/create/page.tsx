@@ -245,6 +245,7 @@ export default function Page() {
         inputType: "text",
         valueKey: "name",
         required: true,
+        forceUppercase: true,
       },
       {
         title: "Primary Phone",

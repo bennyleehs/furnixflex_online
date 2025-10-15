@@ -27,6 +27,7 @@ interface Column {
   // ---- ADD THESE TWO LINES ----
   className?: string; // For custom styling
   subFields?: Column[]; // For composite fields
+  forceUppercase?: boolean;
 }
 
 interface Props<T> {
@@ -99,13 +100,12 @@ const FormUni = <T extends Record<string, any>>({
       }
 
       const result = await response.json();
-      
+
       const message = result.exists
         ? `This number belongs to: ${result.customer.name} (ID: ${result.customer.id})`
         : null;
 
       setPhoneValidation((prev) => ({ ...prev, [fieldKey]: message }));
-
     } catch (error) {
       console.error("Error validating phone number:", error);
       setPhoneValidation((prev) => ({
@@ -115,7 +115,7 @@ const FormUni = <T extends Record<string, any>>({
     }
   };
 
-// handleChange checks for both phone1 and phone2
+  // handleChange checks for both phone1 and phone2
   const handleChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
   ) => {
@@ -136,9 +136,20 @@ const FormUni = <T extends Record<string, any>>({
       }
     }
 
+    // --- 2. Check for Uppercase Requirement (THE NEW LOGIC) ---
+    let newValue = value;
+    // Only attempt to uppercase if we found a column definition AND it's explicitly marked.
+    // We also check e.target instanceof HTMLInputElement to avoid uppercasing select/dropdowns.
+    if (
+      columnDefinition?.forceUppercase &&
+      e.target instanceof HTMLInputElement
+    ) {
+      newValue = value.toUpperCase();
+    }
+
     if (columnDefinition?.transform) {
       const transformedValues = columnDefinition.transform(
-        value,
+        newValue,
         formData || {},
         columnDefinition.options,
       );
@@ -147,7 +158,7 @@ const FormUni = <T extends Record<string, any>>({
       if (transformedValues.phone1) {
         checkPhoneNumber(transformedValues.phone1, "phone1");
       }
-      
+
       // Trigger validation for Secondary Phone if it was updated
       if (transformedValues.phone2) {
         checkPhoneNumber(transformedValues.phone2, "phone2");
@@ -156,12 +167,12 @@ const FormUni = <T extends Record<string, any>>({
       setFormData((prevData) => ({
         ...prevData,
         ...transformedValues,
-        [name]: value,
+        [name]: newValue,
       }));
     } else {
       setFormData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]: newValue,
       }));
     }
   };
@@ -201,9 +212,12 @@ const FormUni = <T extends Record<string, any>>({
       );
       return;
     }
-    
+
     // Check both phone fields for validation issues before submitting
-    if ((phoneValidation.phone1 || phoneValidation.phone2) && data.length === 0) {
+    if (
+      (phoneValidation.phone1 || phoneValidation.phone2) &&
+      data.length === 0
+    ) {
       const confirmSubmit = window.confirm(
         "A record with one of these phone numbers may already exist. Do you want to continue?",
       );
@@ -275,11 +289,11 @@ const FormUni = <T extends Record<string, any>>({
               );
             }
             //validation phone no
-            let validationMessageKey: 'phone1' | 'phone2' | null = null;
-            if (column.valueKey === 'primary_phone_composite') {
-              validationMessageKey = 'phone1';
-            } else if (column.valueKey === 'secondary_phone_composite') {
-              validationMessageKey = 'phone2';
+            let validationMessageKey: "phone1" | "phone2" | null = null;
+            if (column.valueKey === "primary_phone_composite") {
+              validationMessageKey = "phone1";
+            } else if (column.valueKey === "secondary_phone_composite") {
+              validationMessageKey = "phone2";
             }
 
             return (
@@ -316,7 +330,9 @@ const FormUni = <T extends Record<string, any>>({
                               required={subField.required}
                               className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white"
                             >
-                              <option value="" disabled>Select an option</option>
+                              <option value="" disabled>
+                                Select an option
+                              </option>
                               {subField.options?.map((option, idx) => (
                                 <option key={idx} value={option.value}>
                                   {option.label}
@@ -359,7 +375,7 @@ const FormUni = <T extends Record<string, any>>({
                       </option>
                     ))}
                   </select>
-                )  : (
+                ) : (
                   <input
                     type={column.inputType || "text"}
                     id={column.valueKey}
@@ -368,7 +384,7 @@ const FormUni = <T extends Record<string, any>>({
                     onChange={handleChange}
                     readOnly={column.readOnly}
                     required={column.required}
-                    className={`border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white ${
+                    className={`border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded border-[1.5px] bg-transparent px-5 py-3 font-medium outline-hidden transition disabled:cursor-default dark:text-white uppercase${
                       column.readOnly
                         ? "dark:bg-form-input cursor-not-allowed bg-gray-100 opacity-70"
                         : ""
@@ -377,11 +393,12 @@ const FormUni = <T extends Record<string, any>>({
                 )}
 
                 {/* Display validation message for the correct field */}
-                {validationMessageKey && phoneValidation[validationMessageKey] && (
-                  <p className="text-meta-1 mt-2 text-sm">
-                    {phoneValidation[validationMessageKey]}
-                  </p>
-                )}
+                {validationMessageKey &&
+                  phoneValidation[validationMessageKey] && (
+                    <p className="text-meta-1 mt-2 text-sm">
+                      {phoneValidation[validationMessageKey]}
+                    </p>
+                  )}
               </div>
             );
           })}

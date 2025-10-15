@@ -13,7 +13,7 @@ const SUBMENU = "2";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
 export default function LeadPage() {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const [dataLead, setDataLead] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,11 +36,13 @@ export default function LeadPage() {
     // Otherwise, filter by their own UID.
     // const userRole = user?.role.toLowerCase() || "";
     const userRole = user?.role || "";
-    const isSalesPerson = !["Supervisor", "Assistant Manager"].includes(userRole); // Adjust roles as needed
-    
+    const isSalesPerson = !["Supervisor", "Assistant Manager"].includes(
+      userRole,
+    ); // Adjust roles as needed
+
     // Use the logged-in user's UID for filtering if they are a sales person
-    const filterSalesUid = isSalesPerson ? user?.uid : null; 
-    
+    const filterSalesUid = isSalesPerson ? user?.uid : null;
+
     const salesUidParam = filterSalesUid
       ? `&salesUid=${encodeURIComponent(filterSalesUid)}`
       : ""; // <--- New salesUid parameter
@@ -73,7 +75,11 @@ export default function LeadPage() {
             "Not Provided",
           pic: item.sales_name || "Not Assigned",
           created_at: item.created_at
-            ? new Date(item.created_at).toLocaleDateString()
+            ? new Date(item.created_at).toLocaleDateString("en-GB", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })
             : "N/A",
         }),
       );
@@ -93,7 +99,7 @@ export default function LeadPage() {
     selectedStatus,
     searchQuery,
     capitalizedTitle,
-    user
+    user,
   ]);
 
   useEffect(() => {
@@ -145,7 +151,12 @@ export default function LeadPage() {
       group: "Basic Information",
       title: "Created Date",
       // format: (value: Date) => value ? new Date(value).toLocaleDateString() : 'N/A'
-      format: (value: Date) => new Date(value).toLocaleDateString(),
+      format: (value: Date) =>
+        new Date(value).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
     },
     { key: "phone1", group: "Contact Details", title: "Phone 1" },
     {
