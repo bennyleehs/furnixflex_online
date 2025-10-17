@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Link from "next/link";
-import { Quotation, PaymentRecord } from '@/types/sales-quotation';
+import { Quotation, PaymentRecord } from "@/types/sales-quotation";
 
 export default function QuotationListPage() {
   const router = useRouter();
@@ -34,7 +34,9 @@ export default function QuotationListPage() {
 
   // PDF modal states
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-  const [pdfFiles, setPdfFiles] = useState<{name: string; lastModified: string}[]>([]);
+  const [pdfFiles, setPdfFiles] = useState<
+    { name: string; lastModified: string }[]
+  >([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Fetch quotations with filters
@@ -163,20 +165,23 @@ export default function QuotationListPage() {
       }
 
       const data = await response.json();
-      
+
       // Get the task_id from the quotation data
       const taskId = data.quotation.task_id;
-      
+
       if (!taskId) {
         alert("This quotation doesn't have an associated task.");
         return;
       }
-      
+
       // Redirect to the quotation editor with the task ID
       router.push(`/sales/quotation/auto?taskId=${taskId}`);
     } catch (error) {
       console.error("Error fetching quotation:", error);
-      alert("Failed to load quotation: " + (error instanceof Error ? error.message : "Unknown error"));
+      alert(
+        "Failed to load quotation: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      );
     } finally {
       setIsLoadingQuotation(false);
     }
@@ -192,10 +197,9 @@ export default function QuotationListPage() {
         `/api/sales/quotation?id=${editingQuotation?.id}`,
         {
           method: "PUT",
-          headers:
-            {
-              "Content-Type": "application/json",
-            },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(formData),
         },
       );
@@ -227,22 +231,27 @@ export default function QuotationListPage() {
 
     try {
       // Fetch list of PDFs for this task
-      const response = await fetch(`/api/sales/quotation/files?taskId=${taskId}`);
-      
+      const response = await fetch(
+        `/api/sales/quotation/files?taskId=${taskId}`,
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch PDFs");
       }
-      
+
       const data = await response.json();
-      
+
       if (!data.files || data.files.length === 0) {
         alert("No PDFs found for this quotation. You can generate a new one.");
         return;
       }
-      
+
       if (data.files.length === 1) {
         // If only one PDF, open it directly
-        window.open(`/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`, '_blank');
+        window.open(
+          `/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`,
+          "_blank",
+        );
       } else {
         // If multiple PDFs, open modal for selection
         setPdfFiles(data.files);
@@ -251,36 +260,39 @@ export default function QuotationListPage() {
       }
     } catch (error) {
       console.error("Error fetching PDFs:", error);
-      alert("Error fetching PDFs: " + (error instanceof Error ? error.message : "Unknown error"));
+      alert(
+        "Error fetching PDFs: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      );
     }
   };
 
   // Update task db (customers) status
-    async function updateDBTaskStatus(taskId: string, status: string) {
-      try {
-        const response = await fetch("/api/sales/task", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: taskId,
-            status: status,
-          }),
-        });
+  async function updateDBTaskStatus(taskId: string, status: string) {
+    try {
+      const response = await fetch("/api/sales/task", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: taskId,
+          status: status,
+        }),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to update status");
-        }
-
-        const result = await response.json();
-        return result;
-      } catch (error) {
-        console.error("Error updating status:", error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update status");
       }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error updating status:", error);
+      throw error;
     }
+  }
 
   // Function to handle status update
   const handleStatusUpdate = async (taskId: string, status: string) => {
@@ -288,7 +300,7 @@ export default function QuotationListPage() {
       alert("No task ID associated with this quotation");
       return;
     }
-    
+
     try {
       // For other statuses, proceed as before
       const response = await fetch(`/api/sales/quotation?taskId=${taskId}`, {
@@ -301,7 +313,7 @@ export default function QuotationListPage() {
 
       if (status === "payment") {
         // Find the quotation to get its ID
-        const quotation = quotations.find(q => q.task_id === taskId);
+        const quotation = quotations.find((q) => q.task_id === taskId);
         if (!quotation) {
           throw new Error("Quotation not found");
         }
@@ -309,25 +321,27 @@ export default function QuotationListPage() {
 
         // Update task log status
         const formData = new FormData();
-        formData.append('id', taskId);
-        formData.append('status', 'Payment');
-        formData.append('oldStatus', 'Quotation');
-        formData.append('notes', 'Quotation Accepted');
-        formData.append('userName', 'Current User'); // Replace with actual username
+        formData.append("id", taskId);
+        formData.append("status", "Payment");
+        formData.append("oldStatus", "Quotation");
+        formData.append("notes", "Quotation Accepted");
+        formData.append("userName", "Current User"); // Replace with actual username
 
         await fetch(`/api/sales/task/update`, {
           method: "POST",
-          body: formData
+          body: formData,
         });
-        
+
         // Navigate to auto payment page instead of updating status directly
-        router.push(`/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${taskId}`);
+        router.push(
+          `/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${taskId}`,
+        );
         return;
-      }else if (status === "draft") {
+      } else if (status === "draft") {
         // Update task db (customers) status
         await updateDBTaskStatus(taskId, "Quotation");
       }
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update status");
@@ -337,14 +351,17 @@ export default function QuotationListPage() {
       fetchQuotations();
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update status: " + (error instanceof Error ? error.message : "Unknown error"));
+      alert(
+        "Failed to update status: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      );
     }
   };
 
   return (
     <DefaultLayout>
-      <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
-        {/* <Breadcrumb pageName="Quotations" noHeader={true}/> */}
+      {/* <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
+        <Breadcrumb pageName="Quotations" noHeader={true}/>
         <Breadcrumb pageName="Quotations" />
 
         <div className="mt-4 md:mt-0">
@@ -368,7 +385,8 @@ export default function QuotationListPage() {
             Create New Quotation
           </Link>
         </div>
-      </div>
+      </div> */}
+      <Breadcrumb pageName="Quotations" />
 
       {/* Search and Filters */}
       <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-xs border bg-white p-5">
@@ -570,7 +588,7 @@ export default function QuotationListPage() {
                           title="Edit quotation"
                         >
                           <svg
-                            className="fill-current h-5 w-5"
+                            className="h-5 w-5 fill-current"
                             viewBox="0 0 576 512"
                           >
                             <path
@@ -585,7 +603,7 @@ export default function QuotationListPage() {
                           title="View PDF"
                         >
                           <svg
-                          className="h-5 w-5"
+                            className="h-5 w-5"
                             fill="currentColor"
                             viewBox="0 0 512 512"
                           >
@@ -593,7 +611,9 @@ export default function QuotationListPage() {
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleStatusUpdate(quotation.task_id, "payment")}
+                          onClick={() =>
+                            handleStatusUpdate(quotation.task_id, "payment")
+                          }
                           className={`text-success hover:text-success/80 ${quotation.status === "payment" ? "hidden" : ""}`}
                           title="Track Payments"
                         >
@@ -612,7 +632,9 @@ export default function QuotationListPage() {
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleStatusUpdate(quotation.task_id, "draft")}
+                          onClick={() =>
+                            handleStatusUpdate(quotation.task_id, "draft")
+                          }
                           className={`text-danger hover:text-danger/80 ${quotation.status === "history" ? "hidden" : ""}`}
                           title="Mark as Rejected"
                         >
@@ -711,9 +733,9 @@ export default function QuotationListPage() {
 
       {/* Edit Quotation Modal */}
       {isEditModalOpen && editingQuotation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-          <div className="w-full max-w-4xl bg-white dark:bg-boxdark rounded-sm shadow-lg p-6 mx-4">
-            <div className="flex justify-between items-center mb-6">
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black">
+          <div className="dark:bg-boxdark mx-4 w-full max-w-4xl rounded-sm bg-white p-6 shadow-lg">
+            <div className="mb-6 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Edit Quotation #{editingQuotation.quotation_number}
               </h3>
@@ -722,7 +744,7 @@ export default function QuotationListPage() {
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -738,7 +760,7 @@ export default function QuotationListPage() {
             </div>
 
             {updateError && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700">
                 {updateError}
               </div>
             )}
@@ -748,7 +770,7 @@ export default function QuotationListPage() {
               {/* Option 1: iframe approach */}
               <iframe
                 src={`/sales/quotation/auto?id=${editingQuotation.id}&modal=true`}
-                className="w-full h-[calc(100vh-200px)] border-none"
+                className="h-[calc(100vh-200px)] w-full border-none"
               />
 
               {/* Option 2: Direct form implementation 
@@ -761,23 +783,23 @@ export default function QuotationListPage() {
         */}
             </div>
 
-            <div className="flex justify-end mt-6 space-x-3">
+            <div className="mt-6 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-meta-4 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-meta-3"
+                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 form="editQuotationForm" // Match this to your form's id if using Option 2
-                className="px-4 py-2 bg-primary rounded-md text-white hover:bg-primary/90"
+                className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white"
                 disabled={isLoadingQuotation}
               >
                 {isLoadingQuotation ? (
                   <>
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></span>
+                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
                     Saving...
                   </>
                 ) : (
@@ -791,9 +813,9 @@ export default function QuotationListPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-       <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/50">
           <div className="dark:bg-boxdark mx-4 w-full max-w-md rounded-sm bg-white p-6 shadow-lg">
-            <div className="flex justify-between items-center mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Select PDF
               </h3>
@@ -802,7 +824,7 @@ export default function QuotationListPage() {
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -816,22 +838,25 @@ export default function QuotationListPage() {
                 </svg>
               </button>
             </div>
-            
+
             <div className="max-h-96 overflow-y-auto">
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {pdfFiles.map((file, index) => (
                   <li key={index} className="py-2">
                     <button
                       onClick={() => {
-                        window.open(`/api/sales/quotation/view-pdf?filePath=/sales/${selectedTaskId}/quotation/${file.name}`, '_blank');
+                        window.open(
+                          `/api/sales/quotation/view-pdf?filePath=/sales/${selectedTaskId}/quotation/${file.name}`,
+                          "_blank",
+                        );
                         setIsPdfModalOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-meta-4 rounded"
+                      className="dark:hover:bg-meta-4 flex w-full items-center rounded px-2 py-2 text-left hover:bg-gray-100"
                     >
-                      <svg 
-                        className="h-5 w-5 mr-2 text-warning" 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className="text-warning mr-2 h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -849,7 +874,9 @@ export default function QuotationListPage() {
                       </svg>
                       <div>
                         <span className="block font-medium">
-                          {file.name.length > 30 ? `${file.name.substring(0, 27)}...` : file.name}
+                          {file.name.length > 30
+                            ? `${file.name.substring(0, 27)}...`
+                            : file.name}
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(file.lastModified).toLocaleString()}
@@ -860,11 +887,11 @@ export default function QuotationListPage() {
                 ))}
               </ul>
             </div>
-            
-            <div className="flex justify-end mt-4">
+
+            <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setIsPdfModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-meta-4 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-meta-3"
+                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
               >
                 Cancel
               </button>

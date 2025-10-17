@@ -584,12 +584,46 @@ async function generateQuotationPDF(
       { align: "right" },
     );
     doc.text(item.unit, colPositions[3] + 9, yPos + 4);
-    doc.text(formattedUnitPrice, colPositions[4] + colWidths[4] + 4, yPos + 4, {
+    // === START MODIFICATION HERE ===
+    let priceDisplay: string;
+    let totalDisplay: string;
+
+    if (item.category === "SALES DISCOUNT") {
+      // For a discount item, display the total amount in the 'Unit Price' column
+      // and display the total amount (which is the actual discount) in the 'Total' column as well.
+      // This will visually place the discount value clearly.
+      // We will ensure the discount total is displayed with the appropriate sign (negative or positive).
+      const discountAmount = parseFloat(item.total);
+      
+      // Use toLocaleString for number formatting (e.g., 3,000.00)
+      const formattedDiscount = discountAmount.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+      });
+
+      // Unit Price column will show the amount
+      // The negative sign is part of the `item.total` value, so we'll prepend '-' if needed.
+      priceDisplay = discountAmount < 0 ? `-RM${formattedDiscount.substring(1)}` : `RM${formattedDiscount}`;
+      
+      // Total column will show the same amount, as it's a line item total.
+      totalDisplay = priceDisplay;
+
+    } else {
+      // For all other items, use the regular unit price and total price.
+      priceDisplay = formattedUnitPrice;
+      totalDisplay = formattedTotal;
+    }
+
+    // Draw Unit Price (or Discount Total)
+    doc.text(priceDisplay, colPositions[4] + colWidths[4] + 4, yPos + 4, {
       align: "right",
     });
-    doc.text(formattedTotal, colPositions[5] + colWidths[5] + 10, yPos + 4, {
+
+    // Draw Total
+    doc.text(totalDisplay, colPositions[5] + colWidths[5] + 10, yPos + 4, {
       align: "right",
     });
+    // === END MODIFICATION HERE ===
 
     yPos += rowHeight;
   });
@@ -599,6 +633,12 @@ async function generateQuotationPDF(
 
   // Calculate the potential height of the Summary section
   let summaryHeight = 5; // Initial height for Subtotal line
+  const rawPkgPriceItem = data.quotation.items.filter(
+    (item: any) => item.category === "Packages",
+  );
+  const rawAddOnPriceItem = data.quotation.items.filter(
+    (item: any) => item.category === "Additional Items",
+  );
   const pkgDisc = data.quotation.items.find(
     (item: any) =>
       item.category === "Discount" && item.subcategory === "Packages",
@@ -657,7 +697,7 @@ async function generateQuotationPDF(
   const summaryX = pageWidth - margin - 60;
   const summaryWidth = 60;
   let summaryY = sectionStartY;
-  
+
   // Draw summary box with totals
   doc.setFontSize(9);
   // Subtotal
@@ -674,48 +714,122 @@ async function generateQuotationPDF(
   });
   summaryY += 5;
   // Package Discounts
+
+  // -- Sum of package total discount | raw package price - package discounted = package total discount --
+  let pkgTotalDiscountAmount = 0; // This will store the final difference (RM17998 - RM14398.40)
+  let pkgDiscountRate = 0;
+
+  //for package - package discount
   if (pkgDisc) {
-    doc.setFont("helvetica", "bold");
-    doc.text("Packages:", summaryX, summaryY);
-    // Format the total with two decimal places
-    const formattedPkgDiscount = parseFloat(pkgDisc.total).toFixed(2);
-    // reset font style
-    doc.setFont("helvetica", "normal");
-    if (formattedPkgDiscount.startsWith("-")) {
-      // If it's negative, add "RM" after the negative sign
-      doc.text(
-        `-RM${formattedPkgDiscount.substring(1)}`,
-        summaryX + summaryWidth,
-        summaryY,
-        {
-          align: "right",
-        },
-      );
-    } else {
-      doc.text(`RM${formattedPkgDiscount}`, summaryX + summaryWidth, summaryY, {
-        align: "right",
-      });
-    }
-    summaryY += 5;
+    // If a discount item is found, extract the rate
+    pkgDiscountRate = parseFloat(pkgDisc.discount) / 100; // e.g., 20% becomes 0.20
   }
 
-  // Add on Item Discounts
-  if (addItemDisc) {
+  // loop all found package items > calculate total discount
+  //for package - package discount
+  if (rawPkgPriceItem.length > 0) {
+    rawPkgPriceItem.forEach((item: any) => {
+      const originalPrice = parseFloat(item.total);
+
+      // Calculate the discount for this individual package
+      const individualDiscount = originalPrice * pkgDiscountRate;
+      // Add the individual discount to the total discount amount
+      pkgTotalDiscountAmount += individualDiscount;
+    });
+  }
+
+  // Check if any package items were found and a discount was applied
+  if (rawPkgPriceItem.length > 0 && pkgDisc) {
+    // --- Display Total Discount Amount ("Packages:") ---
     doc.setFont("helvetica", "bold");
-    doc.text("Additional Items:", summaryX, summaryY);
-    const formattedAddItemDiscount = parseInt(
-      parseFloat(addItemDisc.discount).toFixed(0),
+    doc.text("Packages:", summaryX, summaryY);
+
+    // Format the calculated total discount (e.g., 3,599.60)
+    const formattedTotalDiscount = pkgTotalDiscountAmount.toLocaleString(
+      "en-US",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
     );
-    // reset font style
+
+    // Display the total discount amount with a negative sign and RM
     doc.setFont("helvetica", "normal");
     doc.text(
-      "-" + formattedAddItemDiscount.toString() + "%",
+      `-RM${formattedTotalDiscount}`,
       summaryX + summaryWidth,
       summaryY,
       {
         align: "right",
       },
     );
+    summaryY += 5;
+  } else if (rawPkgPriceItem.length > 0) {
+    // If packages exist but no discount item is found, show RM0.00 discount
+    doc.setFont("helvetica", "bold");
+    doc.text("Packages:", summaryX, summaryY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`RM0.00`, summaryX + summaryWidth, summaryY, {
+      align: "right",
+    });
+    summaryY += 5;
+  }
+
+  // -- Sum of add item total discount | raw add item price - add item discounted = add item total discount --
+  let addItemTotalDiscountAmount = 0;
+  let addItemDiscountRate = 0;
+
+  //for add item - add item discount
+  if (addItemDisc) {
+    // If a discount item is found, extract the rate
+    addItemDiscountRate = parseFloat(addItemDisc.discount) / 100;
+  }
+
+  // loop all found add item items > calculate total discount
+  if (rawAddOnPriceItem.length > 0) {
+    rawAddOnPriceItem.forEach((item: any) => {
+      const originalPrice = parseFloat(item.total);
+
+      // Calculate the discount for this individual add item
+      const individualDiscount = originalPrice * addItemDiscountRate;
+      // Add the individual discount to the total discount amount
+      addItemTotalDiscountAmount += individualDiscount;
+    });
+  }
+
+  //for add item - add item discount
+  if (rawAddOnPriceItem.length > 0 && addItemDisc) {
+    // --- Display Total Discount Amount ("Additional Items:") ---
+    doc.setFont("helvetica", "bold");
+    doc.text("Additional Items:", summaryX, summaryY);
+
+    const formattedTotalDiscount = addItemTotalDiscountAmount.toLocaleString(
+      "en-US",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    );
+
+    // Display the total discount amount with a negative sign and RM
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `-RM${formattedTotalDiscount}`,
+      summaryX + summaryWidth,
+      summaryY,
+      {
+        align: "right",
+      },
+    );
+    summaryY += 5;
+  } else if (rawAddOnPriceItem.length > 0) {
+    // If Additional Items exist but no discount item is found, show RM0.00 discount
+    doc.setFont("helvetica", "bold");
+    doc.text("Additional Items:", summaryX, summaryY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`RM0.00`, summaryX + summaryWidth, summaryY, {
+      align: "right",
+    });
     summaryY += 5;
   }
 
