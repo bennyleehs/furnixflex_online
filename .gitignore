@@ -28,12 +28,14 @@ yarn-error.log*
 # local env files
 .env*.local
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
 package-lock.json
+bun.lock
 yarn.lock
+
+# Ignore the some of folder in the public directory
+public/admin/
+public/sales/
