@@ -3,6 +3,12 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { getPermissionsForRole } from "@/utils/accessControlUtils";
+import { AuthToken, VerifiedToken } from "@/types/auth"; //  For guard function & refresh token
+
+// Define the Type Guard function
+function isAuthToken(token: VerifiedToken): token is AuthToken {
+  return !!token && typeof (token as AuthToken).roleName === "string";
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,6 +27,17 @@ export async function POST(req: NextRequest) {
 
     if (!tokenData || "expired" in tokenData) {
       return NextResponse.json({ hasPermission: false }, { status: 401 });
+    }
+
+    if (!isAuthToken(tokenData)) {
+      // If it's a RefreshToken or any other invalid type, reject access.
+      return NextResponse.json(
+        {
+          hasPermission: false,
+          error: "Invalid token type for permission check",
+        },
+        { status: 401 },
+      );
     }
 
     // Check if the user has this specific permission
