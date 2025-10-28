@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
   res.cookies.set("authToken", newAuthToken, {
     httpOnly: true,
     maxAge: 60 * 60 * 1, // 1 hour
+    // maxAge: 20, // 20 sec for testing
     path: "/",
     sameSite: "lax",
     // secure: true,

@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
   cookieStore.set("authToken", authToken, {
     httpOnly: true, // IMPORTANT for security
     maxAge: 60 * 60 * 1, // e.g., 1 hour
+    // maxAge: 20, // 20 sec for testing
     path: "/",
     sameSite: "lax",
     // secure: true, // enable in production (HTTPS)

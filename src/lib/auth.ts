@@ -5,7 +5,7 @@ import { AuthToken, UserClaims, RefreshToken } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
 // import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
-const db = createPool();
+// const db = createPool();
 
 const secretKey = process.env.JWT_SECRET
   ? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -17,22 +17,29 @@ const secretKey = process.env.JWT_SECRET
 export async function fetchUserClaimsByUid(
   uid: string,
 ): Promise<UserClaims | null> {
-  const [rows] = await db.query(
-    "SELECT uid, name, roleName, deptName as departmentName, branchRef FROM users WHERE uid = ?",
-    [uid],
-  );
+  const db = createPool();
+  try {
+    const [rows] = await db.query(
+      "SELECT uid, name, roleName, deptName as departmentName, branchRef FROM users WHERE uid = ?",
+      [uid],
+    );
 
-  const user = (rows as any[])[0];
+    const user = (rows as any[])[0];
 
-  if (!user) return null;
+    if (!user) return null;
 
-  // Assuming UserClaims matches this structure
-  return {
-    uid: user.uid,
-    roleName: user.roleName,
-    departmentName: user.departmentName,
-    branchRef: user.branchRef,
-  };
+    // Assuming UserClaims matches this structure
+    return {
+      uid: user.uid,
+      roleName: user.roleName,
+      departmentName: user.departmentName,
+      branchRef: user.branchRef,
+    };
+  } catch (error) {
+    // Catch database errors specifically to prevent a 500 crash
+    console.error("Database error during user claims fetch:", error);
+    return null; // Token refresh will fail and lead to 401/redirect
+  }
 }
 
 // Function to verify the password
@@ -163,7 +170,9 @@ export async function generateAuthToken( // <--- RENAMED from generateToken
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       // .setExpirationTime("1d")
-      .setExpirationTime("1h") // <--- SHORT-LIVED: 1 hour
+      // .setExpirationTime("1h") // <--- SHORT-LIVED: 1 hour
+      // .setExpirationTime("20s") // <--- 20 sec testing
+      .setExpirationTime("365d") // <--- TEMPORARY 1 year
       .sign(secretKey)
   );
 }
