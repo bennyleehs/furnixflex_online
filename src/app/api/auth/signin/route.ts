@@ -1,7 +1,11 @@
 //src/app/api/auth/signin/route.ts
 import { createPool } from "@/lib/db";
 import { IUser } from "@/interface/app_interface";
-import { verifyPassword, generateToken } from "@/lib/auth";
+import {
+  verifyPassword,
+  generateAuthToken,
+  generateRefreshToken,
+} from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -36,19 +40,23 @@ export async function POST(req: NextRequest) {
   }
 
   // Generate token with permissions based on user's branch, department, and role
-  const token = await generateToken(
+  // const token = await generateToken(
+  // Generate short-lived Auth Token
+  const authToken = await generateAuthToken(
     user.uid,
     // user.id,
     user.roleName,
     user.departmentName,
     user.branchRef,
   );
+  // Generate long-lived Refresh Token
+  const refreshToken = await generateRefreshToken(user.uid); // <--- NEW
 
   const res = NextResponse.json({
     success: true,
     // user_id: user.user_id,
     uid: user.uid,
-    name: user.name, // You might want to use a different field for name if available
+    name: user.name,
     // departmentName: user.departmentName,
     role: user.roleName,
     department: user.departmentName,
@@ -59,10 +67,33 @@ export async function POST(req: NextRequest) {
   //   `authToken=${token}; Path=/; SameSite=Lax, Max-Age=3600`,
   // );
 
-  (await cookies()).set("authToken", token, {
-    httpOnly: true,
-    maxAge: 60 * 60 * 24, // 1 day
+  // (await cookies()).set("authToken", token, {
+  //   httpOnly: true,
+  //   maxAge: 60 * 60 * 24, // 1 day
+  //   path: "/",
+  //   sameSite: "lax",
+  //   // secure: true, // enable in production (HTTPS)
+  // });
+
+  //v1.2 gemini
+  const cookieStore = await cookies();
+
+  // Set short-lived Auth Token (client-side visible or not, based on need. HttpOnly is best practice.)
+  cookieStore.set("authToken", authToken, {
+    httpOnly: true, // IMPORTANT for security
+    maxAge: 60 * 60 * 1, // e.g., 1 hour
     path: "/",
+    sameSite: "lax",
+    // secure: true, // enable in production (HTTPS)
+  });
+
+  // Set long-lived Refresh Token (MUST be HttpOnly and Long-lived)
+  cookieStore.set("refreshToken", refreshToken, {
+    // <--- NEW COOKIE
+    httpOnly: true, // CRITICAL for security
+    maxAge: 60 * 60 * 24 * 7, // e.g., 7 days
+    // path: "/api/auth/refresh", // IMPORTANT: only send to the refresh API route
+    path: "/", // CRITICAL update
     sameSite: "lax",
     // secure: true, // enable in production (HTTPS)
   });
