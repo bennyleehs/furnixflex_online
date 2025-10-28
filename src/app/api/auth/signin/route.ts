@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export const runtime = "nodejs"; // Ensure it runs in Node.js
+const isProduction = process.env.NODE_ENV === 'production';
 
 export async function POST(req: NextRequest) {
   const db = createPool();
@@ -85,6 +86,7 @@ export async function POST(req: NextRequest) {
     path: "/",
     sameSite: "lax",
     // secure: true, // enable in production (HTTPS)
+    secure: isProduction, // Use 'secure: true' in production
   });
 
   // Set long-lived Refresh Token (MUST be HttpOnly and Long-lived)
@@ -96,6 +98,7 @@ export async function POST(req: NextRequest) {
     path: "/", // CRITICAL update
     sameSite: "lax",
     // secure: true, // enable in production (HTTPS)
+    secure: isProduction, // Use 'secure: true' in production
   });
 
   console.log("✅ Token set successfully");

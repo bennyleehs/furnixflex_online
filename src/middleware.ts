@@ -72,11 +72,22 @@ async function attemptSilentRefresh(
 ): Promise<NextResponse | null> {
   const refreshUrl = new URL("/api/auth/refresh", request.url);
 
+  // 1. Get the cookies. We only need the refreshToken for the API call to succeed.
+  const refreshToken = request.cookies.get("refreshToken")?.value;
+
+  // If the refreshToken isn't even present, don't make the API call.
+  if (!refreshToken) {
+    return null;
+  }
+
   // 1. Internal Fetch: Call the refresh API, forwarding existing cookies (which include the refreshToken)
   const internalResponse = await fetch(refreshUrl.toString(), {
     method: "POST",
     headers: {
-      Cookie: request.headers.get("Cookie") || "", // Forward ALL cookies
+      // Cookie: request.headers.get("Cookie") || "", // Forward ALL cookies
+      // Send ONLY the specific cookie needed. This is much safer than sending
+      // the raw 'Cookie' header string, which can crash the Edge Runtime.
+      Cookie: `refreshToken=${refreshToken}`,
     },
   });
 
