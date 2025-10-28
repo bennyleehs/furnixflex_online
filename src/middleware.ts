@@ -8,6 +8,7 @@ const publicPaths = [
   "/auth/signup",
   "/api/auth/signin",
   "/api/auth/signup",
+  "/api/auth/refresh", // <--- CRITICAL: Refresh API must be publicly accessible by the middleware
 ];
 
 export const config = {
@@ -15,7 +16,7 @@ export const config = {
   // matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
 
-// Helper to decode base64url
+// Helper to decode base64url (kept from original file)
 function base64UrlDecode(str: string): Uint8Array {
   const base64 =
     str.replace(/-/g, "+").replace(/_/g, "/") +
@@ -27,7 +28,7 @@ function base64UrlDecode(str: string): Uint8Array {
   return bytes;
 }
 
-// JWT verification (Edge-compatible, type-safe)
+// JWT verification (Edge-compatible)
 async function verifyJwt(token: string): Promise<boolean> {
   const secret = process.env.JWT_SECRET;
   if (!secret) return false;
@@ -65,34 +66,75 @@ async function verifyJwt(token: string): Promise<boolean> {
   return true;
 }
 
+// --- HELPER FUNCTION FOR SILENT REFRESH ---
+async function attemptSilentRefresh(
+  request: NextRequest,
+): Promise<NextResponse | null> {
+  const refreshUrl = new URL("/api/auth/refresh", request.url);
+
+  // 1. Internal Fetch: Call the refresh API, forwarding existing cookies (which include the refreshToken)
+  const internalResponse = await fetch(refreshUrl.toString(), {
+    method: "POST",
+    headers: {
+      Cookie: request.headers.get("Cookie") || "", // Forward ALL cookies
+    },
+  });
+
+  if (internalResponse.ok) {
+    // 2. Refresh SUCCESSFUL: The refresh API has set new cookies on its response.
+    // It must return a redirect to force the browser to accept the new cookies
+    // and re-request the protected page with the fresh authToken.
+    const redirectResponse = NextResponse.redirect(request.url);
+
+    // 3. Propagate Cookies: Get new cookies from the internal response and set them on the redirect response
+    internalResponse.headers.getSetCookie().forEach((cookie) => {
+      redirectResponse.headers.append("Set-Cookie", cookie);
+    });
+
+    return redirectResponse;
+  }
+
+  // 4. Refresh FAILED
+  return null;
+}
+// --- END HELPER FUNCTION ---
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // // --- NEW CODE START ---
-  // // Check if the path is a static file (e.g., has a file extension)
-  // const isStaticFile = pathname.includes(".");
-  // if (isStaticFile) {
-  //   return NextResponse.next();
-  // }
-  // // --- NEW CODE END ---
-  // --- IMPORTANT NEW CODE ---
   // If the path contains a file extension (e.g., .jpg), it's a static file.
-  // We must return early to prevent the authentication check from running.
   if (/\./.test(pathname)) {
     return NextResponse.next();
   }
-  // --- END OF NEW CODE ---
 
   // Skip public paths
   if (publicPaths.includes(pathname)) return NextResponse.next();
 
   // Check JWT
   const token = request.cookies.get("authToken")?.value;
-  if (!token || !(await verifyJwt(token))) {
-    const url = new URL("/auth/signin", request.url);
-    url.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(url);
+
+  // 1. If token is present AND valid, allow access.
+  if (token && (await verifyJwt(token))) {
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  // 2. Token is missing or invalid/expired: Attempt silent refresh
+  const refreshResponse = await attemptSilentRefresh(request);
+
+  if (refreshResponse) {
+    // Refresh successful, return the redirect response with new cookies
+    return refreshResponse;
+  } else {
+    // 3. Refresh failed (Auth Token was missing, OR Refresh Token was expired/invalid).
+    // Force sign-in.
+    const url = new URL("/auth/signin", request.url);
+    url.searchParams.set("callbackUrl", pathname);
+
+    // Create the redirect response and clear all auth cookies
+    const redirectResponse = NextResponse.redirect(url);
+    redirectResponse.cookies.delete("authToken");
+    redirectResponse.cookies.delete("refreshToken"); // Ensure a clean logout
+
+    return redirectResponse;
+  }
 }

@@ -1,7 +1,7 @@
 // lib/auth.ts
 import bcrypt from "bcryptjs";
 import { createPool } from "./db";
-import { AuthToken } from "@/types/auth";
+import { AuthToken, UserClaims, RefreshToken } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
 // import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
@@ -10,6 +10,30 @@ const db = createPool();
 const secretKey = process.env.JWT_SECRET
   ? new TextEncoder().encode(process.env.JWT_SECRET)
   : null;
+
+// --- PLACEHOLDER: MUST implement this function to fetch user details from DB ---
+// The refresh token only holds the 'uid'. To generate a new AuthToken, we need the
+// user's up-to-date role, department, and branchRef.
+export async function fetchUserClaimsByUid(
+  uid: string,
+): Promise<UserClaims | null> {
+  const [rows] = await db.query(
+    "SELECT uid, name, roleName, deptName as departmentName, branchRef FROM users WHERE uid = ?",
+    [uid],
+  );
+
+  const user = (rows as any[])[0];
+
+  if (!user) return null;
+
+  // Assuming UserClaims matches this structure
+  return {
+    uid: user.uid,
+    roleName: user.roleName,
+    departmentName: user.departmentName,
+    branchRef: user.branchRef,
+  };
+}
 
 // Function to verify the password
 export async function verifyPassword(
@@ -22,7 +46,7 @@ export async function verifyPassword(
 // function verify token
 export async function verifyToken(
   token: string,
-): Promise<AuthToken | null | { expired: true }> {
+): Promise<AuthToken | RefreshToken | null | { expired: true }> {
   try {
     if (!secretKey) {
       console.error("❌ JWT secret key is missing");
@@ -43,6 +67,7 @@ export async function verifyToken(
       // permissions,
       iat,
       exp,
+      type, // <--- NEW: Check token type for refresh token
     } = payload as {
       uid?: string;
       // id?: number;
@@ -52,8 +77,20 @@ export async function verifyToken(
       // permissions?: string[];
       iat?: number;
       exp?: number;
+      type?: "auth" | "refresh"; // <--- NEW TYPE HINT
     };
 
+    // --- Check for Refresh Token structure ---
+    if (type === "refresh") {
+      if (typeof uid !== "string" || typeof exp !== "number") {
+        console.error("❌ Invalid refresh token structure:", payload);
+        return null;
+      }
+      // Return minimal RefreshToken structure
+      return { uid, exp, type: "refresh" } as RefreshToken;
+    }
+
+    // --- Check for Auth Token structure ---
     if (
       typeof uid !== "string" ||
       // typeof id !== "number" ||
@@ -95,7 +132,7 @@ export async function verifyToken(
 }
 
 //function generate token with permissions
-export async function generateToken(
+export async function generateAuthToken( // <--- RENAMED from generateToken
   uid: string,
   // userId: number,
   roleName: string,
@@ -106,23 +143,43 @@ export async function generateToken(
 
   // Get permissions based on branch, department, and role
   // const permissions = getPermissionsForRole(
-  //   branchRef, 
-  //   departmentName, 
+  //   branchRef,
+  //   departmentName,
   //   roleName,
   // );
 
   const now = Math.floor(Date.now() / 1000); // iat
 
+  return (
+    new SignJWT({
+      uid,
+      // id: userId,
+      roleName,
+      departmentName,
+      branchRef,
+      type: "auth", // <--- NEW: Clearly mark as Auth Token
+      // permissions, // Include permissions array in the token
+      iat: now,
+    })
+      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+      // .setExpirationTime("1d")
+      .setExpirationTime("1h") // <--- SHORT-LIVED: 1 hour
+      .sign(secretKey)
+  );
+}
+
+// Function to generate a LONG-LIVED Refresh Token
+export async function generateRefreshToken(uid: string) {
+  if (!secretKey) throw new Error("JWT secret key is missing");
+
+  const now = Math.floor(Date.now() / 1000); // iat
+
   return new SignJWT({
     uid,
-    // id: userId,
-    roleName,
-    departmentName,
-    branchRef,
-    // permissions, // Include permissions array in the token
+    type: "refresh", // <--- NEW: Clearly mark as Refresh Token
     iat: now,
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-    .setExpirationTime("1d")
+    .setExpirationTime("7d") // <--- LONG-LIVED: 7 days
     .sign(secretKey);
 }
