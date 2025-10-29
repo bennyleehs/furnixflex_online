@@ -911,10 +911,67 @@ export default function QuotationPage() {
       }
     });
 
-    // 4: Final totals
+    // 4: Calculate total before outside discount
+    const totalBase = packagesTotal + addItemsTotal + roundingTotal;
+
+    // 5: Find and apply outside discount
+    // discount - Dealer's commission
+    let discDealerComm = 0;
+    const dealerDiscountItem = items.find(
+      (item) => item.category === "Discount" && item.subcategory === "Dealer",
+    );
+
+    if (dealerDiscountItem) {
+      // Check for percentage discount (e.g., 30%)
+      if (dealerDiscountItem.discount > 0) {
+        // dealerDiscountItem will be a negative value
+        // % discount
+        discDealerComm = -(totalBase * (dealerDiscountItem.discount / 100));
+      }
+      // fixed amount discount
+      // The 'total' for a discount item is stored as a negative number
+      else if (dealerDiscountItem.total < 0) {
+        discDealerComm = dealerDiscountItem.total;
+      }
+    }
+
+    // discount - staff purchase
+    let discStaffPurchase = 0;
+    const staffDiscountItem = items.find(
+      (item) =>
+        item.category === "Discount" && item.subcategory === "Staff Purchase",
+    );
+
+    if (staffDiscountItem) {
+      if (staffDiscountItem.discount > 0) {
+        // discStaffPurchase will be a negative value
+        // % discount
+        discStaffPurchase = -(totalBase * (staffDiscountItem.discount / 100));
+      }
+      // fixed amount discount
+      // The 'total' for a discount item is stored as a negative number
+      else if (staffDiscountItem.total < 0) {
+        discStaffPurchase = staffDiscountItem.total;
+      }
+    }
+
+    // 6: Raw totals
     const subtotal = rawPackagesTotal + rawAddItemsTotal; // <-- no discounts
     // const grandTotal = packagesTotal + addItemsTotal; // <-- with discounts
-    const grandTotal = packagesTotal + addItemsTotal + roundingTotal; // <-- with discounts
+    // const grandTotal = packagesTotal + addItemsTotal + roundingTotal; // <-- with discounts
+
+    let totalDisc = 0;
+    // Condition to apply if a specific discount is provided
+    if (discDealerComm > 0 || discDealerComm < 0) {
+      // totalDisc = totalBase + discDealerComm;
+      totalDisc += discDealerComm;
+    } else if (discStaffPurchase > 0 || discStaffPurchase < 0) {
+      // totalDisc = totalBase + discStaffPurchase;
+      totalDisc += discStaffPurchase;
+    }
+
+    // 7: Final totals
+    const grandTotal = totalBase + totalDisc;
 
     setSubtotal(subtotal);
     setGrandTotal(grandTotal);
@@ -954,6 +1011,20 @@ export default function QuotationPage() {
       item.category === "SALES DISCOUNT" &&
       item.subcategory === "Special Sales Discount" &&
       (item.total < 0 || item.rounding > 0),
+  );
+
+  const appliedDealerComm = items.filter(
+    (item) =>
+      item.category === "Discount" &&
+      item.subcategory === "Dealer" &&
+      (item.total < 0 || item.discount > 0),
+  );
+
+  const appliedStaffDiscounts = items.filter(
+    (item) =>
+      item.category === "Discount" &&
+      item.subcategory === "Staff Purchase" &&
+      (item.total < 0 || item.discount > 0),
   );
 
   if (loading) {
@@ -1678,7 +1749,7 @@ export default function QuotationPage() {
                         {index + 1}
                       </td>
 
-                      <td className="px-3 py-2 min-w-125">
+                      <td className="min-w-125 px-3 py-2">
                         <div className="grid grid-cols-3 gap-2">
                           {/* Category Dropdown - Fixed Version */}
                           <select
@@ -2067,6 +2138,24 @@ export default function QuotationPage() {
                       <span>Rounding Discounts:</span>
                       <span className="text-red-600">
                         -{formatDiscounts(appliedRoundingDiscounts)}
+                      </span>
+                    </div>
+                  )}
+
+                  {appliedDealerComm.length > 0 && (
+                    <div className="flex justify-between py-1">
+                      <span>Dealer Commission:</span>
+                      <span className="text-red-600">
+                        -{formatDiscounts(appliedDealerComm)}
+                      </span>
+                    </div>
+                  )}
+
+                  {appliedStaffDiscounts.length > 0 && (
+                    <div className="flex justify-between py-1">
+                      <span>Staff Purchase Discount:</span>
+                      <span className="text-red-600">
+                        -{formatDiscounts(appliedStaffDiscounts)}
                       </span>
                     </div>
                   )}
