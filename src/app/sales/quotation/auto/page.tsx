@@ -646,10 +646,22 @@ export default function QuotationPage() {
             note: item.note,
           })),
         },
-        company: {
+        company1: {
           name: "CLASSY PROJECT MARKETING SDN BHD",
           regNo: "(1299213-T)",
-          address: `No. 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
+          address: `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
+          phone: "+6016-8866001",
+          tel: "07-5104106",
+          email: "inquiry@classy-pro.com",
+          website: "www.classy-pro.com",
+          branches:
+            "Kota Masai, Johor • Puchong | Setia Alam, Selangor • Bukit Mertajam, Penang",
+          logo: "/images/logo/Classy_2023_vertical.png",
+        },
+        company2: {
+          name: "CLASSY PROJECT MANAGEMENT SDN BHD",
+          regNo: "(1034357-W)",
+          address: `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
           phone: "+6016-8866001",
           tel: "07-5104106",
           email: "inquiry@classy-pro.com",

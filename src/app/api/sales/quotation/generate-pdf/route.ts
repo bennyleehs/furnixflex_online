@@ -102,18 +102,31 @@ async function generateQuotationPDF(
   const CONTENT_START_Y = HEADER_HEIGHT;
   const CONTENT_END_Y = pageHeight - FOOTER_HEIGHT;
 
+  // === START MODIFICATION 1A ===
+  // Determine which company info to use based on "Dealer" discount
+  const isDealerQuotation = data.quotation.items.some(
+    (item: any) =>
+      item.category === "Discount" && item.subcategory === "Dealer",
+  );
+
+  const companyInfo = isDealerQuotation ? data.company2 : data.company1;
+  // === END MODIFICATION 1A ===
+
   // =======================================================================
   // 2. REUSABLE DRAWING FUNCTIONS
   // =======================================================================
 
-  const drawHeader = () => {
+  // === START MODIFICATION 1A ===
+  // Modified drawHeader to accept companyInfo
+  const drawHeader = (company: any) => {
     // ----- HEADER SECTION WITH LOGO -----
     // Add logo on the left side
     try {
       // If a logo URL is provided in the data
-      if (data.company.logo && data.company.logo.startsWith("data:image")) {
+      if (company.logo && company.logo.startsWith("data:image")) {
         // Logo is provided as base64 data URL
-        const logoData = data.company.logo.split(",")[1];
+        // Note: Corrected data.company11.logo typo to company.logo
+        const logoData = company.logo.split(",")[1];
         doc.addImage(logoData, "PNG", margin, margin - 8, 28, 26);
       } else {
         // Use a default logo path
@@ -158,9 +171,9 @@ async function generateQuotationPDF(
     const yPos = margin + 8; // needed to align with logo vertically
 
     // Company name
-    doc.setFontSize(16);
+    doc.setFontSize(15);
     doc.setFont("helvetica", "bold");
-    doc.text(data.company.name, textContentStartX, yPos, {
+    doc.text(company.name, textContentStartX, yPos, {
       align: "left",
       maxWidth: companyNameWidth,
     });
@@ -168,7 +181,7 @@ async function generateQuotationPDF(
     // Company reg. no.
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text(data.company.regNo, pageWidth - margin - 14, yPos, {
+    doc.text(company.regNo, pageWidth - margin - 14, yPos, {
       align: "right",
       maxWidth: regNoWidth,
     });
@@ -176,21 +189,22 @@ async function generateQuotationPDF(
     // Company details with smaller font
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(data.company.address, pageWidth / 2 + margin + 10, margin + 14, {
+    doc.text(company.address, pageWidth / 2 + margin + 10, margin + 14, {
       align: "center",
     });
     doc.text(
-      `H/p: ${data.company.phone} • Tel: ${data.company.tel} • Email: ${data.company.email} • Website: ${data.company.website}`,
+      `H/p: ${company.phone} • Tel: ${company.tel} • Email: ${company.email} • Website: ${company.website}`,
       pageWidth / 2 + margin + 10,
       margin + 18,
       { align: "center" },
     );
     doc.text(
-      `Branches: ${data.company.branches}`,
+      `Branches: ${company.branches}`,
       pageWidth / 2 + margin + 10,
       margin + 22,
       { align: "center" },
     );
+    // === END MODIFICATION 1A ===
 
     // // Horizontal line separator
     doc.setDrawColor(0, 0, 0);
@@ -397,7 +411,10 @@ async function generateQuotationPDF(
    */
   const addNewPage = () => {
     doc.addPage();
-    drawHeader();
+    // === START MODIFICATION 1A ===
+    // Pass the selected companyInfo to the header on new pages
+    drawHeader(companyInfo);
+    // === END MODIFICATION 1A ===
     drawRepeatingFooter();
     return CONTENT_START_Y;
   };
@@ -463,7 +480,10 @@ async function generateQuotationPDF(
   };
 
   // --- Initial Page Setup ---
-  drawHeader();
+  // === START MODIFICATION 1A ===
+  // Pass the selected companyInfo to the header on the first page
+  drawHeader(companyInfo);
+  // === END MODIFICATION 1A ===
   drawRepeatingFooter();
   let yPos = CONTENT_START_Y;
   // Initial table header draw on the first page.
@@ -594,20 +614,22 @@ async function generateQuotationPDF(
       // This will visually place the discount value clearly.
       // We will ensure the discount total is displayed with the appropriate sign (negative or positive).
       const discountAmount = parseFloat(item.total);
-      
+
       // Use toLocaleString for number formatting (e.g., 3,000.00)
       const formattedDiscount = discountAmount.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       });
 
       // Unit Price column will show the amount
       // The negative sign is part of the `item.total` value, so we'll prepend '-' if needed.
-      priceDisplay = discountAmount < 0 ? `-RM${formattedDiscount.substring(1)}` : `RM${formattedDiscount}`;
-      
+      priceDisplay =
+        discountAmount < 0
+          ? `-RM${formattedDiscount.substring(1)}`
+          : `RM${formattedDiscount}`;
+
       // Total column will show the same amount, as it's a line item total.
       totalDisplay = priceDisplay;
-
     } else {
       // For all other items, use the regular unit price and total price.
       priceDisplay = formattedUnitPrice;
@@ -652,12 +674,28 @@ async function generateQuotationPDF(
       item.category === "SALES DISCOUNT" &&
       item.subcategory === "Special Sales Discount",
   );
+  const dealerCommission = data.quotation.items.find(
+    (item: any) =>
+      item.category === "Discount" && item.subcategory === "Dealer",
+  );
+  const staffPurchaseDisc = data.quotation.items.find(
+    (item: any) =>
+      item.category === "Discount" && item.subcategory === "Staff Purchase",
+  );
 
-  if (pkgDisc || addItemDisc || roundingDisc) {
+  if (
+    pkgDisc ||
+    addItemDisc ||
+    roundingDisc ||
+    dealerCommission ||
+    staffPurchaseDisc
+  ) {
     summaryHeight += 5; // Add space for "Discounts" title
     if (pkgDisc) summaryHeight += 5;
     if (addItemDisc) summaryHeight += 5;
     if (roundingDisc) summaryHeight += 5;
+    if (dealerCommission) summaryHeight += 5;
+    if (staffPurchaseDisc) summaryHeight += 5;
   }
   summaryHeight += 8; // Add space for the separator line and Grand Total
 
@@ -713,38 +751,95 @@ async function generateQuotationPDF(
     align: "right",
   });
   summaryY += 5;
-  // Package Discounts
+  // ===================================================================
+  // START: PRE-CALCULATE ALL DISCOUNT AMOUNTS
+  // ===================================================================
 
-  // -- Sum of package total discount | raw package price - package discounted = package total discount --
-  let pkgTotalDiscountAmount = 0; // This will store the final difference (RM17998 - RM14398.40)
-  let pkgDiscountRate = 0;
-
-  //for package - package discount
+  let pkgTotalDiscountAmount = 0;
   if (pkgDisc) {
-    // If a discount item is found, extract the rate
-    pkgDiscountRate = parseFloat(pkgDisc.discount) / 100; // e.g., 20% becomes 0.20
+    if (pkgDisc.discount > 0) {
+      const pkgDiscountRate = parseFloat(pkgDisc.discount) / 100;
+      if (rawPkgPriceItem.length > 0) {
+        rawPkgPriceItem.forEach((item: any) => {
+          pkgTotalDiscountAmount += parseFloat(item.total) * pkgDiscountRate;
+        });
+      }
+    } else if (pkgDisc.total < 0) {
+      pkgTotalDiscountAmount = Math.abs(parseFloat(pkgDisc.total));
+    }
   }
 
-  // loop all found package items > calculate total discount
-  //for package - package discount
-  if (rawPkgPriceItem.length > 0) {
-    rawPkgPriceItem.forEach((item: any) => {
-      const originalPrice = parseFloat(item.total);
+  let addItemTotalDiscountAmount = 0;
+  if (addItemDisc) {
+    if (addItemDisc.discount > 0) {
+      const addItemDiscountRate = parseFloat(addItemDisc.discount) / 100;
+      if (rawAddOnPriceItem.length > 0) {
+        const eligibleAddOnItems = rawAddOnPriceItem.filter(
+          (item: any) =>
+            item.subcategory !== "On-site Services" &&
+            item.subcategory !== "Transportation Charge",
+        );
+        eligibleAddOnItems.forEach((item: any) => {
+          addItemTotalDiscountAmount +=
+            parseFloat(item.total) * addItemDiscountRate;
+        });
+      }
+    } else if (addItemDisc.total < 0) {
+      const eligibleAddItemsTotal = rawAddOnPriceItem
+        .filter(
+          (item: any) =>
+            item.category === "Additional Items" &&
+            item.subcategory !== "On-site Services" &&
+            item.subcategory !== "Transportation Charge",
+        )
+        .reduce((sum: any, i: any) => sum + i.total, 0);
 
-      // Calculate the discount for this individual package
-      const individualDiscount = originalPrice * pkgDiscountRate;
-      // Add the individual discount to the total discount amount
-      pkgTotalDiscountAmount += individualDiscount;
-    });
+      if (eligibleAddItemsTotal > 0) {
+        addItemTotalDiscountAmount = Math.abs(parseFloat(addItemDisc.total));
+      }
+    }
   }
 
-  // Check if any package items were found and a discount was applied
-  if (rawPkgPriceItem.length > 0 && pkgDisc) {
-    // --- Display Total Discount Amount ("Packages:") ---
+  // Get Rounding Total (it's already a negative value if it exists)
+  const roundingTotal = roundingDisc ? parseFloat(roundingDisc.total) : 0;
+
+  // Calculate the base total (totalBase)
+  const totalBase =
+    parseFloat(data.quotation.subtotal) - // Raw Subtotal
+    pkgTotalDiscountAmount - // Subtract positive package discount
+    addItemTotalDiscountAmount + // Subtract positive add item discount
+    roundingTotal; // Add negative rounding discount
+
+  // Now, calculate Dealer and Staff discounts based on this new total
+  let dealerCommissionAmount = 0;
+  if (dealerCommission) {
+    if (dealerCommission.discount > 0) {
+      const dealerCommissionRate = parseFloat(dealerCommission.discount) / 100;
+      dealerCommissionAmount = totalBase * dealerCommissionRate;
+    } else if (dealerCommission.total < 0) {
+      dealerCommissionAmount = Math.abs(parseFloat(dealerCommission.total));
+    }
+  }
+
+  let staffPurchaseAmount = 0;
+  if (staffPurchaseDisc) {
+    if (staffPurchaseDisc.discount > 0) {
+      const staffPurchaseRate = parseFloat(staffPurchaseDisc.discount) / 100;
+      staffPurchaseAmount = totalBase * staffPurchaseRate;
+    } else if (staffPurchaseDisc.total < 0) {
+      staffPurchaseAmount = Math.abs(parseFloat(staffPurchaseDisc.total));
+    }
+  }
+
+  // ===================================================================
+  // END: PRE-CALCULATIONS
+  // START: DRAWING SUMMARY LINES
+  // ===================================================================
+
+  // --- Display Package Discounts ---
+  if (pkgTotalDiscountAmount > 0) {
     doc.setFont("helvetica", "bold");
     doc.text("Packages:", summaryX, summaryY);
-
-    // Format the calculated total discount (e.g., 3,599.60)
     const formattedTotalDiscount = pkgTotalDiscountAmount.toLocaleString(
       "en-US",
       {
@@ -752,8 +847,6 @@ async function generateQuotationPDF(
         maximumFractionDigits: 2,
       },
     );
-
-    // Display the total discount amount with a negative sign and RM
     doc.setFont("helvetica", "normal");
     doc.text(
       `-RM${formattedTotalDiscount}`,
@@ -765,7 +858,6 @@ async function generateQuotationPDF(
     );
     summaryY += 5;
   } else if (rawPkgPriceItem.length > 0) {
-    // If packages exist but no discount item is found, show RM0.00 discount
     doc.setFont("helvetica", "bold");
     doc.text("Packages:", summaryX, summaryY);
     doc.setFont("helvetica", "normal");
@@ -775,34 +867,10 @@ async function generateQuotationPDF(
     summaryY += 5;
   }
 
-  // -- Sum of add item total discount | raw add item price - add item discounted = add item total discount --
-  let addItemTotalDiscountAmount = 0;
-  let addItemDiscountRate = 0;
-
-  //for add item - add item discount
-  if (addItemDisc) {
-    // If a discount item is found, extract the rate
-    addItemDiscountRate = parseFloat(addItemDisc.discount) / 100;
-  }
-
-  // loop all found add item items > calculate total discount
-  if (rawAddOnPriceItem.length > 0) {
-    rawAddOnPriceItem.forEach((item: any) => {
-      const originalPrice = parseFloat(item.total);
-
-      // Calculate the discount for this individual add item
-      const individualDiscount = originalPrice * addItemDiscountRate;
-      // Add the individual discount to the total discount amount
-      addItemTotalDiscountAmount += individualDiscount;
-    });
-  }
-
-  //for add item - add item discount
-  if (rawAddOnPriceItem.length > 0 && addItemDisc) {
-    // --- Display Total Discount Amount ("Additional Items:") ---
+  // --- Display Additional Item Discounts ---
+  if (addItemTotalDiscountAmount > 0) {
     doc.setFont("helvetica", "bold");
     doc.text("Additional Items:", summaryX, summaryY);
-
     const formattedTotalDiscount = addItemTotalDiscountAmount.toLocaleString(
       "en-US",
       {
@@ -810,8 +878,6 @@ async function generateQuotationPDF(
         maximumFractionDigits: 2,
       },
     );
-
-    // Display the total discount amount with a negative sign and RM
     doc.setFont("helvetica", "normal");
     doc.text(
       `-RM${formattedTotalDiscount}`,
@@ -823,7 +889,6 @@ async function generateQuotationPDF(
     );
     summaryY += 5;
   } else if (rawAddOnPriceItem.length > 0) {
-    // If Additional Items exist but no discount item is found, show RM0.00 discount
     doc.setFont("helvetica", "bold");
     doc.text("Additional Items:", summaryX, summaryY);
     doc.setFont("helvetica", "normal");
@@ -833,29 +898,63 @@ async function generateQuotationPDF(
     summaryY += 5;
   }
 
-  // Rounding Discounts
-  if (roundingDisc) {
+  // --- Display Rounding Discounts ---
+  if (roundingTotal < 0) {
+    // Only show if rounding is applied
     doc.setFont("helvetica", "bold");
     doc.text("Rounding:", summaryX, summaryY);
-    // Format the total with two decimal places
-    const formattedRounding = parseFloat(roundingDisc.total).toFixed(2);
-    // reset font style
+    // Use Math.abs to show roundingTotal (which is negative) as -RM...
+    const formattedRounding = Math.abs(roundingTotal).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
     doc.setFont("helvetica", "normal");
-    if (formattedRounding.startsWith("-")) {
-      // If it's negative, add "RM" after the negative sign
-      doc.text(
-        `-RM${formattedRounding.substring(1)}`,
-        summaryX + summaryWidth,
-        summaryY,
-        {
-          align: "right",
-        },
-      );
-    } else {
-      doc.text(`RM${formattedRounding}`, summaryX + summaryWidth, summaryY, {
+    doc.text(`-RM${formattedRounding}`, summaryX + summaryWidth, summaryY, {
+      align: "right",
+    });
+    summaryY += 5;
+  }
+
+  // --- Display Dealer Commission ---
+  if (dealerCommissionAmount > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Dealer Comm.:", summaryX, summaryY);
+    const formattedTotalDiscount = dealerCommissionAmount.toLocaleString(
+      "en-US",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    );
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `-RM${formattedTotalDiscount}`,
+      summaryX + summaryWidth,
+      summaryY,
+      {
         align: "right",
-      });
-    }
+      },
+    );
+    summaryY += 5;
+  }
+
+  // --- Display Staff Purchase ---
+  if (staffPurchaseAmount > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Staff Purchase:", summaryX, summaryY);
+    const formattedTotalDiscount = staffPurchaseAmount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `-RM${formattedTotalDiscount}`,
+      summaryX + summaryWidth,
+      summaryY,
+      {
+        align: "right",
+      },
+    );
     summaryY += 5;
   }
 
