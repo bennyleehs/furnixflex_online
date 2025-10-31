@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
   // Set short-lived Auth Token (client-side visible or not, based on need. HttpOnly is best practice.)
   cookieStore.set("authToken", authToken, {
     httpOnly: true, // IMPORTANT for security
-    maxAge: 60 * 60 * 1, // e.g., 1 hour
     // maxAge: 20, // 20 sec for testing
+    maxAge: 60 * 60 * 9, // e.g., 9 hour
     path: "/",
     sameSite: "lax",
     // secure: true, // enable in production (HTTPS)

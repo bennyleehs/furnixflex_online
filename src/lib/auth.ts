@@ -172,7 +172,7 @@ export async function generateAuthToken( // <--- RENAMED from generateToken
       // .setExpirationTime("1d")
       // .setExpirationTime("1h") // <--- SHORT-LIVED: 1 hour
       // .setExpirationTime("20s") // <--- 20 sec testing
-      .setExpirationTime("365d") // <--- TEMPORARY 1 year
+      .setExpirationTime("9h") // <--- 9 hour
       .sign(secretKey)
   );
 }

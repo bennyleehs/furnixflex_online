@@ -80,33 +80,49 @@ async function attemptSilentRefresh(
     return null;
   }
 
-  // 1. Internal Fetch: Call the refresh API, forwarding existing cookies (which include the refreshToken)
-  const internalResponse = await fetch(refreshUrl.toString(), {
-    method: "POST",
-    headers: {
-      // Cookie: request.headers.get("Cookie") || "", // Forward ALL cookies
-      // Send ONLY the specific cookie needed. This is much safer than sending
-      // the raw 'Cookie' header string, which can crash the Edge Runtime.
-      Cookie: `refreshToken=${refreshToken}`,
-    },
-  });
+  // --- START OF FIX ---
+  // 1. Create a new Headers object from the original request.
+  // This copies 'Host', 'x-forwarded-host', etc., which are
+  // needed for the production environment to route the internal fetch.
+  const requestHeaders = new Headers(request.headers);
 
-  if (internalResponse.ok) {
-    // 2. Refresh SUCCESSFUL: The refresh API has set new cookies on its response.
-    // It must return a redirect to force the browser to accept the new cookies
-    // and re-request the protected page with the fresh authToken.
-    const redirectResponse = NextResponse.redirect(request.url);
+  // 2. Overwrite the 'Cookie' header to send *only* the refreshToken.
+  // We don't want to send the old, expired authToken.
+  requestHeaders.set("Cookie", `refreshToken=${refreshToken}`);
+  // --- END OF FIX ---
 
-    // 3. Propagate Cookies: Get new cookies from the internal response and set them on the redirect response
-    internalResponse.headers.getSetCookie().forEach((cookie) => {
-      redirectResponse.headers.append("Set-Cookie", cookie);
+  // --- ADD TRY/CATCH BLOCK AROUND THE FETCH ---
+  try {
+    // 1. Internal Fetch: Call the refresh API
+    const internalResponse = await fetch(refreshUrl.toString(), {
+      method: "POST",
+      // headers: {
+      //   Cookie: `refreshToken=${refreshToken}`,
+      // },
+      headers: requestHeaders, // <-- NEW: Use the copied headers
     });
 
-    return redirectResponse;
-  }
+    if (internalResponse.ok) {
+      // 2. Refresh SUCCESSFUL
+      const redirectResponse = NextResponse.redirect(request.url);
 
-  // 4. Refresh FAILED
-  return null;
+      // 3. Propagate Cookies
+      internalResponse.headers.getSetCookie().forEach((cookie) => {
+        redirectResponse.headers.append("Set-Cookie", cookie);
+      });
+
+      return redirectResponse;
+    }
+
+    // 4. Refresh FAILED (API returned 401, etc.)
+    return null;
+  } catch (error) {
+    // 5. CATCH FETCH ERROR (API crashed, network error)
+    console.error("Middleware refresh fetch failed:", error);
+    // Prevent 500 error by returning null, which triggers redirect to signin
+    return null;
+  }
+  // --- END OF TRY/CATCH BLOCK ---
 }
 // --- END HELPER FUNCTION ---
 
@@ -143,8 +159,20 @@ export async function middleware(request: NextRequest) {
 
     // Create the redirect response and clear all auth cookies
     const redirectResponse = NextResponse.redirect(url);
-    redirectResponse.cookies.delete("authToken");
-    redirectResponse.cookies.delete("refreshToken"); // Ensure a clean logout
+    // Check if the refresh token exists (even if invalid/expired)
+    if (request.cookies.has("refreshToken")) {
+      // ✅ Must explicitly clear stale cookies on the redirect response
+      redirectResponse.cookies.set("authToken", "", {
+        maxAge: 0,
+        httpOnly: true,
+        path: "/",
+      });
+      redirectResponse.cookies.set("refreshToken", "", {
+        maxAge: 0,
+        httpOnly: true,
+        path: "/",
+      });
+    }
 
     return redirectResponse;
   }
