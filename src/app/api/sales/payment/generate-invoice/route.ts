@@ -67,14 +67,14 @@ export async function POST(request: Request) {
     // });
 
     // Return the PDF with invoice number in the URL
-    return new Response(pdfBuffer, {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${data.invoice_number}.pdf"`,
-        // Add a custom header for the frontend to extract the invoice number
-        'X-Invoice-Number': data.invoice_number
-      }
-    });
+        return new Response(new Uint8Array(pdfBuffer), {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="${data.invoice_number}.pdf"`,
+            // Add a custom header for the frontend to extract the invoice number
+            'X-Invoice-Number': data.invoice_number
+          }
+        });
 
   } catch (error) {
     console.error('Error generating PDF:', error);
