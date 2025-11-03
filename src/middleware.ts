@@ -70,7 +70,15 @@ async function verifyJwt(token: string): Promise<boolean> {
 async function attemptSilentRefresh(
   request: NextRequest,
 ): Promise<NextResponse | null> {
-  const refreshUrl = new URL("/api/auth/refresh", request.url);
+  // const refreshUrl = new URL("/api/auth/refresh", request.url); // <-- OLD
+
+  // --- START OF FIX ---
+  // Force the fetch to use the internal http://localhost:PORT
+  // instead of the public https://domain.com
+  // Assumes your 'npm start' command runs on port 3000.
+  const port = process.env.PORT || 3000;
+  const refreshUrl = new URL(`http://localhost:${port}/api/auth/refresh`);
+  // --- END OF FIX ---
 
   // 1. Get the cookies. We only need the refreshToken for the API call to succeed.
   const refreshToken = request.cookies.get("refreshToken")?.value;
