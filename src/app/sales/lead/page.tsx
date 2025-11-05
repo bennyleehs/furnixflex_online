@@ -70,9 +70,9 @@ export default function LeadPage() {
           address:
             [item.city, item.state, item.country].filter(Boolean).join(", ") ||
             "Not Provided",
-          type:
-            [item.property, item.guard].filter(Boolean).join(" / ") ||
-            "Not Provided",
+          // type:
+          //   [item.property, item.guard].filter(Boolean).join(" / ") ||
+          //   "Not Provided",
           pic: item.sales_name || "Not Assigned",
           created_at: item.created_at
             ? new Date(item.created_at).toLocaleDateString("en-GB", {
@@ -130,7 +130,7 @@ export default function LeadPage() {
     { key: "name", title: "Name", width: "min-w-[140px]" },
     { key: "contact", title: "Contact", width: "min-w-[180px]" },
     { key: "address", title: "Address", width: "min-w-[260px]" },
-    { key: "type", title: "Type", width: "min-w-[180px]" },
+    // { key: "type", title: "Type", width: "min-w-[180px]" },
     { key: "status", title: "Status", width: "min-w-[140px]" },
     { key: "pic", title: "PIC", width: "min-w-[180px]" },
   ];
@@ -196,16 +196,34 @@ export default function LeadPage() {
       format: (value: string) => value || "Not provided",
     },
     {
-      key: "sales_name",
+      key: "salesNameUid",
       group: "PIC",
-      title: "Name",
-      format: (value: string) => value || "Not assigned yet",
+      title: "Salesperson",
+      format: (_: any, row: Lead) => {
+        const salesName = row.sales_name;
+        const salesUid = row.sales_uid;
+
+        // If both are falsy, return the fallback
+        if (!salesName && !salesUid) {
+          return "No salesperson assigned";
+        }
+
+        return `${salesName} | ${salesUid}`;
+      },
     },
     {
-      key: "sales_uid",
+      key: "assignBy",
       group: "PIC",
-      title: "UID",
-      format: (value: string) => value || "Not assigned yet",
+      title: "Assigned By",
+      format: (_: any, row: Lead) => {
+        const assignedBy = row.assigned_name;
+        const assignUid = row.assigned_by;
+
+        // Check falsy and return the fallback, using ternary operator
+        return !assignedBy && !assignUid
+          ? "Not assigned yet"
+          : `${assignedBy} | ${assignUid}`;
+      },
     },
   ];
 

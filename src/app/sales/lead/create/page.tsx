@@ -375,7 +375,7 @@ export default function Page() {
         options: getCityOptions(), // Use the city options function
       },
       {
-        title: "Insterested",
+        title: "Interested",
         inputType: "select",
         valueKey: "interested",
         required: true,
@@ -440,20 +440,34 @@ export default function Page() {
         transform: (value: string, _allValues: Record<string, any>) => {
           // When a valid sales representative is selected (not empty)
           if (value && value !== "") {
-            // Return object to update status to "Follow Up"
+            // Return object to update status AND assign_by
             return {
               status: "Assign PIC",
+              assigned_by: user?.uid, // <-- SET the assign_by field
             };
           }
-          return {}; // No changes if no rep selected
+          // If they are un-assigning (setting back to "0" or empty)
+          return {
+            status: "Not Assign", // Revert status
+            assign_by: null,     // <-- CLEAR the assign_by field
+          };
         },
         options: salesReps.map((rep) => ({
           value: rep.id,
           label: `${rep.uid} ${rep.name} (${rep.task_count || 0})`,
         })) || [{ value: "", label: "Loading sales representatives..." }],
       },
+      // --- "Assigned By" FIELD (as read-only) ---
+      {
+        title: "Assigned By",
+        inputType: "text",
+        valueKey: "assigned_by",
+        readOnly: true,       // Make it read-only
+      },
     ];
-  }, [formData, countries, salesReps]);
+    // pass `user` as a dependency so the transform function
+    // always has access to the latest user data.
+  }, [formData, countries, salesReps, user]);
 
   //v1.4 gemini
   useEffect(() => {

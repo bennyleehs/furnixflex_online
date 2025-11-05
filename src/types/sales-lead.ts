@@ -27,7 +27,9 @@ export interface Lead {
   // PIC
   sales_name: string;
   sales_uid: string;
-  
+  assigned_name: string;
+  assigned_by: string;
+
   // Computed fields (for table display)
   contact?: string;
   address?: string;

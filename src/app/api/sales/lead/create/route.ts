@@ -15,6 +15,7 @@ export async function POST(request: Request) {
         address_line1, address_line2,
         postcode, city, state, country,
         status, sales_id,
+        assigned_by,
         created_at, updated_at
       )
       VALUES (
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
         ?, ?, ?, ?, 
         ?, ?, ?, 
         ?, ?, 
+        ?,
         NOW(), NOW()
       )`;
 
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
       formData['address_line1'], formData['address_line2'],
       formData['postcode'], formData['city'], formData['state'], formData['country'],
       formData['status'], formData['sales_id'],
+      formData['assigned_by'],
     ];
 
     await db.query(sql, values);
@@ -68,6 +71,7 @@ export async function PUT(request: Request) {
         postcode = ?, city = ?, state = ?, country = ?,
         property = ?, guard = ?,
         status = ?, sales_id = ?,
+        assigned_by = ?,
         updated_at = NOW()
       WHERE id = ?
     `;
@@ -81,6 +85,7 @@ export async function PUT(request: Request) {
       formData['postcode'], formData['city'], formData['state'], formData['country'],
       formData['property'], formData['guard'],
       formData['status'], formData['sales_id'],
+      formData['assigned_by'],
       id
     ];
 

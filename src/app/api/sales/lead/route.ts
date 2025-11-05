@@ -96,10 +96,13 @@ export async function GET(request: NextRequest) {
     const dataSql = `
         SELECT
             c.*,
-            u.name as sales_name, 
-            u.uid AS sales_uid
+            u.name AS sales_name, 
+            u.uid AS sales_uid,
+            u1.name AS assigned_name,
+            c.assigned_by
         FROM customers c
         LEFT JOIN users u ON c.sales_id = u.id
+        LEFT JOIN users u1 ON c.assigned_by = u1.uid
         ${whereClause}
         ORDER BY c.id DESC
         LIMIT ${limitValue} OFFSET ${offsetValue};
