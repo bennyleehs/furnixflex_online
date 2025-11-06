@@ -26,11 +26,12 @@ export async function GET(request: NextRequest) {
       return new Response('File not found', { status: 404 });
     }
     
-    // Read the file
+    // Read the file and convert to Uint8Array
     const fileBuffer = fs.readFileSync(fullPath);
+    const fileUint8Array = new Uint8Array(fileBuffer);
     
     // Return file with appropriate headers
-    return new Response(fileBuffer, {
+    return new Response(fileUint8Array, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${path.basename(fullPath)}"`,

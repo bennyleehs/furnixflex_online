@@ -896,14 +896,17 @@ export default function PaymentAutoPage() {
     }
   };
 
-  // Update the handleFileUpload function in your page.tsx
+  // Update the handleFileUpload function to support multiple files
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     paymentId?: string,
   ) => {
+    // Get the files from the event
+    const files = e.target.files;
+
     if (
-      !e.target.files ||
-      !e.target.files[0] ||
+      !files || // Check if files exist
+      files.length === 0 || // Check if any files were selected
       !paymentId ||
       !quotation?.task_id
     ) {
@@ -915,41 +918,73 @@ export default function PaymentAutoPage() {
       const payment = paymentRecords.find((p) => p.id === paymentId);
       if (!payment) return;
 
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("paymentId", paymentId);
-      formData.append("taskId", quotation.task_id);
-      formData.append("paymentReference", payment.payment_reference || "");
-      formData.append("invoiceNumber", payment.invoice_number || "");
-
       setIsAddingPayment(true); // Reuse this state to show loading
 
-      const response = await fetch("/api/sales/payment/upload-receipt", {
-        method: "POST",
-        body: formData,
-      });
+      // We will store all API call promises here
+      const uploadPromises: Promise<Response>[] = [];
 
-      if (!response.ok) {
-        throw new Error("Failed to upload receipt");
+      // Loop through all selected files
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // Use a 1-based index for the filename: _1, _2, _3
+        const fileIndex = i + 1;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("paymentId", paymentId);
+        formData.append("taskId", quotation.task_id);
+        formData.append("paymentReference", payment.payment_reference || "");
+        formData.append("invoiceNumber", payment.invoice_number || "");
+        // *** NEW: Send the file index to the server ***
+        formData.append("fileIndex", fileIndex.toString());
+
+        // Add the fetch promise to the array
+        uploadPromises.push(
+          fetch("/api/sales/payment/upload-receipt", {
+            method: "POST",
+            body: formData,
+          }),
+        );
       }
 
-      const data = await response.json();
+      // Wait for all uploads to complete
+      const responses = await Promise.all(uploadPromises);
+      let allSuccess = true;
+      let lastSuccessfulData: any = null;
 
-      // After successful upload, call the API to mark the payment as received
-      if (data.success && !payment.received) {
-        // Call your existing function to mark payment as received
+      for (const response of responses) {
+        if (!response.ok) {
+          allSuccess = false;
+          // Throw error for the first failed response
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || "Failed to upload one or more receipts",
+          );
+        }
+        lastSuccessfulData = await response.json();
+      }
+
+      // After successful upload, mark the payment as received if it wasn't already.
+      // This only needs to run once if all uploads were successful.
+      if (allSuccess && lastSuccessfulData && !payment.received) {
         await handleToggleReceived(paymentId);
       }
 
       // Refresh payment data
       await refreshPaymentData();
-      setPaymentSuccess("Receipt uploaded successfully");
+      // Update success message to reflect multiple files
+      setPaymentSuccess(`Successfully uploaded ${files.length} receipts`);
     } catch (error) {
       console.error("Error uploading receipt:", error);
-      setPaymentError("Failed to upload receipt");
+      setPaymentError(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload one or more receipts",
+      );
     } finally {
       setIsAddingPayment(false);
+      // Clear the input value so the same files can be selected again
+      e.target.value = "";
     }
   };
 
@@ -1371,7 +1406,7 @@ export default function PaymentAutoPage() {
                               title="Open PDF folder"
                               type="button"
                             >
-                              <svg
+                              {/* <svg
                                 className="h-4 w-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -1383,6 +1418,13 @@ export default function PaymentAutoPage() {
                                   strokeWidth="1.5"
                                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
+                              </svg> */}
+                              <svg
+                                className="h-5 w-5"
+                                fill="currentColor"
+                                viewBox="0 0 512 512"
+                              >
+                                <path d="M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z" />
                               </svg>
                             </button>
                           </td>
@@ -1525,7 +1567,7 @@ export default function PaymentAutoPage() {
                                     disabled={generatingInv}
                                   >
                                     <svg
-                                      className="h-4 w-4"
+                                      className="h-6 w-6"
                                       fill="none"
                                       stroke="currentColor"
                                       viewBox="0 0 24 24"
@@ -1561,7 +1603,7 @@ export default function PaymentAutoPage() {
                                       type="button"
                                     >
                                       <svg
-                                        className="h-4 w-4"
+                                        className="h-6 w-6"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -1597,6 +1639,7 @@ export default function PaymentAutoPage() {
                                         <input
                                           type="file"
                                           accept="image/*,application/pdf"
+                                          multiple
                                           className="hidden"
                                           onChange={(e) =>
                                             handleFileUpload(e, payment.id)
@@ -1613,7 +1656,7 @@ export default function PaymentAutoPage() {
                                       title="Upload receipt"
                                     >
                                       <svg
-                                        className="h-4 w-4"
+                                        className="h-5 w-5"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -1621,13 +1664,14 @@ export default function PaymentAutoPage() {
                                         <path
                                           strokeLinecap="round"
                                           strokeLinejoin="round"
-                                          strokeWidth="1.5"
+                                          strokeWidth="2"
                                           d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
                                         />
                                       </svg>
                                       <input
                                         type="file"
                                         accept="image/*,application/pdf"
+                                        multiple
                                         className="hidden"
                                         onChange={(e) =>
                                           handleFileUpload(e, payment.id)
@@ -1660,7 +1704,7 @@ export default function PaymentAutoPage() {
                                     }
                                   >
                                     <svg
-                                      className="h-4 w-4"
+                                      className="h-5 w-5"
                                       fill="none"
                                       stroke="currentColor"
                                       viewBox="0 0 24 24"
@@ -1668,7 +1712,7 @@ export default function PaymentAutoPage() {
                                       <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        strokeWidth="1.5"
+                                        strokeWidth="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                       />
                                     </svg>
