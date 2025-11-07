@@ -73,6 +73,20 @@ export default function PaymentAutoPage() {
   const [pdfFiles, setPdfFiles] = useState<
     { name: string; lastModified: string }[]
   >([]);
+
+  // Receipt modal states
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [currentPaymentRef, setCurrentPaymentRef] = useState<string | null>(
+    null,
+  );
+  const [receiptFiles, setReceiptFiles] = useState<
+    { filename: string; filePath: string }[]
+  >([]);
+  const [loadingReceipts, setLoadingReceipts] = useState(false);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [currentPaymentIdForUpload, setCurrentPaymentIdForUpload] = useState<
+    string | null
+  >(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // UI states
@@ -787,6 +801,42 @@ export default function PaymentAutoPage() {
     }
   };
 
+  //1.2 view receipt
+  const handleViewReceipts = async (
+    paymentId: string, // <-- now accept the paymentId
+    paymentReference: string,
+  ) => {
+    if (!quotation?.task_id) return;
+
+    // Store both the ID (for new uploads) and Ref (for listing)
+    setCurrentPaymentIdForUpload(paymentId); // <-- SET THE NEW STATE | Id for upload button
+    setCurrentPaymentRef(paymentReference); // Set the Reference for the title and API call
+    setIsReceiptModalOpen(true);
+    setLoadingReceipts(true);
+    setReceiptFiles([]);
+    setReceiptError(null);
+
+    try {
+      const url = `/api/sales/payment/list-receipts?taskId=${quotation.task_id}&paymentReference=${paymentReference}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch receipts list");
+      }
+
+      const data = await response.json();
+      setReceiptFiles(data.files);
+    } catch (error) {
+      console.error("Error fetching receipts:", error);
+      setReceiptError(
+        error instanceof Error ? error.message : "Error fetching receipts list",
+      );
+    } finally {
+      setLoadingReceipts(false);
+    }
+  };
+
   // Handle generating payment statement PDF
   const handleGeneratePaymentStatement = async () => {
     try {
@@ -985,6 +1035,20 @@ export default function PaymentAutoPage() {
       setIsAddingPayment(false);
       // Clear the input value so the same files can be selected again
       e.target.value = "";
+
+      // --- ADD THIS BLOCK TO REFRESH THE MODAL ---
+      // If the modal is open (which we know by checking the state),
+      // re-run the view/list function to show the new file.
+      if (
+        isReceiptModalOpen &&
+        currentPaymentIdForUpload &&
+        currentPaymentRef
+      ) {
+        // We re-call handleViewReceipts to refresh the file list
+        // using the ID and Ref we stored in the state.
+        await handleViewReceipts(currentPaymentIdForUpload, currentPaymentRef);
+      }
+      // --- END OF ADDED BLOCK ---
     }
   };
 
@@ -1594,12 +1658,24 @@ export default function PaymentAutoPage() {
                                   paymentsWithReceipts[payment.id || ""] ? (
                                     // If receipt exists, show view button
                                     <button
-                                      onClick={() =>
-                                        payment.id &&
-                                        handleViewReceipt(payment.id)
+                                      // onClick={() =>
+                                      //   payment.id &&
+                                      //   handleViewReceipt(payment.id)
+                                      // }
+                                      //v1.2
+                                      // onClick={() => payment.payment_reference && handleViewReceipts(payment.payment_reference)}
+                                      //v1.3
+                                      onClick={
+                                        () =>
+                                          payment.id &&
+                                          payment.payment_reference && // <-- Add check for reference
+                                          handleViewReceipts(
+                                            payment.id,
+                                            payment.payment_reference,
+                                          ) // <-- Call the new modal function
                                       }
                                       className="text-blue-500 transition-colors hover:text-blue-700"
-                                      title="View receipt"
+                                      title="View receipts"
                                       type="button"
                                     >
                                       <svg
@@ -2098,6 +2174,161 @@ export default function PaymentAutoPage() {
               <button
                 onClick={() => setIsPdfModalOpen(false)}
                 className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Receipt Selection Modal */}
+      {isReceiptModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
+          <div className="dark:bg-boxdark relative mt-20 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+                Receipts for Payment: {currentPaymentRef}
+              </h3>
+              <button
+                onClick={() => setIsReceiptModalOpen(false)}
+                className="text-primary cursor-pointer text-2xl"
+              >
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="max-h-96 overflow-y-auto py-4">
+              {loadingReceipts && (
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                  Loading receipts...
+                </p>
+              )}
+              {receiptError && (
+                <p className="text-center text-sm text-red-500">
+                  Error: {receiptError}
+                </p>
+              )}
+              {!loadingReceipts &&
+                receiptFiles.length === 0 &&
+                !receiptError && (
+                  <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                    No receipts found for this payment.
+                  </p>
+                )}
+
+              {!loadingReceipts && receiptFiles.length > 0 && (
+                <ul className="space-y-2">
+                  {receiptFiles.map((file, index) => (
+                    <li key={file.filePath}>
+                      <a
+                        href={`/api/sales/payment/view-receipt?filePath=${file.filePath}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group dark:hover:bg-boxdark-2 flex items-center justify-between rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        <span className="flex items-center gap-2">
+                          {/* <svg
+                            className="text-meta-5 h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="1.5"
+                              d="M9 12h6m-3-3v6M17 16l4-4-4-4M7 8l-4 4 4 4"
+                            />
+                          </svg> */}
+                          <svg
+                            className="text-primary h-8 w-8"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 8h6m-6 4h6m-6 4h6M6 3v18l2-2 2 2 2-2 2 2 2-2 2 2V3l-2 2-2-2-2 2-2-2-2 2-2-2Z"
+                            />
+                          </svg>
+                          Receipt #{index + 1}: {file.filename}
+                        </span>
+                        {/* <svg
+                          className="group-hover:text-primary h-6 w-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          />
+                        </svg> */}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="dark:border-strokedark dark:bg-boxdark sticky bottom-0 flex justify-end gap-2 rounded-b-lg border-t bg-white pt-3">
+              {/* --- ADD THIS <label> AS A BUTTON --- */}
+              <label className="bg-primary hover:bg-primarydark dark:border-strokedark flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 font-medium text-white">
+                {/* <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg> */}
+                <span>Add Receipt</span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    // When a file is selected, call handleFileUpload
+                    // with the payment ID we stored in the state
+                    if (currentPaymentIdForUpload) {
+                      handleFileUpload(e, currentPaymentIdForUpload);
+                    }
+                  }}
+                />
+              </label>
+              {/* --- END OF ADDED <label> --- */}
+              <button
+                onClick={() => setIsReceiptModalOpen(false)}
+                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-white"
               >
                 Cancel
               </button>

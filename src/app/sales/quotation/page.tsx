@@ -813,15 +813,15 @@ export default function QuotationListPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/50">
-          <div className="dark:bg-boxdark mx-4 w-full max-w-md rounded-sm bg-white p-6 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
+          <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Select PDF
               </h3>
               <button
                 onClick={() => setIsPdfModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="text-primary cursor-pointer text-2xl"
               >
                 <svg
                   className="h-6 w-6"

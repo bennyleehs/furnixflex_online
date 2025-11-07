@@ -19,9 +19,10 @@ export async function GET(request: NextRequest) {
       }
       
       const fileBuffer = fs.readFileSync(fullPath);
+      const fileUint8Array = new Uint8Array(fileBuffer);
       const contentType = getContentType(fullPath);
       
-      return new NextResponse(fileBuffer, {
+      return new NextResponse(fileUint8Array, {
         headers: {
           'Content-Type': contentType,
           'Content-Disposition': `inline; filename="${path.basename(fullPath)}"`,
@@ -75,9 +76,10 @@ export async function GET(request: NextRequest) {
     // Read and serve the file
     const fullPath = path.join(receiptsDir, receiptFile);
     const fileBuffer = fs.readFileSync(fullPath);
+    const fileUint8Array = new Uint8Array(fileBuffer);
     const contentType = getContentType(fullPath);
     
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(fileUint8Array, {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `inline; filename="${receiptFile}"`,
