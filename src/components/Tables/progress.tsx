@@ -273,7 +273,8 @@ export default function ProgressTable({
             let bgColorClass = "bg-meta-8"; // Determine color based on stage
             let textColorClass = "text-white";
 
-            if (info.stage === "Job Done") bgColorClass = "bg-success dark:bg-green-500";
+            if (info.stage === "Job Done")
+              bgColorClass = "bg-success dark:bg-green-500";
             else if (
               ["Quotation", "Payment", "Production", "Installation"].includes(
                 info.stage,
@@ -298,7 +299,7 @@ export default function ProgressTable({
               >
                 {/* Compact display for mobile */}
                 <div
-                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-md font-medium shadow-md ${
+                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} text-md flex items-center justify-center font-medium shadow-md ${
                     // selectedStage === info.stage
                     selectedStatus === info.stage
                       ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
@@ -474,6 +475,14 @@ export default function ProgressTable({
           const [name, nric] = (task.name || "")
             .split("/")
             .map((s: string) => s.trim());
+
+          const createdDateObj = new Date(task.created_at);
+          const created_date = createdDateObj.toLocaleDateString("en-GB", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+
           const [phone1, phone2, email] = (task.contact || "")
             .split("/")
             .map((s: string) => s.trim());
@@ -643,15 +652,15 @@ export default function ProgressTable({
                     <span
                       className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
                         task.status === "Job Done"
-                          ? "bg-success/10 text-success border border-success"
+                          ? "bg-success/10 text-success border-success border"
                           : [
                                 "Quotation",
                                 "Payment",
                                 "Production",
                                 "Installation",
                               ].includes(task.status)
-                            ? "bg-meta-10/10 text-meta-10 border border-meta-10"
-                            : "bg-meta-8/10 text-meta-8 border border-meta-8"
+                            ? "bg-meta-10/10 text-meta-10 border-meta-10 border"
+                            : "bg-meta-8/10 text-meta-8 border-meta-8 border"
                       }`}
                     >
                       {task.status}
@@ -659,25 +668,32 @@ export default function ProgressTable({
                   </div>
 
                   {/* PIC info */}
-                  <div className="mt-2 flex items-center">
-                    <svg
-                      className="mr-1 h-3 w-3 text-gray-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                    </svg>
-                    <span className="font-semibold text-black dark:text-white">
-                      PIC:
-                    </span>
-                    <span className="ml-1 text-black dark:text-white">
-                      {salesName || "Unassigned"}
-                    </span>
-                    {salesUid && (
-                      <span className="ml-1 text-black dark:text-white">
-                        ({salesUid})
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      <svg
+                        className="mr-1 h-3 w-3 text-gray-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      </svg>
+                      <span className="font-semibold text-black dark:text-white">
+                        PIC:
                       </span>
-                    )}
+                      <span className="ml-1 text-black dark:text-white">
+                        {salesName || "Unassigned"}
+                      </span>
+                      {salesUid && (
+                        <span className="ml-1 text-black dark:text-white">
+                          ({salesUid})
+                        </span>
+                      )}
+                    </div>
+                    {/* Display date */}
+                    <div className="pt-3 text-black dark:text-white">
+                      <span  className="font-semibold ">DATE: </span>
+                      <span className="ml-1 text-sm">{created_date}</span>
+                      </div>
                   </div>
                 </div>
               </div>

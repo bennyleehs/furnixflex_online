@@ -1600,23 +1600,18 @@ export default function PaymentAutoPage() {
                                     disabled={generatingInv}
                                   >
                                     <svg
-                                      className="h-4 w-4"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="20"
+                                      height="20"
+                                      viewBox="0 0 24 24"
                                       fill="none"
                                       stroke="currentColor"
-                                      viewBox="0 0 24 24"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="1.5"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                      />
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="1.5"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                      />
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                                      <path d="M14 3v5h5M16 13H8M16 17H8M10 9H8" />
                                     </svg>
                                   </button>
                                 ) : (
