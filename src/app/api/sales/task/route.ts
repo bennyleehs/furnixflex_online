@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
           WHEN 'Assign PIC' THEN 7
           ELSE 8
         END,
-        GREATEST(c.created_at, c.updated_at) DESC, 
+        c.created_at DESC, 
         c.id DESC 
       LIMIT ? OFFSET ?;
     `;
