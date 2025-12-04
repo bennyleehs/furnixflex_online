@@ -4,6 +4,10 @@ import Tables from "@/components/Tables/progress";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useAuth } from "@/context/AuthContext";
 
+const MENU = "2";
+const SUBMENU = "3";
+const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+
 export default function Page() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [data, setData] = useState<any[]>([]);
