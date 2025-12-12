@@ -616,7 +616,7 @@ const Profile = () => {
                   </div>
 
                   {/* Change Password button */}
-                  <div className="flex w-full justify-center md:w-auto">
+                  {/* <div className="flex w-full justify-center md:w-auto">
                     <button
                       onClick={() => setIsChangePasswordModalOpen(true)}
                       className="dark:bg-meta-4 dark:border-strokedark dark:hover:bg-primary hover:border-primary hover:text-primary inline-flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 px-2 py-2 text-gray-700 md:w-auto md:px-4 dark:text-white dark:hover:text-white"
@@ -636,7 +636,7 @@ const Profile = () => {
                       </svg>
                       Change Password
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               {/* User Info section */}
