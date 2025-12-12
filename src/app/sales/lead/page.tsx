@@ -36,9 +36,13 @@ export default function LeadPage() {
     // Otherwise, filter by their own UID.
     // const userRole = user?.role.toLowerCase() || "";
     const userRole = user?.role || "";
-    const isSalesPerson = !["Supervisor", "Assistant Manager"].includes(
-      userRole,
-    ); // Adjust roles as needed
+    const isSalesPerson = ![
+      "Managing Director",
+      "Director",
+      "Supervisor",
+      "Manager",
+      "Assistant Manager",
+    ].includes(userRole); // Adjust roles as needed
 
     // Use the logged-in user's UID for filtering if they are a sales person
     const filterSalesUid = isSalesPerson ? user?.uid : null;
