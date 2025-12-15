@@ -66,4 +66,4 @@ async function handler(req: AuthenticatedRequest) {
 }
 
 // Export the route handler with authentication middleware
-export const GET = withAuth(handler, ["1.0.1", "1.0.2", "1.0.3", "1.0.4"]);
+export const GET = withAuth(handler, ["1.0.1", "1.0.2", "1.0.3", "1.0.4", "1.1.1", "1.1.2", "1.1.3", "1.1.4"]);
