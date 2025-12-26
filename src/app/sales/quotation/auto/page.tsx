@@ -12,6 +12,7 @@ import {
   TermsConditionsWarrantySections,
   getTermsAsPlainText,
 } from "@/types/sales-quotation";
+import SearchableDropdown from "@/components/SearchableDropdown/SearchDropdown";
 
 export default function QuotationPage() {
   const searchParams = useSearchParams();
@@ -1721,7 +1722,7 @@ export default function QuotationPage() {
               </button>
             </div>
 
-            <div className="border-stroke dark:border-strokedark overflow-x-auto rounded-lg border">
+            <div className="border-stroke dark:border-strokedark overflow-x-auto rounded-lg border relative">
               <table className="w-full min-w-full">
                 <thead>
                   <tr className="dark:bg-meta-4 bg-gray-100">
@@ -1762,9 +1763,8 @@ export default function QuotationPage() {
                       </td>
 
                       <td className="min-w-125 px-3 py-2">
-                        <div className="grid grid-cols-3 gap-2">
-                          {/* Category Dropdown - Fixed Version */}
-                          <select
+                        {/* <div className="grid grid-cols-3 gap-2">
+                          <select // Category Dropdown
                             value={item.category || ""}
                             onChange={(e) => {
                               e.stopPropagation();
@@ -1803,8 +1803,7 @@ export default function QuotationPage() {
                             ))}
                           </select>
 
-                          {/* Subcategory Dropdown */}
-                          <select
+                          <select //Subcategory Dropdown
                             value={item.subcategory || ""}
                             onChange={(e) => {
                               e.stopPropagation();
@@ -1857,8 +1856,7 @@ export default function QuotationPage() {
                             )}
                           </select>
 
-                          {/* Product Dropdown */}
-                          <select
+                          <select //Product Dropdown
                             value={String(item.productId || "")}
                             onChange={(e) => {
                               e.stopPropagation(); // Prevent event bubbling
@@ -1914,6 +1912,133 @@ export default function QuotationPage() {
                                 ),
                               )}
                           </select>
+                        </div> */}
+
+                        {/* Search Dropdown */}
+                        <div className="grid grid-cols-3 gap-2">
+                          {/* Category Dropdown */}
+                          <SearchableDropdown
+                            value={item.category || ""}
+                            placeholder="Select Category"
+                            // Convert your string array to object array
+                            options={categories.map((c) => ({
+                              label: c,
+                              value: c,
+                            }))}
+                            onChange={(cat) => {
+                              const newCategory = String(cat);
+                              console.log("Selected category:", newCategory);
+
+                              const updatedItem = {
+                                ...item,
+                                productId: "",
+                                category: newCategory,
+                                subcategory: "",
+                                productName: "",
+                                description: "",
+                                unitPrice: 0,
+                                unit: "unit",
+                                total: 0,
+                              };
+
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                              logSubcategorySelection(newCategory);
+                            }}
+                          />
+
+                          {/* Subcategory Dropdown */}
+                          <SearchableDropdown
+                            value={item.subcategory || ""}
+                            placeholder="Select Subcategory"
+                            disabled={
+                              !item.category ||
+                              !subcategories[item.category]?.length
+                            }
+                            // Handle the safe access for subcategories
+                            options={(subcategories[item.category] || []).map(
+                              (s) => ({
+                                label: s,
+                                value: s,
+                              }),
+                            )}
+                            onChange={(subcat) => {
+                              const newSubcategory = String(subcat);
+                              console.log(
+                                "Selected subcategory:",
+                                newSubcategory,
+                              );
+
+                              if (newSubcategory) {
+                                debugProductStructure(
+                                  item.category,
+                                  newSubcategory,
+                                );
+                              }
+
+                              const updatedItem = {
+                                ...item,
+                                productId: "",
+                                subcategory: newSubcategory,
+                                productName: "",
+                                description: "",
+                                unitPrice: 0,
+                                unit: "unit",
+                                total: 0,
+                              };
+
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                            }}
+                          />
+
+                          {/* Product Dropdown */}
+                          <SearchableDropdown
+                            value={String(item.productId || "")}
+                            placeholder="Select Product"
+                            disabled={!item.category || !item.subcategory}
+                            // Map products to { label: name, value: id }
+                            options={(
+                              products[item.category]?.[item.subcategory] || []
+                            ).map((p) => ({
+                              label: p.name,
+                              value: String(p.id),
+                            }))}
+                            onChange={(productId) => {
+                              const newProductId = String(productId);
+                              console.log("Product selected:", newProductId);
+
+                              let updatedItem = {
+                                ...item,
+                                productId: newProductId,
+                              };
+
+                              if (newProductId && productLookup[newProductId]) {
+                                const product = productLookup[newProductId];
+
+                                updatedItem = {
+                                  ...updatedItem,
+                                  productName: product.name || "",
+                                  description: product.description || "",
+                                  unitPrice: product.price || 0,
+                                  discount: product.discount || 0,
+                                  unit: product.unit || "unit",
+                                  total:
+                                    (Number(updatedItem.quantity) || 1) *
+                                    (product.price || 0),
+                                };
+                              }
+
+                              const newItems = items.map((i) =>
+                                i.id === item.id ? updatedItem : i,
+                              );
+                              setItems(newItems);
+                            }}
+                          />
                         </div>
 
                         {/* Hidden display for the selected product description (optional) */}
