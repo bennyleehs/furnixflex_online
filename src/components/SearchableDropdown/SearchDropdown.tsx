@@ -128,7 +128,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           >
             <div className="p-2">
               <input
-                autoFocus
                 type="text"
                 placeholder="Search..."
                 className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm outline-hidden dark:border-gray-700 dark:bg-meta-4"
