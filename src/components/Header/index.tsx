@@ -14,14 +14,14 @@ const Header = (props: {
       <div className="shadow-2 flex grow items-center justify-between px-4 py-2 md:px-6 2xl:px-8">
         <div className="flex items-center gap-2 sm:gap-4">
           {/* <!-- Hamburger Toggle BTN --> */}
-          <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
+          <div className="flex items-center gap-2 sm:gap-4 2xl:hidden">
             <button
               aria-controls="sidebar"
               onClick={(e) => {
                 e.stopPropagation();
                 props.setSidebarOpen(!props.sidebarOpen);
               }}
-              className="border-stroke dark:border-strokedark dark:bg-boxdark z-99999 block rounded-xs border bg-white p-1.5 shadow-xs lg:hidden"
+              className="border-stroke dark:border-strokedark dark:bg-boxdark z-99999 block rounded-xs border bg-white p-1.5 shadow-xs 2xl:hidden"
             >
               <span className="relative block h-5.5 w-5.5 cursor-pointer">
                 <span className="du-block absolute right-0 h-full w-full">
@@ -58,7 +58,7 @@ const Header = (props: {
           </div>
           {/* <!-- Hamburger Toggle BTN --> */}
 
-          <Link className="block shrink-0 lg:hidden" href="/">
+          <Link className="block shrink-0 2xl:hidden" href="/">
             <Image
               width={32}
               height={32}

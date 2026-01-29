@@ -35,15 +35,19 @@ export async function GET(req: NextRequest) {
         checkout_latitude, 
         checkout_longitude, 
         total_minutes,
+        attendance.created_at,
         u.id AS users_id, 
         u.name AS employee_name
     FROM attendance
-    LEFT JOIN users u ON attendance.user_id = u.id`;
+    LEFT JOIN users u ON attendance.user_id = u.id
+    `;
     // --- END OF MODIFICATION ---
 
     if (id) {
       sql += ` WHERE attendance.id = ?`;
     }
+
+    sql += `ORDER BY created_at DESC`
 
     const [rows] = id
       ? await db.query<RowDataPacket[]>(sql, [id])

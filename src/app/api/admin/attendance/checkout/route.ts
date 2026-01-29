@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     }
 
     await db.query(
-      "UPDATE attendance SET checkout_time = ?, checkout_latitude = ?, checkout_longitude = ?, checkout_address = ?, total_minutes = ? WHERE id = ?",
+      "UPDATE attendance SET checkout_time = ?, checkout_latitude = ?, checkout_longitude = ?, checkout_address = ?, total_minutes = ?, updated_at = NOW() WHERE id = ?",
       [
         checkout_time,
         latitude,

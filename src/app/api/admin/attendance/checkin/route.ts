@@ -83,6 +83,8 @@ export async function POST(req: NextRequest) {
       checkout_latitude: null,
       checkout_longitude: null,
       total_minutes: 0,
+      created_at: new Date(),
+      // created_at: new Date().toISOString().slice(0,19).replace('T', ' '),
     };
 
     const [result] = await db.query(

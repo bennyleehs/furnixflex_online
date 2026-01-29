@@ -412,7 +412,7 @@ export default function Tables({
                   {col.title}
                 </th>
               ))}
-              <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[120px] px-4 py-4 text-center font-medium text-black xl:pl-6 dark:text-white">
+              <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-30 px-4 py-4 text-center font-medium text-black xl:pl-6 dark:text-white">
                 Actions
               </th>
             </tr>
