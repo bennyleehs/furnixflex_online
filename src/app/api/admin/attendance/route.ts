@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
       sql += ` WHERE attendance.id = ?`;
     }
 
-    sql += `ORDER BY created_at DESC`
+    // sql += `ORDER BY created_at DESC`
+    sql += `ORDER BY tracking_date DESC`
 
     const [rows] = id
       ? await db.query<RowDataPacket[]>(sql, [id])
