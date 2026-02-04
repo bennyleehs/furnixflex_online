@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       process.cwd(),
       "public",
       "sales",
-      data.quotation.task_id,
+      data.quotation.task_id.toString(),
       "quotation",
     );
     fs.mkdirSync(uploadsDir, { recursive: true });
