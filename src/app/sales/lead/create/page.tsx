@@ -342,11 +342,13 @@ export default function Page() {
         title: "Address Line",
         inputType: "text",
         valueKey: "address_line1",
+        forceUppercase: true,
       },
       {
         title: "Address Line 2",
         inputType: "text",
         valueKey: "address_line2",
+        forceUppercase: true,
       },
       {
         title: "Postcode",

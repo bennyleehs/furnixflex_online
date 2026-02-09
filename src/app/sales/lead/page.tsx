@@ -182,7 +182,7 @@ export default function LeadPage() {
       format: (_: any, row: Lead) => {
         const parts = [
           row.address_line1 ? `${row.address_line1},` : "-",
-          // row.address_line2 || "-",
+          row.address_line2 || "-",
           [row.city, row.state].filter(Boolean).join(", ") || "-",
           [row.postcode, row.country].filter(Boolean).join(", ") || "-",
         ];

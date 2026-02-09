@@ -345,11 +345,11 @@ layer(base);
 }
 
 @utility chat-height {
-  @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+  @apply h-[calc(100vh-8.125rem)] lg:h-[calc(100vh-5.625rem)];
 }
 
 @utility inbox-height {
-  @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+  @apply h-[calc(100vh-8.125rem)] lg:h-[calc(100vh-5.625rem)];
 }
 
 @layer base {

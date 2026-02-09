@@ -776,13 +776,13 @@ export default function ProductsPage() {
                 <th className="px-4 py-4 font-medium text-black dark:text-white">
                   Category
                 </th>
-                <th className="min-w-[180px] px-4 py-4 font-medium text-black dark:text-white">
+                <th className="min-w-45 px-4 py-4 font-medium text-black dark:text-white">
                   Subcategory
                 </th>
-                <th className="min-w-[300px] px-4 py-4 font-medium text-black dark:text-white">
+                <th className="min-w-75 px-4 py-4 font-medium text-black dark:text-white">
                   Product
                 </th>
-                <th className="min-w-[140px] px-4 py-4 text-right font-medium text-black dark:text-white">
+                <th className="min-w-35 px-4 py-4 text-right font-medium text-black dark:text-white">
                   Price (RM)
                 </th>
                 <th className="px-4 py-4 text-center font-medium text-black dark:text-white">
@@ -794,10 +794,10 @@ export default function ProductsPage() {
                 <th className="px-4 py-4 font-medium text-black dark:text-white">
                   Effective Duration
                 </th>
-                <th className="min-w-[140px] px-4 py-4 font-medium text-black dark:text-white">
+                <th className="min-w-35 px-4 py-4 font-medium text-black dark:text-white">
                   Task ID
                 </th>
-                <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-[120px] px-4 py-4 text-center font-medium text-black dark:text-white">
+                <th className="bg-gray-2 dark:bg-meta-4 sticky right-0 z-10 min-w-30 px-4 py-4 text-center font-medium text-black dark:text-white">
                   Actions
                 </th>
               </tr>
