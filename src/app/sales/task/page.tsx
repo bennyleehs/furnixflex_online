@@ -17,7 +17,7 @@ export default function Page() {
   const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
+  const [itemsPerPage] = useState(50);
   const [hasMore, setHasMore] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
@@ -58,6 +58,7 @@ export default function Page() {
           contact: `${item.phone1} / ${item.phone2} / ${item.email}`,
           address: `${item.address_line1}, ${item.address_line2}, 
                    ${item.city}, ${item.state}, ${item.country}`,
+          address_short:`${item.city}, ${item.state}`,
           date: new Date(item.created_at).toLocaleDateString(),
           status: `${item.status}`,
           sales_uid: `${item.sales_uid}`,
@@ -165,7 +166,7 @@ export default function Page() {
         <div className="mt-4 text-center">
           <button
             onClick={handleLoadMore}
-            className="border-primary bg-primary hover:bg-primarydark w-sm cursor-pointer rounded-lg border p-3 font-semibold text-white transition"
+            className="border-primary bg-primary hover:bg-primarydark w-full xsm:w-sm cursor-pointer rounded-lg border p-3 font-semibold text-white transition"
           >
             Load More ({data.length}/{totalItems})
           </button>

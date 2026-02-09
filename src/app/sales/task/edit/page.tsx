@@ -22,6 +22,7 @@ interface Task {
   country: string | null;
   customer_remark: string | null;
   status: string;
+  followUp_status: string;
   created_at: string;
   updated_at: string;
   source: string | null;
@@ -64,6 +65,7 @@ export default function TaskEditPage() {
 
   // Add this state variable at the top of your component
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedSubStatus, setSelectedSubStatus] = useState<string>("");
 
   // Add this state variable at the top of your component with the other state variables
   const [groupedTasks, setGroupedTasks] = useState<Record<string, Task>>({});
@@ -78,9 +80,12 @@ export default function TaskEditPage() {
       "Production",
       "Installation",
       "Job Done",
+      "Others",
     ],
     [],
   );
+
+  const followUpOptions = ["Survey", "Waiting for Home Key", "Renovation"];
 
   // Wrap fetchFtpLogs and fetchTaskFiles in useCallback
   const fetchFtpLogs = useCallback(async () => {
@@ -176,6 +181,7 @@ export default function TaskEditPage() {
     taskId: string,
     newStatus: string,
     oldStatus: string,
+    followUpstatus: string,
   ) {
     try {
       const response = await fetch("/api/sales/task", {
@@ -186,7 +192,8 @@ export default function TaskEditPage() {
         body: JSON.stringify({
           id: taskId,
           status: newStatus,
-          notes: `Status changed from ${oldStatus} to ${newStatus}`,
+          followUp_status: followUpstatus || null,
+          notes: `Status changed from ${oldStatus} to ${newStatus}${followUpstatus ? `(${followUpstatus})` : ""}`,
           userName: "Current User", // Replace with actual user name from auth
         }),
       });
@@ -215,6 +222,7 @@ export default function TaskEditPage() {
       setTask({
         ...task,
         status: newStatus,
+        followUp_status: selectedSubStatus,
         stageIndex: pipelineStages.indexOf(newStatus),
         progressPercentage: Math.round(
           ((pipelineStages.indexOf(newStatus) + 1) / pipelineStages.length) *
@@ -226,6 +234,7 @@ export default function TaskEditPage() {
       formData.append("id", taskId);
       formData.append("status", newStatus);
       formData.append("oldStatus", oldStatus.current); // Use the ref value
+      formData.append("followUp_status", selectedSubStatus);
       formData.append("notes", updateNote);
       formData.append("userName", "Current User"); // Replace with actual username
 
@@ -244,7 +253,10 @@ export default function TaskEditPage() {
         action:
           files.length > 0 ? "Status Update with Attachments" : "Status Update",
         oldValue: oldStatus.current, // Use the ref value
-        newValue: newStatus,
+        newValue:
+          newStatus === "Follow Up"
+            ? `Follow Up (${selectedSubStatus})`
+            : newStatus,
         notes: updateNote,
       };
 
@@ -255,6 +267,7 @@ export default function TaskEditPage() {
         taskId,
         newStatus,
         `Status changed from ${oldStatus} to ${newStatus}${updateNote ? "\n" + updateNote : ""}`,
+        selectedSubStatus,
       );
 
       // API call to update backend
@@ -354,25 +367,28 @@ export default function TaskEditPage() {
   useEffect(() => {
     if (task) {
       // Check if the task status is one of the pipeline stages.
-      // If not, default to the first pipeline stage ("Follow Up").
       const initialStatus = pipelineStages.includes(task.status)
         ? task.status
-        : pipelineStages[0]; // pipelineStages[0] is "Follow Up"
+        : pipelineStages[0]; // take the first in array pipelineStages[]
 
       setSelectedStatus(initialStatus);
 
-      // Also, update the task object's status in the state if we defaulted it,
-      // so the logic in handleStatusUpdate correctly compares oldStatus/newStatus.
-      // However, to keep task data pristine, we'll rely on the user clicking update.
-      // For now, only update selectedStatus.
+      if (task.followUp_status) {
+        setSelectedSubStatus(task.followUp_status);
+      } else {
+        setSelectedSubStatus("");
+      }
+
+      // safely load new task
+      setUpdateNote("");
     }
-  }, [task, pipelineStages]); // Added pipelineStages to dependency array for correctness
+  }, [task, pipelineStages]); // Added pipelineStages to dependency array
 
   if (loading) {
     return (
       <DefaultLayout>
         <div className="flex h-64 items-center justify-center">
-          <div className="border-primary h-16 w-16 animate-spin rounded-full border-t-2 border-b-2"></div>
+          <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"></div>
         </div>
       </DefaultLayout>
     );
@@ -689,9 +705,9 @@ export default function TaskEditPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Left column - Task details with vertical flex layout */}
         <div className="md:col-span-2">
-          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-4 rounded-lg border bg-white p-6">
             {/* Customer header section */}
-            <div className="border-stroke dark:border-strokedark border-b pb-5">
+            <div className="border-stroke dark:border-strokedark">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2 className="text-xl font-semibold text-black dark:text-white">
@@ -721,19 +737,14 @@ export default function TaskEditPage() {
                 {/* Contact information as flex-column on mobile, flex-row on larger screens */}
                 <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
                   {nric && (
-                    <span className="border-stroke dark:bg-meta-4 dark:border-strokedark inline-flex items-center rounded-sm border bg-gray-100 px-2 py-0.5 text-xs font-normal text-gray-700 dark:text-gray-300">
+                    <span className="border-stroke dark:bg-meta-4 dark:border-strokedark inline-flex items-center rounded-sm border bg-gray-100 px-2 py-1 text-sm font-normal text-gray-600 dark:text-gray-300">
                       <svg
-                        className="mr-1 h-3 w-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                        className="mr-1 h-6 w-6"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 640 640"
+                        fill="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
-                        ></path>
+                        <path d="M544 144C552.8 144 560 151.2 560 160L560 480C560 488.8 552.8 496 544 496L96 496C87.2 496 80 488.8 80 480L80 160C80 151.2 87.2 144 96 144L544 144zM96 96C60.7 96 32 124.7 32 160L32 480C32 515.3 60.7 544 96 544L544 544C579.3 544 608 515.3 608 480L608 160C608 124.7 579.3 96 544 96L96 96zM240 312C270.9 312 296 286.9 296 256C296 225.1 270.9 200 240 200C209.1 200 184 225.1 184 256C184 286.9 209.1 312 240 312zM208 352C163.8 352 128 387.8 128 432C128 440.8 135.2 448 144 448L336 448C344.8 448 352 440.8 352 432C352 387.8 316.2 352 272 352L208 352zM408 208C394.7 208 384 218.7 384 232C384 245.3 394.7 256 408 256L488 256C501.3 256 512 245.3 512 232C512 218.7 501.3 208 488 208L408 208zM408 304C394.7 304 384 314.7 384 328C384 341.3 394.7 352 408 352L488 352C501.3 352 512 341.3 512 328C512 314.7 501.3 304 488 304L408 304z" />
                       </svg>
                       {nric}
                     </span>
@@ -757,29 +768,11 @@ export default function TaskEditPage() {
                       {task.phone1}
                     </a>
                   )}
+                </div>
 
-                  {(task.address_line1 || task.state) && (
+                <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
+                  {(task.address_line1 || task.address_line2 || task.state) && (
                     <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      {/* <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        ></path>
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        ></path>
-                      </svg> */}
                       <svg
                         className="h-4 w-4 text-red-500"
                         fill="currentColor"
@@ -789,12 +782,14 @@ export default function TaskEditPage() {
                       >
                         <path d="M16 144a144 144 0 1 1 288 0A144 144 0 1 1 16 144zM160 80c8.8 0 16-7.2 16-16s-7.2-16-16-16c-53 0-96 43-96 96c0 8.8 7.2 16 16 16s16-7.2 16-16c0-35.3 28.7-64 64-64zM128 480l0-162.9c10.4 1.9 21.1 2.9 32 2.9s21.6-1 32-2.9L192 480c0 17.7-14.3 32-32 32s-32-14.3-32-32z" />
                       </svg>
-                      {task.address_line1}
-                      {task.address_line1 && task.state ? ", " : ""}
-                      {task.state}
+                      {[task.address_line1, task.address_line2, task.state]
+                        .filter(Boolean)
+                        .join(", ")}
                     </span>
                   )}
+                </div>
 
+                <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
                   {/* Interested field */}
                   {task.interested && (
                     <span className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400">
@@ -857,25 +852,74 @@ export default function TaskEditPage() {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Task Update Form - Status, Notes, File Upload */}
-            <div className="border-stroke dark:border-strokedark border-t pt-5">
-              {/* <h5 className="mb-4 text-md font-medium text-black dark:text-white">Update Task</h5> */}
+          {/* Task Update Form - Status, Notes, File Upload */}
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
+            {/* <h5 className="mb-4 text-md font-medium text-black dark:text-white">Update Task</h5> */}
 
-              {/* Status Dropdown */}
+            {/* Status Dropdown */}
+            <div className="mb-4.5 w-full">
+              <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+                Status
+              </label>
+              <div className="relative z-20 bg-transparent">
+                <select
+                  className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary relative z-20 w-full appearance-none rounded-sm border bg-transparent px-5 py-3 outline-hidden transition"
+                  value={selectedStatus}
+                  onChange={(e) => {
+                    setSelectedStatus(e.target.value);
+                    //Reset sub-status if main status changes away from Follow up
+                    if (e.target.value !== "Follow up")
+                      setSelectedSubStatus("");
+                  }}
+                >
+                  {pipelineStages.map((stage) => (
+                    <option key={stage} value={stage}>
+                      {stage}
+                    </option>
+                  ))}
+                </select>
+                <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g opacity="0.8">
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                        fill="#637381"
+                      ></path>
+                    </g>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            {/* Conditional Sub-status Dropdown */}
+            {selectedStatus === "Follow Up" && (
               <div className="mb-4.5 w-full">
                 <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
-                  Status
+                  Follow Up Type
                 </label>
                 <div className="relative z-20 bg-transparent">
                   <select
                     className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary relative z-20 w-full appearance-none rounded-sm border bg-transparent px-5 py-3 outline-hidden transition"
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    value={selectedSubStatus}
+                    onChange={(e) => setSelectedSubStatus(e.target.value)}
+                    required={selectedStatus === "Follow Up"}
                   >
-                    {pipelineStages.map((stage) => (
-                      <option key={stage} value={stage}>
-                        {stage}
+                    <option value="" disabled>
+                      -- Select a follow up reason --
+                    </option>
+                    {followUpOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
                       </option>
                     ))}
                   </select>
@@ -899,120 +943,93 @@ export default function TaskEditPage() {
                   </span>
                 </div>
               </div>
+            )}
 
-              {/* Notes Textarea */}
-              <div className="mb-4.5">
-                <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
-                  Notes
+            {/* Notes Textarea */}
+            <div className="mb-4.5">
+              <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+                Notes
+              </label>
+              <textarea
+                rows={4}
+                placeholder="Add notes about this update..."
+                className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm font-medium outline-hidden transition disabled:cursor-default"
+                value={updateNote}
+                onChange={(e) => setUpdateNote(e.target.value)}
+              ></textarea>
+            </div>
+
+            {/* File Upload */}
+            <div className="mb-5.5">
+              <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+                Attach Files
+              </label>
+
+              <div className="relative">
+                <input
+                  type="file"
+                  className="hidden"
+                  id="fileUpload"
+                  multiple
+                  onChange={handleFileChange}
+                />
+                <label
+                  htmlFor="fileUpload"
+                  className="border-primary flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed px-6 py-4"
+                >
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="text-primary">
+                      <svg
+                        className="h-8 w-8"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </span>
+                    <p className="text-body-color text-sm dark:text-gray-400">
+                      <span className="text-primary font-medium">
+                        Click to upload
+                      </span>{" "}
+                      or drag and drop
+                    </p>
+                    <p className="text-body-color mt-1 text-xs dark:text-gray-400">
+                      JPG, PNG, PDF (MAX 10MB)
+                    </p>
+                  </div>
                 </label>
-                <textarea
-                  rows={4}
-                  placeholder="Add notes about this update..."
-                  className="border-stroke focus:border-primary active:border-primary disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-5 py-3 text-sm font-medium outline-hidden transition disabled:cursor-default"
-                  value={updateNote}
-                  onChange={(e) => setUpdateNote(e.target.value)}
-                ></textarea>
               </div>
 
-              {/* File Upload */}
-              <div className="mb-5.5">
-                <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
-                  Attach Files
-                </label>
-
-                <div className="relative">
-                  <input
-                    type="file"
-                    className="hidden"
-                    id="fileUpload"
-                    multiple
-                    onChange={handleFileChange}
-                  />
-                  <label
-                    htmlFor="fileUpload"
-                    className="border-primary flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed px-6 py-4"
-                  >
-                    <div className="flex flex-col items-center gap-1 text-center">
-                      <span className="text-primary">
-                        <svg
-                          className="h-8 w-8"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                          />
-                        </svg>
-                      </span>
-                      <p className="text-body-color text-sm dark:text-gray-400">
-                        <span className="text-primary font-medium">
-                          Click to upload
-                        </span>{" "}
-                        or drag and drop
-                      </p>
-                      <p className="text-body-color mt-1 text-xs dark:text-gray-400">
-                        JPG, PNG, PDF (MAX 10MB)
-                      </p>
-                    </div>
-                  </label>
-                </div>
-
-                {/* File Previews */}
-                {files.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                      Selected files:
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {files.map((file, index) => (
-                        <div
-                          key={`file-preview-${index}`}
-                          className="dark:bg-meta-4 group relative flex items-center gap-2 rounded-md bg-gray-50 p-2"
-                        >
-                          {file.type.startsWith("image/") ? (
-                            <div className="border-stroke dark:border-strokedark h-10 w-10 shrink-0 overflow-hidden rounded-sm border">
-                              <Image
-                                src={URL.createObjectURL(file)}
-                                alt={file.name}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="bg-primary/10 dark:bg-primary/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-sm">
-                              <svg
-                                className="text-primary h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                ></path>
-                              </svg>
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {(file.size / 1024).toFixed(1)} KB
-                            </p>
+              {/* File Previews */}
+              {files.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                    Selected files:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={`file-preview-${index}`}
+                        className="dark:bg-meta-4 group relative flex items-center gap-2 rounded-md bg-gray-50 p-2"
+                      >
+                        {file.type.startsWith("image/") ? (
+                          <div className="border-stroke dark:border-strokedark h-10 w-10 shrink-0 overflow-hidden rounded-sm border">
+                            <Image
+                              src={URL.createObjectURL(file)}
+                              alt={file.name}
+                              className="h-full w-full object-cover"
+                            />
                           </div>
-                          <button
-                            type="button"
-                            className="text-danger hover:text-danger-hover"
-                            onClick={() => removeFile(index)}
-                          >
+                        ) : (
+                          <div className="bg-primary/10 dark:bg-primary/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-sm">
                             <svg
-                              className="h-4 w-4"
+                              className="text-primary h-5 w-5"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1021,26 +1038,53 @@ export default function TaskEditPage() {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M6 18L18 6M6 6l12 12"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                               ></path>
                             </svg>
-                          </button>
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </p>
                         </div>
-                      ))}
-                    </div>
+                        <button
+                          type="button"
+                          className="text-danger hover:text-danger-hover"
+                          onClick={() => removeFile(index)}
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            ></path>
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </div>
-
-              {/* Update Button */}
-              <button
-                type="button"
-                onClick={() => handleStatusUpdate(selectedStatus)}
-                className="bg-primary hover:bg-opacity-90 flex w-full justify-center rounded-sm p-3 font-medium text-white"
-              >
-                Update Task
-              </button>
+                </div>
+              )}
             </div>
+
+            {/* Update Button */}
+            <button
+              type="button"
+              onClick={() => handleStatusUpdate(selectedStatus)}
+              className="bg-primary hover:bg-primarydark flex w-full cursor-pointer justify-center rounded-lg p-3 font-medium text-white transition"
+            >
+              Update Task
+            </button>
           </div>
         </div>
 

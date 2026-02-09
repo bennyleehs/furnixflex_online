@@ -31,6 +31,7 @@ export default function ProgressTable({
       "Payment",
       "Production",
       "Installation",
+      "Others",
       "Job Done",
     ],
     [],
@@ -158,6 +159,8 @@ export default function ProgressTable({
           (task.contact && task.contact.toLowerCase().includes(query)) ||
           (task.address && task.address.toLowerCase().includes(query)) ||
           (task.source && task.source.toLowerCase().includes(query)) ||
+          (task.followUp_status &&
+            task.followUp_status.toLowerCase().includes(query)) ||
           (task.pic && task.pic.toLowerCase().includes(query)) ||
           (task.id && task.id.toString().includes(query))
         );
@@ -194,115 +197,48 @@ export default function ProgressTable({
       </div>
 
       {/* Pipeline flow visualization with responsive layout */}
-      <div className="mb-6">
-        {/* Desktop view - full pipeline */}
-        <div className="border-stroke dark:border-strokedark relative mb-1 hidden border-b py-4 md:flex">
-          {stageData.stageInfo.map((info, index) => {
-            // Determine color based on stage
-            let bgColorClass = "bg-meta-8";
-            let textColorClass = "text-white";
+      {/* Desktop view - full pipeline */}
+      <div className="border-stroke dark:border-strokedark relative mb-1 hidden border-b py-4 md:flex">
+        {stageData.stageInfo.map((info, index) => {
+          // Determine color based on stage
+          let bgColorClass = "bg-meta-8";
+          let textColorClass = "text-white";
 
-            if (info.stage === "Job Done")
-              bgColorClass = "bg-success dark:bg-green-500";
-            else if (
-              ["Quotation", "Payment", "Production", "Installation"].includes(
-                info.stage,
-              )
-            ) {
-              bgColorClass = "bg-meta-10";
-            }
+          if (info.stage === "Job Done")
+            bgColorClass = "bg-success dark:bg-green-500";
+          else if (
+            ["Quotation", "Payment", "Production", "Installation"].includes(
+              info.stage,
+            )
+          ) {
+            bgColorClass = "bg-meta-10";
+          } else if (["Others"].includes(info.stage)) {
+            bgColorClass = "bg-meta-11";
+          }
 
-            return (
-              <div
-                key={info.stage}
-                className="flex min-w-0 flex-1 cursor-pointer flex-col items-center px-1 text-center"
-                // onClick={() => setSelectedStage(selectedStage === info.stage ? null : info.stage,  )}
-                onClick={() => {
-                  // setSelectedStage(
-                  //   selectedStage === info.stage ? null : info.stage,
-                  // );
-                  // onFilterChange?.("status", info.stage);
-                  onFilterChange?.(
-                    "status",
-                    selectedStatus === info.stage ? "All" : info.stage,
-                  );
-                }}
-              >
-                {/* Circular count indicator with dark-mode compatible border highlight */}
-                <div className="relative">
-                  <div
-                    className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-lg font-medium shadow-md ${
-                      // selectedStage === info.stage
-                      selectedStatus === info.stage
-                        ? `dark:ring-offset-boxdark scale-110 transform ring-4 ring-offset-2 ring-offset-white ${
-                            info.stage === "Job Done"
-                              ? "ring-success dark:ring-green-500"
-                              : [
-                                    "Quotation",
-                                    "Payment",
-                                    "Production",
-                                    "Installation",
-                                  ].includes(info.stage)
-                                ? "ring-meta-10"
-                                : "ring-meta-8"
-                          }`
-                        : ""
-                    } transition-all duration-200`}
-                  >
-                    {info.count}
-                  </div>
-                </div>
-
-                {/* Stage connection line */}
-
-                {/* Vertical stage label directly under the circle */}
-                <div className="mt-2 flex w-full flex-col items-center text-sm text-black dark:text-white">
-                  <span className="font-medium">{index + 1}</span>
-                  <span className="w-full truncate text-[13px]">
-                    {info.stage}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Mobile view - condensed pipeline */}
-        <div className="border-stroke dark:border-strokedark mb-1 flex flex-wrap justify-center gap-6 border-b py-4 md:hidden">
-          {stageData.stageInfo.map((info, index) => {
-            let bgColorClass = "bg-meta-8"; // Determine color based on stage
-            let textColorClass = "text-white";
-
-            if (info.stage === "Job Done")
-              bgColorClass = "bg-success dark:bg-green-500";
-            else if (
-              ["Quotation", "Payment", "Production", "Installation"].includes(
-                info.stage,
-              )
-            ) {
-              bgColorClass = "bg-meta-10";
-            }
-
-            return (
-              <div
-                key={info.stage}
-                className="flex cursor-pointer flex-col items-center"
-                onClick={() =>
-                  // setSelectedStage(
-                  //   selectedStage === info.stage ? null : info.stage,
-                  // )
-                  onFilterChange?.(
-                    "status",
-                    selectedStatus === info.stage ? "All" : info.stage,
-                  )
-                }
-              >
-                {/* Compact display for mobile */}
+          return (
+            <div
+              key={info.stage}
+              className="flex min-w-0 flex-1 cursor-pointer flex-col items-center px-1 text-center"
+              // onClick={() => setSelectedStage(selectedStage === info.stage ? null : info.stage,  )}
+              onClick={() => {
+                // setSelectedStage(
+                //   selectedStage === info.stage ? null : info.stage,
+                // );
+                // onFilterChange?.("status", info.stage);
+                onFilterChange?.(
+                  "status",
+                  selectedStatus === info.stage ? "All" : info.stage,
+                );
+              }}
+            >
+              {/* Circular count indicator with dark-mode compatible border highlight */}
+              <div className="relative">
                 <div
-                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} text-md flex items-center justify-center font-medium shadow-md ${
+                  className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} flex items-center justify-center text-lg font-medium shadow-md ${
                     // selectedStage === info.stage
                     selectedStatus === info.stage
-                      ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
+                      ? `dark:ring-offset-boxdark scale-110 transform ring-4 ring-offset-2 ring-offset-white ${
                           info.stage === "Job Done"
                             ? "ring-success dark:ring-green-500"
                             : [
@@ -312,30 +248,105 @@ export default function ProgressTable({
                                   "Installation",
                                 ].includes(info.stage)
                               ? "ring-meta-10"
-                              : "ring-meta-8"
+                              : ["Others"].includes(info.stage)
+                                ? "ring-meta-11"
+                                : "ring-meta-8"
                         }`
                       : ""
                   } transition-all duration-200`}
                 >
                   {info.count}
                 </div>
-                <div className="mt-1 max-w-[60px] text-center text-[10px] text-wrap text-black dark:text-white">
-                  {info.stage}
-                </div>
-                <div className="text-[10px] font-bold">{index + 1}</div>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Stage connection line */}
+
+              {/* Vertical stage label directly under the circle */}
+              <div className="mt-2 flex w-full flex-col items-center text-sm text-black dark:text-white">
+                <span className="font-medium">{index + 1}</span>
+                <span className="w-full truncate text-[13px]">
+                  {info.stage}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile view - condensed pipeline */}
+      <div className="border-stroke dark:border-strokedark mb-1 flex gap-8 overflow-x-auto border-b px-2 py-4 md:hidden">
+        {stageData.stageInfo.map((info, index) => {
+          let bgColorClass = "bg-meta-8"; // Determine color based on stage
+          let textColorClass = "text-white";
+
+          if (info.stage === "Job Done")
+            bgColorClass = "bg-success dark:bg-green-500";
+          else if (
+            ["Quotation", "Payment", "Production", "Installation"].includes(
+              info.stage,
+            )
+          ) {
+            bgColorClass = "bg-meta-10";
+          } else if (["Others"].includes(info.stage)) {
+            bgColorClass = "bg-meta-11";
+          }
+
+          return (
+            <div
+              key={info.stage}
+              className="flex cursor-pointer flex-col items-center"
+              onClick={() =>
+                // setSelectedStage(
+                //   selectedStage === info.stage ? null : info.stage,
+                // )
+                onFilterChange?.(
+                  "status",
+                  selectedStatus === info.stage ? "All" : info.stage,
+                )
+              }
+            >
+              {/* Compact display for mobile */}
+              <div
+                className={`h-10 w-10 rounded-full ${bgColorClass} ${textColorClass} text-md flex items-center justify-center font-medium shadow-md ${
+                  // selectedStage === info.stage
+                  selectedStatus === info.stage
+                    ? `dark:ring-offset-boxdark ring-2 ring-offset-1 ${
+                        info.stage === "Job Done"
+                          ? "ring-success dark:ring-green-500"
+                          : [
+                                "Quotation",
+                                "Payment",
+                                "Production",
+                                "Installation",
+                              ].includes(info.stage)
+                            ? "ring-meta-10"
+                            : ["Others"].includes(info.stage)
+                              ? "ring-meta-11"
+                              : "ring-meta-8"
+                      }`
+                    : ""
+                } transition-all duration-200`}
+              >
+                {info.count}
+              </div>
+              <div className="mt-2 flex w-full flex-col items-center text-xs text-black dark:text-white">
+                <span className="font-bold">{index + 1}</span>
+              </div>
+              <div className="mt-1 max-w-15 text-center text-xs text-wrap text-black dark:text-white">
+                {info.stage}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* PIC filter buttons with counts and search input */}
       <div className="mb-4">
         <div className="flex flex-wrap items-center justify-between">
           {/* Sales rep filters with dark mode support */}
-          <div className="mb-2 flex flex-wrap gap-2 md:mb-0 lg:mb-2">
+          <div className="flex gap-2 overflow-x-auto py-2 whitespace-nowrap">
             <button
-              className={`rounded-full px-3 py-1 text-xs ${
+              className={`rounded-full px-2 py-1 text-xs ${
                 !selectedPIC
                   ? "bg-indigo-600 text-white dark:bg-indigo-700"
                   : "dark:bg-meta-4 bg-gray-100 text-gray-700 dark:text-gray-300"
@@ -356,7 +367,7 @@ export default function ProgressTable({
               return (
                 <button
                   key={pic}
-                  className={`rounded-full px-3 py-1 text-xs ${
+                  className={`rounded-full px-2 py-1 text-xs ${
                     selectedPIC === pic
                       ? "bg-indigo-600 text-white dark:bg-indigo-700"
                       : "dark:bg-meta-4 bg-gray-100 text-gray-700 dark:text-gray-300"
@@ -370,7 +381,7 @@ export default function ProgressTable({
                     className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${
                       selectedPIC === pic
                         ? "bg-indigo-400/30 text-white dark:bg-indigo-300/30"
-                        : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-300"
+                        : "bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-gray-300"
                     }`}
                   >
                     {picTaskCount}
@@ -381,13 +392,14 @@ export default function ProgressTable({
           </div>
 
           {/* Search input - right side */}
-          <div className="relative w-full md:mt-4 md:w-auto md:min-w-[200px] lg:mt-0">
+          <div className="relative w-full py-2 md:w-auto md:min-w-[200px]">
             <input
               type="text"
               placeholder="Search tasks..."
               value={searchQuery}
               // onChange={(e) => setSearchQuery(e.target.value)}
               onChange={(e) => {
+                console.log("Input changed to:", e.target.value);
                 setSearchQuery(e.target.value);
                 onSearchChange?.(e.target.value); // trigger parent state reset
               }}
@@ -395,7 +407,11 @@ export default function ProgressTable({
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  console.log("Clear button clicked");
+                  setSearchQuery("");
+                  onSearchChange?.("");
+                }}
                 className="absolute top-1/2 right-2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
               >
                 <svg
@@ -460,16 +476,20 @@ export default function ProgressTable({
         </span>
       </h4>
 
-      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 xl:grid-cols-5">
         {/* {displayedTasks.map((task) => { */}
         {Array.from(
           new Map(uniqueDisplayedTasks.map((t) => [t.id, t])).values(),
         ).map((task) => {
           // Determine color based on progress
           let colorClass = "bg-meta-8";
-          if (task.progressPercentage >= 100)
+          if (task.status === "Others") {
+            colorClass = "bg-meta-11";
+          } else if (task.progressPercentage >= 100) {
             colorClass = "bg-success dark:bg-green-500";
-          else if (task.progressPercentage >= 50) colorClass = "bg-meta-10";
+          } else if (task.progressPercentage >= 40) {
+            colorClass = "bg-meta-10";
+          }
 
           // Parse composite fields into components
           const [name, nric] = (task.name || "")
@@ -493,41 +513,37 @@ export default function ProgressTable({
           return (
             <div
               key={task.id}
-              className="dark:bg-form-input border-stroke dark:border-strokedark flex h-full flex-col rounded-md border bg-white p-3 shadow-xl dark:shadow-lg dark:shadow-white/20"
+              className="dark:bg-form-input border-stroke dark:border-stroke/40 flex h-full flex-col rounded-lg border bg-white p-3 shadow-xl dark:shadow-lg dark:shadow-gray-400/20"
             >
+              <div className="border-stroke mb-4 flex justify-start border-b pb-4 dark:border-white/40">
+                <span
+                  className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
+                    task.status === "Job Done"
+                      ? "bg-success/10 text-success border-success border"
+                      : [
+                            "Quotation",
+                            "Payment",
+                            "Production",
+                            "Installation",
+                          ].includes(task.status)
+                        ? "bg-meta-10/10 text-meta-10 border-meta-10 border"
+                        : ["Others"].includes(task.status)
+                          ? "bg-meta-11/10 text-meta-11 border-meta-11 border"
+                          : "bg-meta-8/10 text-meta-8 border-meta-8 border"
+                  }`}
+                >
+                  {task.status}
+                </span>
+              </div>
+
               {/* Customer info section with better containment */}
-              <div className="dark:bg-meta-4/30 border-stroke dark:border-stroke/40 mb-4 rounded-md border bg-gray-100 p-2">
+              <div className="dark:bg-meta-4/30 border-stroke dark:border-stroke/40 mb-2 rounded-md border bg-gray-100 p-2">
                 {/* Customer header with name and action button */}
                 <div className="mb-2 flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <h5 className="font-medium text-black dark:text-white">
                       {name}
                     </h5>
-                    {nric && (
-                      <span className="dark:bg-meta-4 border-stroke dark:border-strokedark rounded-sm border bg-white px-1.5 py-0.5 text-xs">
-                        {nric}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    {task.status !== "Job Done" && (
-                      <button
-                        className="bg-primary hover:bg-primarydark dark:bg-primary dark:hover:bg-primarydark flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium whitespace-nowrap text-white transition-colors"
-                        onClick={() =>
-                          (window.location.href = `/sales/task/edit?id=${task.id}`)
-                        }
-                        title="Update task status"
-                      >
-                        <svg
-                          className="h-3 w-3"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        Update
-                      </button>
-                    )}
                   </div>
                 </div>
 
@@ -543,7 +559,7 @@ export default function ProgressTable({
                     >
                       <span className="flex items-center text-sm">
                         <svg
-                          className="mr-1 h-3.5 w-3.5 flex-shrink-0 text-green-500"
+                          className="mr-1 h-3.5 w-3.5 shrink-0 text-green-500"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
@@ -554,146 +570,115 @@ export default function ProgressTable({
                     </a>
                   )}
 
-                  {/* Secondary phone */}
-                  {phone2 && (
+                  {/* NRIC */}
+                  {nric && nric !== "null" && (
                     <div className="flex items-center text-sm">
-                      <svg
-                        className="mr-1.5 h-3.5 w-3.5 flex-shrink-0 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                      </svg>
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {phone2}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Email */}
-                  {email && (
-                    <div className="flex items-center text-sm">
-                      <svg
-                        className="mr-1.5 h-3.5 w-3.5 flex-shrink-0 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                      <span className="max-w-[180px] truncate text-gray-700 dark:text-gray-300">
-                        {email}
+                      <span className="dark:bg-meta-4 border-stroke dark:border-strokedark rounded-sm border bg-white px-1.5 py-0.5 text-xs">
+                        {nric}
                       </span>
                     </div>
                   )}
 
                   {/* Address */}
-                  {task.address && (
+                  {task.address_short && (
                     <div className="flex items-start text-sm">
                       <svg
-                        className="mt-0.5 mr-1.5 h-3.5 w-3.5 flex-shrink-0 text-red-500"
+                        className="mt-0.5 mr-1.5 h-3.5 w-3.5 shrink-0 text-red-500"
                         fill="currentColor"
                         viewBox="0 0 320 512"
                       >
                         <path d="M16 144a144 144 0 1 1 288 0A144 144 0 1 1 16 144zM160 80c8.8 0 16-7.2 16-16s-7.2-16-16-16c-53 0-96 43-96 96c0 8.8 7.2 16 16 16s16-7.2 16-16c0-35.3 28.7-64 64-64zM128 480l0-162.9c10.4 1.9 21.1 2.9 32 2.9s21.6-1 32-2.9L192 480c0 17.7-14.3 32-32 32s-32-14.3-32-32z" />
                       </svg>
-                      <span className="line-clamp-2 break-words text-gray-700 dark:text-gray-300">
-                        {task.address}
+                      <span className="line-clamp-2 wrap-break-word text-gray-700 dark:text-gray-300">
+                        {task.address_short}
                       </span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Spacer to push progress bar to bottom */}
-              <div className="flex-grow"></div>
-
               {/* Bottom section with progress bar and PIC info */}
               <div className="mt-auto">
+                {task.followUp_status && task.followUp_status !== "null" && (
+                  <div className="py-2 text-sm text-black dark:text-white">
+                    <span className="font-semibold">Note: </span>
+                    <span className="dark:bg-meta-4 border-b-2 border-orange-300 bg-gray-100 px-2 py-1.5 dark:border-b-2 dark:border-orange-400">
+                      {task.followUp_status}
+                    </span>
+                  </div>
+                )}
                 {/* Progress section */}
                 <div className="my-2 flex items-center justify-between">
-                  <span className="text-sm font-medium">Progress</span>
-                  <span className="text-sm font-medium">
-                    {task.progressPercentage}%
-                  </span>
+                  <div className="text-sm font-medium">
+                    <span>Progress for </span>[
+                    <span className="text-primary"> {task.id} </span>]
+                  </div>
                 </div>
 
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
-                  <div
-                    className={`h-full ${colorClass} rounded-full transition-all duration-300`}
-                    style={{ width: `${task.progressPercentage}%` }}
-                  />
-                </div>
-
-                {/* Pipeline position indicator */}
-                <div className="mt-2 mb-3 flex items-center justify-between">
-                  {pipelineStages.map((stage, index) => (
-                    <div
-                      key={stage}
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        index <= task.stageIndex
-                          ? colorClass
-                          : "bg-gray-200 dark:bg-gray-400"
-                      }`}
-                      title={stage}
-                    />
-                  ))}
-                </div>
+                {task.status === "Others" ? (
+                  <div className="text-center text-sm font-bold">
+                    <span>No progress applicable.</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-8">
+                    <div className="col-span-6 col-end-7 content-center">
+                      <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
+                        <div
+                          className={`h-full ${colorClass} rounded-full transition-all duration-300`}
+                          style={{ width: `${task.progressPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-end-9">
+                      <div className="flex justify-end">
+                        <span className="text-sm font-medium">
+                          {task.progressPercentage}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Person-In-Charge section with status */}
                 <div className="border-stroke mt-3 border-t pt-3 text-xs dark:border-white/40">
-                  <div className="flex flex-wrap items-center justify-between">
-                    <div className="flex items-center">
-                      <span className="text-sm text-black dark:text-white">
-                        ID: {task.id}
-                      </span>
-                    </div>
-
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
-                        task.status === "Job Done"
-                          ? "bg-success/10 text-success border-success border"
-                          : [
-                                "Quotation",
-                                "Payment",
-                                "Production",
-                                "Installation",
-                              ].includes(task.status)
-                            ? "bg-meta-10/10 text-meta-10 border-meta-10 border"
-                            : "bg-meta-8/10 text-meta-8 border-meta-8 border"
-                      }`}
-                    >
-                      {task.status}
-                    </span>
-                  </div>
-
                   {/* PIC info */}
-                  <div className="mt-2 flex items-center justify-between">
+                  <div className="flex justify-between">
                     <div>
-                      <svg
-                        className="mr-1 h-3 w-3 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                      </svg>
-                      <span className="font-semibold text-black dark:text-white">
-                        PIC:
-                      </span>
-                      <span className="ml-1 text-black dark:text-white">
-                        {salesName || "Unassigned"}
-                      </span>
-                      {salesUid && (
-                        <span className="ml-1 text-black dark:text-white">
-                          ({salesUid})
+                      <div className="text-sm text-black dark:text-white">
+                        <span className="font-semibold">PIC:</span>
+                        <span className="ml-1">
+                          {salesName || "Unassigned"}
                         </span>
-                      )}
-                    </div>
-                    {/* Display date */}
-                    <div className="pt-3 text-black dark:text-white">
-                      <span  className="font-semibold ">DATE: </span>
-                      <span className="ml-1 text-sm">{created_date}</span>
+                        {salesUid && <span className="ml-1">({salesUid})</span>}
                       </div>
+                      {/* Display date */}
+                      <div className="text-sm text-black dark:text-white">
+                        <span className="font-semibold">DATE: </span>
+                        <span className="ml-1">{created_date}</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* </div> */}
+
+                  <div className="flex justify-end">
+                    {task.status !== "Job Done" && (
+                      <button
+                        className="bg-primary hover:bg-primarydark dark:bg-primary dark:hover:bg-primarydark flex cursor-pointer items-center rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors"
+                        onClick={() =>
+                          (window.location.href = `/sales/task/edit?id=${task.id}`)
+                        }
+                        title="Update task status"
+                      >
+                        <svg
+                          className="mr-2 h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                        Update
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
