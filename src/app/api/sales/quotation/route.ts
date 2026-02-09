@@ -100,8 +100,11 @@ export async function POST(request: Request) {
       `INSERT INTO quotations 
        (task_id, customer_name, customer_nric, customer_contact, customer_email, customer_address,
         customer_property, customer_guard, quotation_date, valid_until, sales_representative, sales_uid,
-        subtotal, discount, tax, total, notes, terms, status, quote_ref, quotation_number) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        subtotal, discount, tax, total, notes, terms, status, 
+        quote_ref, quotation_number, created_at, updated_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+       ?, ?, ?, ?, ?, ?, ?, 
+       ?, ?, NOW(), NOW())`,
       [
         body.task_id,
         body.customer_name,
@@ -223,7 +226,8 @@ export async function PUT(request: Request) {
         total = ?,
         notes = ?,
         terms = ?,
-        status = ?
+        status = ?,
+        updated_at = NOW()
        WHERE id = ?`,
       [
         body.task_id,
@@ -342,10 +346,10 @@ export async function PATCH(request: Request) {
     const status = body.status;
 
     // Update only the status field
-    await pool.query("UPDATE quotations SET status = ? WHERE task_id = ?", [
-      status,
-      taskId,
-    ]);
+    await pool.query(
+      "UPDATE quotations SET status = ?, updated_at = NOW() WHERE task_id = ?",
+      [status, taskId],
+    );
 
     // Update task status in customers table if needed
     let taskStatus = null;
@@ -356,7 +360,7 @@ export async function PATCH(request: Request) {
     }
 
     if (taskStatus) {
-      await pool.query("UPDATE customers SET status = ? WHERE id = ?", [
+      await pool.query("UPDATE customers SET status = ?, updated_at = NOW() WHERE id = ?", [
         taskStatus,
         taskId,
       ]);

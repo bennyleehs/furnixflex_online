@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 // import Link from "next/link";
-import { Quotation, PaymentRecord } from '@/types/sales-quotation'; // Import Quotation interface
+import { Quotation, PaymentRecord } from "@/types/sales-quotation"; // Import Quotation interface
 
 export default function QuotationListPage() {
   const router = useRouter();
@@ -19,6 +19,11 @@ export default function QuotationListPage() {
   const [salesRepFilter, setSalesRepFilter] = useState("");
   const [salesReps, setSalesReps] = useState<string[]>([]);
 
+  // Payment stats
+  const [totalPaid, setTotalPaid] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [paymentProgress, setPaymentProgress] = useState(0);
+
   // Pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -28,8 +33,12 @@ export default function QuotationListPage() {
   const [generatingInv, setgeneratingInv] = useState(false);
 
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-  const [pdfFiles, setPdfFiles] = useState<{name: string; lastModified: string}[]>([]);
-  const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>(null);
+  const [pdfFiles, setPdfFiles] = useState<
+    { name: string; lastModified: string }[]
+  >([]);
+  const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>(
+    null,
+  );
 
   // Fetch quotations with filters
   const fetchQuotations = useCallback(async () => {
@@ -37,10 +46,10 @@ export default function QuotationListPage() {
     try {
       // Build query string with all filters
       let queryString = `?page=${page}&pageSize=${pageSize}&status=payment`;
-      // if (searchTerm) queryString += `&search=${searchTerm}`;
-      // if (dateRange.from) queryString += `&from=${dateRange.from}`;
-      // if (dateRange.to) queryString += `&to=${dateRange.to}`;
-      // if (salesRepFilter) queryString += `&salesRep=${salesRepFilter}`;
+      if (searchTerm) queryString += `&search=${searchTerm}`;
+      if (dateRange.from) queryString += `&from=${dateRange.from}`;
+      if (dateRange.to) queryString += `&to=${dateRange.to}`;
+      if (salesRepFilter) queryString += `&salesRep=${salesRepFilter}`;
 
       const response = await fetch(`/api/sales/quotation/list${queryString}`);
 
@@ -65,11 +74,11 @@ export default function QuotationListPage() {
   }, [
     page,
     pageSize,
-    // searchTerm,
-    // dateRange.from,
-    // dateRange.to,
+    searchTerm,
+    dateRange.from,
+    dateRange.to,
     // statusFilter,
-    // salesRepFilter,
+    salesRepFilter,
   ]);
 
   // Initial fetch
@@ -103,8 +112,27 @@ export default function QuotationListPage() {
   };
 
   // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  // const formatDate = (dateString: string) => {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleDateString("en-MY", {
+  //     year: "numeric",
+  //     month: "short",
+  //     day: "numeric",
+  //   });
+  // };
+
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) return "N/A";
+
+    // Replace space with 'T' to support "YYYY-MM-DD HH:mm:ss" formats
+    const formattedString = dateString.replace(" ", "T");
+    const date = new Date(formattedString);
+
+    // Check if the date is actually valid
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
     return date.toLocaleDateString("en-MY", {
       year: "numeric",
       month: "short",
@@ -139,60 +167,68 @@ export default function QuotationListPage() {
       setSelectedQuotationId(quotationId);
 
       // Fetch quotation details
-      const quotationResponse = await fetch(`/api/sales/quotation?quotationId=${quotationId}`);
+      const quotationResponse = await fetch(
+        `/api/sales/quotation?quotationId=${quotationId}`,
+      );
       if (!quotationResponse.ok) {
-        throw new Error('Failed to fetch quotation details');
+        throw new Error("Failed to fetch quotation details");
       }
       const quotationData = await quotationResponse.json();
-      
+
       // Fetch payment records
-      const paymentResponse = await fetch(`/api/sales/payment?quotationId=${quotationId}`);
+      const paymentResponse = await fetch(
+        `/api/sales/payment?quotationId=${quotationId}`,
+      );
       if (!paymentResponse.ok) {
-        throw new Error('Failed to fetch payment records');
+        throw new Error("Failed to fetch payment records");
       }
       const paymentData = await paymentResponse.json();
-      
+
       if (!quotationData.quotation) {
-        throw new Error('No quotation found');
+        throw new Error("No quotation found");
       }
 
       const quotation = quotationData.quotation;
       const paymentRecords = paymentData.payments || [];
-      
+
       // Calculate payment summary
-      const totalPaid = paymentRecords.reduce((sum: number, payment: PaymentRecord) => 
-        sum + (payment.amount_inv || 0), 0);
+      const totalPaid = paymentRecords.reduce(
+        (sum: number, payment: PaymentRecord) =>
+          sum + (payment.amount_inv || 0),
+        0,
+      );
       const balance = quotation.total - totalPaid;
-      const paymentProgress = quotation.total > 0 ? (totalPaid / quotation.total) * 100 : 0;
+      const paymentProgress =
+        quotation.total > 0 ? (totalPaid / quotation.total) * 100 : 0;
 
       const statementData = {
         task_id: quotation.task_id,
-        
+
         // Customer info
-        customer_name: quotation.customer_name || '',
-        customer_nric: quotation.customer_nric || '',
-        customer_contact: quotation.customer_contact || '',
-        customer_email: quotation.customer_email || '',
-        customer_address: quotation.customer_address || '',
-        customer_property: quotation.customer_property || '',
-        customer_guard: quotation.customer_guard || '',
-        sales_representative: quotation.sales_representative || '',
-        sales_uid: quotation.sales_uid || '',
-        
+        customer_name: quotation.customer_name || "",
+        customer_nric: quotation.customer_nric || "",
+        customer_contact: quotation.customer_contact || "",
+        customer_email: quotation.customer_email || "",
+        customer_address: quotation.customer_address || "",
+        customer_property: quotation.customer_property || "",
+        customer_guard: quotation.customer_guard || "",
+        sales_representative: quotation.sales_representative || "",
+        sales_uid: quotation.sales_uid || "",
+
         // Quotation details
-        quotation_number: quotation.quotation_number || '',
-        quotation_date: quotation.quotation_date || '',
+        quotation_number: quotation.quotation_number || "",
+        quotation_date: quotation.quotation_date || "",
         quotation_total: quotation.total || 0,
-        
+
         // Payment summary
         total_paid: totalPaid || 0,
         balance: balance || 0,
         payment_progress: paymentProgress || 0,
-        
+
         // Payment records
         payments: paymentRecords.map((payment: PaymentRecord) => ({
           id: payment.id,
-          invoice_number: payment.invoice_number || '',
+          invoice_number: payment.invoice_number || "",
           payment_date: payment.payment_date,
           payment_reference: payment.payment_reference,
           payment_method: payment.payment_method,
@@ -200,9 +236,9 @@ export default function QuotationListPage() {
           balance: payment.balance,
           received: payment.received,
           received_date: payment.received_date,
-          notes: payment.notes
+          notes: payment.notes,
         })),
-        
+
         // Company info
         company: {
           name: "CLASSYPRO Aluminium Kitchen",
@@ -212,7 +248,7 @@ export default function QuotationListPage() {
           website: "www.classy-pro.com",
           logo: "/images/logo/classy_logo_gray.png",
         },
-        
+
         // PDF format
         format: {
           pageSize: "A4",
@@ -221,46 +257,48 @@ export default function QuotationListPage() {
           header: true,
           footer: true,
           tableLines: true,
-          currencySymbol: "RM"
+          currencySymbol: "RM",
         },
-        
+
         // Statement specific
-        statement_date: new Date().toISOString().split('T')[0],
+        statement_date: new Date().toISOString().split("T")[0],
         statement_title: `Payment Statement - ${quotation.quotation_number}`,
       };
-      
+
       // Call the API endpoint to generate PDF
-      const response = await fetch('/api/sales/payment/generate-statement', {
-        method: 'POST',
+      const response = await fetch("/api/sales/payment/generate-statement", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(statementData)
+        body: JSON.stringify(statementData),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to generate payment statement');
+        throw new Error("Failed to generate payment statement");
       }
-      
+
       // Get PDF blob and trigger download
       const blob = await response.blob();
-      
+
       // Create a download link
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `Payment_Statement_${quotation.quotation_number}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-      
+
       // Show success message
       // alert('Payment statement generated successfully');
-      
     } catch (error) {
-      console.error('Error generating payment statement:', error);
-      alert('Failed to generate payment statement: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error("Error generating payment statement:", error);
+      alert(
+        "Failed to generate payment statement: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      );
     } finally {
       setgeneratingInv(false);
     }
@@ -272,7 +310,7 @@ export default function QuotationListPage() {
       alert("No task ID associated with this quotation");
       return;
     }
-    
+
     try {
       // For other statuses, proceed as before
       const response = await fetch(`/api/sales/quotation?taskId=${taskId}`, {
@@ -285,16 +323,18 @@ export default function QuotationListPage() {
 
       if (status === "payment") {
         // Find the quotation to get its ID
-        const quotation = quotations.find(q => q.task_id === taskId);
+        const quotation = quotations.find((q) => q.task_id === taskId);
         if (!quotation) {
           throw new Error("Quotation not found");
         }
-        
+
         // Navigate to auto payment page instead of updating status directly
-        router.push(`/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${taskId}`);
+        router.push(
+          `/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${taskId}`,
+        );
         return;
       }
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update status");
@@ -304,16 +344,21 @@ export default function QuotationListPage() {
       fetchQuotations();
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update status: " + (error instanceof Error ? error.message : "Unknown error"));
+      alert(
+        "Failed to update status: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      );
     }
   };
 
   return (
     <DefaultLayout>
-      <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
+      {/* <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
         <Breadcrumb pageName="Payments" noHeader={true}/>
 
-      </div>
+      </div> */}
+
+      <Breadcrumb pageName="Payments" />
 
       {/* Search and Filters */}
       <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-xs border bg-white p-5">
@@ -335,24 +380,74 @@ export default function QuotationListPage() {
             />
           </div>
 
-          {/* Search and Reset Buttons */}
-          <div className="flex items-end space-x-2 md:col-span-2">
-            {/* <button
-              type="submit"
-              className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white transition"
-            >
-              Search
-            </button> */}
+          {/* Date Range From */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
+              Date From
+            </label>
+            <input
+              type="date"
+              value={dateRange.from}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, from: e.target.value })
+              }
+              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
+            />
+          </div>
 
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300 dark:text-gray-300"
-            >
-              Reset Filters
-            </button>
+          {/* Date Range To */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
+              Date To
+            </label>
+            <input
+              type="date"
+              value={dateRange.to}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, to: e.target.value })
+              }
+              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Sales Rep Filter */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
+                Sales Representative
+              </label>
+              <select
+                value={salesRepFilter}
+                onChange={(e) => setSalesRepFilter(e.target.value)}
+                className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
+              >
+                <option value="">All Representatives</option>
+                {salesReps.map((rep) => (
+                  <option key={rep} value={rep}>
+                    {rep}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </form>
+        {/* Search and Reset Buttons */}
+        <div className="flex items-end space-x-2 pt-4 md:col-span-2">
+          <button
+            type="submit"
+            className="bg-primary hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
+          >
+            Search
+          </button>
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="dark:bg-meta-4 dark:hover:bg-meta-3 cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300 dark:text-gray-300"
+          >
+            Reset Filters
+          </button>
+        </div>
       </div>
 
       {/* Quotations Table */}
@@ -426,7 +521,8 @@ export default function QuotationListPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      {formatDate(quotation.quotation_date)}
+                      {/* {formatDate(quotation.quotation_date)} */}
+                      {formatDate(quotation.created_at)}
                     </td>
                     <td className="px-4 py-4">
                       {quotation.sales_representative}
@@ -435,12 +531,14 @@ export default function QuotationListPage() {
                       {formatCurrency(quotation.total)}
                     </td>
                     {/* New Paid cell */}
-                    <td className="px-4 py-4 text-right font-medium text-success">
+                    <td className="text-success px-4 py-4 text-right font-medium">
                       {formatCurrency(quotation.paid || 0)}
                     </td>
                     {/* New Balance cell */}
-                    <td className="px-4 py-4 text-right font-medium text-warning">
-                      {formatCurrency((quotation.total || 0) - (quotation.paid || 0))}
+                    <td className="text-warning px-4 py-4 text-right font-medium">
+                      {formatCurrency(
+                        (quotation.total || 0) - (quotation.paid || 0),
+                      )}
                     </td>
                     <td className="px-4 py-4 text-center">
                       <span
@@ -453,8 +551,10 @@ export default function QuotationListPage() {
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3.5">
                         <button
-                          onClick={() => handleStatusUpdate(quotation.task_id, "payment")}
-                          className={`text-success hover:text-success/80 ${quotation.status === "done" ? "hidden" : ""}`}
+                          onClick={() =>
+                            handleStatusUpdate(quotation.task_id, "payment")
+                          }
+                          className={`text-success hover:text-success/80 cursor-pointer ${quotation.status === "done" ? "hidden" : ""}`}
                           title="Track Payments"
                         >
                           <svg
@@ -472,34 +572,44 @@ export default function QuotationListPage() {
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleGeneratePaymentStatement(quotation.quotation_number)}
-                          disabled={generatingInv && selectedQuotationId === quotation.quotation_number}
-                          className="text-warning hover:text-warning/80 relative"
+                          onClick={() =>
+                            handleGeneratePaymentStatement(
+                              quotation.quotation_number,
+                            )
+                          }
+                          disabled={
+                            generatingInv &&
+                            selectedQuotationId === quotation.quotation_number
+                          }
+                          className="text-warning hover:text-warning/80 relative cursor-pointer"
                           title="Print Statement"
                         >
-                          {generatingInv && selectedQuotationId === quotation.quotation_number ? (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-warning border-t-transparent"></div>
-                          </div>
+                          {generatingInv &&
+                          selectedQuotationId === quotation.quotation_number ? (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="border-warning h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"></div>
+                            </div>
                           ) : (
-                          <svg
-                            className="h-6 w-6"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
+                            <svg
+                              className="h-6 w-6"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
                           )}
                         </button>
                         <button
-                          onClick={() => handleStatusUpdate(quotation.task_id, "draft")}
-                          className={`text-danger hover:text-danger/80 ${quotation.status === "history" ? "hidden" : ""}`}
+                          onClick={() =>
+                            handleStatusUpdate(quotation.task_id, "draft")
+                          }
+                          className={`text-danger hover:text-danger/80 cursor-pointer ${quotation.status === "history" ? "hidden" : ""}`}
                           title="Mark as Rejected"
                         >
                           <svg
@@ -597,9 +707,9 @@ export default function QuotationListPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedQuotationId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-          <div className="w-full max-w-lg bg-white dark:bg-boxdark rounded-sm shadow-lg p-6 mx-4">
-            <div className="flex justify-between items-center mb-4">
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black">
+          <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-sm bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
                 Select PDF
               </h3>
@@ -608,7 +718,7 @@ export default function QuotationListPage() {
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -622,22 +732,25 @@ export default function QuotationListPage() {
                 </svg>
               </button>
             </div>
-            
+
             <div className="max-h-96 overflow-y-auto">
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {pdfFiles.map((file, index) => (
                   <li key={index} className="py-2">
                     <button
                       onClick={() => {
-                        window.open(`/api/sales/quotation/view-pdf?filePath=/sales/${selectedQuotationId}/quotation/${file.name}`, '_blank');
+                        window.open(
+                          `/api/sales/quotation/view-pdf?filePath=/sales/${selectedQuotationId}/quotation/${file.name}`,
+                          "_blank",
+                        );
                         setIsPdfModalOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-meta-4 rounded"
+                      className="dark:hover:bg-meta-4 flex w-full items-center rounded px-2 py-2 text-left hover:bg-gray-100"
                     >
-                      <svg 
-                        className="h-5 w-5 mr-2 text-warning" 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className="text-warning mr-2 h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -655,7 +768,9 @@ export default function QuotationListPage() {
                       </svg>
                       <div>
                         <span className="block font-medium">
-                          {file.name.length > 30 ? `${file.name.substring(0, 27)}...` : file.name}
+                          {file.name.length > 30
+                            ? `${file.name.substring(0, 27)}...`
+                            : file.name}
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(file.lastModified).toLocaleString()}
@@ -666,11 +781,11 @@ export default function QuotationListPage() {
                 ))}
               </ul>
             </div>
-            
-            <div className="flex justify-end mt-4">
+
+            <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setIsPdfModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-meta-4 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-meta-3"
+                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
               >
                 Cancel
               </button>
@@ -681,4 +796,3 @@ export default function QuotationListPage() {
     </DefaultLayout>
   );
 }
-

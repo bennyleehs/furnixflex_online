@@ -127,8 +127,18 @@ export default function QuotationListPage() {
   };
 
   // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) return "N/A";
+
+    // Replace space with 'T' to support "YYYY-MM-DD HH:mm:ss" formats
+    const formattedString = dateString.replace(" ", "T");
+    const date = new Date(formattedString);
+
+    // Check if the date is actually valid
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
     return date.toLocaleDateString("en-MY", {
       year: "numeric",
       month: "short",
@@ -438,61 +448,63 @@ export default function QuotationListPage() {
             />
           </div>
 
-          {/* Status Filter */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
-              Status
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
-            >
-              <option value="all">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="accepted">Accepted</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Status Filter */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
+                Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
+              >
+                <option value="all">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+                <option value="payment">Payment</option>
+              </select>
+            </div>
 
-          {/* Sales Rep Filter */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
-              Sales Representative
-            </label>
-            <select
-              value={salesRepFilter}
-              onChange={(e) => setSalesRepFilter(e.target.value)}
-              className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
-            >
-              <option value="">All Representatives</option>
-              {salesReps.map((rep) => (
-                <option key={rep} value={rep}>
-                  {rep}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Search and Reset Buttons */}
-          <div className="flex items-end space-x-2 md:col-span-2">
-            <button
-              type="submit"
-              className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white transition"
-            >
-              Search
-            </button>
-
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300 dark:text-gray-300"
-            >
-              Reset Filters
-            </button>
+            {/* Sales Rep Filter */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
+                Sales Representative
+              </label>
+              <select
+                value={salesRepFilter}
+                onChange={(e) => setSalesRepFilter(e.target.value)}
+                className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
+              >
+                <option value="">All Representatives</option>
+                {salesReps.map((rep) => (
+                  <option key={rep} value={rep}>
+                    {rep}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </form>
+        {/* Search and Reset Buttons */}
+        <div className="flex items-end space-x-2 pt-4 md:col-span-2">
+          <button
+            type="submit"
+            className="bg-primary hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
+          >
+            Search
+          </button>
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="dark:bg-meta-4 dark:hover:bg-meta-3 cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300 dark:text-gray-300"
+          >
+            Reset Filters
+          </button>
+        </div>
       </div>
 
       {/* Quotations Table */}
@@ -507,11 +519,17 @@ export default function QuotationListPage() {
                 <th className="px-4 py-4 font-medium text-gray-500 dark:text-gray-400">
                   Customer
                 </th>
-                <th className="px-4 py-4 font-medium text-gray-500 dark:text-gray-400">
-                  Date
+                <th
+                  className="px-4 py-4 font-medium text-gray-500 underline decoration-dashed underline-offset-5 dark:text-gray-400"
+                  title="Quotation created"
+                >
+                  Issue Date
                 </th>
-                <th className="px-4 py-4 font-medium text-gray-500 dark:text-gray-400">
-                  Valid Until
+                <th
+                  className="px-4 py-4 font-medium text-gray-500 underline decoration-dashed underline-offset-5 dark:text-gray-400"
+                  title="Quotation contents updated"
+                >
+                  Updated Date
                 </th>
                 <th className="px-4 py-4 font-medium text-gray-500 dark:text-gray-400">
                   Sales Rep
@@ -561,10 +579,12 @@ export default function QuotationListPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      {formatDate(quotation.quotation_date)}
+                      {/* {formatDate(quotation.quotation_date)} */}
+                      {formatDate(quotation.created_at)}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      {formatDate(quotation.valid_until)}
+                      {/* {formatDate(quotation.valid_until)} */}
+                      {formatDate(quotation.quotation_date)}
                     </td>
                     <td className="px-4 py-4">
                       {quotation.sales_representative}
@@ -584,7 +604,7 @@ export default function QuotationListPage() {
                       <div className="flex items-center justify-center space-x-3.5">
                         <button
                           onClick={() => handleEditQuotation(quotation.task_id)}
-                          className={`text-primary hover:text-primary/80 ${quotation.status === "payment" ? "hidden" : ""}`}
+                          className={`text-primary hover:text-primary/80 cursor-pointer ${quotation.status === "payment" ? "hidden" : ""}`}
                           title="Edit quotation"
                         >
                           <svg
@@ -599,7 +619,7 @@ export default function QuotationListPage() {
                         </button>
                         <button
                           onClick={() => handleViewPdf(quotation.task_id)}
-                          className="text-primary hover:text-primary/80"
+                          className="text-primary hover:text-primary/80 cursor-pointer"
                           title="View PDF"
                         >
                           <svg
@@ -614,7 +634,7 @@ export default function QuotationListPage() {
                           onClick={() =>
                             handleStatusUpdate(quotation.task_id, "payment")
                           }
-                          className={`text-success hover:text-success/80 ${quotation.status === "payment" ? "hidden" : ""}`}
+                          className={`text-success hover:text-success/80 cursor-pointer ${quotation.status === "payment" ? "hidden" : ""}`}
                           title="Track Payments"
                         >
                           <svg
@@ -635,7 +655,7 @@ export default function QuotationListPage() {
                           onClick={() =>
                             handleStatusUpdate(quotation.task_id, "draft")
                           }
-                          className={`text-danger hover:text-danger/80 ${quotation.status === "history" ? "hidden" : ""}`}
+                          className={`text-danger hover:text-danger/80 cursor-pointer ${quotation.status === "history" ? "hidden" : ""}`}
                           title="Mark as Rejected"
                         >
                           <svg

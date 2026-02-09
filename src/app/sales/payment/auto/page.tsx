@@ -1466,8 +1466,8 @@ export default function PaymentAutoPage() {
                             {/* Invoice PDF icon button */}
                             <button
                               onClick={() => handleViewPdf(quotation.task_id)}
-                              className="hover:text-success text-gray-500 transition-colors"
-                              title="Open PDF folder"
+                              className="hover:text-success cursor-pointer text-gray-500 transition-colors"
+                              title="List Quotations PDF"
                               type="button"
                             >
                               {/* <svg
@@ -1525,7 +1525,7 @@ export default function PaymentAutoPage() {
                               <td className="px-4 py-2.5 text-xs capitalize">
                                 {payment.payment_method.replace(/_/g, " ")}
                                 {payment.notes && (
-                                  <span className="text-xxs mt-0.5 block max-w-[120px] truncate text-gray-500">
+                                  <span className="text-xxs mt-0.5 block max-w-30 truncate text-gray-500">
                                     {payment.notes}
                                   </span>
                                 )}
@@ -1594,7 +1594,7 @@ export default function PaymentAutoPage() {
                                         payment.invoice_number,
                                       )
                                     }
-                                    className="text-success hover:text-success/80 transition-colors"
+                                    className="text-success hover:text-success/80 cursor-pointer transition-colors"
                                     title="View invoice"
                                     type="button"
                                     disabled={generatingInv}
@@ -1620,7 +1620,7 @@ export default function PaymentAutoPage() {
                                       payment.id &&
                                       handleCreateInvoice(payment.id)
                                     }
-                                    className="hover:text-warning text-gray-500 transition-colors"
+                                    className="hover:text-warning cursor-pointer text-gray-500 transition-colors"
                                     title="Generate invoice"
                                     type="button"
                                     disabled={generatingInv}
@@ -1669,7 +1669,7 @@ export default function PaymentAutoPage() {
                                             payment.payment_reference,
                                           ) // <-- Call the new modal function
                                       }
-                                      className="text-blue-500 transition-colors hover:text-blue-700"
+                                      className="cursor-pointer text-blue-500 transition-colors hover:text-blue-700"
                                       title="View receipts"
                                       type="button"
                                     >
@@ -1762,7 +1762,7 @@ export default function PaymentAutoPage() {
                                     className={`${
                                       paymentsWithPdfs[payment.id || ""]
                                         ? "cursor-not-allowed text-gray-300 dark:text-gray-600"
-                                        : "hover:text-danger text-gray-500 transition-colors"
+                                        : "hover:text-danger cursor-pointer text-gray-500 transition-colors"
                                     }`}
                                     title={
                                       paymentsWithPdfs[payment.id || ""]
@@ -1990,7 +1990,7 @@ export default function PaymentAutoPage() {
                       newPayment.amount_inv > latestEstimateBalance ||
                       isNaN(newPayment.amount_inv)
                     }
-                    className="bg-primary hover:bg-opacity-90 disabled:bg-opacity-70 inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed"
+                    className="bg-primary hover:bg-opacity-90 disabled:bg-opacity-70 inline-flex w-full cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed"
                   >
                     {isAddingPayment ? (
                       <>
@@ -2090,15 +2090,15 @@ export default function PaymentAutoPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black">
-          <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-sm bg-white p-6 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
+          <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
-                {modalTitle}
+                Select PDF
               </h3>
               <button
                 onClick={() => setIsPdfModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="text-primary cursor-pointer text-2xl"
               >
                 <svg
                   className="h-6 w-6"

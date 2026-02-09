@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
       `INSERT INTO payments (
         quotation_number, task_id, amount_inv, balance,
         payment_date, payment_method, payment_reference,
-        notes, received, received_date, invoice_number, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        notes, received, received_date, invoice_number, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         body.quotation_number,
         body.task_id,
@@ -133,7 +133,8 @@ export async function PATCH(request: NextRequest) {
     const [result] = await db.query<ResultSetHeader>(
       `UPDATE payments SET 
         received = ?, 
-        received_date = ?
+        received_date = ?,
+        updated_at = NOW()
        WHERE id = ?`,
       [
         body.received ? 1 : 0,

@@ -84,6 +84,8 @@ export interface Quotation {
   status: string;
   quote_ref: string; // New optional field
   quotation_number: string; // Optional field for quotation number
+  created_at: string;
+  updated_at: string;
 }
 
 // Payment record interface
@@ -131,9 +133,7 @@ export const TermsConditionsWarrantySections: Section[] = [
 ];
 
 export const getTermsAsPlainText = (): string =>
-  TermsConditionsWarrantySections
-    .map(
-      (section) =>
-        `${section.title}\n${section.content.map((c, i) => `${i + 1}. ${c}`).join("\n")}`
-    )
-    .join("\n\n");
+  TermsConditionsWarrantySections.map(
+    (section) =>
+      `${section.title}\n${section.content.map((c, i) => `${i + 1}. ${c}`).join("\n")}`,
+  ).join("\n\n");

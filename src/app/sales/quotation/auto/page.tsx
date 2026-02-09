@@ -656,7 +656,7 @@ export default function QuotationPage() {
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           branches:
-            "Kota Masai, Johor • Puchong | Setia Alam, Selangor • Bukit Mertajam, Penang",
+            "Kota Masai, Johor • Puchong | Setia Alam, Selangor",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         company2: {
@@ -668,7 +668,7 @@ export default function QuotationPage() {
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           branches:
-            "Kota Masai, Johor • Puchong | Setia Alam, Selangor • Bukit Mertajam, Penang",
+            "Kota Masai, Johor • Puchong | Setia Alam, Selangor",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         format: {
@@ -1061,20 +1061,20 @@ export default function QuotationPage() {
         <div className="mt-3 flex gap-2 md:mt-0">
           <button
             onClick={() => saveQuotation("draft")}
-            className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300"
+            className="cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300"
           >
             Save Draft
           </button>
           <button
             onClick={() => saveQuotation("sent")}
-            className="bg-success hover:bg-success/90 rounded-md px-4 py-2 text-white transition"
+            className="bg-success hover:bg-success/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
           >
             Save & Send
           </button>
           {quotation && (
             <button
               onClick={generatePDF}
-              className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white transition"
+              className="bg-primary hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
             >
               Generate PDF
             </button>
@@ -1093,7 +1093,7 @@ export default function QuotationPage() {
               </h2>
               <button
                 onClick={() => setEditingCustomer(!editingCustomer)}
-                className="text-success hover:text-success/80 inline-flex items-center text-sm font-medium"
+                className="text-success hover:text-success/80 inline-flex cursor-pointer items-center text-sm font-medium"
               >
                 {editingCustomer ? (
                   <>
@@ -1511,7 +1511,7 @@ export default function QuotationPage() {
                       );
                     }
                   }}
-                  className="bg-success hover:bg-success/90 rounded-md px-4 py-2 text-white transition"
+                  className="bg-success hover:bg-success/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
                 >
                   Save Changes
                 </button>
@@ -1559,7 +1559,7 @@ export default function QuotationPage() {
                         quotation.quotation_number || "",
                       )
                     }
-                    className="hover:text-primary ml-2 text-gray-500"
+                    className="hover:text-primary ml-2 cursor-pointer text-gray-500"
                     title="Copy to clipboard"
                   >
                     <svg
@@ -1613,7 +1613,7 @@ export default function QuotationPage() {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
                     Valid For (Days)
                   </label>
@@ -1627,9 +1627,9 @@ export default function QuotationPage() {
                     max="90"
                     className="border-stroke dark:bg-boxdark focus:border-primary active:border-primary w-full rounded-sm border-[1.5px] bg-white px-3 py-2 text-sm outline-hidden transition"
                   />
-                </div>
+                </div> */}
 
-                <div>
+                {/* <div>
                   <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
                     Installation Date
                   </label>
@@ -1639,7 +1639,7 @@ export default function QuotationPage() {
                     disabled
                     className="border-stroke dark:bg-boxdark w-full rounded-sm border-[1.5px] bg-white px-3 py-2 text-sm outline-hidden transition disabled:cursor-default"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -1655,6 +1655,7 @@ export default function QuotationPage() {
                   </label>
                   <input
                     type="text"
+                    disabled
                     value={
                       quotation?.sales_representative || task?.sales_name || ""
                     }
@@ -1666,7 +1667,7 @@ export default function QuotationPage() {
                         });
                       }
                     }}
-                    className="border-stroke dark:bg-boxdark focus:border-primary active:border-primary w-full rounded-sm border-[1.5px] bg-white px-3 py-2 text-sm outline-hidden transition"
+                    className="border-primary dark:bg-boxdark w-full rounded-sm border-[1.5px] bg-white px-3 py-2 text-sm outline-hidden transition"
                     placeholder="Sales representative name"
                   />
                 </div>
@@ -1677,6 +1678,7 @@ export default function QuotationPage() {
                   </label>
                   <input
                     type="text"
+                    disabled
                     value={quotation?.sales_uid || task?.sales_uid || ""}
                     onChange={(e) => {
                       if (quotation) {
@@ -1686,7 +1688,7 @@ export default function QuotationPage() {
                         });
                       }
                     }}
-                    className="border-stroke dark:bg-boxdark focus:border-primary active:border-primary w-full rounded-sm border-[1.5px] bg-white px-3 py-2 text-sm outline-hidden transition"
+                    className="border-primary dark:bg-boxdark w-full rounded-sm border-[1.5px] bg-white px-3 py-2 text-sm outline-hidden transition"
                     placeholder="Sales representative ID"
                   />
                 </div>
@@ -1729,25 +1731,25 @@ export default function QuotationPage() {
                     <th className="w-8 px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                       #
                     </th>
-                    <th className="px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="p-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Description
                     </th>
-                    <th className="w-20 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="w-20 p-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Qty
                     </th>
-                    <th className="w-20 px-3 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="w-20 p-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Unit
                     </th>
-                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="w-28 p-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Unit Price
                     </th>
-                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="w-28 p-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Rounding
                     </th>
-                    <th className="w-28 px-3 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="w-28 p-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                       Amount
                     </th>
-                    <th className="w-10 px-3 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase"></th>
+                    <th className="w-10 p-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase"></th>
                   </tr>
                 </thead>
                 <tbody className="dark:divide-strokedark divide-y divide-gray-200">
