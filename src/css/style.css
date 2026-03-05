@@ -72,17 +72,17 @@ layer(base);
   --color-form-strokedark: #3d4d60;
   --color-form-input: #1d2a39;
 
-  --color-meta-1: #dc3545;
-  --color-meta-2: #eff2f7;
-  --color-meta-3: #10b981;
-  --color-meta-4: #1c1f22;
-  --color-meta-5: #259ae6;
-  --color-meta-6: #ffba00;
-  --color-meta-7: #ff6766; /* rose */
+  --color-meta-1: #dc3545; /* matte red */
+  --color-meta-2: #eff2f7; /* light gray */
+  --color-meta-3: #10b981; /* medium green */
+  --color-meta-4: #1c1f22; /* black */
+  --color-meta-5: #259ae6; /* sea blue */
+  --color-meta-6: #ffba00; /* mustard */
+  --color-meta-7: #ff6766; /* light rose */
   --color-meta-8: #F0CA33; /* dark gold */
   --color-meta-9: #e5e7eb; /* gray-200 */
   /* --color-meta-10: #F63C4C; Scarlet */
-  --color-meta-10: #FF404C;
+  --color-meta-10: #FF404C; /* bright rose */
   --color-meta-11: #ff9257; /* apricot */
 
   --color-success: #219653;

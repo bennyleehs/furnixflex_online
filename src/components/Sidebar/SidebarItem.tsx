@@ -189,7 +189,7 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
               e.stopPropagation();
               handleClick();
             }}
-            className="ml-auto border-l-1 border-bodydark2"
+            className="ml-auto border-l border-bodydark2"
           >
             <svg
               className={`transform fill-current transition-transform duration-300 ease-in-out ml-2 ${

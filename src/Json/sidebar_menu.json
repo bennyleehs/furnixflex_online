@@ -177,8 +177,8 @@
         "route": "/country-currency"
       },
       {
-        "label": "Settings",
-        "route": "/settings"
+        "label": "Attendance",
+        "route": "/attendance"
       },
       {
         "label": "History",
