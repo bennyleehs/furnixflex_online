@@ -11,6 +11,11 @@ interface ProgressTableProps {
   onFilterChange?: (key: string, value: string) => void;
   onSearchChange?: (query: string) => void;
 }
+  const section1 = ["Assign PIC", "Follow Up", "Visit Showroom"];
+  const section2 = ["Quotation", "Payment", "Production", "Installation"];
+  const section3 = ["Over Budget", "Others Design", "Drop Interest", "Others"];
+  // Helper function to check if a status belongs to the Others group
+  const isOthersGroup = (status: string) => section3.includes(status);
 
 export default function ProgressTable({
   data,
@@ -23,19 +28,9 @@ export default function ProgressTable({
 }: ProgressTableProps) {
   // Memoize the pipeline stages array
   const pipelineStages = useMemo(
-    () => [
-      "Assign PIC",
-      "Follow Up",
-      "Visit Showroom",
-      "Quotation",
-      "Payment",
-      "Production",
-      "Installation",
-      "Others",
-      "Job Done",
-    ],
+    () => [...section1, ...section2, "Others", "Job Done"],
     [],
-  ); // Empty dependency array since stages are static
+  ); 
 
   // const [selectedStage, setSelectedStage] = useState<string | null>(null); // State for task filtering
   const [selectedPIC, setSelectedPIC] = useState<string | null>(null); // Add a new state for PIC filtering
@@ -64,10 +59,19 @@ export default function ProgressTable({
       {} as Record<string, number>,
     );
 
+    // Track individual counts for Others group
+    const othersIndividualCounts = {} as Record<string, number>;
+
     // Count tasks in each stage
     data.forEach((task) => {
       const status = task.status;
-      if (pipelineStages.includes(status)) {
+      if (isOthersGroup(status)) {
+        // Count under "Others" stage
+        counts["Others"] = (counts["Others"] || 0) + 1;
+        // Track individual status for tooltips
+        othersIndividualCounts[status] =
+          (othersIndividualCounts[status] || 0) + 1;
+      } else if (pipelineStages.includes(status)) {
         counts[status]++;
       }
     });
@@ -89,6 +93,8 @@ export default function ProgressTable({
         percentage,
         progressWeight,
         weightedProgress,
+        // Add individual counts for Others stage
+        individualCounts: stage === "Others" ? othersIndividualCounts : null,
       };
     });
 
@@ -111,31 +117,37 @@ export default function ProgressTable({
 
   // Process individual tasks with progress percentage
   const tasksWithProgress = useMemo(() => {
-    return data
-      .map((task) => {
-        const stageIndex = pipelineStages.indexOf(task.status);
-        const progressPercentage =
-          stageIndex >= 0
-            ? Math.round(((stageIndex + 1) / pipelineStages.length) * 100)
-            : 0;
+    return data.map((task) => {
+      let stageIndex;
+      let displayStage;
 
-        return {
-          ...task,
-          progressPercentage,
-          stageIndex,
-        };
-      })
-      .sort((a, b) => b.progressPercentage - a.progressPercentage); // Sort by progress descending
+      if (isOthersGroup(task.status)) {
+        // If status is in section3, it belongs to "Others" stage
+        stageIndex = pipelineStages.indexOf("Others");
+        displayStage = "Others";
+      } else {
+        stageIndex = pipelineStages.indexOf(task.status);
+        displayStage = task.status;
+      }
+
+      const progressPercentage =
+        stageIndex >= 0
+          ? Math.round(((stageIndex + 1) / pipelineStages.length) * 100)
+          : 0;
+
+      return {
+        ...task,
+        progressPercentage,
+        stageIndex,
+        displayStage,
+        isOthersGroup: isOthersGroup(task.status),
+      };
+    });
   }, [data, pipelineStages]);
 
   // Update the displayedTasks memo to include search functionality
   const displayedTasks = useMemo(() => {
     let filtered = tasksWithProgress;
-
-    // Apply stage filter if selected
-    // if (selectedStage) {
-    //   filtered = filtered.filter((task) => task.status === selectedStage);
-    // }
 
     // Apply PIC filter if selected
     if (selectedPIC) {
@@ -145,15 +157,21 @@ export default function ProgressTable({
       });
     }
 
-    if (selectedStatus !== "All") {
-      filtered = filtered.filter((task) => task.status === selectedStatus);
+    // Handle status filtering with Others group
+    if (selectedStatus && selectedStatus !== "All") {
+      if (selectedStatus === "Others") {
+        // If "Others" is selected, show all tasks from section3
+        filtered = filtered.filter((task) => isOthersGroup(task.status));
+      } else {
+        // Otherwise filter by exact status
+        filtered = filtered.filter((task) => task.status === selectedStatus);
+      }
     }
 
     // Apply search query if provided
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter((task) => {
-        // Search through all important fields
         return (
           (task.name && task.name.toLowerCase().includes(query)) ||
           (task.contact && task.contact.toLowerCase().includes(query)) ||
@@ -174,7 +192,6 @@ export default function ProgressTable({
     );
 
     return filtered;
-    // }, [tasksWithProgress, selectedStage, selectedPIC, searchQuery]);
   }, [tasksWithProgress, selectedStatus, selectedPIC, searchQuery]);
 
   const uniqueDisplayedTasks = useMemo(() => {
@@ -198,7 +215,7 @@ export default function ProgressTable({
 
       {/* Pipeline flow visualization with responsive layout */}
       {/* Desktop view - full pipeline */}
-      <div className="border-stroke dark:border-strokedark relative mb-1 hidden border-b py-4 md:flex">
+      <div className="border-stroke dark:border-stroke/40 relative mb-1 hidden border-b py-4 md:flex">
         {stageData.stageInfo.map((info, index) => {
           // Determine color based on stage
           let bgColorClass = "bg-meta-8";
@@ -206,11 +223,7 @@ export default function ProgressTable({
 
           if (info.stage === "Job Done")
             bgColorClass = "bg-success dark:bg-green-500";
-          else if (
-            ["Quotation", "Payment", "Production", "Installation"].includes(
-              info.stage,
-            )
-          ) {
+          else if (section2.includes(info.stage)) {
             bgColorClass = "bg-meta-10";
           } else if (["Others"].includes(info.stage)) {
             bgColorClass = "bg-meta-11";
@@ -258,8 +271,6 @@ export default function ProgressTable({
                   {info.count}
                 </div>
               </div>
-
-              {/* Stage connection line */}
 
               {/* Vertical stage label directly under the circle */}
               <div className="mt-2 flex w-full flex-col items-center text-sm text-black dark:text-white">
@@ -465,9 +476,9 @@ export default function ProgressTable({
       </h4> */}
       <h4 className="text-md mb-3 font-medium text-black dark:text-white">
         {selectedStatus && selectedPIC
-          ? `Tasks for ${selectedPIC} in ${selectedStatus} Stage`
+          ? `Tasks for ${selectedPIC} in ${selectedStatus === "Others" ? "Others (All non-standard statuses)" : selectedStatus} Stage`
           : selectedStatus
-            ? `Tasks in ${selectedStatus} Stage`
+            ? `Tasks in ${selectedStatus === "Others" ? "Others (All non-standard statuses)" : selectedStatus} Stage`
             : selectedPIC
               ? `Tasks for ${selectedPIC}`
               : "Recent Tasks Progress"}
@@ -483,7 +494,7 @@ export default function ProgressTable({
         ).map((task) => {
           // Determine color based on progress
           let colorClass = "bg-meta-8";
-          if (task.status === "Others") {
+          if (section3.includes(task.status)) {
             colorClass = "bg-meta-11";
           } else if (task.progressPercentage >= 100) {
             colorClass = "bg-success dark:bg-green-500";
@@ -513,27 +524,29 @@ export default function ProgressTable({
           return (
             <div
               key={task.id}
-              className="dark:bg-form-input border-stroke dark:border-stroke/40 flex h-full flex-col rounded-lg border bg-white p-3 shadow-xl dark:shadow-lg dark:shadow-gray-400/20"
+              className="dark:bg-form-input border-strokedark/30 hover:border-strokedark/80 dark:border-stroke/40 hover:dark:border-stroke flex h-full flex-col rounded-lg border bg-white p-3 shadow-xl dark:shadow-lg dark:shadow-gray-400/20"
             >
-              <div className="border-stroke mb-4 flex justify-start border-b pb-4 dark:border-white/40">
-                <span
-                  className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
-                    task.status === "Job Done"
-                      ? "bg-success/10 text-success border-success border"
-                      : [
-                            "Quotation",
-                            "Payment",
-                            "Production",
-                            "Installation",
-                          ].includes(task.status)
-                        ? "bg-meta-10/10 text-meta-10 border-meta-10 border"
-                        : ["Others"].includes(task.status)
-                          ? "bg-meta-11/10 text-meta-11 border-meta-11 border"
-                          : "bg-meta-8/10 text-meta-8 border-meta-8 border"
-                  }`}
-                >
-                  {task.status}
-                </span>
+              <div className="border-stroke dark:border-stroke/20 mb-4 flex justify-between border-b pb-4">
+                <div>
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${
+                      task.status === "Job Done"
+                        ? "bg-success/10 text-success border-success border"
+                        : section2.includes(task.status)
+                          ? "bg-meta-10/10 text-meta-10 border-meta-10 border"
+                          : section3.includes(task.status)
+                            ? "bg-meta-11/10 text-meta-11 border-meta-11 border"
+                            : "bg-meta-8/10 text-meta-8 border-meta-8 border"
+                    }`}
+                  >
+                    {task.status}
+                  </span>
+                </div>
+                {/* Display date */}
+                <div className="pt-1 text-sm text-black dark:text-white">
+                  {/* <span className="font-semibold">DATE: </span> */}
+                  <span className="ml-1 font-semibold">{created_date}</span>
+                </div>
               </div>
 
               {/* Customer info section with better containment */}
@@ -615,7 +628,7 @@ export default function ProgressTable({
                   </div>
                 </div>
 
-                {task.status === "Others" ? (
+                {section3.includes(task.status) ? (
                   <div className="text-center text-sm font-bold">
                     <span>No progress applicable.</span>
                   </div>
@@ -640,7 +653,7 @@ export default function ProgressTable({
                 )}
 
                 {/* Person-In-Charge section with status */}
-                <div className="border-stroke mt-3 border-t pt-3 text-xs dark:border-white/40">
+                <div className="border-stroke dark:border-stroke/20 mt-3 border-t pt-3 text-xs">
                   {/* PIC info */}
                   <div className="flex justify-between">
                     <div>
@@ -652,10 +665,10 @@ export default function ProgressTable({
                         {salesUid && <span className="ml-1">({salesUid})</span>}
                       </div>
                       {/* Display date */}
-                      <div className="text-sm text-black dark:text-white">
+                      {/* <div className="text-sm text-black dark:text-white">
                         <span className="font-semibold">DATE: </span>
                         <span className="ml-1">{created_date}</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   {/* </div> */}
@@ -663,20 +676,20 @@ export default function ProgressTable({
                   <div className="flex justify-end">
                     {task.status !== "Job Done" && (
                       <button
-                        className="bg-primary hover:bg-primarydark dark:bg-primary dark:hover:bg-primarydark flex cursor-pointer items-center rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors"
+                        className="bg-primary hover:bg-primarydark dark:bg-primary dark:hover:bg-primarydark flex cursor-pointer items-center rounded-md px-4 py-1.5 text-sm font-medium whitespace-nowrap text-white transition-colors"
                         onClick={() =>
                           (window.location.href = `/sales/task/edit?id=${task.id}`)
                         }
                         title="Update task status"
                       >
-                        <svg
+                        {/* <svg
                           className="mr-2 h-4 w-4"
                           viewBox="0 0 20 20"
                           fill="currentColor"
                         >
                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        Update
+                        </svg> */}
+                        UPDATE
                       </button>
                     )}
                   </div>

@@ -8,6 +8,9 @@ const MENU = "2";
 const SUBMENU = "3";
 const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
 
+// Add the Others group definition for API knows what to fetch
+const OTHERS_GROUP = ["Over Budget", "Others Design", "Drop Interest", "Others"];
+
 export default function Page() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [data, setData] = useState<any[]>([]);
@@ -34,8 +37,16 @@ export default function Page() {
       setLoading(true);
       setError(null);
       try {
-        const statusParam =
-          selectedStatus !== "All" ? `&status=${selectedStatus}` : "";
+        // If "Others" is selected, send a comma-separated string of all related statuses
+        let statusParam = "";
+        if (selectedStatus !== "All") {
+          if (selectedStatus === "Others") {
+            statusParam = `&status=${OTHERS_GROUP.join(",")}`; // e.g., "&status=Over Budget,Others Design,Drop Interest,Others"
+          } else {
+            statusParam = `&status=${selectedStatus}`;
+          }
+        }
+
         const searchParam = searchQuery ? `&search=${searchQuery}` : "";
 
         const userUidParam = `&userUid=${user.uid}`;
