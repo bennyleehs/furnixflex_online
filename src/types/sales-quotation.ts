@@ -77,8 +77,10 @@ export interface Quotation {
   discount: number;
   tax: number;
   total: number;
-  paid: number;
-  balance: number;
+  paid?: number;
+  balance?: number;
+  payment_count?: number;
+  received_payment_count?: number;
   notes: string;
   terms: string;
   status: string;

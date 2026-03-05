@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
     if (from) {
       whereConditions.push(`created_at >= ?`);
-      queryParams.push(from + ' 00:00:00'); // start of day | very beginning of the "from" day
+      queryParams.push(from + " 00:00:00"); // start of day | very beginning of the "from" day
     }
 
     if (to) {
@@ -67,13 +67,46 @@ export async function GET(request: Request) {
     // Query for paginated list
     const [quotationRows] = (await pool.query(
       `SELECT 
-        id, task_id, quote_ref, quotation_number,
-        customer_name, customer_contact, customer_email, customer_address,
-        quotation_date, valid_until, installation_date,
-        sales_representative, sales_uid,
-        subtotal, tax, total, 
-        notes, terms, status, created_at, updated_at
-      FROM quotations
+        q.id, q.task_id, q.quote_ref, q.quotation_number,
+        q.customer_name, q.customer_contact, q.customer_email, q.customer_address,
+        q.quotation_date, q.valid_until, q.installation_date,
+        q.sales_representative, q.sales_uid,
+        q.subtotal, q.tax, q.total, 
+        q.notes, q.terms, q.status, q.created_at, q.updated_at,
+
+      COALESCE(
+        ( SELECT SUM(p.amount_inv)
+          FROM payments p
+          WHERE p.quotation_number = q.quotation_number
+          AND p.received = 1
+        ), 0
+      ) as paid,
+
+      q.total - COALESCE(
+        ( SELECT SUM(p.amount_inv)
+          FROM payments p
+          WHERE p.quotation_number = q.quotation_number
+          AND p.received = 1
+        ), 0
+      ) as balance,
+
+      COALESCE(
+        ( SELECT COUNT(p.id)
+          FROM payments p
+          WHERE p.quotation_number = q.quotation_number
+          AND p.received = 1
+        ), 0
+      ) as payment_count,
+
+      COALESCE(
+        ( SELECT COUNT(p.id)
+          FROM payments p
+          WHERE p.quotation_number = q.quotation_number
+          AND p.received = 1
+        ),0
+      ) as received_payment_count
+       
+      FROM quotations q
       ${whereClause}
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?`,

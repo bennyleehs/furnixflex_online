@@ -1055,14 +1055,10 @@ export default function PaymentAutoPage() {
   return (
     <DefaultLayout>
       {/* Header with Breadcrumb */}
-      <div className="mb-6">
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Breadcrumb
-            noHeader={true}
-            pageName={quotationId ? `${quotationId}` : "New"}
-          />
-        </div>
-      </div>
+      <Breadcrumb
+        // noHeader={true}
+        pageName={quotationId ? `${quotationId}` : "New"}
+      />
 
       {loading ? (
         <div className="flex h-60 items-center justify-center">
@@ -1074,9 +1070,9 @@ export default function PaymentAutoPage() {
           </div>
         </div>
       ) : quotation ? (
-        <div className="grid grid-cols-12 gap-5">
+        <div className="grid grid-cols-14 gap-5">
           {/* Top Row - Payment Summary Card */}
-          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-12 rounded-sm border bg-white">
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-14 rounded-sm border bg-white">
             <div className="p-5">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-5">
                 {/* Customer and Quotation Details */}
@@ -1186,7 +1182,7 @@ export default function PaymentAutoPage() {
                             <span className="mr-2 text-gray-500 dark:text-gray-400">
                               Quotation / Task:
                             </span>
-                            <span className="font-medium">
+                            <span className="text-primary font-medium">
                               {quotation.quotation_number}{" "}
                               <span className="mx-1 text-gray-400 dark:text-gray-500">
                                 /
@@ -1254,7 +1250,7 @@ export default function PaymentAutoPage() {
                   <div className="grid h-full grid-cols-1 gap-3 sm:grid-cols-3">
                     {/* Total Amount */}
                     <div className="dark:bg-meta-4 flex items-center justify-between rounded-md bg-gray-50 p-3 sm:flex-col sm:justify-center">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Total
                       </span>
                       <span className="text-lg font-bold text-black sm:text-xl dark:text-white">
@@ -1264,7 +1260,7 @@ export default function PaymentAutoPage() {
 
                     {/* Paid Amount */}
                     <div className="dark:bg-meta-4 flex items-center justify-between rounded-md bg-gray-50 p-3 sm:flex-col sm:justify-center">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Paid
                       </span>
                       <span className="text-success text-lg font-bold sm:text-xl">
@@ -1274,10 +1270,10 @@ export default function PaymentAutoPage() {
 
                     {/* Actual Balance */}
                     <div className="dark:bg-meta-4 flex items-center justify-between rounded-md bg-gray-50 p-3 sm:flex-col sm:justify-center">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Balance
                       </span>
-                      <span className="text-primary text-lg font-bold sm:text-xl">
+                      <span className="text-meta-10 text-lg font-bold sm:text-xl">
                         {formatCurrency(balance)}
                       </span>
                     </div>
@@ -1306,7 +1302,7 @@ export default function PaymentAutoPage() {
           </div>
 
           {/* Payment Statement Section */}
-          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-12 rounded-sm border bg-white md:col-span-8">
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-14 rounded-sm border bg-white md:col-span-10">
             <div className="p-5">
               <div className="mb-5 flex items-center justify-between">
                 <h4 className="text-lg font-semibold text-black dark:text-white">
@@ -1315,11 +1311,11 @@ export default function PaymentAutoPage() {
 
                 {paymentRecords.length > 0 && (
                   <button
-                    className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm"
+                    className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
                     onClick={() => handleGeneratePaymentStatement()}
                   >
                     <svg
-                      className="h-4 w-4"
+                      className="h-6 w-6"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1341,34 +1337,34 @@ export default function PaymentAutoPage() {
                 <div className="dark:bg-meta-4 mb-4 rounded-md bg-gray-50 p-3">
                   <div className="grid grid-cols-2 gap-3 text-center md:grid-cols-4">
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-base font-medium text-gray-500 dark:text-gray-400">
                         Total Payments
                       </div>
-                      <div className="text-sm font-medium">
+                      <div className="text-base font-medium">
                         {paymentRecords.length}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-base font-medium text-gray-500 dark:text-gray-400">
                         Received
                       </div>
-                      <div className="text-success text-sm font-medium">
+                      <div className="text-success text-base font-medium">
                         {paymentRecords.filter((p: any) => p.received).length}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-base font-medium text-gray-500 dark:text-gray-400">
                         Pending
                       </div>
-                      <div className="text-warning text-sm font-medium">
+                      <div className="text-warning text-base font-medium">
                         {paymentRecords.filter((p: any) => !p.received).length}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-base font-medium text-gray-500 dark:text-gray-400">
                         Paid (Received)
                       </div>
-                      <div className="text-success text-sm font-medium">
+                      <div className="text-success text-base font-medium">
                         {formatCurrency(totalPaid)}
                       </div>
                     </div>
@@ -1405,25 +1401,25 @@ export default function PaymentAutoPage() {
                     <table className="w-full table-auto">
                       <thead>
                         <tr className="bg-gray-2 dark:bg-meta-4 text-left">
-                          <th className="px-4 py-2.5 text-xs font-medium">
+                          <th className="px-4 py-2.5 text-base font-medium">
                             Date
                           </th>
-                          <th className="px-4 py-2.5 text-xs font-medium">
+                          <th className="px-4 py-2.5 text-base font-medium">
                             Reference
                           </th>
-                          <th className="px-4 py-2.5 text-xs font-medium">
+                          <th className="px-4 py-2.5 text-base font-medium">
                             Type
                           </th>
-                          <th className="px-4 py-2.5 text-center text-xs font-medium">
+                          <th className="px-4 py-2.5 text-center text-base font-medium">
                             Amount
                           </th>
-                          <th className="px-4 py-2.5 text-center text-xs font-medium">
+                          <th className="px-4 py-2.5 text-center text-base font-medium">
                             Estimate Balance
                           </th>
-                          <th className="px-4 py-2.5 text-center text-xs font-medium">
+                          <th className="px-4 py-2.5 text-center text-base font-medium">
                             Payment Status
                           </th>
-                          <th className="w-10 px-4 py-2.5 text-xs font-medium">
+                          <th className="w-10 px-4 py-2.5 text-base font-medium">
                             Action
                           </th>
                         </tr>
@@ -1431,25 +1427,25 @@ export default function PaymentAutoPage() {
                       <tbody>
                         {/* Initial balance row */}
                         <tr className="border-stroke dark:border-strokedark dark:bg-meta-4/50 border-t bg-gray-50/50">
-                          <td className="px-4 py-2.5 text-xs">
+                          <td className="px-4 py-2.5 text-base">
                             {formatDate(quotation.quotation_date)}
                           </td>
-                          <td className="px-4 py-2.5 text-xs">
+                          <td className="px-4 py-2.5 text-base">
                             {quotation.quotation_number}
                           </td>
-                          <td className="px-4 py-2.5 text-xs font-medium">
+                          <td className="px-4 py-2.5 text-base font-medium">
                             Initial
                           </td>
-                          <td className="px-4 py-2.5 text-right text-xs">
+                          <td className="px-4 py-2.5 text-center text-base font-black">
                             {formatCurrency(quotation.total)}
                           </td>
-                          <td className="px-4 py-2.5 text-right text-xs font-medium">
+                          <td className="px-4 py-2.5 text-center text-base font-medium">
                             {formatCurrency(quotation.total)}
                           </td>
-                          <td className="px-4 py-2.5 text-center text-xs">
-                            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                          <td className="px-4 py-2.5 text-center text-base">
+                            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-base font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
                               <svg
-                                className="mr-1 h-3 w-3"
+                                className="mr-1 h-4 w-4"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >
@@ -1515,35 +1511,35 @@ export default function PaymentAutoPage() {
                               key={payment.id || index}
                               className="border-stroke dark:border-strokedark border-t"
                             >
-                              <td className="px-4 py-2.5 text-xs">
+                              <td className="px-4 py-2.5 text-base">
                                 {formatDate(payment.payment_date)}
                               </td>
-                              <td className="px-4 py-2.5 font-mono text-xs">
+                              <td className="px-4 py-2.5 font-mono text-base">
                                 {payment.payment_reference ||
                                   `${quotation.quotation_number}-P${(index + 1).toString().padStart(3, "0")}`}
                               </td>
-                              <td className="px-4 py-2.5 text-xs capitalize">
+                              <td className="px-4 py-2.5 text-base capitalize">
                                 {payment.payment_method.replace(/_/g, " ")}
                                 {payment.notes && (
-                                  <span className="text-xxs mt-0.5 block max-w-30 truncate text-gray-500">
+                                  <span className="mt-0.5 block max-w-30 truncate text-xs text-gray-500">
                                     {payment.notes}
                                   </span>
                                 )}
                               </td>
-                              <td className="text-success px-4 py-2.5 text-right text-xs font-medium">
+                              <td className="text-success px-4 py-2.5 text-center text-base font-medium">
                                 -
                                 {formatCurrency(
                                   Number(payment.amount_inv) || 0,
                                 )}
                               </td>
-                              <td className="px-4 py-2.5 text-right text-xs font-medium">
+                              <td className="px-4 py-2.5 text-center text-base font-medium">
                                 {formatCurrency(currentBalance)}
                               </td>
-                              <td className="px-4 py-2.5 text-center text-xs">
+                              <td className="px-4 py-2.5 text-center">
                                 {payment.received ? (
-                                  <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                  <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-base font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
                                     <svg
-                                      className="mr-1 h-3 w-3"
+                                      className="mr-1 h-4 w-4"
                                       fill="currentColor"
                                       viewBox="0 0 20 20"
                                     >
@@ -1556,9 +1552,9 @@ export default function PaymentAutoPage() {
                                     Received
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-base font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
                                     <svg
-                                      className="mr-1 h-3 w-3"
+                                      className="mr-1 h-4 w-4"
                                       fill="none"
                                       stroke="currentColor"
                                       viewBox="0 0 24 24"
@@ -1574,11 +1570,11 @@ export default function PaymentAutoPage() {
                                   </span>
                                 )}
                                 {payment.received && payment.received_date ? (
-                                  <div className="text-xxs mt-1 text-gray-500">
+                                  <div className="mt-1 text-xs text-gray-500">
                                     {formatDate(payment.received_date)}
                                   </div>
                                 ) : (
-                                  <div className="text-xxs mt-1 text-gray-500">
+                                  <div className="mt-1 text-xs text-gray-500">
                                     Requires follow up
                                   </div>
                                 )}
@@ -1817,7 +1813,7 @@ export default function PaymentAutoPage() {
           </div>
 
           {/* Add Payment Form */}
-          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-12 rounded-sm border bg-white md:col-span-4">
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark col-span-14 rounded-sm border bg-white md:col-span-4">
             <div className="p-5">
               <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">
                 Add Payment
@@ -1882,23 +1878,25 @@ export default function PaymentAutoPage() {
                       Amount <span className="text-meta-1">*</span>
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       name="amount_inv"
                       min="0"
                       step="0.01"
-                      value={newPayment.amount_inv}
+                      // value={newPayment.amount_inv}
                       onChange={handlePaymentInputChange}
-                      className="border-stroke focus:border-primary dark:border-strokedark dark:focus:border-primary w-full rounded-md border bg-transparent px-4 py-2 text-sm focus-visible:outline-none"
+                      className="border-stroke focus:border-primary dark:border-strokedark dark:focus:border-primary w-full [appearance:textfield] rounded-md border bg-transparent px-4 py-2 text-sm focus-visible:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       placeholder={formatCurrency(latestEstimateBalance)}
                       required
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       Remaining estimate balance:{" "}
-                      {formatCurrency(latestEstimateBalance)}
+                      <span className="font-bold text-black dark:text-white">
+                        {formatCurrency(latestEstimateBalance)}
+                      </span>
                     </p>
                   </div>
 
-                  <div>
+                  <div className="dark:scheme-dark">
                     <label className="mb-1 block text-sm font-medium">
                       Date <span className="text-meta-1">*</span>
                     </label>
@@ -2090,7 +2088,7 @@ export default function PaymentAutoPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-gray-600/80">
           <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">

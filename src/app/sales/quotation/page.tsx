@@ -185,7 +185,7 @@ export default function QuotationListPage() {
       }
 
       // Redirect to the quotation editor with the task ID
-      router.push(`/sales/quotation/auto?taskId=${taskId}`);
+      // router.push(`/sales/quotation/auto?taskId=${taskId}`);
     } catch (error) {
       console.error("Error fetching quotation:", error);
       alert(
@@ -256,18 +256,18 @@ export default function QuotationListPage() {
         return;
       }
 
-      if (data.files.length === 1) {
-        // If only one PDF, open it directly
-        window.open(
-          `/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`,
-          "_blank",
-        );
-      } else {
-        // If multiple PDFs, open modal for selection
-        setPdfFiles(data.files);
-        setSelectedTaskId(taskId);
-        setIsPdfModalOpen(true);
-      }
+      // if (data.files.length === 1) {
+      //   // If only one PDF, open it directly
+      //   window.open(
+      //     `/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`,
+      //     "_blank",
+      //   );
+      // } else {
+      // If multiple PDFs, open modal for selection
+      setPdfFiles(data.files);
+      setSelectedTaskId(taskId);
+      setIsPdfModalOpen(true);
+      // }
     } catch (error) {
       console.error("Error fetching PDFs:", error);
       alert(
@@ -419,7 +419,7 @@ export default function QuotationListPage() {
           </div>
 
           {/* Date Range From */}
-          <div>
+          <div className="dark:scheme-dark">
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
               Date From
             </label>
@@ -434,7 +434,7 @@ export default function QuotationListPage() {
           </div>
 
           {/* Date Range To */}
-          <div>
+          <div className="dark:scheme-dark">
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
               Date To
             </label>
@@ -490,25 +490,41 @@ export default function QuotationListPage() {
         </form>
         {/* Search and Reset Buttons */}
         <div className="flex items-end space-x-2 pt-4 md:col-span-2">
-          <button
+          {/* <button
             type="submit"
             className="bg-primary hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
           >
             Search
-          </button>
+          </button> */}
 
           <button
             type="button"
             onClick={resetFilters}
-            className="dark:bg-meta-4 dark:hover:bg-meta-3 cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300 dark:text-gray-300"
+            // className="hover:bg-primary dark:bg-meta-4 dark:hover:bg-primarydark rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition hover:text-white dark:text-gray-300"
+            className="hover:bg-primary dark:bg-meta-4 dark:hover:bg-primarydark cursor-pointer rounded-md bg-gray-100 px-4 py-2 text-gray-800 transition hover:text-white dark:text-gray-300"
           >
-            Reset Filters
+            Clear Filters
           </button>
         </div>
       </div>
 
       {/* Quotations Table */}
       <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-xs border bg-white px-5 pt-6 pb-2.5">
+        <div className="pb-2">
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1); // Reset to first page when changing page size
+            }}
+            className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary rounded-sm border bg-transparent px-2 py-1 outline-hidden transition"
+          >
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+            <option value="100">100 per page</option>
+          </select>
+        </div>
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
@@ -602,7 +618,7 @@ export default function QuotationListPage() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3.5">
-                        <button
+                        {/* <button
                           onClick={() => handleEditQuotation(quotation.task_id)}
                           className={`text-primary hover:text-primary/80 cursor-pointer ${quotation.status === "payment" ? "hidden" : ""}`}
                           title="Edit quotation"
@@ -616,7 +632,24 @@ export default function QuotationListPage() {
                               fill=""
                             />
                           </svg>
-                        </button>
+                        </button> */}
+                        <Link
+                          href={`/sales/quotation/auto?taskId=${quotation.task_id}`}
+                          // target="blank"
+                          onClick={() => handleEditQuotation(quotation.task_id)}
+                          className={`text-primary hover:text-primary/80 cursor-pointer ${quotation.status === "payment" ? "hidden" : ""}`}
+                          title="Edit quotation"
+                        >
+                          <svg
+                            className="h-5 w-5 fill-current"
+                            viewBox="0 0 576 512"
+                          >
+                            <path
+                              d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1 .8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9-22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"
+                              fill=""
+                            />
+                          </svg>
+                        </Link>
                         <button
                           onClick={() => handleViewPdf(quotation.task_id)}
                           className="text-primary hover:text-primary/80 cursor-pointer"
@@ -651,6 +684,29 @@ export default function QuotationListPage() {
                             ></path>
                           </svg>
                         </button>
+                        {/* if using this as link, comment or remove router push in handleStatusUpdate */}
+                        {/* <Link
+                          href={`/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${quotation.task_id}`}
+                          onClick={() =>
+                            handleStatusUpdate(quotation.task_id, "payment")
+                          }
+                          className={`text-success hover:text-success/80 cursor-pointer ${quotation.status === "payment" ? "hidden" : ""}`}
+                          title="Track Payments"
+                        >
+                          <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="1.5"
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                          </svg>
+                        </Link> */}
                         <button
                           onClick={() =>
                             handleStatusUpdate(quotation.task_id, "draft")
@@ -733,20 +789,6 @@ export default function QuotationListPage() {
                 ></path>
               </svg>
             </button>
-
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1); // Reset to first page when changing page size
-              }}
-              className="border-stroke dark:border-strokedark rounded-md border bg-transparent px-2 py-1"
-            >
-              <option value="10">10 per page</option>
-              <option value="25">25 per page</option>
-              <option value="50">50 per page</option>
-              <option value="100">100 per page</option>
-            </select>
           </div>
         </div>
       </div>
@@ -869,7 +911,7 @@ export default function QuotationListPage() {
                           `/api/sales/quotation/view-pdf?filePath=/sales/${selectedTaskId}/quotation/${file.name}`,
                           "_blank",
                         );
-                        setIsPdfModalOpen(false);
+                        // setIsPdfModalOpen(false);
                       }}
                       className="dark:hover:bg-meta-4 flex w-full items-center rounded px-2 py-2 text-left hover:bg-gray-100"
                     >
@@ -911,7 +953,7 @@ export default function QuotationListPage() {
             <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setIsPdfModalOpen(false)}
-                className="dark:bg-meta-4 dark:hover:bg-meta-3 rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
+                className="dark:bg-meta-4 dark:hover:bg-meta-3 cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:text-gray-300"
               >
                 Cancel
               </button>

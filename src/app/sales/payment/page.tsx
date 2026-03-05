@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-// import Link from "next/link";
+import Link from "next/link";
 import { Quotation, PaymentRecord } from "@/types/sales-quotation"; // Import Quotation interface
 
 export default function QuotationListPage() {
   const router = useRouter();
-  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]); // fetch in array
   const [loading, setLoading] = useState(true);
 
   // Search and filter states
@@ -304,6 +304,33 @@ export default function QuotationListPage() {
     }
   };
 
+  // Update task db (customers) status
+  async function updateDBTaskStatus(taskId: string, status: string) {
+    try {
+      const response = await fetch("/api/sales/task", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: taskId,
+          status: status,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update status");
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error updating status:", error);
+      throw error;
+    }
+  }
+
   // Function to update status
   const handleStatusUpdate = async (taskId: string, status: string) => {
     if (!taskId) {
@@ -321,18 +348,22 @@ export default function QuotationListPage() {
         body: JSON.stringify({ status }),
       });
 
-      if (status === "payment") {
-        // Find the quotation to get its ID
-        const quotation = quotations.find((q) => q.task_id === taskId);
-        if (!quotation) {
-          throw new Error("Quotation not found");
-        }
+      if (status === "draft") {
+        await updateDBTaskStatus(taskId, "Quotation");
 
-        // Navigate to auto payment page instead of updating status directly
-        router.push(
-          `/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${taskId}`,
-        );
-        return;
+        const formData = new FormData();
+        formData.append("id", taskId);
+        formData.append("status", "Quotation");
+        formData.append("oldStatus", "Payment");
+        formData.append("notes", "Payment update to Quotation draft");
+        formData.append("userName", "Current User"); // Replace with actual username
+
+        await fetch(`/api/sales/task/update`, {
+          method: "POST",
+          body: formData,
+        });
+
+        alert(`Payment update to Quotation ${status}`);
       }
 
       if (!response.ok) {
@@ -340,7 +371,7 @@ export default function QuotationListPage() {
         throw new Error(errorData.error || "Failed to update status");
       }
 
-      alert(`Quotation has been marked as ${status}!`);
+      // alert(`Payment change to Quotation draft ${status}`);
       fetchQuotations();
     } catch (error) {
       console.error("Error updating status:", error);
@@ -381,7 +412,7 @@ export default function QuotationListPage() {
           </div>
 
           {/* Date Range From */}
-          <div>
+          <div className="dark:scheme-dark">
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
               Date From
             </label>
@@ -396,7 +427,7 @@ export default function QuotationListPage() {
           </div>
 
           {/* Date Range To */}
-          <div>
+          <div className="dark:scheme-dark">
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
               Date To
             </label>
@@ -433,25 +464,40 @@ export default function QuotationListPage() {
         </form>
         {/* Search and Reset Buttons */}
         <div className="flex items-end space-x-2 pt-4 md:col-span-2">
-          <button
+          {/* <button
             type="submit"
             className="bg-primary hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
           >
             Search
-          </button>
+          </button> */}
 
           <button
             type="button"
             onClick={resetFilters}
-            className="dark:bg-meta-4 dark:hover:bg-meta-3 cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300 dark:text-gray-300"
+            className="dark:bg-meta-4 dark:hover:bg-primary/90 hover:bg-primary cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:text-white dark:text-white"
           >
-            Reset Filters
+            Clear Filters
           </button>
         </div>
       </div>
 
       {/* Quotations Table */}
       <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-xs border bg-white px-5 pt-6 pb-2.5">
+        <div className="pb-2">
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1); // Reset to first page when changing page size
+            }}
+            className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary rounded-sm border bg-transparent px-2 py-1 outline-hidden transition"
+          >
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+            <option value="100">100 per page</option>
+          </select>
+        </div>
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
@@ -535,7 +581,7 @@ export default function QuotationListPage() {
                       {formatCurrency(quotation.paid || 0)}
                     </td>
                     {/* New Balance cell */}
-                    <td className="text-warning px-4 py-4 text-right font-medium">
+                    <td className="text-meta-10 px-4 py-4 text-right font-medium">
                       {formatCurrency(
                         (quotation.total || 0) - (quotation.paid || 0),
                       )}
@@ -550,7 +596,8 @@ export default function QuotationListPage() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3.5">
-                        <button
+                        <Link
+                          href={`/sales/payment/auto?quotationId=${quotation.quotation_number}&taskId=${quotation.task_id}`}
                           onClick={() =>
                             handleStatusUpdate(quotation.task_id, "payment")
                           }
@@ -570,7 +617,7 @@ export default function QuotationListPage() {
                               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             ></path>
                           </svg>
-                        </button>
+                        </Link>
                         <button
                           onClick={() =>
                             handleGeneratePaymentStatement(
@@ -687,20 +734,6 @@ export default function QuotationListPage() {
                 ></path>
               </svg>
             </button>
-
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1); // Reset to first page when changing page size
-              }}
-              className="border-stroke dark:border-strokedark rounded-md border bg-transparent px-2 py-1"
-            >
-              <option value="10">10 per page</option>
-              <option value="25">25 per page</option>
-              <option value="50">50 per page</option>
-              <option value="100">100 per page</option>
-            </select>
           </div>
         </div>
       </div>

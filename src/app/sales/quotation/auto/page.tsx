@@ -591,7 +591,7 @@ export default function QuotationPage() {
         formData.append("id", taskId);
         formData.append("status", "Quotation");
         formData.append("oldStatus", task.status);
-        formData.append("notes", "Quotation sent to customer");
+        formData.append("notes", "Quotation saved & sent to customer");
         formData.append("userName", "Current User");
 
         await fetch(`/api/sales/task/update`, {
@@ -655,8 +655,7 @@ export default function QuotationPage() {
           tel: "07-5104106",
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
-          branches:
-            "Kota Masai, Johor • Puchong | Setia Alam, Selangor",
+          branches: "Kota Masai, Johor • Puchong, Selangor",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         company2: {
@@ -667,8 +666,7 @@ export default function QuotationPage() {
           tel: "07-5104106",
           email: "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
-          branches:
-            "Kota Masai, Johor • Puchong | Setia Alam, Selangor",
+          branches: "Kota Masai, Johor • Puchong, Selangor",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         format: {
@@ -1044,7 +1042,7 @@ export default function QuotationPage() {
     return (
       <DefaultLayout>
         <div className="flex items-center justify-center">
-          <div className="border-primary h-16 w-16 animate-spin rounded-full border-6 border-t-transparent"></div>
+          <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"></div>
         </div>
       </DefaultLayout>
     );
@@ -1052,24 +1050,23 @@ export default function QuotationPage() {
 
   return (
     <DefaultLayout>
-      <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
-        <Breadcrumb
-          noHeader={true}
-          pageName={taskId ? `Quotation for Task #${taskId}` : "New Quotation"}
-        />
-
-        <div className="mt-3 flex gap-2 md:mt-0">
-          <button
+      <Breadcrumb
+        // noHeader={true}
+        pageName={taskId ? `Quotation for Task #${taskId}` : "New Quotation"}
+      />
+      <div className="mb-4 flex flex-col items-center justify-end md:flex-row">
+        <div className="flex gap-2">
+          {/* <button
             onClick={() => saveQuotation("draft")}
             className="cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 transition hover:bg-gray-300"
           >
             Save Draft
-          </button>
+          </button> */}
           <button
             onClick={() => saveQuotation("sent")}
             className="bg-success hover:bg-success/90 cursor-pointer rounded-md px-4 py-2 text-white transition"
           >
-            Save & Send
+            Save Quotation
           </button>
           {quotation && (
             <button
@@ -1365,7 +1362,7 @@ export default function QuotationPage() {
                     <>
                       <div className="mb-2">
                         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                          Property Type
+                          Property / Residential Area
                         </label>
                         <select
                           value={task.property || ""}
@@ -1374,13 +1371,14 @@ export default function QuotationPage() {
                           }
                           className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-3 py-2 text-sm outline-hidden transition"
                         >
+                          <option value="" disabled>Select Property Type:</option>
                           <option value="Landed">Landed</option>
                           <option value="High-Rise">High-Rise</option>
                         </select>
                       </div>
                       <div className="mb-2">
                         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                          Access Type
+                          Access Buildings
                         </label>
                         <select
                           value={task.guard || ""}
@@ -1389,6 +1387,7 @@ export default function QuotationPage() {
                           }
                           className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-3 py-2 text-sm outline-hidden transition"
                         >
+                          <option value="" disabled>Select Access Type:</option>
                           <option value="Guarded">Guarded</option>
                           <option value="No-Guard">No-Guard</option>
                         </select>
@@ -1531,7 +1530,7 @@ export default function QuotationPage() {
             {/* Quotation Number Display */}
             <div className="dark:bg-meta-4 flex items-center rounded-md bg-gray-50 px-3 py-2">
               <span className="mr-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Quotation #:
+                Quotation: #
               </span>
               {quotation?.quotation_number ? (
                 <div className="flex items-center">
