@@ -41,7 +41,13 @@
   "JB.ENGINEERING.Partner": [],
   "JB.ENGINEERING.Staff": [],
   "JB.ENGINEERING.Supervisor": [],
-  "JB.FINANCE.Assistant Manager": [],
+  "JB.FINANCE.Assistant Manager": [
+    "2.4.4",
+    "2.5.4",
+    "4.1.4",
+    "4.2.4",
+    "4.3.4"
+  ],
   "JB.FINANCE.Chief Officer": [],
   "JB.FINANCE.Director": [],
   "JB.FINANCE.Manager": [
@@ -117,7 +123,25 @@
   ],
   "JB.TECHNOLOGY.Director": [],
   "JB.TECHNOLOGY.Manager": [],
-  "JB.TECHNOLOGY.Managing Director": [],
+  "JB.TECHNOLOGY.Managing Director": [
+    "1.1.2",
+    "1.2.2",
+    "1.3.2",
+    "1.4.2",
+    "1.5.2",
+    "1.6.2",
+    "1.7.2",
+    "1.8.2",
+    "1.9.2",
+    "1.10.2",
+    "2.1.2",
+    "2.2.2",
+    "2.3.2",
+    "2.4.2",
+    "2.5.2",
+    "3.1.1",
+    "3.2.1"
+  ],
   "JB.TECHNOLOGY.Non-Executive Director": [],
   "JB.TECHNOLOGY.Partner": [],
   "JB.TECHNOLOGY.Staff": [
@@ -251,7 +275,12 @@
     "2.4.2",
     "2.5.2"
   ],
-  "KL.SALES.Supervisor": [],
+  "KL.SALES.Supervisor": [
+    "1.1.4",
+    "1.2.4",
+    "2.2.2",
+    "2.3.4"
+  ],
   "KL.TECHNOLOGY.Assistant Manager": [],
   "KL.TECHNOLOGY.Chief Officer": [],
   "KL.TECHNOLOGY.Director": [],

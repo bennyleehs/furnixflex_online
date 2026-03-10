@@ -317,7 +317,7 @@ const FormUni = <T extends Record<string, any>>({
                       return (
                         <div
                           key={subIndex}
-                          className={subField.className || "flex-grow"}
+                          className={subField.className || "grow"}
                         >
                           {subField.inputType === "select" ? (
                             <select
