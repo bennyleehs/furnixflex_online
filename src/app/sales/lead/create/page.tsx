@@ -419,6 +419,16 @@ export default function Page() {
         valueKey: "status",
         required: true,
         defaultValue: "Not Assign",
+        transform: (value: string) => {
+          // Automatically clear assignment if user manually sets status back to 'Not Assign'
+          if (value === "Not Assign") {
+            return {
+              sales_id: null,
+              assigned_by: "",
+            };
+          }
+          return {};
+        },
         options: [
           { value: "Not Assign", label: "Not Assign" },
           { value: "Assign PIC", label: "Assign PIC" },
@@ -438,37 +448,35 @@ export default function Page() {
         title: "Sales Representative",
         inputType: "select",
         valueKey: "sales_id",
-        defaultValue: "0", // Add this line to set default value
+        defaultValue: "",
         transform: (value: string, _allValues: Record<string, any>) => {
-          // When a valid sales representative is selected (not empty)
+          // If a valid representative is selected
           if (value && value !== "") {
-            // Return object to update status AND assign_by
             return {
               status: "Assign PIC",
-              assigned_by: user?.uid, // <-- SET the assign_by field
+              assigned_by: user?.uid, // Sets the current user's UID
             };
           }
-          // If they are un-assigning (setting back to "0" or empty)
+
           return {
-            status: "Not Assign", // Revert status
-            assign_by: null,     // <-- CLEAR the assign_by field
+            status: "Not Assign",
+            assigned_by: "",
+            sales_id: null, // Send null to prevent SQL integer errors
           };
         },
-        options: salesReps.map((rep) => ({
+        options: salesReps.map((rep: any) => ({
           value: rep.id,
           label: `${rep.uid} ${rep.name} (${rep.task_count || 0})`,
         })) || [{ value: "", label: "Loading sales representatives..." }],
       },
-      // --- "Assigned By" FIELD (as read-only) ---
       {
         title: "Assigned By",
         inputType: "text",
         valueKey: "assigned_by",
-        readOnly: true,       // Make it read-only
+        readOnly: true, // Field remains non-editable by the user
       },
     ];
     // pass `user` as a dependency so the transform function
-    // always has access to the latest user data.
   }, [formData, countries, salesReps, user]);
 
   //v1.4 gemini

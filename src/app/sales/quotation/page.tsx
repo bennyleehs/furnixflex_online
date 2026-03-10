@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Link from "next/link";
-import { Quotation, PaymentRecord } from "@/types/sales-quotation";
+import { Quotation } from "@/types/sales-quotation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function QuotationListPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +47,13 @@ export default function QuotationListPage() {
     try {
       // Build query string with all filters
       let queryString = `?page=${page}&pageSize=${pageSize}`;
+      if (user?.uid) {
+        queryString += `&userUid=${encodeURIComponent(user.uid)}`;
+      }
+
+      if (user?.role) {
+        queryString += `&userRole=${encodeURIComponent(user.role)}`;
+      }
 
       if (searchTerm) {
         queryString += `&search=${encodeURIComponent(searchTerm)}`;
@@ -94,12 +103,16 @@ export default function QuotationListPage() {
     dateRange.to,
     statusFilter,
     salesRepFilter,
+    user?.uid,
+    user?.role,
   ]);
 
   // Initial fetch
   useEffect(() => {
-    fetchQuotations();
-  }, [fetchQuotations]);
+    if (user) {
+      fetchQuotations();
+    }
+  }, [fetchQuotations, user]);
 
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
@@ -399,7 +412,7 @@ export default function QuotationListPage() {
       <Breadcrumb pageName="Quotations" />
 
       {/* Search and Filters */}
-      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-xs border bg-white p-5">
+      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark mb-6 rounded-lg border bg-white p-5">
         <form
           onSubmit={handleSearch}
           className="grid grid-cols-1 gap-4 md:grid-cols-4"
@@ -509,7 +522,7 @@ export default function QuotationListPage() {
       </div>
 
       {/* Quotations Table */}
-      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-xs border bg-white px-5 pt-6 pb-2.5">
+      <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5">
         <div className="pb-2">
           <select
             value={pageSize}
