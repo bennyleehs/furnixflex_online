@@ -1,7 +1,8 @@
 import React, { ReactNode } from "react";
 
 interface SalesDataStatsProps {
-  total: string;
+  totalA: string;
+  totalB: string;
   titleMonthYear: string;
   rate: string;
   levelUp?: boolean;
@@ -11,7 +12,8 @@ interface SalesDataStatsProps {
 }
 
 const SalesDataStats: React.FC<SalesDataStatsProps> = ({
-  total,
+  totalA,
+  totalB,
   titleMonthYear,
   rate,
   levelUp,
@@ -43,7 +45,9 @@ const SalesDataStats: React.FC<SalesDataStatsProps> = ({
       </div>
 
       <div className="flex items-end justify-between">
-        <span className="pl-6 font-medium">{total} record(s)</span>
+        <span className="pl-6 font-medium">
+          {totalA} / {totalB}
+        </span>
         <span
           className={`flex items-center gap-1 text-sm font-medium ${
             levelUp && "text-meta-3"

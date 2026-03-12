@@ -9,7 +9,8 @@ const getCurrentMonthYear = () => {
     month: "long",
     year: "numeric",
   };
-  return today.toLocaleDateString("en-US", options);
+  const formattedString = today.toLocaleDateString("en-US", options);
+  return formattedString.toUpperCase();
 };
 
 export default function LeadsConversion() {
@@ -108,7 +109,9 @@ export default function LeadsConversion() {
         Leads Conversion
       </h1>
       <SalesDataStats
-        total={`${conversionData.totalLeads}/${conversionData.quotationLeads}`}
+        // total={`${conversionData.totalLeads}/${conversionData.quotationLeads}`}
+        totalA={`${conversionData.totalLeads} Assigned Leads`}
+        totalB={`${conversionData.quotationLeads} Quotations Created`}
         titleMonthYear={monthYear}
         title="Total Leads / Total Quotations"
         rate={conversionData.rate}

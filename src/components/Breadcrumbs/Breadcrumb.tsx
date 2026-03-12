@@ -7,15 +7,29 @@ interface BreadcrumbProps {
   noHeader?: boolean;
 }
 
+const ChevRight = () => (
+  <svg
+    className="inline-block w-4 h-4 mx-2 text-gray-400"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+);
+
 const Breadcrumb = ({ pageName, noHeader }: BreadcrumbProps) => {
   const pathname = usePathname();
   const pathSegments = pathname.split("/").filter((segment) => segment);
 
   return (
     <div className={noHeader ? 'inline-breadcrumb mb-6' : 'mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'}>
-      {!noHeader && <h2 className="mb-2 text-title-md2 font-semibold text-black dark:text-white">
-        {pageName}
-      </h2>}
+      {!noHeader && (
+        <h2 className="mb-2 text-title-md2 font-semibold text-black dark:text-white">
+          {pageName}
+        </h2>
+      )}
       
       <nav>
         <ol className="flex items-center text-gray-600 dark:text-gray-300">
@@ -32,7 +46,7 @@ const Breadcrumb = ({ pageName, noHeader }: BreadcrumbProps) => {
                 ) : (
                   <span className="font-medium text-primary capitalize">{pageName}</span>
                 )}
-                {!isLast && <span className="mx-2">/</span>}
+                {!isLast && <ChevRight />}
               </li>
             );
           })}

@@ -192,7 +192,7 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
             className="ml-auto border-l border-bodydark2"
           >
             <svg
-              className={`transform fill-current transition-transform duration-300 ease-in-out ml-2 ${
+              className={`transform fill-current transition-transform duration-300 ease-in-out ml-2 hover:scale-135 ${
                 pageName === item.label.toLowerCase() ? "rotate-180" : ""
               }`}
               width="20"

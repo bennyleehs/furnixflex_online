@@ -110,7 +110,9 @@ export default function SalesConversion() {
         Sales Conversion
       </h1>
       <SalesDataStats
-        total={`${conversionData.quotationLeads}/${conversionData.paymentLeads}`}
+        // total={`${conversionData.quotationLeads}/${conversionData.paymentLeads}`}
+        totalA={`${conversionData.quotationLeads} Quotation Leads`}
+        totalB={`${conversionData.paymentLeads} Payment Leads`}
         titleMonthYear={monthYear}
         title="Total Quotations / Total Payments"
         rate={conversionData.rate}

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/flatpickr.css";
 import Link from "next/link";
 import { Quotation, PaymentRecord } from "@/types/sales-quotation";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +22,10 @@ export default function QuotationListPage() {
   // const [statusFilter, setStatusFilter] = useState("all");
   const [salesRepFilter, setSalesRepFilter] = useState("");
   const [salesReps, setSalesReps] = useState<string[]>([]);
+
+  const formatDateFilter = (date: Date) => {
+    return date.toISOString().split("T")[0];
+  };
 
   // Payment stats
   const [totalPaid, setTotalPaid] = useState(0);
@@ -435,12 +441,18 @@ export default function QuotationListPage() {
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
               Date From
             </label>
-            <input
-              type="date"
+            <Flatpickr
               value={dateRange.from}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, from: e.target.value })
-              }
+              options={{ dateFormat: "Y-m-d" }}
+              placeholder="yyyy-mm-dd"
+              onChange={(dates) => {
+                if (dates[0]) {
+                  setDateRange((prev) => ({
+                    ...prev,
+                    from: formatDateFilter(dates[0]),
+                  }));
+                }
+              }}
               className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
             />
           </div>
@@ -450,12 +462,18 @@ export default function QuotationListPage() {
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
               Date To
             </label>
-            <input
-              type="date"
+            <Flatpickr
               value={dateRange.to}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, to: e.target.value })
-              }
+              options={{ dateFormat: "Y-m-d" }}
+              placeholder="yyyy-mm-dd"
+              onChange={(dates) => {
+                if (dates[0]) {
+                  setDateRange((prev) => ({
+                    ...prev,
+                    to: formatDateFilter(dates[0]),
+                  }));
+                }
+              }}
               className="border-stroke focus:border-primary active:border-primary dark:border-strokedark dark:bg-form-input dark:focus:border-primary w-full rounded-sm border-[1.5px] bg-transparent px-4 py-2 text-sm outline-hidden transition"
             />
           </div>
