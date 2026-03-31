@@ -84,17 +84,17 @@ export default function Administration() {
         </div>
         <div className="mt-4 flex space-x-3 sm:mt-0">
           <Link
-            href="/admin/users"
-            className="bg-primary hover:bg-primary/90 inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm"
+            href="/admin/employee"
+            className="bg-primary hover:bg-primary/90 inline-flex items-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm"
           >
-            Manage Users
+            Manage Employee
           </Link>
-          <Link
+          {/* <Link
             href="/admin/settings"
             className="dark:bg-boxdark dark:border-strokedark inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:text-gray-300"
           >
             System Settings
-          </Link>
+          </Link> */}
         </div>
       </div>
 

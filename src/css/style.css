@@ -68,7 +68,7 @@ layer(base);
   --color-whiter: #f5f7fd;
   --color-boxdark: #24303f;
   --color-boxdark-2: #1a222c;
-  --color-strokedark: #2e3a47;
+  --color-strokedark: #364452; /*#2e3a47*/
   --color-form-strokedark: #3d4d60;
   --color-form-input: #1d2a39;
 
