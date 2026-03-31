@@ -24,7 +24,7 @@ const SalesDataStats: React.FC<SalesDataStatsProps> = ({
   return (
     // <div className="rounded-lg border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
     <div className="dark:bg-boxdark bg-white">
-      <div className="grid grid-cols-4 gap-4 sm:grid-cols-5">
+      <div className="grid grid-cols-4 gap-4 sm:grid-cols-4">
         <div className="flex justify-center">
           <div className="bg-meta-2 dark:bg-meta-4 flex h-12 w-18 items-center justify-center rounded-xl">
             {children}

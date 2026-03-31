@@ -21,6 +21,7 @@ interface TableProps {
   onFilterChange?: (key: string, value: string) => void; // Callback for filter changes
   onSearchChange?: (query: string) => void; // Add new prop for search changes
   selectedStatus?: string; // Add this new prop
+  modalTitle?: string;
   showCreateButton?: boolean; //prop to control button visibility (from parent)
   createPermissionPrefix?: string; // To control the create button
   editPermissionPrefix?: string; // To control the edit button
@@ -48,6 +49,7 @@ export default function Tables({
   onFilterChange,
   onSearchChange, // Add onSearchChange to props
   selectedStatus = "All", // Default to "Active" if not provided
+  modalTitle,
   showCreateButton = true, // Default to true for backward compatibility
   createPermissionPrefix,
   editPermissionPrefix,
@@ -284,10 +286,10 @@ export default function Tables({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="bg-primary flex cursor-pointer items-center rounded-sm py-1 pr-2 text-white hover:opacity-80 disabled:opacity-50"
+            className={`border-stroke dark:border-strokedark flex items-center rounded-sm border px-2 py-1 hover:opacity-80 disabled:opacity-50 ${currentPage === 1 ? "" : "hover:border-primary dark:hover:border-primary cursor-pointer"}`}
           >
             <svg
-              className="h-5 w-5 text-white"
+              className="text-primary h-5 w-5"
               width="24"
               height="24"
               fill="none"
@@ -301,7 +303,6 @@ export default function Tables({
                 d="m15 19-7-7 7-7"
               />
             </svg>
-            Prev
           </button>
 
           {pages.map((page, index) => (
@@ -324,11 +325,10 @@ export default function Tables({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="bg-primary flex cursor-pointer items-center rounded-sm py-1 pl-2 text-white hover:opacity-80 disabled:opacity-50"
+            className={`border-stroke dark:border-strokedark flex items-center rounded-sm border px-2 py-1 hover:opacity-80 disabled:opacity-50 ${currentPage === totalPages ? "" : "hover:border-primary dark:hover:border-primary cursor-pointer"}`}
           >
-            Next
             <svg
-              className="h-5 w-5 text-white"
+              className="text-primary h-5 w-5"
               width="24"
               height="24"
               fill="none"
@@ -599,6 +599,7 @@ export default function Tables({
                           ) && (
                             <button
                               className="hover:text-primary cursor-pointer"
+                              title="Edit Details"
                               onClick={() => handleEdit(row)}
                             >
                               <svg
@@ -644,7 +645,7 @@ export default function Tables({
                     )}
                     <button
                       className="hover:text-primary cursor-pointer"
-                      title="Info"
+                      title="Details"
                       onClick={() => handleInfoClick(row)}
                       disabled={isLoadingInfo}
                     >
@@ -677,7 +678,7 @@ export default function Tables({
             {/* Modal Header */}
             <div className="dark:border-strokedark dark:bg-boxdark sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-white p-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Lead Details
+                {modalTitle}
               </h3>
               <button
                 onClick={() => setIsInfoModalOpen(false)}

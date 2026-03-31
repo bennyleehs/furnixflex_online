@@ -245,6 +245,7 @@ export default function LeadPage() {
         filterKeys={["status"]}
         statusCounts={statusCounts}
         selectedStatus={selectedStatus} // Pass this prop
+        modalTitle="Lead Details"
         currentPage={currentPage}
         totalItems={totalItems}
         itemsPerPage={itemsPerPage}

@@ -27,11 +27,6 @@ export default function QuotationListPage() {
     return date.toISOString().split("T")[0];
   };
 
-  // Payment stats
-  const [totalPaid, setTotalPaid] = useState(0);
-  const [balance, setBalance] = useState(0);
-  const [paymentProgress, setPaymentProgress] = useState(0);
-
   // Pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -409,11 +404,6 @@ export default function QuotationListPage() {
 
   return (
     <DefaultLayout>
-      {/* <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
-        <Breadcrumb pageName="Payments" noHeader={true}/>
-
-      </div> */}
-
       <Breadcrumb pageName="Payments" />
 
       {/* Search and Filters */}
@@ -777,7 +767,7 @@ export default function QuotationListPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedQuotationId && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black">
+        <div className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-400/50 backdrop-blur-xs">
           <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-sm bg-white p-6 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">

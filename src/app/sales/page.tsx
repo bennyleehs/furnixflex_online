@@ -11,6 +11,47 @@
 //   );
 // }
 
+// export default function SalesDashboard() {
+//   // const [chartData, setChartData] = useState(null);
+//   // const [loading, setLoading] = useState(true);
+//   // const [error, setError] = useState<string | null>(null);
+
+//   // useEffect(() => {
+//   //   const fetchData = async () => {
+//   //     try {
+//   //       const res = await fetch("/api/sales");
+//   //       if (!res.ok) {
+//   //         throw new Error("Failed to fetch sales data");
+//   //       }
+//   //       const data = await res.json();
+//   //       setChartData(data);
+//   //     } catch (err) {
+//   //       setError("Error fetching 9090");
+//   //       console.error(err);
+//   //     } finally {
+//   //       setLoading(false);
+//   //     }
+//   //   };
+
+//   //   fetchData();
+//   // }, []);
+
+//   // if (loading) return <div className="m-auto">Loading template data...</div>;
+//   // if (error) return <div>Error: {error}</div>;
+//   // if (!chartData) return null;
+
+//   return (
+//     <DefaultLayout>
+//       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:sm:grid-cols-3">
+//         <CustomerChart />
+//         <CustomerChart />
+//         <LeadChart />
+//         <LeadChart />
+//       </div>
+//     </DefaultLayout>
+//   );
+// }
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,6 +68,8 @@ import {
   Title,
 } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
+import CustomerChart from "@/components/SalesChart/CustomerChart";
+import LeadChart from "@/components/SalesChart/LeadChart";
 
 // Register ChartJS components
 ChartJS.register(
@@ -242,7 +285,7 @@ export default function Home() {
         </div>
 
         {/* Stats Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2  xl:grid-cols-4">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {/* Overall Progress */}
           <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-7.5 py-6">
             <div className="flex items-center justify-between">
@@ -364,58 +407,65 @@ export default function Home() {
 
         {/* Charts Row */}
         {/* <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6"> */}
-          {/* Status Charts */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Job Status Chart */}
-            <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
-              <h4 className="mb-2 text-lg font-semibold text-black dark:text-white">
-                Job Status
-              </h4>
-              <div className="flex h-40 justify-center">
-                <Doughnut
-                  data={jobChartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: "bottom",
-                        labels: {
-                          boxWidth: 12,
-                          padding: 10,
-                        },
+        {/* Status Charts */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Job Status Chart */}
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
+            <h4 className="mb-2 text-lg font-semibold text-black dark:text-white">
+              Job Status
+            </h4>
+            <div className="flex h-40 justify-center">
+              <Doughnut
+                data={jobChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        boxWidth: 12,
+                        padding: 10,
                       },
                     },
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Sales Status Chart */}
-            <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
-              <h4 className="mb-2 text-lg font-semibold text-black dark:text-white">
-                Quotation Status
-              </h4>
-              <div className="flex h-40 justify-center">
-                <Doughnut
-                  data={salesChartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: "bottom",
-                        labels: {
-                          boxWidth: 12,
-                          padding: 10,
-                        },
-                      },
-                    },
-                  }}
-                />
-              </div>
+                  },
+                }}
+              />
             </div>
           </div>
+
+          {/* Sales Status Chart */}
+          <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white p-6">
+            <h4 className="mb-2 text-lg font-semibold text-black dark:text-white">
+              Quotation Status
+            </h4>
+            <div className="flex h-40 justify-center">
+              <Doughnut
+                data={salesChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        boxWidth: 12,
+                        padding: 10,
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 pt-5 lg:grid-cols-2 xl:sm:grid-cols-3">
+          <CustomerChart />
+          <LeadChart />
+          {/* <CustomerChart />
+          <LeadChart /> */}
+        </div>
         {/* </div> */}
       </DefaultLayout>
     </>

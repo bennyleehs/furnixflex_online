@@ -711,20 +711,20 @@ export default function PaymentAutoPage() {
         return;
       }
 
-      if (data.files.length === 1) {
-        // If only one PDF, open it directly
-        window.open(
-          `/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`,
-          "_blank",
-        );
-      } else {
-        // If multiple PDFs, open modal for selection
-        setPdfFiles(data.files);
-        setSelectedTaskId(taskId);
-        setSelectedFileType("quotation");
-        setModalTitle("Select Quotation PDF");
-        setIsPdfModalOpen(true);
-      }
+      // if (data.files.length === 1) {
+      //   // If only one PDF, open it directly
+      //   window.open(
+      //     `/api/sales/quotation/view-pdf?filePath=/sales/${taskId}/quotation/${data.files[0].name}`,
+      //     "_blank",
+      //   );
+      // } else {
+      // If multiple PDFs, open modal for selection
+      setPdfFiles(data.files);
+      setSelectedTaskId(taskId);
+      setSelectedFileType("quotation");
+      setModalTitle("Select Quotation PDF");
+      setIsPdfModalOpen(true);
+      // }
     } catch (error) {
       console.error("Error fetching PDFs:", error);
       alert(
@@ -2088,7 +2088,7 @@ export default function PaymentAutoPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-gray-600/80">
+        <div className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-400/50 backdrop-blur-xs">
           <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
@@ -2177,8 +2177,8 @@ export default function PaymentAutoPage() {
 
       {/* Receipt Selection Modal */}
       {isReceiptModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
-          <div className="dark:bg-boxdark relative mt-20 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
+        <div className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-400/50 backdrop-blur-xs">
+          <div className="dark:bg-boxdark relative mx-4 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
                 Receipts for Payment: {currentPaymentRef}

@@ -906,7 +906,7 @@ export default function QuotationListPage() {
 
       {/* PDF Selection Modal */}
       {isPdfModalOpen && selectedTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 dark:bg-white/30">
+        <div className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-400/50 backdrop-blur-xs">
           <div className="dark:bg-boxdark mx-4 w-full max-w-lg rounded-lg bg-white p-4 shadow-lg">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-black dark:text-white">
