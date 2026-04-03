@@ -1,7 +1,0 @@
-=== Task #1726 Event Log ===
-
-----------------------------------------
-[2026-03-13T07:45:05.574Z] Current User - Status Update: Assign PIC → Quotation
-----------------------------------------
-[2026-03-13T07:45:05.968Z] Current User - Status Update: Quotation → Quotation
-----------------------------------------

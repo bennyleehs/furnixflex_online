@@ -1,6 +1,0 @@
-=== Task #957 Event Log ===
-
-----------------------------------------
-[2026-01-21T08:40:49.032Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Visits showroom 18/1/26, survey price first, those interested will contact
-----------------------------------------

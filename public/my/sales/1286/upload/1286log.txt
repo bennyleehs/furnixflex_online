@@ -1,8 +1,0 @@
-=== Task #1286 Event Log ===
-
-----------------------------------------
-[2026-01-28T09:22:31.356Z] Current User - Status Update: Assign PIC → Quotation
-----------------------------------------
-[2026-01-28T10:24:34.651Z] Current User - Status Update: Quotation → Payment
-Notes: Quotation Accepted
-----------------------------------------

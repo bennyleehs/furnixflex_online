@@ -1,6 +1,0 @@
-=== Task #1017 Event Log ===
-
-----------------------------------------
-[2026-01-22T10:24:33.813Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Measurement on site 23/1/26
-----------------------------------------

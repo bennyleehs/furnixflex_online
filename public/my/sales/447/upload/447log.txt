@@ -1,8 +1,0 @@
-=== Task #447 Event Log ===
-
-----------------------------------------
-[2025-11-21T06:19:54.156Z] Current User - Status Update: Assign PIC → Quotation
-----------------------------------------
-[2026-01-29T05:21:23.621Z] Current User - Status Update: Quotation → Payment
-Notes: Quotation Accepted
-----------------------------------------

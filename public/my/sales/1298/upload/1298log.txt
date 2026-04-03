@@ -1,8 +1,0 @@
-=== Task #1298 Event Log ===
-
-----------------------------------------
-[2026-01-30T07:17:01.019Z] Current User - Status Update: Assign PIC → Visit Showroom
-Notes: Saturday 24/1/26 maybe 3pm-4pm
-----------------------------------------
-[2026-01-30T07:17:03.552Z] Current User - Status Update: Visit Showroom → Visit Showroom
-----------------------------------------

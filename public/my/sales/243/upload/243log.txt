@@ -1,8 +1,0 @@
-=== Task #243 Event Log ===
-
-----------------------------------------
-[2025-10-27T02:28:00.909Z] Current User - Status Update: Visit Showroom → Visit Showroom
-----------------------------------------
-[2025-10-27T02:28:06.980Z] Current User - Status Update: Assign PIC → Visit Showroom
-Notes: Tunggu Ukur
-----------------------------------------

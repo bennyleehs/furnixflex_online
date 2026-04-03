@@ -1,6 +1,0 @@
-=== Task #1360 Event Log ===
-
-----------------------------------------
-[2026-02-07T09:29:24.517Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Customer Batu pahat survey dulu
-----------------------------------------

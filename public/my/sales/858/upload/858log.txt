@@ -1,6 +1,0 @@
-=== Task #858 Event Log ===
-
-----------------------------------------
-[2025-12-30T10:17:21.067Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Visits showroom 29/12/25, survey first
-----------------------------------------

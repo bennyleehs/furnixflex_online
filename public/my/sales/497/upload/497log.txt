@@ -1,6 +1,0 @@
-=== Task #497 Event Log ===
-
-----------------------------------------
-[2025-11-28T04:28:30.807Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Measurement on site 29/11/25(saturday) 1.30pm
-----------------------------------------

@@ -38,8 +38,10 @@ bun.lock
 yarn.lock
 
 # Ignore the some of folder in the public directory
-public/admin/
-public/sales/
+public/my/
+public/sg/
+public/id/
+public/ph/
 
 ### VisualStudioCode ###
 .vscode/*

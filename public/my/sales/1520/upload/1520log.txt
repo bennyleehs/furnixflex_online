@@ -1,6 +1,0 @@
-=== Task #1520 Event Log ===
-
-----------------------------------------
-[2026-02-27T03:59:26.996Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Customer at KL , home at jb, Cust will goto KL showroom the customer pass to sales person kl
-----------------------------------------

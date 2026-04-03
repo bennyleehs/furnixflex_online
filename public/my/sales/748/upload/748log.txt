@@ -1,6 +1,0 @@
-=== Task #748 Event Log ===
-
-----------------------------------------
-[2025-12-16T10:00:43.186Z] Current User - Status Update: Assign PIC → Follow Up
-Files: Screenshot_2025-12-16-18-00-22-62_6012fa4d4ddec268fc5c7112cbb265e7.jpg
-----------------------------------------

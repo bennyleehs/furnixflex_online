@@ -1,6 +1,0 @@
-=== Task #84 Event Log ===
-
-----------------------------------------
-[2025-10-08T03:21:13.401Z] Current User - Status Update: Assign PIC → Visit Showroom
-Notes: Da beri cust harga .. Cust nak buat island unit dan Top Cabinet .. Tunggu cust free tarikh xpasti sbb cust kerja atas kapal.
-----------------------------------------

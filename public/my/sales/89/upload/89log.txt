@@ -1,6 +1,0 @@
-=== Task #89 Event Log ===
-
-----------------------------------------
-[2025-10-07T05:35:13.273Z] Current User - Status Update: Assign PIC → Visit Showroom
-Notes: 7/10/25 visit showroom 2.30pm
-----------------------------------------

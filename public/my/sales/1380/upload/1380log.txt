@@ -1,6 +1,0 @@
-=== Task #1380 Event Log ===
-
-----------------------------------------
-[2026-02-08T04:07:55.203Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Cust kota tinggi ,only buat door shj, ada charge transport free ,customer surveys dulu
-----------------------------------------

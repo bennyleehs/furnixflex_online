@@ -1,9 +1,0 @@
-=== Task #1131 Event Log ===
-
-----------------------------------------
-[2026-01-23T04:18:30.206Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: No reply
-----------------------------------------
-[2026-01-23T04:40:45.498Z] Current User - Status Update: Follow Up → Follow Up
-Notes: Customer nak buat concrete table top, tunggu siap lepas inform
-----------------------------------------

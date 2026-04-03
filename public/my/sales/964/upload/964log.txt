@@ -1,6 +1,0 @@
-=== Task #964 Event Log ===
-
-----------------------------------------
-[2026-01-16T07:41:41.446Z] Current User - Status Update: Assign PIC → Visit Showroom
-Notes: Seremban. will try to find time to come showroom.
-----------------------------------------

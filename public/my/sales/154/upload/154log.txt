@@ -1,6 +1,0 @@
-=== Task #154 Event Log ===
-
-----------------------------------------
-[2025-10-22T03:30:42.226Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: sudah send promo cust tiada reply
-----------------------------------------

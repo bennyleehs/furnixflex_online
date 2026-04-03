@@ -1,6 +1,0 @@
-=== Task #258 Event Log ===
-
-----------------------------------------
-[2025-10-30T05:42:48.395Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Ctm dari segamat , dia nak lekat dia punya brand kat melaka , kalau minat dia akan call back
-----------------------------------------

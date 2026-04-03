@@ -1,6 +1,0 @@
-=== Task #1076 Event Log ===
-
-----------------------------------------
-[2026-01-16T04:20:40.716Z] Current User - Status Update: Assign PIC → Visit Showroom
-Notes: Will come to visit showroom.
-----------------------------------------

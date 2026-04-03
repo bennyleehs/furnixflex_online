@@ -1,8 +1,0 @@
-=== Task #1094 Event Log ===
-
-----------------------------------------
-[2026-01-16T04:25:39.308Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: need to dismantle old cabinet first.
-----------------------------------------
-[2026-01-16T04:26:18.066Z] Current User - Status Update: Follow Up → Follow Up
-----------------------------------------

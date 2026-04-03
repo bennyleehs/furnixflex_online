@@ -1,6 +1,0 @@
-=== Task #1717 Event Log ===
-
-----------------------------------------
-[2026-03-17T03:06:29.857Z] Current User - Status Update: Assign PIC → Others
-Notes: Customers with available time will be scheduled to visit the showroom to learn more.
-----------------------------------------

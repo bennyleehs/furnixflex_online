@@ -1,6 +1,0 @@
-=== Task #167 Event Log ===
-
-----------------------------------------
-[2025-10-22T03:31:29.872Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: cust tiada budget.. kita sudah beri 20% discount masih lari dri budget dia
-----------------------------------------

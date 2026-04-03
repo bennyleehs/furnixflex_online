@@ -1,6 +1,0 @@
-=== Task #1121 Event Log ===
-
-----------------------------------------
-[2026-01-21T08:08:26.046Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: I'm considering it; I'll contact you again if needed.   Visit showroom on 19/1/27
-----------------------------------------

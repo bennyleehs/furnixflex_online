@@ -1,8 +1,0 @@
-=== Task #269 Event Log ===
-
-----------------------------------------
-[2025-11-06T09:38:28.495Z] Current User - Status Update: Quotation → Quotation
-----------------------------------------
-[2026-02-25T08:14:05.851Z] Current User - Status Update: Quotation → Payment
-Notes: Quotation Accepted
-----------------------------------------

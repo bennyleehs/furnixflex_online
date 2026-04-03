@@ -1,6 +1,0 @@
-=== Task #883 Event Log ===
-
-----------------------------------------
-[2026-01-05T07:35:40.790Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Cust survey dulu
-----------------------------------------

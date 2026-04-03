@@ -1,6 +1,0 @@
-=== Task #299 Event Log ===
-
-----------------------------------------
-[2025-11-07T04:05:32.182Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Customer ialah designer visit showroom 5/11 /25 tengok material , kalau cust minat akan contact back
-----------------------------------------

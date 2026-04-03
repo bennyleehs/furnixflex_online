@@ -1,6 +1,0 @@
-=== Task #236 Event Log ===
-
-----------------------------------------
-[2026-02-26T07:46:17.367Z] Current User - Status Update: Quotation → Payment
-Notes: Quotation Accepted
-----------------------------------------

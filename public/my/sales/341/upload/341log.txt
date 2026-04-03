@@ -1,8 +1,0 @@
-=== Task #341 Event Log ===
-
-----------------------------------------
-[2025-11-14T03:23:43.098Z] Current User - Status Update: Assign PIC → Follow Up
-Notes: Customer batu pahat survey dulu
-----------------------------------------
-[2025-11-14T03:23:45.005Z] Current User - Status Update: Follow Up → Follow Up
-----------------------------------------
