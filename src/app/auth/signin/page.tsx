@@ -45,7 +45,7 @@ const SignIn = () => {
 
         setMessage(data.message || "Sign-in successful");
         setIsError(false);
-        router.push("/");
+        router.push("/dashboard");
       } else {
         setMessage(data.error || "Sign-in failed.");
         setIsError(true);
@@ -72,7 +72,7 @@ const SignIn = () => {
               <div className="group relative">
                 <div className="relative">
                   <Link
-                    href={"https://classy-pro.com/"}
+                    href={"https://classypro.online/"}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

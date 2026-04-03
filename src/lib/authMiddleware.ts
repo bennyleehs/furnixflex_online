@@ -48,13 +48,15 @@ export function withAuth(
       // console.log(decoded);
       // Ensure the decoded token's permissions include at least one required permission
       // const userPermissions: string[] = decoded.permissions || [];
+      const country = req.headers.get("x-country") || "my";
       const userPermissions: string[] = getPermissionsForRole(
         decoded.branchRef,
         decoded.departmentName,
         decoded.roleName,
+        country,
       );
-      // Check if any required permission exists in the user's permissions array
-      const hasPermission = requiredPermissions.some((p) =>
+      // Superadmin bypass: skip permission check entirely
+      const hasPermission = decoded.roleName === "Superadmin" || requiredPermissions.some((p) =>
         userPermissions.includes(p),
       );
       if (!hasPermission) {

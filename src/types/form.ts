@@ -16,4 +16,6 @@ export interface Column {
   min?: number;
   max?: number;
   options?: OptionItem[];
+  defaultValue?: string;
+  readOnly?: boolean;
 }

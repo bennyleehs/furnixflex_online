@@ -2,9 +2,11 @@
 import { NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 export async function GET(request: NextRequest) {
   try {
+    const country = getCountryFromRequest(request);
     // Get file path from query parameter
     const searchParams = request.nextUrl.searchParams;
     const filePath = searchParams.get('filePath');
@@ -18,8 +20,8 @@ export async function GET(request: NextRequest) {
       return new Response('Invalid file path', { status: 400 });
     }
     
-    // Construct the full path
-    const fullPath = path.join(process.cwd(), 'public', filePath);
+    // Construct the full path with country
+    const fullPath = path.join(process.cwd(), 'public', country, filePath);
     
     // Check if file exists
     if (!fs.existsSync(fullPath)) {

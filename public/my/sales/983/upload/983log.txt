@@ -1,0 +1,17 @@
+=== Task #983 Event Log ===
+
+----------------------------------------
+[2026-01-09T04:33:56.841Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Customer survey price first 
+下厨门：10.5ft x Rm160
+=Rm1680
+
+Drawer 1.5ft =Rm1300/set
+
+上厨 :12ft x std height =Rm5400
+
+Totally:Rm8380
+After discount:Rm7123
+
+**已有洋灰炤台
+----------------------------------------

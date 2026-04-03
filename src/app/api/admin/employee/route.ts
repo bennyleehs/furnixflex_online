@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
 
   try {
-    const db = createPool();
+    const db = await getPool();
 
     let sql = `
       SELECT  
@@ -78,7 +78,7 @@ export async function PUT(req: NextRequest) {
     // }
 
     // Create the database connection
-    const db = createPool();
+    const db = await getPool();
 
     // Construct the SQL update statement
     const sql = `
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create the database connection
-    const db = createPool();
+    const db = await getPool();
 
     // Check if employee with the same UID already exists
     const [existingEmployees] = await db.query<RowDataPacket[]>(

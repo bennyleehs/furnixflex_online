@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 interface ReceiptFile {
   filename: string;
@@ -22,9 +23,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const country = getCountryFromRequest(request);
     const receiptsDir = path.join(
       process.cwd(), 
       'public', 
+      country,
       'sales', 
       taskId, 
       'Invoice', 

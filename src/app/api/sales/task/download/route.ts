@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 // Define MIME types for common file extensions
 const MIME_TYPES: Record<string, string> = {
@@ -38,7 +39,8 @@ export async function GET(request: NextRequest) {
     const sanitizedFileName = fileName.replace(/\.\./g, '').replace(/\//g, '');
     
     // Construct file path
-    const taskDir = path.join(process.cwd(), 'public', 'sales', taskId, 'upload');
+    const country = getCountryFromRequest(request);
+    const taskDir = path.join(process.cwd(), 'public', country, 'sales', taskId, 'upload');
     const filePath = path.join(taskDir, sanitizedFileName);
     
     // Check if file exists

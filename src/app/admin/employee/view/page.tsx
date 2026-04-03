@@ -557,6 +557,7 @@ export default function EmployeeDetailPage() {
                           src={employee.profilePhoto}
                           alt={employee.name}
                           fill
+                          unoptimized
                           className="object-cover"
                         />
                       ) : (

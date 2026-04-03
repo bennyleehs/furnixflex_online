@@ -7,42 +7,45 @@ import FormBranch from "@/components/FormElements/FormBranch";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Column } from '@/types/form';
+import countriesData from "@/../public/data/countries.json";
 
-interface Country {
+interface LocalCountry {
   name: string;
-  callingCodes: string[];
-  timezones: string[];
-  currencies: { code: string; symbol: string }[];
+  idd: string;
+  time_zone: string;
+  currency_name: string;
+  currency: string;
+  currency_symbol: string;
+  states: { name: string; cities: string[] }[];
 }
 
 export default function BranchPage() {
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const hasFetchedCountries = useRef(false);
   const hasFetchedData = useRef(false);
   const searchParams = useSearchParams();
   const [data, setData] = useState<Record<string, any>[]>([]);
+  const [sidebarCountryName, setSidebarCountryName] = useState("");
+  const [matchedCountry, setMatchedCountry] = useState<LocalCountry | undefined>(undefined);
 
+  // Load country from sidebar menu API
   useEffect(() => {
-    async function fetchCountries() {
+    const loadMenu = async () => {
       try {
-        const res = await fetch("https://restcountries.com/v2/all");
-        if (!res.ok) throw new Error("Failed to fetch countries");
-        const countriesData = await res.json();
-        setCountries(countriesData);
+        const res = await fetch("/api/admin/menu_items");
+        if (res.ok) {
+          const menuData = await res.json();
+          const countryName = menuData[0]?.name || "";
+          setSidebarCountryName(countryName);
+          setMatchedCountry(
+            (countriesData.countries as LocalCountry[]).find((c) => c.name === countryName)
+          );
+        }
       } catch (err) {
-        setError("Error fetching countries");
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.error("Failed to load menu:", err);
       }
-    }
-
-    if (!hasFetchedCountries.current) {
-      fetchCountries();
-      hasFetchedCountries.current = true;
-    }
+    };
+    loadMenu();
   }, []);
 
   useEffect(() => {
@@ -67,22 +70,15 @@ export default function BranchPage() {
   const columns: Column[] = [
     { 
       title: "Country", 
-      inputType: "select", 
-      valueKey: "country", 
-      options: countries.map(country => ({ 
-        id: country.name, // Add this line to provide required id
-        value: country.name,
-        label: country.name, 
-        idd: country.callingCodes, 
-        timezones: country.timezones,
-        currencies_code: country.currencies?.[0]?.code || '',
-        currencies_symbol: country.currencies?.[0]?.symbol || ''      
-      })) 
+      inputType: "text", 
+      valueKey: "country",
+      defaultValue: sidebarCountryName,
+      readOnly: true,
     },
-    { title: "Time Zone", inputType: "text", valueKey: "time_zone" },
-    { title: "Currency Code", inputType: "text", valueKey: "currencies_code" },
-    { title: "Currency Symbol", inputType: "text", valueKey: "currencies_symbol" },
-    { title: "IDD", inputType: "text", valueKey: "idd" },
+    { title: "Time Zone", inputType: "text", valueKey: "time_zone", defaultValue: matchedCountry?.time_zone || "" },
+    { title: "Currency Code", inputType: "text", valueKey: "currencies_code", defaultValue: matchedCountry?.currency || "" },
+    { title: "Currency Symbol", inputType: "text", valueKey: "currencies_symbol", defaultValue: matchedCountry?.currency_symbol || "" },
+    { title: "IDD", inputType: "text", valueKey: "idd", defaultValue: matchedCountry?.idd || "", readOnly: true },
     { title: "Name", inputType: "text", valueKey: "name" },
     { title: "REF", inputType: "text", valueKey: "ref" },
     { title: "Phone", inputType: "text", valueKey: "phone" },

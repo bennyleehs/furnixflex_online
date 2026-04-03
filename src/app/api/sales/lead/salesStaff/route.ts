@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const salesUid = searchParams.get("salesUid") || null; // <--- Get the salesUid parameter
 
-    const db = createPool();
+    const db = await getPool();
 
     //base variable - WHERE clause
     let whereClause = "WHERE deptName = 'Sales' AND u.status = 'Active'";

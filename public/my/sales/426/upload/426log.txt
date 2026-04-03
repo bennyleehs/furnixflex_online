@@ -1,0 +1,39 @@
+=== Task #426 Event Log ===
+
+----------------------------------------
+[2025-11-22T11:06:33.250Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: _*Dry kitchen*_
+Top cabinet L-6ft H-3ft D-1ft Rm3300
+Display Cabinet L-2ft H-4.5ft D-1ft Rm1800
+Bottom cabinet L-5.5ft H-34" D-2ft Rm4455
+Bar counter L-5ft  H-42" D-2ft Rm5250
+
+_*Wet kitchen*_
+Top cabinet L-19.5ft H-3ft D-1ft Rm10,725
+Bottom aluminum door Only L-17.5ft Rm2800
+1set drawer L-1.5ft Rm1300
+Tall Unit L-2ft H-8ft D-2ft Rm2800
+
+
+Total Rm32,430
+After Discount Rm25,944
+----------------------------------------
+[2025-11-26T03:53:38.082Z] Current User - Status Update: Follow Up → Follow Up
+Notes: _*Dry kitchen*_
+Top cabinet L-6ft H-3ft D-1ft Rm3300
+Display Cabinet L-2ft H-4.5ft D-1ft Rm1800
+Bottom cabinet L-5.5ft H-34" D-2ft Rm4455
+Bar counter L-5ft  H-42" D-2ft Rm5250
+
+_*Wet kitchen*_
+Top cabinet L-19.5ft H-3ft D-1ft Rm10,725
+Bottom aluminum door Only L-17.5ft Rm2800
+1set drawer L-1.5ft Rm1300
+Tall Unit L-2ft H-8ft D-2ft Rm2800
+
+
+Total Rm32,430
+After Discount Rm25,944
+----------------------------------------
+[2025-12-08T08:45:12.463Z] Current User - Status Update: Follow Up → Quotation
+----------------------------------------

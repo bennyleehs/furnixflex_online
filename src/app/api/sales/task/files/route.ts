@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
 import { mkdirSync } from 'fs';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,8 @@ export async function GET(request: NextRequest) {
     }
     
     // Path to task directory
-    const taskDir = path.join(process.cwd(), 'public', 'sales', taskId, 'upload');
+    const country = getCountryFromRequest(request);
+    const taskDir = path.join(process.cwd(), 'public', country, 'sales', taskId, 'upload');
     
     // Check if directory exists, create it if it doesn't
     if (!fs.existsSync(taskDir)) {

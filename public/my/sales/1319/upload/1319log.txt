@@ -1,0 +1,22 @@
+=== Task #1319 Event Log ===
+
+----------------------------------------
+[2026-02-07T09:33:15.650Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Customer survey harga dulu 
+
+Package 8ft(top) x 11ft (btm)
+X2ft tall units
+ =Rm13999-Rm1000(voucher)
+=Rm12999
+
+Package SPECIAL (no including free gift)
+7ft(top) x 7ft (bottom)
+=Rm5999
+
+Add on item
+Top 4ft x std (h)=Rm1800
+
+
+Totally:Rm21798
+After discount:Rm20528
+----------------------------------------

@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
 
   try {
-    const db = createPool();
+    const db = await getPool();
 
     let sql = `
         SELECT  

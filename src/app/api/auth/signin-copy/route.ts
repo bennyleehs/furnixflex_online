@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { Pool } from "mysql2/promise";
 import { IUser } from "@/interface/app_interface";
 
@@ -34,7 +34,7 @@ async function verifyPassword(
 // }
 
 export async function POST(req: Request) {
-  const db = createPool();
+  const db = await getPool();
 
   try {
     const { uid, password } = await req.json();

@@ -1,0 +1,16 @@
+=== Task #1371 Event Log ===
+
+----------------------------------------
+[2026-02-09T06:38:48.628Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Aluminum Kitchen cabinet
+
+Bottom cabinet L-11.5ft H-34" D-2ft Rm9315
+1set Drawer L-1.5ft Rm1300
+
+Total Rm10,615
+After Discount Rm8492
+Files: Screenshot_2026-02-09-14-38-33-77_6012fa4d4ddec268fc5c7112cbb265e7.jpg
+----------------------------------------
+[2026-03-12T03:50:38.388Z] Current User - Status Update: Follow Up → Follow Up
+Files: Screenshot_2026-03-12-11-50-17-20_6012fa4d4ddec268fc5c7112cbb265e7.jpg
+----------------------------------------

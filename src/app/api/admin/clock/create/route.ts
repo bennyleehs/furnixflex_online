@@ -1,10 +1,10 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
     const formData = await request.json(); // Parse the JSON body
-    const db = createPool();
+    const db = await getPool();
 
     const sql = `
       INSERT INTO rule_clock (

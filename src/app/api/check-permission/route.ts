@@ -41,11 +41,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if the user has this specific permission
+    const country = req.headers.get("x-country") || "my";
     const userPermissions = getPermissionsForRole(
       tokenData.branchRef,
       tokenData.departmentName,
       tokenData.roleName,
+      country,
     );
+
+    // Superadmin bypass: always grant access
+    if (tokenData.roleName === "Superadmin") {
+      return NextResponse.json({ hasPermission: true });
+    }
 
     // Direct match
     const hasPermission = userPermissions.includes(permissionValue);

@@ -105,8 +105,8 @@ export async function generateQuotationPDF(data: any): Promise<Buffer> {
         { label: "Description", property: 'description', width: 200, align: 'left' },
         { label: "Qty", property: 'quantity', width: 40, align: 'right' },
         { label: "Unit", property: 'unit', width: 50, align: 'center' },
-        { label: "Unit Price (RM)", property: 'unitPrice', width: 80, align: 'right' },
-        { label: "Amount (RM)", property: 'total', width: 80, align: 'right' }
+        { label: `Unit Price (${data.format?.currencySymbol || 'RM'})`, property: 'unitPrice', width: 80, align: 'right' },
+        { label: `Amount (${data.format?.currencySymbol || 'RM'})`, property: 'total', width: 80, align: 'right' }
       ],
       datas: data.quotation.items.map((item: QuotationItem, i: number) => ({
         index: i + 1,
@@ -136,7 +136,7 @@ export async function generateQuotationPDF(data: any): Promise<Buffer> {
       doc.font('Times-Bold')
          .text('Subtotal:', 390, y, { width: 80, align: 'right' })
          .font('Times-Roman')
-         .text(`RM ${formattedSubtotal}`, 470, y, { width: 80, align: 'right' });
+         .text(`${data.format?.currencySymbol || 'RM'} ${formattedSubtotal}`, 470, y, { width: 80, align: 'right' });
       
       if (parseFloat(data.quotation.discount || 0) > 0) {
         y += 20;
@@ -144,7 +144,7 @@ export async function generateQuotationPDF(data: any): Promise<Buffer> {
            .text('Discount:', 390, y, { width: 80, align: 'right' })
            .font('Times-Roman')
            .fillColor('red')
-           .text(`- RM ${formattedDiscount}`, 470, y, { width: 80, align: 'right' })
+           .text(`- ${data.format?.currencySymbol || 'RM'} ${formattedDiscount}`, 470, y, { width: 80, align: 'right' })
            .fillColor('black');
       }
       
@@ -153,13 +153,13 @@ export async function generateQuotationPDF(data: any): Promise<Buffer> {
         doc.font('Times-Bold')
            .text('Tax:', 390, y, { width: 80, align: 'right' })
            .font('Times-Roman')
-           .text(`RM ${formattedTax}`, 470, y, { width: 80, align: 'right' });
+           .text(`${data.format?.currencySymbol || 'RM'} ${formattedTax}`, 470, y, { width: 80, align: 'right' });
       }
       
       y += 20;
       doc.font('Times-Bold')
          .text('Total:', 390, y, { width: 80, align: 'right' })
-         .text(`RM ${formattedTotal}`, 470, y, { width: 80, align: 'right' });
+         .text(`${data.format?.currencySymbol || 'RM'} ${formattedTotal}`, 470, y, { width: 80, align: 'right' });
       
       // Add notes
       if (data.quotation.notes) {

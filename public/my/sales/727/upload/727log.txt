@@ -1,0 +1,6 @@
+=== Task #727 Event Log ===
+
+----------------------------------------
+[2026-01-21T08:55:41.010Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Customers are busy with work and don't have fixed visiting times. They may need to make an appointment in advance to visit the showroom.
+----------------------------------------

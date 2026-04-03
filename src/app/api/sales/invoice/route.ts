@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPool } from '@/lib/db';
+import { getPool } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 /**
@@ -7,7 +7,7 @@ import { RowDataPacket, ResultSetHeader } from 'mysql2';
  */
 export async function GET(request: NextRequest) {
   try {
-    const db = createPool();
+    const db = await getPool();
     const { searchParams } = new URL(request.url);
     
     // Get task ID if provided for specific invoice retrieval
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const db = createPool();
+    const db = await getPool();
     const body = await request.json();
     
     // Validate required fields

@@ -1,10 +1,10 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { NextResponse } from 'next/server';
 
 export async function PATCH(request: Request) {
   try {
     const { id } = await request.json(); // Parse the JSON body to get the id
-    const db = createPool();
+    const db = await getPool();
 
     const sql = `
       UPDATE rule_clock

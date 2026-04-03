@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +19,8 @@ export async function GET(request: NextRequest) {
     }
     
     // Define the receipts directory path
-    const receiptsDir = path.join(process.cwd(), 'public', 'sales', taskId, 'Invoice', 'receipts');
+    const country = getCountryFromRequest(request);
+    const receiptsDir = path.join(process.cwd(), 'public', country, 'sales', taskId, 'Invoice', 'receipts');
     
     // Check if directory exists
     if (!fs.existsSync(receiptsDir)) {

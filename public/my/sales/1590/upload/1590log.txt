@@ -1,0 +1,15 @@
+=== Task #1590 Event Log ===
+
+----------------------------------------
+[2026-03-09T08:04:21.123Z] Current User - Status Update: Assign PIC → Others
+Notes: Customer tanya ada installments tak? survey dulu
+----------------------------------------
+[2026-03-10T04:32:57.223Z] Current User - Status Update: Others → Follow Up (Survey)
+Notes: Bottom door only:19.5ft x Rm160
+=Rm3120
+Drawer 18”=Rm1300/set
+Top cabinet 25ft x 4ft(h)=Rm17500
+
+Totally:Rm21920
+After discount:Rm17536
+----------------------------------------

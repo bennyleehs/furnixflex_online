@@ -1,11 +1,11 @@
 // lib/auth.ts
 import bcrypt from "bcryptjs";
-import { createPool } from "./db";
+import { getPool } from "./db";
 import { AuthToken, UserClaims, RefreshToken } from "@/types/auth";
 import { SignJWT, jwtVerify } from "jose";
 // import { getPermissionsForRole } from "@/utils/accessControlUtils";
 
-// const db = createPool();
+// const db = await getPool();
 
 const secretKey = process.env.JWT_SECRET
   ? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -17,7 +17,7 @@ const secretKey = process.env.JWT_SECRET
 export async function fetchUserClaimsByUid(
   uid: string,
 ): Promise<UserClaims | null> {
-  const db = createPool();
+  const db = await getPool();
   try {
     const [rows] = await db.query(
       "SELECT uid, name, roleName, deptName as departmentName, branchRef FROM users WHERE uid = ?",

@@ -509,6 +509,7 @@ const Profile = () => {
                           src={`${users.profilePhoto.includes("?") ? users.profilePhoto : `${users.profilePhoto}?v=${Date.now()}`}`}
                           alt={users.name}
                           fill
+                          unoptimized
                           className="object-cover"
                         />
                       ) : (

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPool } from '@/lib/db';
+import { getPool } from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 export async function GET(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const db = createPool();
+    const db = await getPool();
 
     let query = '';
     let params: any[] = [];
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const db = createPool();
+    const db = await getPool();
     
     // Generate invoice number if payment is marked as received
     let invoiceNumber = null;
@@ -127,7 +127,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
     
-    const db = createPool();
+    const db = await getPool();
     
     // Update payment received status and invoice number if needed
     const [result] = await db.query<ResultSetHeader>(
@@ -182,7 +182,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const db = createPool();
+    const db = await getPool();
     
     // Delete the payment record
     const [result] = await db.query<ResultSetHeader>(

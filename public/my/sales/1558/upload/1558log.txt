@@ -1,0 +1,19 @@
+=== Task #1558 Event Log ===
+
+----------------------------------------
+[2026-03-05T04:34:07.630Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Top:16ft
+Bottom:16ft
+
+Use Package top 8ft x btm 11ft x 2ft tall unit
+=Rm13999-Rm1000(voucher)
+=Rm12999
+
+Add on item:
+Top:6ft x std height =Rm2700
+Bottom:3ft x Rm810 =Rm2430
+
+Totally:Rm19129
+After discount:Rm17103
+Customer survey dulu
+----------------------------------------

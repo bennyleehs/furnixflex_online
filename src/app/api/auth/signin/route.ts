@@ -1,5 +1,5 @@
 //src/app/api/auth/signin/route.ts
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { IUser } from "@/interface/app_interface";
 import {
   verifyPassword,
@@ -13,7 +13,7 @@ export const runtime = "nodejs"; // Ensure it runs in Node.js
 const isProduction = process.env.NODE_ENV === 'production';
 
 export async function POST(req: NextRequest) {
-  const db = createPool();
+  const db = await getPool();
 
   const { uid, password } = await req.json();
   // query from input to the db - only get necessary user info

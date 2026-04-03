@@ -1,0 +1,17 @@
+=== Task #1223 Event Log ===
+
+----------------------------------------
+[2026-01-28T11:29:55.966Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Aluminum Kitchen cabinet
+
+Tall Unit L-5.5ft H-8ft D-2ft Rm7975
+Fridge cabinet L-3.5ft H-30" D-2ft Rm2730
+Top cabinet L-14ft H-48" D-1ft Rm9100
+Bottom Aluminum glass door Only L-7.5ft Rm1200
+1set Drawer L-1.5ft Rm1300
+
+Total Rm22,305
+After Discount Rm17,844
+
+20% Discount last day 24/1/2026
+----------------------------------------

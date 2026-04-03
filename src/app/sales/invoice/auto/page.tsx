@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Link from "next/link";
+import { useCountry } from "@/context/CountryContext";
 
 // Invoice interface
 interface InvoiceData {
@@ -92,6 +93,7 @@ export default function AutoInvoicePage() {
   const searchParams = useSearchParams();
   const quotationId = searchParams.get("quotationId");
   const taskId = searchParams.get("taskId");
+  const { country } = useCountry();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -521,7 +523,7 @@ export default function AutoInvoicePage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-MY', {
       style: 'currency',
-      currency: 'MYR',
+      currency: country.currency,
       minimumFractionDigits: 2,
     }).format(amount);
   };

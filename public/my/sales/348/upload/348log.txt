@@ -1,0 +1,43 @@
+=== Task #348 Event Log ===
+
+----------------------------------------
+[2025-11-11T05:37:43.163Z] Current User - Status Update: Assign PIC → Quotation
+Notes: Survey promotion
+
+
+Package Top 8ft (std h)x bottom 8ft 
+=Rm9999-Rm1000(voucher)
+=Rm8999 (chimney hood)
+
+Add on item
+Fridge cabinet 3ft std h=Rm1080
+Totally:Rm11079
+After discount:Rm9917
+
+🔥🔥PROMOTION PACKAGE 🔥🔥
+FREE GIFT 🎁 : Buy 1 free 15
+
+1- Cooker Hood  (chimney hood)
+2- Cooker hob (gas hob)
+3- Quartz Stone table top
+4- Stainless steel sink
+5- Stainless steel watertap
+6- Stainless steel dishrack
+7- 18" Drawer 1set
+8- Heavy duty drawer system
+9- Stainless steel Soft close hinges
+10- Cutlery tray
+11- Normal frame
+12- 20 Year Warranty
+13- Package Discount Rm1000
+14- Mirror cabinet L-24" H-24" D-6"
+15- Shoe Cabinet L-3ft H-2.5ft D-1ft
+----------------------------------------
+[2025-12-01T08:48:35.431Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2025-12-01T08:57:49.913Z] Current User - Status Update: Quotation → Payment
+Notes: Quotation Accepted
+----------------------------------------
+[2025-12-01T09:18:35.380Z] Current User - Status Update: Quotation → Payment
+Notes: Quotation Accepted
+----------------------------------------

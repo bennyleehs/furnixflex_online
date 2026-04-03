@@ -1,0 +1,21 @@
+=== Task #473 Event Log ===
+
+----------------------------------------
+[2025-11-26T03:57:30.979Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: [11/25 19:13] nolanyai: Aluminum Kitchen cabinet ( No full height)
+
+ cabinet L-11ft H-29" D-1ft Rm4950
+Bottom aluminum door Only L-9.5ft Rm1520
+1set drawer L-1.5ft Rm1300
+
+Total Rm7770
+After Discount Rm6216
+[11/25 19:14] nolanyai: Aluminum Kitchen cabinet ( full height)
+
+ cabinet L-11ft H-4.5" D-1ft Rm8250
+Bottom aluminum door Only L-9.5ft Rm1520
+1set drawer L-1.5ft Rm1300
+
+Total Rm11,070
+After Discount Rm8856
+----------------------------------------

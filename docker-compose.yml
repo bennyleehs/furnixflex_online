@@ -1,0 +1,25 @@
+services:
+  kvm2-docker:
+    image: oven/bun:1-alpine
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+    expose:
+      - "3000"
+    volumes:
+      - .:/app
+      - app_bun_cache:/root/.bun
+    command: sh -c "bun install && bun run build && bun run start -- -p 3000 -H 0.0.0.0"
+    networks:
+      - nginx-proxy
+    restart: unless-stopped
+
+volumes:
+  app_bun_cache:
+
+networks:
+  nginx-proxy:
+    external: true

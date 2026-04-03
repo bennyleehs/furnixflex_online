@@ -4,6 +4,7 @@ import autoTable from 'jspdf-autotable';
 import fs from 'fs';
 import path from 'path';
 import QRCode from 'qrcode';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 async function generateQRCode(data: string): Promise<string> {
   try {
@@ -33,7 +34,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid data provided' }, { status: 400 });
     }
     // Create directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'public', 'sales', data.task_id, 'Invoice');
+    const country = getCountryFromRequest(request);
+    const uploadsDir = path.join(process.cwd(), 'public', country, 'sales', data.task_id, 'Invoice');
     fs.mkdirSync(uploadsDir, { recursive: true });
     
     // Create a safe filename from quotation number

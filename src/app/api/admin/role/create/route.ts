@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { ResultSetHeader } from "mysql2/promise"; // Import from mysql2/promise
 import { regenerateAccessControl } from "@/lib/regenAccessControl";
@@ -7,7 +7,7 @@ import { withAuth, AuthenticatedRequest } from '@/lib/authMiddleware';
 async function handlePost(req: AuthenticatedRequest) {
   try {
     const formData = await req.json(); // Parse the JSON body
-    const db = createPool();
+    const db = await getPool();
 
     const sql = `
       INSERT INTO roles (
@@ -23,7 +23,8 @@ async function handlePost(req: AuthenticatedRequest) {
 
     await db.query(sql, values);
     //regenerate the access_control.json
-    await regenerateAccessControl();
+    const country = req.headers.get("x-country") || "my";
+    await regenerateAccessControl(country);
 
     return NextResponse.json({
       success: true,
@@ -51,7 +52,7 @@ async function handlePut(req: AuthenticatedRequest) {
     }
 
     const formData = await req.json(); // Parse the JSON body
-    const db = createPool();
+    const db = await getPool();
 
     const sql = `
       UPDATE roles
@@ -77,7 +78,8 @@ async function handlePut(req: AuthenticatedRequest) {
     }
     
     //regenerate the access_control.json
-    await regenerateAccessControl();
+    const countryCode = req.headers.get("x-country") || "my";
+    await regenerateAccessControl(countryCode);
 
     return NextResponse.json({
       success: true,
@@ -93,5 +95,5 @@ async function handlePut(req: AuthenticatedRequest) {
 }
 
 // Export the route handlers with authentication and required permissions
-export const POST = withAuth(handlePost,  ["1.0.1","1.0.2"]);
-export const PUT = withAuth(handlePut,  ["1.0.1","1.0.3"]);
+export const POST = withAuth(handlePost,  ["1.0.3","1.3.3"]);
+export const PUT = withAuth(handlePut,  ["1.0.2","1.3.2"]);

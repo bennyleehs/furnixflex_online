@@ -36,8 +36,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   useEffect(() => {
     const loadMenu = async () => {
-      const data = await import("@/Json/sidebar_menu.json");
-      setMenuGroups(data.default);
+      try {
+        const res = await fetch("/api/admin/menu_items");
+        if (res.ok) {
+          const data = await res.json();
+          setMenuGroups(data);
+        }
+      } catch (err) {
+        console.error("Failed to load menu:", err);
+      }
     };
     loadMenu();
   }, []);
@@ -88,9 +95,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <nav className="mt-5 px-4 py-4 2xl:mt-9 2xl:px-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
-                <h3 className="text-bodydark2 mb-4 ml-4 text-sm font-semibold">
+                <h2 className="mb-4 ml-4 text-base font-semibold text-white">
                   {group.name}
-                </h3>
+                </h2>
                 <ul className="mb-6 flex flex-col gap-1.5">
                   {group.menuItems.map((menuItem, menuIndex) => (
                     <SidebarItem

@@ -9,12 +9,28 @@ import "flatpickr/dist/flatpickr.css";
 import Link from "next/link";
 import { Quotation, PaymentRecord } from "@/types/sales-quotation";
 import { useAuth } from "@/context/AuthContext";
+import { useCountry } from "@/context/CountryContext";
 
 export default function QuotationListPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { country } = useCountry();
   const [quotations, setQuotations] = useState<Quotation[]>([]); // fetch in array
   const [loading, setLoading] = useState(true);
+  const [hqBranch, setHqBranch] = useState<any>(null);
+
+  // Fetch HQ branch info for PDF header
+  useEffect(() => {
+    const fetchHQ = async () => {
+      try {
+        const res = await fetch("/api/admin/branch/hq");
+        if (res.ok) setHqBranch(await res.json());
+      } catch (err) {
+        console.error("Failed to load HQ branch:", err);
+      }
+    };
+    fetchHQ();
+  }, []);
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,7 +142,7 @@ export default function QuotationListPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-MY", {
       style: "currency",
-      currency: "MYR",
+      currency: country.currency,
       minimumFractionDigits: 2,
     }).format(amount);
   };
@@ -261,10 +277,10 @@ export default function QuotationListPage() {
 
         // Company info
         company: {
-          name: "CLASSYPRO Aluminium Kitchen",
-          address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
-          phone: "+6016-8866001",
-          email: "inquiry@classy-pro.com",
+          name: hqBranch?.company_name || "CLASSYPRO Aluminium Kitchen",
+          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          phone: hqBranch?.phone || "+6016-8866001",
+          email: hqBranch?.email || "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           logo: "/images/logo/classy_logo_gray.png",
         },
@@ -277,7 +293,7 @@ export default function QuotationListPage() {
           header: true,
           footer: true,
           tableLines: true,
-          currencySymbol: "RM",
+          currencySymbol: country.currencySymbol,
         },
 
         // Statement specific

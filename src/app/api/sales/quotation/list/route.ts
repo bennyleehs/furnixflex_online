@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPool } from "@/lib/db";
-
-// Initialize the pool outside the request handler to reuse connections across requests
-const pool = createPool();
+import { getPool } from "@/lib/db";
 
 // Define privileged roles as a Set for faster O(1) lookups
 const PRIVILEGED_ROLES = new Set([
@@ -14,6 +11,7 @@ const PRIVILEGED_ROLES = new Set([
 ]);
 
 export async function GET(request: Request) {
+  const pool = await getPool();
   const url = new URL(request.url);
 
   // Pagination

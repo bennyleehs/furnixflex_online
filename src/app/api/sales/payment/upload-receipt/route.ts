@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest) {
 
     // Create directory if it doesn't exist
     // Note: It's better to store all receipts under a common folder like 'receipts'
-    const uploadsDir = path.join(process.cwd(), 'public', 'sales', taskId, 'Invoice', 'receipts'); 
+    const country = getCountryFromRequest(request);
+    const uploadsDir = path.join(process.cwd(), 'public', country, 'sales', taskId, 'Invoice', 'receipts'); 
     fs.mkdirSync(uploadsDir, { recursive: true });
 
     // Create a meaningful filename

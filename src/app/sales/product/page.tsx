@@ -5,6 +5,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import usePermissions from "@/hooks/usePermissions";
+import { useCountry } from "@/context/CountryContext";
 
 // Product interface
 interface Product {
@@ -75,6 +76,7 @@ export default function ProductsPage() {
 
   const { canEdit, canCreate, canDelete, loadingPermissions } =
     usePermissions();
+  const { country } = useCountry();
 
   const getMenuSubmenu = (
     permissionPrefix?: string,
@@ -549,7 +551,7 @@ export default function ProductsPage() {
               {/* Product Price */}
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Price (RM) *
+                  Price ({country.currencySymbol}) *
                 </label>
                 <input
                   type="number"
@@ -783,7 +785,7 @@ export default function ProductsPage() {
                   Product
                 </th>
                 <th className="min-w-35 px-4 py-4 text-right font-medium text-black dark:text-white">
-                  Price (RM)
+                  Price ({country.currencySymbol})
                 </th>
                 <th className="px-4 py-4 text-center font-medium text-black dark:text-white">
                   Discount

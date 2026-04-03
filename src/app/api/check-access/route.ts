@@ -42,16 +42,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const country = req.headers.get("x-country") || "my";
     const userPermissions = getPermissionsForRole(
       tokenData.branchRef,
       tokenData.departmentName,
       tokenData.roleName,
+      country,
     );
 
     // Use permissions from token to check access
     // const hasAccess = checkUserAccess(tokenData.permissions || [], path);
     // Use the fetched permissions to check access
-    const hasAccess = checkUserAccess(userPermissions, path);
+    const hasAccess = checkUserAccess(userPermissions, path, country);
 
     return NextResponse.json({ hasAccess });
   } catch (error) {

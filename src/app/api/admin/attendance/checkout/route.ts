@@ -1,10 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { calculateDistance } from "@/lib/location";
 import { RowDataPacket } from "mysql2/promise";
 
 export async function POST(req: NextRequest) {
-  const db = createPool();
+  const db = await getPool();
 
   try {
     const { uid: uid, latitude, longitude } = await req.json();

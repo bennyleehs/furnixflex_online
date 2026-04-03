@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { verifyToken } from "@/lib/auth"; // Your server-side auth utility
 import { getPermissionsForRole } from "@/utils/accessControlUtils"; // Your utility to read access_control.json
 import { AuthToken, VerifiedToken } from "@/types/auth"; //  For guard function & refresh token
@@ -45,10 +45,13 @@ export async function GET() {
     const { branchRef, departmentName, roleName } = decodedToken;
 
     // Fetch permissions using your server-side utility
+    const headersList = await headers();
+    const country = headersList.get("x-country") || "my";
     const permissions = getPermissionsForRole(
       branchRef,
       departmentName,
       roleName,
+      country,
     );
 
     return NextResponse.json({ permissions });

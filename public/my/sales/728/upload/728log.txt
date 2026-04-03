@@ -1,0 +1,16 @@
+=== Task #728 Event Log ===
+
+----------------------------------------
+[2025-12-16T09:57:13.300Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Aluminum Kitchen cabinet
+
+Top Cabinet L-13ft H-29" D-1ft Rm5850
+Bottom aluminum glass door only L-17.5ft Rm2800
+1set drawer L-1.5ft Rm1300
+Island aluminum glass door only L-8ft Rm1280
+
+Total Rm11,230 -20%
+After Discount Rm8984
+
+20%last day 31/12/2025
+----------------------------------------

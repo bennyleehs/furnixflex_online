@@ -1,0 +1,9 @@
+=== Task #5 Event Log ===
+
+----------------------------------------
+[2025-09-26T07:12:35.945Z] Current User - Status Update: Assign PIC → Assign PIC
+Notes: Called the ctm he didn't answer. But before that the customer asked for the company 's address
+----------------------------------------
+[2025-09-26T07:50:42.526Z] Current User - Status Update: Assign PIC → Assign PIC
+Notes: Waiting key kunci dpt lagi 2 thn
+----------------------------------------

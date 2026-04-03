@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import Link from 'next/link';
+import { useCountry } from "@/context/CountryContext";
 
 // QuotationItem interface
 interface QuotationItem {
@@ -54,6 +55,7 @@ export default function QuotationEditPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+  const { country } = useCountry();
   
   const [quotation, setQuotation] = useState<Partial<Quotation>>({});
   const [items, setItems] = useState<QuotationItem[]>([]);
@@ -318,7 +320,7 @@ export default function QuotationEditPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-MY', {
       style: 'currency',
-      currency: 'MYR',
+      currency: country.currency,
       minimumFractionDigits: 2
     }).format(amount);
   };

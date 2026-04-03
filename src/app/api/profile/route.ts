@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const uid = searchParams.get("uid"); // Add support for uId parameter
 
   try {
-    const db = createPool();
+    const db = await getPool();
 
     let sql = `
       SELECT  

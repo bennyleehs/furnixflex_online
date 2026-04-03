@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync, readFileSync } from "fs";
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
+import { getCountryFromRequest } from "@/utils/countryDetect";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +20,13 @@ interface EventLog {
 }
 
 // Save event log with clear separation between notes and files
-async function saveEventLog(taskId: string, log: EventLog) {
+async function saveEventLog(taskId: string, log: EventLog, country: string = "my") {
   try {
     // Create directory structure if it doesn't exist
     const taskDir = path.join(
       process.cwd(),
       "public",
+      country,
       "sales",
       taskId,
       "upload",
@@ -76,11 +78,12 @@ async function saveEventLog(taskId: string, log: EventLog) {
 }
 
 // Handle file upload
-async function saveFile(taskId: string, file: File) {
+async function saveFile(taskId: string, file: File, country: string = "my") {
   try {
     const taskDir = path.join(
       process.cwd(),
       "public",
+      country,
       "sales",
       taskId,
       "upload",
@@ -223,9 +226,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Path to task directory
+    const country = getCountryFromRequest(request);
     const taskDir = path.join(
       process.cwd(),
       "public",
+      country,
       "sales",
       taskId,
       "upload",
@@ -263,7 +268,7 @@ export async function GET(request: NextRequest) {
 // Add function to update task status in database
 // async function updateTaskInDatabase(taskId: string, newStatus: string) {
 //   try {
-//     const conn = createPool();
+//     const conn = getPool();
 
 //     // Update the task status in the customer1 table
 //     const [result] = await conn.execute(
@@ -281,6 +286,7 @@ export async function GET(request: NextRequest) {
 // POST handler for task updates and file uploads
 export async function POST(request: NextRequest) {
   try {
+    const country = getCountryFromRequest(request);
     const formData = await request.formData();
 
     // Extract form data
@@ -304,7 +310,7 @@ export async function POST(request: NextRequest) {
     const uploadedFiles = [];
 
     for (const file of files) {
-      const fileName = await saveFile(taskId, file);
+      const fileName = await saveFile(taskId, file, country);
       uploadedFiles.push(fileName);
     }
 
@@ -325,7 +331,7 @@ export async function POST(request: NextRequest) {
       filesName: uploadedFiles.length > 0 ? uploadedFiles : undefined, // Only include filesName if files were uploaded
     };
 
-    await saveEventLog(taskId, logEntry);
+    await saveEventLog(taskId, logEntry, country);
 
     return NextResponse.json({
       success: true,

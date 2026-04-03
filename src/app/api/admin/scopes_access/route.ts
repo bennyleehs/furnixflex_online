@@ -1,9 +1,9 @@
 // api/admin/scopes_access/route.ts
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const db = createPool();
+  const db = await getPool();
 
   const [branches] = await db.execute("SELECT name,ref FROM branches");
   const [departments] = await db.execute("SELECT name FROM departments ORDER BY id");

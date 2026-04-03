@@ -1,0 +1,25 @@
+=== Task #374 Event Log ===
+
+----------------------------------------
+[2025-11-13T13:06:10.967Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Aluminum Kitchen cabinet
+
+Total size L-14ft
+Bottom cabinet L-12.5ft H-34" D-2ft Rm10,125 -15%
+1set Drawer L-1.5ft Rm1300 -15%
+transportation (batu pahat) Rm300
+
+_Including_
+1.Quartz Stone Table Top
+2.Soft Close System Drawer 
+3.Soft Close Hinges
+4.Stainless Steel Dish Rack
+5.Cutlery Tray
+6.Normal frame
+7.Package Discount
+8.Additional items Discount
+9.Aluminum Warranty 20 Year
+
+Total Rm11,725
+After Discount Rm10,011
+----------------------------------------

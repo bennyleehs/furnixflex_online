@@ -1,0 +1,25 @@
+=== Task #123 Event Log ===
+
+----------------------------------------
+[2025-10-22T03:27:32.379Z] Current User - Status Update: Assign PIC → Visit Showroom
+Notes: tunggu settle ukur rumah.. cust walk in showroom
+----------------------------------------
+[2025-10-29T07:27:52.242Z] Current User - Status Update: Visit Showroom → Quotation
+----------------------------------------
+[2025-10-29T07:36:56.885Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2025-10-29T07:39:07.221Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2025-10-29T07:41:29.709Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2025-12-30T09:13:50.148Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2025-12-30T09:17:47.766Z] Current User - Status Update: Quotation → Payment
+Files: Screenshot 2025-12-30 171457.png, M2U_20251110_1636.pdf, M2U_20251029_1049 (1).pdf
+----------------------------------------
+[2025-12-30T09:19:25.318Z] Current User - Status Update: Payment → Job Done
+Files: WhatsApp Image 2025-12-07 at 10.23.22.jpeg, Order 2873_251207_101253 (1).pdf, M2U_20251207_0658.pdf
+----------------------------------------
+[2026-02-25T08:20:07.843Z] Current User - Status Update: Quotation → Payment
+Notes: Quotation Accepted
+----------------------------------------

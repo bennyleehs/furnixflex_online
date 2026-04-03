@@ -1,12 +1,12 @@
 // api/admin/scopes_access/access_path/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { getAccessControlFilePath } from "@/Sidemenu/loader";
 import { promises as fs } from "fs";
-import path from "path";
 
-const filePath = path.resolve("src/Json/access_control.json");
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const country = req.headers.get("x-country") || "my";
+    const filePath = getAccessControlFilePath(country);
     const fileContent = await fs.readFile(filePath, "utf-8");
     return NextResponse.json(JSON.parse(fileContent));
   } catch (err) {
@@ -17,6 +17,8 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   try {
+    const country = req.headers.get("x-country") || "my";
+    const filePath = getAccessControlFilePath(country);
     const { key, accessPath } = await req.json();
     
     if (!key) {

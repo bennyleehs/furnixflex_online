@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { format } from "date-fns";
 
@@ -21,7 +21,7 @@ interface JobsReport {
 
 export async function GET() {
   try {
-    const db = createPool();
+    const db = await getPool();
 
     const sql = `
       SELECT quotations.id AS quotation_id, 

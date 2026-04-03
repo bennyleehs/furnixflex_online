@@ -1,0 +1,38 @@
+=== Task #897 Event Log ===
+
+----------------------------------------
+[2026-01-19T06:30:14.314Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Package 8ft ~Rm8999 - Rm1000 =Rm7999
+Top cabinet L-8ft H-29" D-1ft
+Bottom cabinet L-8ft H-34" D-2ft
+
+_*Add On Item*_
+Bottom cabinet L-8ft H-34" D-2ft Rm6480 -15%
+Upgrade Top cabinet height 29" To 36" Rm800
+
+*Free: Buy 1 free 15*
+~1- Slim Hood~(-Rm300)
+~2- Gas Hob~(-Rm150)
+3- Quartz Stone table top
+~4- Stainless steel sink~(-Rm50)
+~5- Stainless steel tap~
+6- Stainless steel dishrack
+7- 18" Drawer 1set
+8- Heavy duty drawer system
+9- Stainless steel Soft close hinges
+10- Cutlery tray
+11- Normal frame
+12- 20 Year Warranty
+
+January Promotion 🔥: 4/1/2026
+🎁Up to 15% OFF on additional items
+🎁Extra FREE Gifts: Shoe Cabinet (1x) & Mirror Cabinet (1x)
+
+Total Rm16,279
+After Discount Rm13,687
+----------------------------------------
+[2026-01-29T02:36:55.329Z] Current User - Status Update: Follow Up → Quotation
+----------------------------------------
+[2026-02-25T06:34:03.809Z] Current User - Status Update: Quotation → Payment
+Notes: Quotation Accepted
+----------------------------------------

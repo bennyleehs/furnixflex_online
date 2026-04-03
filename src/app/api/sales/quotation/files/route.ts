@@ -2,9 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 export async function GET(request: NextRequest) {
   try {
+    const country = getCountryFromRequest(request);
     // Get task ID from query parameters
     const searchParams = request.nextUrl.searchParams;
     const taskId = searchParams.get('taskId');
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Construct the directory path
-    const directoryPath = path.join(process.cwd(), 'public', 'sales', taskId, 'quotation');
+    const directoryPath = path.join(process.cwd(), 'public', country, 'sales', taskId, 'quotation');
     
     // Check if directory exists
     if (!fs.existsSync(directoryPath)) {

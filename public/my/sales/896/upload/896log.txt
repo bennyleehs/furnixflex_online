@@ -1,0 +1,6 @@
+=== Task #896 Event Log ===
+
+----------------------------------------
+[2026-01-21T08:49:06.882Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Visits showroom 18/1/26, have budget survey first
+----------------------------------------

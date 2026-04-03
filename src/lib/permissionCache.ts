@@ -1,8 +1,8 @@
 // lib/permissionCache.ts
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { cache } from "react";
-import sidebarData from "@/Json/sidebar_menu.json"; 
+import { loadSidebarMenu } from "@/Sidemenu/loader";
 
 function extractMenuItems(items: any[]): { value: number | string, route: string }[] {
   let result: { value: number | string, route: string }[] = [];
@@ -25,13 +25,30 @@ function extractMenuItems(items: any[]): { value: number | string, route: string
   return result;
 }
 
-// Extract all menu items from the sidebar
-const allMenuItems: { value: number | string, route: string }[] = [];
-sidebarData.forEach(section => {
-  if (section.menuItems && Array.isArray(section.menuItems)) {
-    allMenuItems.push(...extractMenuItems(section.menuItems));
+// Cache menu items per country with TTL
+const menuItemsCache: Map<string, {
+  items: { value: number | string, route: string }[],
+  timestamp: number
+}> = new Map();
+
+async function getAllMenuItems(countryCode: string): Promise<{ value: number | string, route: string }[]> {
+  const now = Date.now();
+  const cached = menuItemsCache.get(countryCode);
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.items;
   }
-});
+
+  const sidebarData = await loadSidebarMenu(countryCode);
+  const allItems: { value: number | string, route: string }[] = [];
+  sidebarData.forEach((section: any) => {
+    if (section.menuItems && Array.isArray(section.menuItems)) {
+      allItems.push(...extractMenuItems(section.menuItems));
+    }
+  });
+
+  menuItemsCache.set(countryCode, { items: allItems, timestamp: now });
+  return allItems;
+}
 
 // In-memory cache with TTL
 const rolePermissionsCache: Map<number, {
@@ -44,7 +61,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 // This function will be cached for the same user ID during a request
 export const getUserRole = cache(async (userId: number): Promise<number | null> => {
   try {
-    const db = createPool();
+    const db = await getPool();
     const [rows] = await db.query<RowDataPacket[]>(
       "SELECT role_id FROM users WHERE id = ?", 
       [userId]
@@ -68,7 +85,7 @@ export async function getRolePermissions(roleId: number): Promise<number[]> {
   }
   
   try {
-    const db = createPool();
+    const db = await getPool();
     const [rows] = await db.query<RowDataPacket[]>(
       "SELECT permission_value FROM user_permissions WHERE role_id = ?",
       [roleId]
@@ -90,10 +107,12 @@ export async function getRolePermissions(roleId: number): Promise<number[]> {
 }
 
 // Function to check if a permission value allows access to a specific path
-export function checkPermissionForPath(
+export async function checkPermissionForPath(
   permissionValue: number, 
-  path: string
-): boolean {
+  path: string,
+  countryCode: string = "my"
+): Promise<boolean> {
+  const allMenuItems = await getAllMenuItems(countryCode);
   // For exact match
   const exactMatch = allMenuItems.find(item => 
     Number(item.value) === permissionValue && 

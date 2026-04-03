@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCountryFromRequest } from '@/utils/countryDetect';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +13,8 @@ export async function GET(request: NextRequest) {
     
     // If a direct file path is provided, use it (for backward compatibility)
     if (filePath) {
-      const fullPath = path.join(process.cwd(), 'public', filePath.startsWith('/') ? filePath.substring(1) : filePath);
+      const country = getCountryFromRequest(request);
+      const fullPath = path.join(process.cwd(), 'public', country, filePath.startsWith('/') ? filePath.substring(1) : filePath);
       
       if (!fs.existsSync(fullPath)) {
         return NextResponse.json({ error: 'Receipt file not found' }, { status: 404 });
@@ -37,7 +39,8 @@ export async function GET(request: NextRequest) {
     }
     
     // Define the receipts directory path
-    const receiptsDir = path.join(process.cwd(), 'public', 'sales', taskId, 'Invoice', 'receipts');
+    const country = getCountryFromRequest(request);
+    const receiptsDir = path.join(process.cwd(), 'public', country, 'sales', taskId, 'Invoice', 'receipts');
     
     // Check if directory exists
     if (!fs.existsSync(receiptsDir)) {

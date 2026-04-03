@@ -1,10 +1,10 @@
 //app/api/profile/changePassword/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
-  const db = createPool();
+  const db = await getPool();
   
   try {
     const body = await request.json();

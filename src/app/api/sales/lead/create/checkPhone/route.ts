@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, error: 'Phone number is required' }, { status: 400 });
     }
 
-    const db = createPool();
+    const db = await getPool();
     console.log(`Checking for phone number: ${phone}`);
 
     const [rows] = await db.query(

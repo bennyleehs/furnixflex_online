@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
 
   try {
-    const db = createPool();
+    const db = await getPool();
     // --- MODIFIED SQL QUERY ---
     // We are creating two new fields, `checkinISO` and `checkoutISO`.
     // CONCAT combines the tracking date and time into a full ISO 8601 string in UTC.

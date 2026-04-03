@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 //     const userRole = searchParams.get("userRole") || null;
 
 //     const offset = (page - 1) * limit;
-//     const db = createPool();
+//     const db = await getPool();
 
 //     const privilegedRoles = [
 //       "Director",
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
     const userRole = searchParams.get("userRole") || null;
 
     const offset = (page - 1) * limit;
-    const db = createPool();
+    const db = await getPool();
 
     const privilegedRoles = [
       "Director",
@@ -393,7 +393,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Create database connection
-    const db = createPool();
+    const db = await getPool();
 
     // Start transaction for data consistency
     await db.query("START TRANSACTION");

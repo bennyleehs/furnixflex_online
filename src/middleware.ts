@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 
 // Public routes (accessible without auth)
 const publicPaths = [
+  "/",
   "/auth/signin",
   "/auth/signup",
   "/api/auth/signin",
@@ -137,20 +138,44 @@ async function attemptSilentRefresh(
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // --- SUBDOMAIN COUNTRY DETECTION ---
+  const hostname = request.headers.get("host") || "";
+  const subdomain = hostname.split(".")[0]; // "my", "sg", "id", "ph"
+  const validCountries = ["my", "sg", "id", "ph"];
+  const country = validCountries.includes(subdomain) ? subdomain : "my";
+
+  // Set x-country header on the request for downstream use
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-country", country);
+
+  // Helper to create NextResponse.next() with x-country header
+  const nextWithCountry = () =>
+    NextResponse.next({ request: { headers: requestHeaders } });
+  // --- END SUBDOMAIN COUNTRY DETECTION ---
+
+  // If on a country subdomain and visiting root, redirect accordingly
+  if (pathname === "/" && validCountries.includes(subdomain)) {
+    const token = request.cookies.get("authToken")?.value;
+    if (token && (await verifyJwt(token))) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.redirect(new URL("/auth/signin", request.url));
+  }
+
   // If the path contains a file extension (e.g., .jpg), it's a static file.
   if (/\./.test(pathname)) {
-    return NextResponse.next();
+    return nextWithCountry();
   }
 
   // Skip public paths
-  if (publicPaths.includes(pathname)) return NextResponse.next();
+  if (publicPaths.includes(pathname)) return nextWithCountry();
 
   // Check JWT
   const token = request.cookies.get("authToken")?.value;
 
   // 1. If token is present AND valid, allow access.
   if (token && (await verifyJwt(token))) {
-    return NextResponse.next();
+    return nextWithCountry();
   }
 
   // 2. Token is missing or invalid/expired: Attempt silent refresh

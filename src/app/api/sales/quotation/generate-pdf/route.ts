@@ -4,9 +4,11 @@ import fs from "fs";
 import path from "path";
 import "jspdf-autotable";
 import { TermsConditionsWarrantySections } from "@/types/sales-quotation";
+import { getCountryFromRequest } from "@/utils/countryDetect";
 
 export async function POST(request: Request) {
   try {
+    const country = getCountryFromRequest(request);
     const data = await request.json();
     if (!data || !data.quotation || !data.quotation.task_id) {
       return NextResponse.json(
@@ -19,6 +21,7 @@ export async function POST(request: Request) {
     const uploadsDir = path.join(
       process.cwd(),
       "public",
+      country,
       "sales",
       data.quotation.task_id.toString(),
       "quotation",

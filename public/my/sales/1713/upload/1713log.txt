@@ -1,0 +1,18 @@
+=== Task #1713 Event Log ===
+
+----------------------------------------
+[2026-03-14T04:55:46.292Z] Current User - Status Update: Assign PIC → Follow Up (Survey)
+Notes: Customer dari segamat
+
+Door only:10.5ft x Rm160=Rm1680
+Drawer set 1.5ft =Rm1300
+1.5ft tall unit x7ft(h)=Rm2200
+Top cabinets 
+6ft x Rm450(std)=Rm2700
+Fridge cabinet
+ 3ft x Rm360(std)=Rm1080
+Transport Rm600
+Totally:Rm9560
+
+**Approximate price
+----------------------------------------

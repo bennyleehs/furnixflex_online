@@ -1,11 +1,11 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { NextResponse } from 'next/server';
 import { ResultSetHeader } from 'mysql2/promise'; // Import from mysql2/promise
 
 export async function POST(request: Request) {
   try {
     const formData = await request.json(); // Parse the JSON body
-    const db = createPool();
+    const db = await getPool();
 
     const sql = `
       INSERT INTO customers (
@@ -58,7 +58,7 @@ export async function PUT(request: Request) {
     }
 
     const formData = await request.json();
-    const db = createPool();
+    const db = await getPool();
 
     // Update SQL query to include property_type and security_access fields
     const sql = `

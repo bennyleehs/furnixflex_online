@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const pool = createPool();
+    const pool = await getPool();
     let quotationRows;
 
     // Fetch quotation based on provided parameters
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const pool = createPool();
+    const pool = await getPool();
 
     // Insert new quotation with correct column names (snake_case)
     const [result] = (await pool.query(
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const pool = createPool();
+    const pool = await getPool();
 
     // Ensure quotation ID is provided
     if (!body.id) {
@@ -325,7 +325,7 @@ export async function PATCH(request: Request) {
     const url = new URL(request.url);
     const taskId = url.searchParams.get("taskId");
     const body = await request.json();
-    const pool = createPool();
+    const pool = await getPool();
 
     // Ensure taskId is provided
     if (!taskId) {

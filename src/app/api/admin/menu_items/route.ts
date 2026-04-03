@@ -1,12 +1,12 @@
 // api/admin/menu_items/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { getMenuFilePath } from "@/Sidemenu/loader";
 import { promises as fs } from "fs";
-import path from "path";
-import { NextResponse } from "next/server";
 
-const filePath = path.resolve("src/Json/sidebar_menu.json");
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const country = req.headers.get("x-country") || "my";
+    const filePath = getMenuFilePath(country);
     const fileContent = await fs.readFile(filePath, "utf-8");
     return NextResponse.json(JSON.parse(fileContent));
   } catch (error) {

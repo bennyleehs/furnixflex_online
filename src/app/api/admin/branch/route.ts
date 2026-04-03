@@ -1,4 +1,4 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextResponse } from "next/server";
 import { withAuth, AuthenticatedRequest } from "@/lib/authMiddleware";
@@ -8,7 +8,7 @@ async function handler(req: AuthenticatedRequest) {
   const id = searchParams.get("id");
 
   try {
-    const db = createPool();
+    const db = await getPool();
 
     let sql = `
       SELECT  

@@ -1,15 +1,14 @@
 // src/lib/regenAccessControl.ts
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { promises as fs } from "fs";
-import path from "path";
 import { PoolConnection } from "mysql2/promise";
+import { getAccessControlFilePath } from "@/Sidemenu/loader";
 
-const filePath = path.resolve("src/Json/access_control.json");
-
-export async function regenerateAccessControl() {
+export async function regenerateAccessControl(countryCode: string = "my") {
+  const filePath = getAccessControlFilePath(countryCode);
   let connection: PoolConnection | undefined;
   try {
-    const pool = createPool();
+    const pool = await getPool();
     connection = await pool.getConnection();
 
     // 1. Read existing data

@@ -13,19 +13,35 @@ import {
   getTermsAsPlainText,
 } from "@/types/sales-quotation";
 import SearchableDropdown from "@/components/SearchableDropdown/SearchDropdown";
+import { useCountry } from "@/context/CountryContext";
 
 export default function QuotationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const taskId = searchParams.get("taskId");
+  const { country } = useCountry();
 
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const hasFetchedData = useRef(false);
+  const [hqBranch, setHqBranch] = useState<any>(null);
 
   // Add this with your other useState declarations at the top of your component
   const [generatingPdf, setGeneratingPdf] = useState(false);
+
+  // Fetch HQ branch info for PDF header
+  useEffect(() => {
+    const fetchHQ = async () => {
+      try {
+        const res = await fetch("/api/admin/branch/hq");
+        if (res.ok) setHqBranch(await res.json());
+      } catch (err) {
+        console.error("Failed to load HQ branch:", err);
+      }
+    };
+    fetchHQ();
+  }, []);
 
   function generateUUID() {
     if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -648,25 +664,25 @@ export default function QuotationPage() {
           })),
         },
         company1: {
-          name: "CLASSY PROJECT MARKETING SDN BHD",
-          regNo: "(1299213-T)",
-          address: `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
-          phone: "+6016-8866001",
-          tel: "07-5104106",
-          email: "inquiry@classy-pro.com",
+          name: hqBranch?.company_name || "CLASSY PROJECT MARKETING SDN BHD",
+          regNo: hqBranch?.company_reg || "(1299213-T)",
+          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
+          phone: hqBranch?.phone || "+6016-8866001",
+          tel: hqBranch?.phone || "07-5104106",
+          email: hqBranch?.email || "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
-          branches: "Kota Masai, Johor • Puchong, Selangor",
+          branches: hqBranch?.name || "Kota Masai, Johor • Puchong, Selangor",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         company2: {
-          name: "CLASSY PROJECT MANAGEMENT SDN BHD",
-          regNo: "(1034357-W)",
-          address: `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
-          phone: "+6016-8866001",
-          tel: "07-5104106",
-          email: "inquiry@classy-pro.com",
+          name: hqBranch?.company_name || "CLASSY PROJECT MANAGEMENT SDN BHD",
+          regNo: hqBranch?.company_reg || "(1034357-W)",
+          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
+          phone: hqBranch?.phone || "+6016-8866001",
+          tel: hqBranch?.phone || "07-5104106",
+          email: hqBranch?.email || "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
-          branches: "Kota Masai, Johor • Puchong, Selangor",
+          branches: hqBranch?.name || "Kota Masai, Johor • Puchong, Selangor",
           logo: "/images/logo/Classy_2023_vertical.png",
         },
         format: {
@@ -676,7 +692,7 @@ export default function QuotationPage() {
           header: true,
           footer: true,
           tableLines: true,
-          currencySymbol: "RM",
+          currencySymbol: country.currencySymbol,
         },
       };
 
@@ -818,7 +834,7 @@ export default function QuotationPage() {
     // This prevents deducting more than the item is worth (e.g., deducting -120 from a -100 item)
     if (Math.abs(roundingValue) > Math.abs(unitPrice)) {
       alert(
-        `Special Sales Discount cannot be more than the fixed unit price of RM${Math.abs(unitPrice).toFixed(2)}.`,
+        `Special Sales Discount cannot be more than the fixed unit price of ${country.currencySymbol}${Math.abs(unitPrice).toFixed(2)}.`,
       );
       return;
     }
@@ -996,7 +1012,7 @@ export default function QuotationPage() {
 
     const fixed = discountItems
       .filter((d) => d.total < 0)
-      .map((d) => `RM${formatWithCommas(Math.abs(d.total))}`);
+      .map((d) => `${country.currencySymbol}${formatWithCommas(Math.abs(d.total))}`);
 
     // Combine both percentage and fixed discounts
     return [...percentage, ...fixed].join(" + ");
@@ -2086,7 +2102,7 @@ export default function QuotationPage() {
                 <div className="w-2/3">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>RM{formatWithCommas(subtotal)}</span>
+                    <span>{country.currencySymbol}{formatWithCommas(subtotal)}</span>
                   </div>
 
                   {/* Show package discounts only if applied */}
@@ -2159,7 +2175,7 @@ export default function QuotationPage() {
                   {/* Grand Total */}
                   <div className="flex justify-between border-t border-gray-200 py-2 font-bold">
                     <span>Grand Total:</span>
-                    <span>RM {formatWithCommas(grandTotal)}</span>
+                    <span>{country.currencySymbol} {formatWithCommas(grandTotal)}</span>
                   </div>
                 </div>
               </div>

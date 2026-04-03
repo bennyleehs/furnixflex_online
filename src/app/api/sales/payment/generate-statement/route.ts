@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getCountryFromRequest } from "@/utils/countryDetect";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,9 +17,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create directory if it doesn't exist
+    const country = getCountryFromRequest(request);
     const uploadsDir = path.join(
       process.cwd(),
       "public",
+      country,
       "sales",
       data.task_id.toString(),
       "Invoice",

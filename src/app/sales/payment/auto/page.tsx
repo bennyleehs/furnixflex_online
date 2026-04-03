@@ -6,16 +6,32 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Link from "next/link";
 import { Quotation, PaymentRecord } from "@/types/sales-quotation"; // Import Quotation interface
+import { useCountry } from "@/context/CountryContext";
 
 export default function PaymentAutoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quotationId = searchParams.get("quotationId");
   const taskId = searchParams.get("taskId");
+  const { country } = useCountry();
 
   const [loading, setLoading] = useState(true);
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
+  const [hqBranch, setHqBranch] = useState<any>(null);
+
+  // Fetch HQ branch info for PDF header
+  useEffect(() => {
+    const fetchHQ = async () => {
+      try {
+        const res = await fetch("/api/admin/branch/hq");
+        if (res.ok) setHqBranch(await res.json());
+      } catch (err) {
+        console.error("Failed to load HQ branch:", err);
+      }
+    };
+    fetchHQ();
+  }, []);
 
   // Payment stats
   const [totalPaid, setTotalPaid] = useState(0);
@@ -192,7 +208,7 @@ export default function PaymentAutoPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-MY", {
       style: "currency",
-      currency: "MYR",
+      currency: country.currency,
       minimumFractionDigits: 2,
     }).format(amount);
   };
@@ -622,10 +638,10 @@ export default function PaymentAutoPage() {
         payment_reference: payment.payment_reference || "",
         notes: payment.notes || "",
         company: {
-          name: "CLASSYPRO Aluminium Kitchen",
-          address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
-          phone: "+6016-8866001",
-          email: "inquiry@classy-pro.com",
+          name: hqBranch?.company_name || "CLASSYPRO Aluminium Kitchen",
+          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          phone: hqBranch?.phone || "+6016-8866001",
+          email: hqBranch?.email || "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           logo: "/images/logo/classy_logo_gray.png",
         },
@@ -636,7 +652,7 @@ export default function PaymentAutoPage() {
           header: true,
           footer: true,
           tableLines: true,
-          currencySymbol: "RM",
+          currencySymbol: country.currencySymbol,
         },
       };
 
@@ -885,10 +901,10 @@ export default function PaymentAutoPage() {
 
         // Company info
         company: {
-          name: "CLASSYPRO Aluminium Kitchen",
-          address: `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
-          phone: "+6016-8866001",
-          email: "inquiry@classy-pro.com",
+          name: hqBranch?.company_name || "CLASSYPRO Aluminium Kitchen",
+          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
+          phone: hqBranch?.phone || "+6016-8866001",
+          email: hqBranch?.email || "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           logo: "/images/logo/classy_logo_gray.png",
         },
@@ -901,7 +917,7 @@ export default function PaymentAutoPage() {
           header: true,
           footer: true,
           tableLines: true,
-          currencySymbol: "RM",
+          currencySymbol: country.currencySymbol,
         },
 
         // Statement specific

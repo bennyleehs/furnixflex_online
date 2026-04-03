@@ -1,0 +1,17 @@
+=== Task #867 Event Log ===
+
+----------------------------------------
+[2025-12-31T04:00:10.481Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Measurement on site 31/12/25 survey harga dulu
+----------------------------------------
+[2025-12-31T04:00:53.202Z] Current User - Status Update: Follow Up → Follow Up
+Notes: Top cabinets :9ft =Rm4050
+Door only: 12.5ft x Rm160=Rm2000
+Drawer 1.5ft(w)=Rm1300/set
+Shelfing 7ft x Rm350=Rm2450
+Totally:Rm9800
+After discount:Rm7840
+
+Foc:dishrack dan spoon tray
+**Tengah jarak sgt tinggi
+----------------------------------------

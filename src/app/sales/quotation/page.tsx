@@ -9,10 +9,12 @@ import "flatpickr/dist/flatpickr.css";
 import Link from "next/link";
 import { Quotation } from "@/types/sales-quotation";
 import { useAuth } from "@/context/AuthContext";
+import { useCountry } from "@/context/CountryContext";
 
 export default function QuotationListPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { country } = useCountry();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -140,7 +142,7 @@ export default function QuotationListPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-MY", {
       style: "currency",
-      currency: "MYR",
+      currency: country.currency,
       minimumFractionDigits: 2,
     }).format(amount);
   };

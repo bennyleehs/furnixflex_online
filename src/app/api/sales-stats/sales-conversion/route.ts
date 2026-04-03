@@ -1,9 +1,9 @@
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { RowDataPacket } from "mysql2/promise";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const db = createPool();
+  const db = await getPool();
 
   // Get the UID, month, and year from URL search parameters
   const { searchParams } = new URL(req.url);

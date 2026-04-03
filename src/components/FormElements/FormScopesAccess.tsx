@@ -4,7 +4,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect, useMemo } from "react";
 import SelectDropdown from "@/components/SelectGroup/SelectDropdown";
-import sidebarMenu from "@/Json/sidebar_menu.json";
 import { MenuWithPath, SidebarMenu } from "@/types/sidebarMenu";
 
 const FormScopesAccess = () => {
@@ -12,6 +11,7 @@ const FormScopesAccess = () => {
   const searchParams = useSearchParams();
   const key = searchParams.get("key");
 
+  const [sidebarMenu, setSidebarMenu] = useState<SidebarMenu>([]);
   const [accessPaths, setAccessPaths] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -31,6 +31,22 @@ const FormScopesAccess = () => {
     {},
   );
   const typedSidebarMenu = sidebarMenu as SidebarMenu;
+
+  // Load sidebar menu from API (country-aware via middleware)
+  useEffect(() => {
+    const loadMenu = async () => {
+      try {
+        const res = await fetch("/api/admin/menu_items");
+        if (res.ok) {
+          const data = await res.json();
+          setSidebarMenu(data);
+        }
+      } catch (err) {
+        console.error("Failed to load menu:", err);
+      }
+    };
+    loadMenu();
+  }, []);
 
   // Fetch current access paths when component mounts
   useEffect(() => {

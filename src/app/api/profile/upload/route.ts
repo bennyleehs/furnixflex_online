@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
 import fs from "fs";
+import { getCountryFromRequest } from "@/utils/countryDetect";
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,10 +56,14 @@ export async function POST(request: NextRequest) {
       const file = photo || document;
       const fileType = photo ? "photo" : "document";
 
+      // Get country from request
+      const country = getCountryFromRequest(request);
+
       // Create directory if it doesn't exist
       const uploadDir = path.join(
         process.cwd(),
         "public",
+        country,
         "admin",
         "employee",
         usersUid,
@@ -92,7 +97,7 @@ export async function POST(request: NextRequest) {
 
       // Return the URL to the uploaded file
       // const fileUrl = `/admin/employee/${usersUid}/upload/${filename}`;
-      const fileUrl = `/admin/employee/${usersUid}/upload/${filename}?v=${Date.now()}`;
+      const fileUrl = `/api/files/admin/employee/${usersUid}/upload/${filename}?v=${Date.now()}`;
 
       // Return response with appropriate property name based on file type
       return NextResponse.json({
@@ -133,10 +138,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get country from request
+    const country = getCountryFromRequest(request);
+
     // Path to the employee's upload directory
     const uploadDir = path.join(
       process.cwd(),
       "public",
+      country,
       "admin",
       "employee",
       usersUid,
@@ -158,7 +167,7 @@ export async function GET(request: NextRequest) {
       `profileImage${usersUid}.jpg`,
     );
     const profilePhotoUrl = existsSync(profilePhotoPath)
-      ? `/admin/employee/${usersUid}/upload/profileImage${usersUid}.jpg`
+      ? `/api/files/admin/employee/${usersUid}/upload/profileImage${usersUid}.jpg`
       : null;
 
     // Filter and format document files
@@ -175,7 +184,7 @@ export async function GET(request: NextRequest) {
           type: getFileType(originalName),
           size: stats.size,
           uploadDate: new Date(stats.mtime).toISOString().split("T")[0],
-          url: `/admin/employee/${usersUid}/upload/${file}`,
+          url: `/api/files/admin/employee/${usersUid}/upload/${file}`,
         };
       });
 
@@ -205,10 +214,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Get country from request
+    const country = getCountryFromRequest(request);
+
     // Path to the employee's upload directory
     const uploadDir = path.join(
       process.cwd(),
       "public",
+      country,
       "admin",
       "employee",
       usersUid,

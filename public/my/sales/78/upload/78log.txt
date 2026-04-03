@@ -1,0 +1,48 @@
+=== Task #78 Event Log ===
+
+----------------------------------------
+[2025-11-07T03:43:11.118Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: [10/4 19:19] nolanyai: Now only = Rm8999
+ (normal price Rm9999)
+
+*8feet top and bottom package*
+Top cabinet L-8ft H-29" D-1ft
+Bottom cabinet L-8ft H-34" D-2ft
+
+*Add On Item*
+Upgrade top cabinet 29" to 42" Rm800
+
+*Free: Buy 1 free 15*
+1- Chimi Hood 
+2- Gas Hob
+3- Quartz Stone table top
+4- Stainless steel sink
+5- Stainless steel tap
+6- Stainless steel dishrack
+7- 18" Drawer 1set
+8- Heavy duty drawer system
+9- Stainless steel Soft close hinges
+10- Cutlery tray
+11- Normal frame
+12- 20 Year Warranty
+
+expiration date 11/10/2025
+13- Package Discount Rm1000
+14- Mirror cabinet L-24" H-24" D-6"
+15- Shoe Cabinet L-3ft H-2.5ft D-1ft
+
+Total Rm10,799
+After Discount Rm9639
+[10/4 19:21] nolanyai: Bottom cabinet L-7.5ft H-34" D-2ft Rm6075
+Drawer 1set L-1.5ft Rm1300
+
+Total Rm7375
+After Discount Rm5900
+[10/4 19:22] nolanyai: Bottom cabinet L-7.5ft H-34" D-2ft Rm7695
+Drawer 1set L-1.5ft Rm1300
+
+Total Rm8995
+After Discount Rm7196
+[10/4 19:23] nolanyai: Total Rm27,169
+After Discount Rm22,735
+----------------------------------------

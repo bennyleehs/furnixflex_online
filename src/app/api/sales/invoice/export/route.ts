@@ -1,11 +1,11 @@
 // src/app/api/sales/invoice/export/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createPool } from '@/lib/db';
+import { getPool } from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
 
 export async function GET(request: NextRequest) {
   try {
-    const db = createPool();
+    const db = await getPool();
     const { searchParams } = new URL(request.url);
     
     // Get filter parameters

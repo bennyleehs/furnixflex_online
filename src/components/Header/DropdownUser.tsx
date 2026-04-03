@@ -34,7 +34,7 @@ const DropdownUser = () => {
             width={112}
             height={112}
             src={user?.uid && !imageError 
-              ? `/admin/employee/${user.uid}/upload/profileImage${user.uid}.jpg?v=${Date.now()}` // Add cache-busting
+              ? `/api/files/admin/employee/${user.uid}/upload/profileImage${user.uid}.jpg?v=${Date.now()}` // Add cache-busting
               : "/images/logo/classy_icon.svg"}
             style={{
               width: "100%",
@@ -42,6 +42,7 @@ const DropdownUser = () => {
               objectFit: "cover",
             }}
             alt="User"
+            unoptimized
             onError={(_e) => {
               setImageError(true);
             }}

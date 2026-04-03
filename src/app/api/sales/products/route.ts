@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createPool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 
 // GET endpoint to fetch all products, categories, and subcategories
 export async function GET() {
   try {
-    const pool = createPool();
+    const pool = await getPool();
 
     // Fetch all products with the new fields
     const [productRows] = (await pool.query(
@@ -79,7 +79,7 @@ export async function GET() {
 // POST endpoint to create a new product
 export async function POST(request: Request) {
   try {
-    const pool = createPool();
+    const pool = await getPool();
     const body = await request.json();
 
     const {
@@ -177,7 +177,7 @@ export async function POST(request: Request) {
 // PUT endpoint to update an existing product
 export async function PUT(request: Request) {
   try {
-    const pool = createPool();
+    const pool = await getPool();
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
 
@@ -291,7 +291,7 @@ export async function PUT(request: Request) {
 // DELETE endpoint - soft delete a product (change status to Inactive)
 export async function DELETE(request: Request) {
   try {
-    const pool = createPool();
+    const pool = await getPool();
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
 

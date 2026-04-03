@@ -1,0 +1,36 @@
+=== Task #1505 Event Log ===
+
+----------------------------------------
+[2026-02-13T06:06:02.153Z] Current User - Status Update: Follow Up → Follow Up
+----------------------------------------
+[2026-02-13T06:06:12.047Z] Current User - Status Update: Assign PIC → Follow Up
+Notes: Survey first 
+
+适用于配套8ft(上厨） x8ft(下厨）
+=Rm9999-Rm1000(voucher)
+=Rm8999
+
+Add on item 
+上厨：3ft x  std height =Rm1350
+下厨：6ft x Rm810=Rm4860
+Fridge 3ft x std =Rm1080
+Fridge cover 1pc=Rm800
+
+Totally:Rm18089
+After discount:Rm15876
+----------------------------------------
+[2026-02-13T07:34:41.870Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2026-02-13T07:34:41.883Z] Current User - Status Update: Quotation → Quotation
+----------------------------------------
+[2026-02-13T07:34:51.394Z] Current User - Status Update: Follow Up → Quotation
+----------------------------------------
+[2026-02-25T05:40:32.209Z] Current User - Status Update: Quotation → Payment
+Notes: Quotation Accepted
+----------------------------------------
+[2026-03-11T06:40:02.266Z] Current User - Status Update: Payment → Quotation
+Notes: Payment update to Quotation draft
+----------------------------------------
+[2026-03-11T06:54:54.788Z] Current User - Status Update: Quotation → Payment
+Notes: Quotation Accepted
+----------------------------------------

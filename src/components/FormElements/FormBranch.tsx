@@ -60,17 +60,17 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
     if (data.length > 0) {
       columns.forEach((column) => {
         if (column.valueKey) {
-          newFormData[column.valueKey] = data[0]?.[column.valueKey] || "";
+          newFormData[column.valueKey] = data[0]?.[column.valueKey] || column.defaultValue || "";
         } else {
-          newFormData[column.title] = data[0]?.[column.title] || "";
+          newFormData[column.title] = data[0]?.[column.title] || column.defaultValue || "";
         }
       });
     } else {
       columns.forEach((column) => {
         if (column.valueKey) {
-          newFormData[column.valueKey] = "";
+          newFormData[column.valueKey] = column.defaultValue || "";
         } else {
-          newFormData[column.title] = "";
+          newFormData[column.title] = column.defaultValue || "";
         }
       });
     }
@@ -200,7 +200,8 @@ const FormBranch = <T extends Record<string, any>>({ columns, data, loading, sub
                   name={column.valueKey || column.title}
                   value={formData[column.valueKey || column.title] || ""}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-sm solid-black-text"
+                  readOnly={column.readOnly}
+                  className={`w-full p-2 border rounded-sm solid-black-text ${column.readOnly ? "bg-gray-100 cursor-not-allowed dark:bg-meta-4" : ""}`}
                 />
               ) : column.inputType === "time" ? (
                 <input
