@@ -71,7 +71,7 @@ const countrySubdomains: Record<string, string> = {
   Philippines: "ph",
 };
 
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || "furnixtech.cloud";
+const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN;
 
 function getSubdomainUrl(countryName: string, path: string): string {
   const sub = countrySubdomains[countryName];

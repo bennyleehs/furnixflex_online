@@ -94,6 +94,7 @@ export default function SalesUserDashboard() {
       hasFetched.current = true;
       fetchDashboard();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthLoading, user?.uid]);
 
   const fetchDashboard = async () => {
