@@ -354,20 +354,13 @@ const FormScopesAccess = () => {
   };
 
   return (
-    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-5 pt-6 pb-2.5 sm:px-7.5 xl:pb-2">
+    <div className="border-stroke shadow-default dark:border-strokedark dark:bg-boxdark rounded-lg border bg-white px-4 pt-4 pb-2 sm:px-5">
       <form onSubmit={handleSubmit}>
-        <div className="my-2 grid md:grid-cols-3">
-          <div className="my-2 md:grid md:grid-cols-2">
-            <label className="my-auto font-medium text-black dark:text-white">
-              Branch - Department - Role
-            </label>
-            <input
-              type="text"
-              disabled
-              className="border-primary active:border-primary disabled:bg-whiter dark:bg-form-input w-full rounded-lg border-[1.5px] bg-transparent px-5 py-3 text-black outline-hidden transition disabled:cursor-default md:w-80 dark:text-white"
-              value={key || ""}
-            />
-          </div>
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Scope:</span>
+          <span className="border-primary inline-flex items-center rounded-lg border bg-transparent px-3 py-1.5 text-sm font-semibold text-black dark:text-white">
+            {key || "—"}
+          </span>
         </div>
 
         {/* Display status message if there is one */}
@@ -380,50 +373,45 @@ const FormScopesAccess = () => {
         )}
 
         {/* Display sections and their menu items */}
-        <div className="grid gap-x-4 md:grid-cols-3">
+        <div className="grid gap-x-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Object.entries(groupedMenuItems).map(([sectionLabel, items]) => {
-            // Find the original menu item to get its ID
             const sectionItem = typedSidebarMenu
               .flatMap((s) => s.menuItems)
               .find((item) => item.label === sectionLabel);
             const sectionId = sectionItem?.id;
 
             return (
-              <div key={sectionLabel} className="mb-8">
-                <h3 className="mb-4 text-xl font-bold text-black dark:text-white">
-                  {/* {sectionLabel} */}
-                  {/* Display the ID if available, otherwise just the label */}
+              <div key={sectionLabel} className="mb-4">
+                <h3 className="mb-1 text-sm font-bold text-black dark:text-white">
                   {sectionId && `${sectionId}. `}
                   {sectionLabel}
                 </h3>
                 {items.map((item) => (
-                  <div key={item.id}>
-                    <SelectDropdown
-                      key={`${key}-${item.id}`}
-                      subSectionId={item.id}
-                      path={item.path}
-                      section={item.section}
-                      id={item.id}
-                      onChange={handleDropdownChange}
-                      initialValue={getInitialValue(item.id)}
-                    />
-                  </div>
+                  <SelectDropdown
+                    key={`${key}-${item.id}`}
+                    subSectionId={item.id}
+                    path={item.path}
+                    section={item.section}
+                    id={item.id}
+                    onChange={handleDropdownChange}
+                    initialValue={getInitialValue(item.id)}
+                  />
                 ))}
               </div>
             );
           })}
         </div>
-        <div className="mb-1 flex space-x-4">
+        <div className="border-stroke dark:border-strokedark sticky bottom-0 -mx-4 flex gap-3 border-t bg-white px-4 py-3 dark:bg-boxdark sm:-mx-5 sm:px-5">
           <input
             type="submit"
             value="UPDATE"
-            className="bg-primary hover:bg-primarydark cursor-pointer rounded-lg border p-4 font-semibold text-white transition hover:text-white"
+            className="bg-primary hover:bg-primarydark cursor-pointer rounded-lg px-6 py-2 text-sm font-semibold text-white transition"
             disabled={loading}
           />
           <button
             type="button"
             onClick={() => router.push("/admin/scopes_access")}
-            className="rounded-lg border border-gray-300 bg-gray-100 p-4 font-semibold text-gray-700 transition hover:bg-gray-200"
+            className="rounded-lg border border-gray-300 bg-gray-100 px-6 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
           >
             CANCEL
           </button>

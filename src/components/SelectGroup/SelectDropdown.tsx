@@ -124,15 +124,15 @@ const SelectDropdown = ({
   }, [initialValue]);
 
   return (
-    <div className="grid md:grid-cols-2 my-2">
-      <label className="block font-medium text-black dark:text-white mr-4">
+    <div className="flex items-center gap-2 py-1">
+      <label className="shrink-0 text-xs font-medium text-black dark:text-white">
         {subSectionId && section && path
           ? `${subSectionId}. ${formatPath(path, section)}`
           : path || "Sub-menu:"}
       </label>
-      <div className="relative inline-block">
+      <div className="relative shrink-0">
         <select
-          className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[200px] cursor-pointer appearance-none rounded-lg border bg-transparent py-2 pr-8 pl-3 outline-none"
+          className="border-stroke focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input w-[170px] cursor-pointer appearance-none rounded border bg-transparent py-1.5 pr-7 pl-2.5 text-xs outline-none"
           value={selectedActions}
           onChange={handleChange}
           id={id}
@@ -149,12 +149,12 @@ const SelectDropdown = ({
           ))}
         </select>
 
-        <div className="pointer-events-none absolute top-1/2 right-16 -translate-y-1/2 transform">
+        <div className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2 transform">
           {loading ? (
-            <span className="text-xs text-gray-500">Loading...</span>
+            <span className="text-[10px] text-gray-500">...</span>
           ) : (
             <svg
-              className="h-4 w-4 fill-current"
+              className="h-3 w-3 fill-current"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -171,9 +171,7 @@ const SelectDropdown = ({
         </div>
       </div>
       {error && (
-        <div className="ml-4 text-sm text-red-500">
-          Error loading actions: Using fallback options
-        </div>
+        <span className="text-[10px] text-red-400" title="Using fallback options">!</span>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useCountry } from "@/context/CountryContext";
 
 const SignIn = () => {
   const [uid, setUid] = useState("");
@@ -14,6 +15,7 @@ const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { setUser } = useAuth();
+  const { country } = useCountry();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ const SignIn = () => {
           uid: data.uid,
           name: data.name || "User", // Assuming API returns user name or fallback
           role: data.role,
-          // department: data.department
+          department: data.department || "",
         });
 
         setMessage(data.message || "Sign-in successful");
@@ -88,6 +90,9 @@ const SignIn = () => {
                   </Link>
                 </div>
               </div>
+              <p className="mt-2 text-center text-sm font-medium text-gray-600">
+                {country.name}
+              </p>
             </div>
 
             <div className="mb-4">

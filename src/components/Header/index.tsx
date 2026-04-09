@@ -11,7 +11,7 @@ const Header = (props: {
 }) => {
   return (
     <header className="drop-shadow-1 dark:bg-boxdark sticky top-0 z-999 flex w-full bg-white dark:drop-shadow-none">
-      <div className="shadow-2 flex grow items-center justify-between px-4 py-2 md:px-6 2xl:px-8">
+      <div className="shadow-2 flex grow items-center justify-between px-4 py-1.5 md:px-6 2xl:px-8">
         <div className="flex items-center gap-2 sm:gap-4">
           {/* <!-- Hamburger Toggle BTN --> */}
           <div className="flex items-center gap-2 sm:gap-4 2xl:hidden">
@@ -21,7 +21,7 @@ const Header = (props: {
                 e.stopPropagation();
                 props.setSidebarOpen(!props.sidebarOpen);
               }}
-              className="border-stroke dark:border-strokedark dark:bg-boxdark z-99999 block rounded-xs border bg-white p-1.5 shadow-xs 2xl:hidden"
+              className="border-stroke dark:border-strokedark dark:bg-boxdark z-99999 block rounded-xs border bg-white p-1 shadow-xs 2xl:hidden"
             >
               <span className="relative block h-5.5 w-5.5 cursor-pointer">
                 <span className="du-block absolute right-0 h-full w-full">

@@ -14,7 +14,7 @@ type User = {
   uid: string;
   name: string;
   role: string;
-  // department: string;
+  department: string;
   profileImage?: string;
   // Add other user properties as needed
 };

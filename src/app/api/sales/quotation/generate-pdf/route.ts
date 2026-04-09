@@ -196,7 +196,7 @@ async function generateQuotationPDF(
       align: "center",
     });
     doc.text(
-      `H/p: ${company.phone} • Tel: ${company.tel} • Email: ${company.email} • Website: ${company.website}`,
+      `Tel: ${company.idd || ''}${company.tel} • Email: ${company.email} • Website: ${company.website}`,
       pageWidth / 2 + margin + 10,
       margin + 18,
       { align: "center" },
@@ -329,14 +329,15 @@ async function generateQuotationPDF(
       valueC3 + doc.getTextWidth(data.quotation.quotation_number),
       sectionTop + 8,
     );
+    const fmtDate = (d: string) => { const dt = new Date(d); return `${dt.getDate().toString().padStart(2,'0')}/${(dt.getMonth()+1).toString().padStart(2,'0')}/${dt.getFullYear()}`; };
     doc.text(
-      new Date(data.quotation.quotation_date).toLocaleDateString(),
+      fmtDate(data.quotation.quotation_date),
       valueC3,
       sectionTop + 13,
     );
     doc.text("~", valueC3 + 19, sectionTop + 13);
     doc.text(
-      new Date(data.quotation.valid_until).toLocaleDateString(),
+      fmtDate(data.quotation.valid_until),
       valueC3 + 22,
       sectionTop + 13,
     );
@@ -891,6 +892,18 @@ async function generateQuotationPDF(
       },
     );
     summaryY += 5;
+    
+    // doc.setFont("helvetica", "italic");
+    // doc.text("*Accessories, On-site Services & Transportation Charge not included",summaryX, summaryY)
+    // summaryY += 5;
+    const text =
+      "*Accessories, On-site Services & Transportation Charge not included";
+    const maxWidth = 60; // adjust to your column width
+    const lines = doc.splitTextToSize(text, maxWidth);
+    doc.setFont("helvetica", "italic");
+    doc.text(lines, summaryX, summaryY);
+    summaryY += 10;
+
   } else if (rawAddOnPriceItem.length > 0) {
     doc.setFont("helvetica", "bold");
     doc.text("Additional Items:", summaryX, summaryY);

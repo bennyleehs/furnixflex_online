@@ -263,8 +263,8 @@ export default function EmployeePage() {
         throw new Error(errorMessage);
       }
 
-      // Refresh employee list
-      fetchEmployees();
+      // Refresh employee list (await so UID count is updated for next create)
+      await fetchEmployees();
 
       // Close modal
       closeModal();
@@ -600,28 +600,10 @@ export default function EmployeePage() {
     setFilteredEmployees(filtered);
   }, [branchFilter, departmentFilter, statusFilter, employees]);
 
-  // Call extractOptions whenever employees data changes
-  useEffect(() => {
-    const extractOptions = () => {
-      const branches = [...new Set(employees.map((emp) => emp.branch))]
-        .filter(Boolean)
-        .sort();
-      const departments = [...new Set(employees.map((emp) => emp.department))]
-        .filter(Boolean)
-        .sort();
-      const roles = [...new Set(employees.map((emp) => emp.role))]
-        .filter(Boolean)
-        .sort();
-
-      setBranchOptions(branches);
-      setDepartmentOptions(departments);
-      setRoleOptions(roles);
-    };
-
-    if (employees.length) {
-      extractOptions();
-    }
-  }, [employees]);
+  // NOTE: Dropdown options are fetched from the API via fetchOptionsData().
+  // Do NOT extract options from the employees array, as that would overwrite
+  // the API-fetched options (which include all branches/departments/roles,
+  // not just those with existing employees assigned).
 
   // Add these helper functions before your return statement
   const getBranchOptions = () => branchOptions;
@@ -702,7 +684,7 @@ export default function EmployeePage() {
 
       // Auto-generate UID if not in edit mode and both branch and department are selected
       if (!isEditMode && updated.branch && updated.department) {
-        updated.uid = generateUID();
+        updated.uid = generateUID(updated.branch, updated.department);
       }
 
       return updated;
@@ -723,7 +705,7 @@ export default function EmployeePage() {
 
       // Auto-generate UID if not in edit mode and both branch and department are selected
       if (!isEditMode && updated.branch && updated.department) {
-        updated.uid = generateUID();
+        updated.uid = generateUID(updated.branch, updated.department);
       }
 
       return updated;
@@ -741,7 +723,7 @@ export default function EmployeePage() {
 
       // Auto-generate UID if not in edit mode and all required fields are selected
       if (!isEditMode && updated.branch && updated.department && updated.role) {
-        updated.uid = generateUID();
+        updated.uid = generateUID(updated.branch, updated.department);
       }
 
       return updated;
@@ -749,13 +731,14 @@ export default function EmployeePage() {
   };
 
   // Add this function with your helper functions
-  const generateUID = () => {
-    if (!isEditMode && formData.branch && formData.department) {
+  // Accept branch and department as parameters to avoid stale closure issues
+  const generateUID = (branch: string, department: string) => {
+    if (!isEditMode && branch && department) {
       // Get the branchRef from the selected branch
-      const branchRef = getBranchRefByName(formData.branch) || "";
+      const branchRef = getBranchRefByName(branch) || "";
 
       // Find departmentRef from departments data
-      const deptRef = getDeptRefByName(formData.department) || "";
+      const deptRef = getDeptRefByName(department) || "";
 
       if (!branchRef || !deptRef) {
         console.warn("Missing reference for branch or department");
@@ -766,8 +749,8 @@ export default function EmployeePage() {
       // This ensures we're counting all employees in the same department regardless of ref
       const sameTypeEmployees = employees.filter(
         (emp) =>
-          emp.branchName === formData.branch &&
-          emp.deptName === formData.department,
+          emp.branchName === branch &&
+          emp.deptName === department,
       );
 
       // Generate next running number (count + 1), padding to 4 digits
@@ -779,7 +762,7 @@ export default function EmployeePage() {
       const newUID = `${branchRef}${deptRef}${nextNumber}`;
 
       console.log(
-        `Generated UID: ${newUID} (Found ${sameTypeEmployees.length} existing employees with branch "${formData.branch}" and department "${formData.department}")`,
+        `Generated UID: ${newUID} (Found ${sameTypeEmployees.length} existing employees with branch "${branch}" and department "${department}")`,
       );
       return newUID;
     }

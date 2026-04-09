@@ -790,7 +790,7 @@ export default function BranchPage() {
                       >
                         <td className="px-4 py-3">{branch.name}</td>
                         <td className="px-4 py-3">{branch.ref}</td>
-                        <td className="px-4 py-3">{branch.phone}</td>
+                        <td className="px-4 py-3">{branch.idd ? `${branch.idd} ` : ""}{branch.phone}</td>
                         <td className="px-4 py-3">{branch.city}</td>
                         <td className="px-4 py-3">{branch.status}</td>
                         <td className="px-4 py-3">

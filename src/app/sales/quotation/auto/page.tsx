@@ -623,24 +623,13 @@ export default function QuotationPage() {
 
   // Generate PDF quotation
   const generatePDF = async () => {
-    // Alert the user to save the quotation first
-    const confirmSave = confirm(
-      "You need to save the quotation before generating a PDF. Would you like to save now?",
-    );
-
-    if (confirmSave) {
-      // Save as draft and then continue
-      await saveQuotation("draft");
-      // If quotation is still not available after saving, return
-      if (!quotation) {
-        alert("Unable to generate PDF. Please try saving again.");
-        return;
-      }
-    } else {
-      // User declined to save, abort PDF generation
+    // Auto-save as draft before generating PDF
+    await saveQuotation("draft");
+    // If quotation is still not available after saving, return
+    if (!quotation) {
+      alert("Unable to generate PDF. Please try saving again.");
       return;
     }
-    // }
 
     try {
       setGeneratingPdf(true);
@@ -667,19 +656,8 @@ export default function QuotationPage() {
           name: hqBranch?.company_name || "CLASSY PROJECT MARKETING SDN BHD",
           regNo: hqBranch?.company_reg || "(1299213-T)",
           address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
-          phone: hqBranch?.phone || "+6016-8866001",
-          tel: hqBranch?.phone || "07-5104106",
-          email: hqBranch?.email || "inquiry@classy-pro.com",
-          website: "www.classy-pro.com",
-          branches: hqBranch?.name || "Kota Masai, Johor • Puchong, Selangor",
-          logo: "/images/logo/Classy_2023_vertical.png",
-        },
-        company2: {
-          name: hqBranch?.company_name || "CLASSY PROJECT MANAGEMENT SDN BHD",
-          regNo: hqBranch?.company_reg || "(1034357-W)",
-          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `No 3, Jln Empire 2, Tmn Perindustrian Empire Park, 81550 Gelang Patah, Johor`,
-          phone: hqBranch?.phone || "+6016-8866001",
-          tel: hqBranch?.phone || "07-5104106",
+          idd: hqBranch?.idd || "+60",
+          tel: hqBranch?.phone || "168866001",
           email: hqBranch?.email || "inquiry@classy-pro.com",
           website: "www.classy-pro.com",
           branches: hqBranch?.name || "Kota Masai, Johor • Puchong, Selangor",
@@ -929,6 +907,7 @@ export default function QuotationPage() {
           .filter(
             (i) =>
               i.category === "Additional Items" &&
+              i.subcategory !== "Accessories" &&
               i.subcategory !== "On-site Services" &&
               i.subcategory !== "Transportation Charge",
           )

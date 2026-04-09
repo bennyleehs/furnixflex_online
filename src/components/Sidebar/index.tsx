@@ -6,6 +6,7 @@ import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { useRouter } from "next/navigation";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -33,6 +34,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     "selectedMenu",
     "ui elements",
   );
+  const router = useRouter();
 
   useEffect(() => {
     const loadMenu = async () => {
@@ -57,7 +59,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
       >
         {/* SIDEBAR HEADER */}
-        <div className="flex items-center justify-between gap-2 px-6 py-5 2xl:py-6">
+        <div className="flex items-center gap-3 px-6 py-5 2xl:py-6">
           <Link href="/">
             <Image
               width={170}
@@ -70,7 +72,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-controls="sidebar"
-            className="block cursor-pointer 2xl:hidden"
+            aria-label="Close sidebar"
+            className="block cursor-pointer text-white transition-opacity hover:opacity-80 2xl:hidden"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -92,10 +95,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* Sidebar Menu */}
-          <nav className="mt-5 px-4 py-4 2xl:mt-9 2xl:px-6">
+          <nav className="px-4 py-4 2xl:px-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
-                <h2 className="mb-4 ml-4 text-base font-semibold">
+                <h2
+                  className="mb-4 ml-4 cursor-pointer text-lg font-bold text-bodydark1 transition-colors hover:text-white"
+                  onClick={() => router.push("/dashboard")}
+                >
                   {group.name}
                 </h2>
                 <ul className="mb-6 flex flex-col gap-1.5">

@@ -373,13 +373,13 @@ export default function Home() {
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href={selectedCountry ? getSubdomainUrl(selectedCountry, "/auth/signup") : "#"}
-              onClick={(e) => {
-                if (!selectedCountry) {
-                  e.preventDefault();
-                  alert("Please select a country first.");
-                }
-              }}
+              href="https://classy-pro.com/join-partner/"
+              // onClick={(e) => {
+              //   if (!selectedCountry) {
+              //     e.preventDefault();
+              //     alert("Please select a country first.");
+              //   }
+              // }}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-blue-700 shadow-lg transition hover:bg-gray-100"
             >
               Register Now

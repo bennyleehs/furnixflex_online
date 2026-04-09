@@ -2,6 +2,7 @@
 import React, { useState, ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import RouteGuard from "@/components/RouteGuard";
 
 export default function DefaultLayout({
   children,
@@ -25,8 +26,8 @@ export default function DefaultLayout({
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
-          <div className="mx-auto max-w(--breakpoint-3xl) p-4 md:py-6 2xl:py-8">
-              {children}
+          <div className="mx-auto max-w(--breakpoint-3xl) px-4 py-3 md:py-4 2xl:py-5">
+              <RouteGuard>{children}</RouteGuard>
             </div>
           </main>
           {/* <!-- ===== Main Content End ===== --> */}

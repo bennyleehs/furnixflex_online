@@ -24,9 +24,9 @@ const Breadcrumb = ({ pageName, noHeader }: BreadcrumbProps) => {
   const pathSegments = pathname.split("/").filter((segment) => segment);
 
   return (
-    <div className={noHeader ? 'inline-breadcrumb mb-6' : 'mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'}>
+    <div className={noHeader ? 'inline-breadcrumb mb-4' : 'mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between'}>
       {!noHeader && (
-        <h2 className="mb-2 text-title-md2 font-semibold text-black dark:text-white">
+        <h2 className="text-lg font-semibold text-black dark:text-white">
           {pageName}
         </h2>
       )}

@@ -54,7 +54,7 @@ export async function GET(request: Request) {
     // Fetch related items - using quotation_number field
     try {
       const [itemRows] = (await pool.query(
-        "SELECT * FROM quotation_items WHERE quotation_number = ?",
+        "SELECT * FROM quotation_items WHERE quotation_number = ? AND note != 'REMOVED'",
         [quotation.quotation_number],
       )) as [any[], any];
 
@@ -255,35 +255,83 @@ export async function PUT(request: Request) {
 
     // Handle items if provided
     if (body.items && Array.isArray(body.items)) {
-      // First, delete all existing items for this quotation
-      await pool.query(
-        "DELETE FROM quotation_items WHERE quotation_number = ?",
+      // Get existing item IDs for this quotation
+      const [existingItems] = (await pool.query(
+        "SELECT id FROM quotation_items WHERE quotation_number = ?",
         [body.quotation_number],
-      );
+      )) as [any[], any];
+      const existingIds = new Set(existingItems.map((r: any) => r.id));
 
-      // Then insert the updated items
+      // Track which IDs are still present in the incoming items
+      const incomingIds = new Set<number>();
+
       for (const item of body.items) {
+        const itemId = item.id ? parseInt(item.id, 10) : null;
+
+        if (itemId && existingIds.has(itemId)) {
+          // Update existing item
+          incomingIds.add(itemId);
+          await pool.query(
+            `UPDATE quotation_items SET
+              task_id = ?, productId = ?, category = ?, subcategory = ?, productName = ?,
+              description = ?, quantity = ?, unit = ?, unitPrice = ?, discount = ?,
+              rounding = ?, total = ?, note = ?
+             WHERE id = ? AND quotation_number = ?`,
+            [
+              body.task_id || "",
+              item.productId || 0,
+              item.category || "",
+              item.subcategory || "",
+              item.productName || "",
+              item.description || "",
+              item.quantity || 0,
+              item.unit || "",
+              item.unitPrice || 0,
+              item.discount || 0,
+              item.rounding || 0,
+              item.total || 0,
+              item.note || "",
+              itemId,
+              body.quotation_number,
+            ],
+          );
+        } else {
+          // Insert new item
+          await pool.query(
+            `INSERT INTO quotation_items 
+             (quotation_number, task_id, productId, category, subcategory, productName, description,
+              quantity, unit, unitPrice, discount, rounding, total, note) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              body.quotation_number,
+              body.task_id || "",
+              item.productId || 0,
+              item.category || "",
+              item.subcategory || "",
+              item.productName || "",
+              item.description || "",
+              item.quantity || 0,
+              item.unit || "",
+              item.unitPrice || 0,
+              item.discount || 0,
+              item.rounding || 0,
+              item.total || 0,
+              item.note || "",
+            ],
+          );
+        }
+      }
+
+      // Mark removed items as inactive instead of deleting
+      // (items in DB but not in the incoming list)
+      const removedIds = [...existingIds].filter((id) => !incomingIds.has(id));
+      if (removedIds.length > 0) {
+        // Set quantity to 0 and total to 0 for removed items
+        const placeholders = removedIds.map(() => "?").join(",");
         await pool.query(
-          `INSERT INTO quotation_items 
-           (quotation_number, task_id, productId, category, subcategory, productName, description,
-            quantity, unit, unitPrice, discount, rounding, total, note) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            body.quotation_number, // Save quotation_number
-            body.task_id || "", // Save task_id from parent quotation
-            item.productId || 0, // Use productId instead of productName
-            item.category || "",
-            item.subcategory || "",
-            item.productName || "",
-            item.description || "",
-            item.quantity || 0,
-            item.unit || "",
-            item.unitPrice || 0,
-            item.discount || 0,
-            item.rounding || 0,
-            item.total || 0,
-            item.note || "",
-          ],
+          `UPDATE quotation_items SET quantity = 0, total = 0, note = 'REMOVED'
+           WHERE id IN (${placeholders}) AND quotation_number = ?`,
+          [...removedIds, body.quotation_number],
         );
       }
     }
