@@ -1,6 +1,6 @@
 // src/components/Sidebar/index.tsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
@@ -30,25 +30,35 @@ interface MenuGroup {
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [menuGroups, setMenuGroups] = useState<MenuGroup[]>([]);
-  const [pageName, setPageName] = useLocalStorage(
-    "selectedMenu",
-    "ui elements",
-  );
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
+  const [pageName, setPageName] = useLocalStorage("selectedMenu", "ui elements");
+  const hasFetched = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
-    const loadMenu = async () => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    const loadData = async () => {
       try {
-        const res = await fetch("/api/admin/menu_items");
-        if (res.ok) {
-          const data = await res.json();
-          setMenuGroups(data);
+        const [menuRes, permRes] = await Promise.all([
+          fetch("/api/admin/menu_items"),
+          fetch("/api/permissions"),
+        ]);
+        if (menuRes.ok) setMenuGroups(await menuRes.json());
+        if (permRes.ok) {
+          const data = await permRes.json();
+          setPermissions(data.permissions || []);
         }
       } catch (err) {
-        console.error("Failed to load menu:", err);
+        console.error("Failed to load sidebar data:", err);
+      } finally {
+        setPermissionsLoaded(true);
       }
     };
-    loadMenu();
+
+    loadData();
   }, []);
 
   return (
@@ -91,10 +101,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </svg>
           </button>
         </div>
-        {/* SIDEBAR HEADER */}
 
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-          {/* Sidebar Menu */}
           <nav className="px-4 py-4 2xl:px-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
@@ -111,21 +119,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       item={menuItem}
                       pageName={pageName}
                       setPageName={setPageName}
+                      permissions={permissions}
+                      permissionsLoaded={permissionsLoaded}
                     />
                   ))}
                 </ul>
               </div>
             ))}
           </nav>
-          {/* Sidebar Menu */}
         </div>
-        {/* <!-- Footer --> */}
 
         <p className="mt-auto py-4 text-center text-sm text-gray-400">
           &copy; {new Date().getFullYear()} - FurnixFlex Sdn. Bhd.
         </p>
-
-        {/* <!-- Footer --> */}
       </aside>
     </ClickOutside>
   );
