@@ -108,7 +108,7 @@ export default function Home() {
               }}
               className={`rounded-lg px-5 py-2.5 text-sm font-semibold shadow-sm transition ${
                 selectedCountry
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-pink-600 text-white hover:bg-pink-700"
                   : "cursor-not-allowed bg-gray-300 text-gray-500"
               }`}
             >
@@ -119,19 +119,19 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pt-28 pb-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-pink-900 to-slate-800 pt-28 pb-20">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 h-72 w-72 rounded-full bg-blue-400 blur-3xl" />
-          <div className="absolute right-10 bottom-10 h-96 w-96 rounded-full bg-indigo-400 blur-3xl" />
+          <div className="absolute top-20 left-10 h-72 w-72 rounded-full bg-pink-400 blur-3xl" />
+          <div className="absolute right-10 bottom-10 h-96 w-96 rounded-full bg-fuchsia-400 blur-3xl" />
         </div>
         <div className="relative mx-auto max-w-7xl px-6 text-center">
           <h1 className="mb-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Join Our{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-pink-400 to-fuchsia-300 bg-clip-text text-transparent">
               Partnership Program
             </span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100/80">
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-pink-100/80">
             Our partnership model fosters a win-win collaboration. We bring business
             expertise and solutions, while partners contribute resources — creating
             a mutually beneficial relationship for success.
@@ -139,14 +139,14 @@ export default function Home() {
 
           {/* Country Selection */}
           <div className="mx-auto mb-8 max-w-md">
-            <label className="mb-3 block text-sm font-medium text-blue-200">
+            <label className="mb-3 block text-sm font-medium text-pink-200">
               Select Your Country to Get Started
             </label>
             <div className="relative">
               <select
                 value={selectedCountry}
                 onChange={(e) => setSelectedCountry(e.target.value)}
-                className="w-full appearance-none rounded-xl border border-white/20 bg-white/10 px-5 py-4 pr-12 text-lg font-medium text-white backdrop-blur-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+                className="w-full appearance-none rounded-xl border border-white/20 bg-white/10 px-5 py-4 pr-12 text-lg font-medium text-white backdrop-blur-sm transition focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400/50"
               >
                 <option value="" className="text-gray-900">
                   Choose a country...
@@ -162,7 +162,7 @@ export default function Home() {
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                <svg className="h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-pink-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
@@ -170,7 +170,7 @@ export default function Home() {
           </div>
 
           {selectedCountry && (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-blue-200 backdrop-blur-sm">
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-pink-200 backdrop-blur-sm">
               <span className="text-lg">{countryFlags[selectedCountry]}</span>
               <span>
                 {selectedCountry} —{" "}
@@ -199,9 +199,9 @@ export default function Home() {
             {partnerTypes.map((partner) => (
               <div
                 key={partner.title}
-                className="group relative rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition hover:border-blue-300 hover:shadow-lg"
+                className="group relative rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition hover:border-pink-300 hover:shadow-lg"
               >
-                <div className="mb-5 inline-flex rounded-xl bg-blue-50 p-3 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+                <div className="mb-5 inline-flex rounded-xl bg-pink-50 p-3 text-pink-600 transition group-hover:bg-pink-600 group-hover:text-white">
                   {partner.icon}
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-gray-900">
@@ -253,7 +253,7 @@ export default function Home() {
               },
             ].map((item) => (
               <div key={item.title} className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-3xl">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
                   {item.icon}
                 </div>
                 <h3 className="mb-2 text-lg font-bold text-gray-900">{item.title}</h3>
@@ -311,7 +311,7 @@ export default function Home() {
                 key={item.title}
                 className="rounded-2xl border border-gray-200 bg-white p-8 text-center transition hover:shadow-lg"
               >
-                <div className="mx-auto mb-4 inline-flex rounded-xl bg-blue-50 p-4 text-blue-600">
+                <div className="mx-auto mb-4 inline-flex rounded-xl bg-pink-50 p-4 text-pink-600">
                   {item.icon}
                 </div>
                 <h3 className="mb-3 text-xl font-bold text-gray-900">{item.title}</h3>
@@ -343,8 +343,8 @@ export default function Home() {
                 onClick={() => setSelectedCountry(country.name)}
                 className={`rounded-2xl border-2 p-6 text-left transition ${
                   selectedCountry === country.name
-                    ? "border-blue-500 bg-blue-50 shadow-md"
-                    : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                    ? "border-pink-500 bg-pink-50 shadow-md"
+                    : "border-gray-200 bg-white hover:border-pink-300 hover:shadow-sm"
                 }`}
               >
                 <div className="mb-3 text-4xl">{countryFlags[country.name]}</div>
@@ -361,12 +361,12 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 py-16">
+      <section className="bg-gradient-to-r from-pink-600 to-pink-800 py-16">
         <div className="mx-auto max-w-4xl px-6 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
             Ready to Start Your Partnership?
           </h2>
-          <p className="mb-8 text-lg text-blue-100">
+          <p className="mb-8 text-lg text-pink-100">
             Join our growing network of partners across Southeast Asia
             and build a successful business with FurnixFlex.
           </p>
@@ -380,7 +380,7 @@ export default function Home() {
               //     alert("Please select a country first.");
               //   }
               // }}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-blue-700 shadow-lg transition hover:bg-gray-100"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-pink-700 shadow-lg transition hover:bg-gray-100"
             >
               Register Now
             </Link>
@@ -455,7 +455,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm">
-            © {new Date().getFullYear()} FurnixFlex Sdn. Bhd. All Rights Reserved.
+            © {new Date().getFullYear()} FurnixTech Sdn. Bhd. All Rights Reserved.
           </div>
         </div>
       </footer>
