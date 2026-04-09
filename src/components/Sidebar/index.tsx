@@ -64,8 +64,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             <Image
               width={170}
               height={20}
-              src={"/images/logo/classy_logo_gray.svg"}
-              alt="Logo"
+              src={"/images/logo/furnixflex_logo.png"}
+              alt="FurnixFlex Logo"
               priority
             />
           </Link>
@@ -122,8 +122,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         {/* <!-- Footer --> */}
 
         <p className="mt-auto py-4 text-center text-sm text-gray-400">
-          &copy; {new Date().getFullYear()} - Classy Project <br />
-          Marketing Sdn. Bhd.
+          &copy; {new Date().getFullYear()} - FurnixFlex Sdn. Bhd.
         </p>
 
         {/* <!-- Footer --> */}

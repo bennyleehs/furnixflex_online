@@ -62,16 +62,16 @@ const Header = (props: {
             <Image
               width={32}
               height={32}
-              src="/images/logo/classy_icon.svg"
-              alt="Logo"
+              src="/images/logo/furnixflex_icon.png"
+              alt="FurnixFlex Logo"
               className="block dark:hidden"
             />
             {/* Dark Mode Logo */}
             <Image
               width={32}
               height={32}
-              src="/images/logo/classy_gray_icon.svg"
-              alt="Logo"
+              src="/images/logo/furnixflex_icon.png"
+              alt="FurnixFlex Logo"
               className="hidden dark:block"
             />
           </Link>

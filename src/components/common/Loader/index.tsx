@@ -6,8 +6,8 @@ const Loader = () => {
       <div className="h-max w-max animate-spin rounded-full ">
       {/* <div className="h-16 w-max animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"> */}
         <Image
-          src={"/images/logo/classy_icon.svg"}
-          alt={"Classy Pro Icon"}
+          src={"/images/logo/furnixflex_icon.png"}
+          alt={"FurnixFlex Icon"}
           width={80}
           height={80}
         />

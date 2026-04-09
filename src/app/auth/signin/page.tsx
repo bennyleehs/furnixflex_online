@@ -74,15 +74,15 @@ const SignIn = () => {
               <div className="group relative">
                 <div className="relative">
                   <Link
-                    href={"https://classypro.online/"}
+                    href={"https://furnixflex.com/"}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Image
-                      src="/images/logo/classy_logo_ori.svg"
+                      src="/images/logo/furnixflex_logo_dark.png"
                       width={240}
                       height={140}
-                      alt="Classy Logo"
+                      alt="FurnixFlex Logo"
                       className="h-auto transform drop-shadow-sm transition duration-300 group-hover:scale-105"
                       priority
                       quality={100}
@@ -224,7 +224,7 @@ const SignIn = () => {
           </form>
         </div>
         <p className="mt-auto py-4 text-center text-sm text-gray-400">
-          &copy; {new Date().getFullYear()} - Classy Project Marketing Sdn. Bhd.
+          &copy; {new Date().getFullYear()} - FurnixFlex Sdn. Bhd.
         </p>
       </div>
     </div>

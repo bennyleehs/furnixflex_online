@@ -112,7 +112,7 @@ try {
       doc.addImage(logoData, 'PNG', margin, margin - 8, 40, 15);
     } else {
       // Use a default logo path
-      const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'classy_logo_gray.png');
+      const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'furnixflex_logo_dark.png');
       if (fs.existsSync(logoPath)) {
         const logoData = fs.readFileSync(logoPath);
         const logoBase64 = logoData.toString('base64');

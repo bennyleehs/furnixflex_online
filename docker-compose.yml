@@ -1,5 +1,5 @@
 services:
-  kvm2-docker:
+  online:
     image: oven/bun:1-alpine
     working_dir: /app
     env_file:

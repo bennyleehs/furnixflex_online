@@ -9,16 +9,16 @@ const ComingSoon = () => {
           <Image
             width={280}
             height={100}
-            src={"/images/logo/classy_logo_ori.svg"}
-            alt="Logo Classy Pro"
+            src={"/images/logo/furnixflex_logo_dark.png"}
+            alt="FurnixFlex Logo"
             className="block dark:hidden"
           />
           {/* Dark Mode Logo */}
           <Image
             width={280}
             height={100}
-            src={"/images/logo/classy_logo_gray.svg"}
-            alt="Logo Classy Pro"
+            src={"/images/logo/furnixflex_logo.png"}
+            alt="FurnixFlex Logo"
             className="hidden dark:block"
           />
         </div>
@@ -27,7 +27,7 @@ const ComingSoon = () => {
           This page section is under construction! Thank you for waiting.
         </p>
         <p className="mb-20 text-center text-sm text-gray-600 dark:text-gray-400">
-          &copy; {new Date().getFullYear()} - Classy Project Marketing Sdn. Bhd.
+          &copy; {new Date().getFullYear()} - FurnixFlex Sdn. Bhd.
         </p>
       </div>
     </div>

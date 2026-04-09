@@ -85,7 +85,7 @@ async function generateStatementPDF(data: any): Promise<Buffer> {
         "public",
         "images",
         "logo",
-        "classy_logo_gray.png",
+        "furnixflex_logo_dark.png",
       );
       if (fs.existsSync(logoPath)) {
         const logoData = fs.readFileSync(logoPath);
@@ -524,7 +524,7 @@ async function generateStatementPDF(data: any): Promise<Buffer> {
   doc.setFontSize(7);
   doc.text("Generated on: " + new Date().toLocaleDateString(), margin, footerY);
   doc.text("Page 1 of 1", pageWidth - margin, footerY, { align: "right" });
-  doc.text("Powered by CLASSYPRO System", pageWidth / 2, footerY, {
+  doc.text("Powered by FurnixFlex System", pageWidth / 2, footerY, {
     align: "center",
   });
 

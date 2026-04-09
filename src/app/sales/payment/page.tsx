@@ -277,12 +277,12 @@ export default function QuotationListPage() {
 
         // Company info
         company: {
-          name: hqBranch?.company_name || "CLASSYPRO Aluminium Kitchen",
-          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : `3, Jalan Empire 2, Taman Perindustrian Empire Park, 81550 Gelang Patah, Johor Darul Ta'zim`,
-          phone: hqBranch?.phone || "+6016-8866001",
-          email: hqBranch?.email || "inquiry@classy-pro.com",
-          website: "www.classy-pro.com",
-          logo: "/images/logo/classy_logo_gray.png",
+          name: hqBranch?.company_name || "FURNIXFLEX SDN BHD",
+          address: hqBranch ? `${hqBranch.address_line1}${hqBranch.address_line2 ? ', ' + hqBranch.address_line2 : ''}, ${hqBranch.postcode} ${hqBranch.city}, ${hqBranch.state}` : ``,
+          phone: hqBranch?.phone || "",
+          email: hqBranch?.email || "info@furnixflex.com",
+          website: "www.furnixflex.com",
+          logo: "/images/logo/furnixflex_logo_dark.png",
         },
 
         // PDF format

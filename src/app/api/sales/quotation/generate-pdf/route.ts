@@ -138,7 +138,7 @@ async function generateQuotationPDF(
           "public",
           "images",
           "logo",
-          "Classy_2023_vertical.png",
+          "furnixflex_logo_dark.png",
         );
         if (fs.existsSync(logoPath)) {
           const logoData = fs.readFileSync(logoPath);

@@ -35,7 +35,7 @@ const DropdownUser = () => {
             height={112}
             src={user?.uid && !imageError 
               ? `/api/files/admin/employee/${user.uid}/upload/profileImage${user.uid}.jpg?v=${Date.now()}` // Add cache-busting
-              : "/images/logo/classy_icon.svg"}
+              : "/images/logo/furnixflex_icon.png"}
             style={{
               width: "100%",
               height: "100%",
