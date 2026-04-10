@@ -141,9 +141,17 @@ export function getPermissionsForRole(branch: string, department: string, role: 
   }
 
   const accessControl = loadAccessControl(countryCode);
-  const roleKey = `${branch}.${department}.${role}`;
-  
-  if (accessControl[roleKey]) {
+  const normalizedDept = department.toUpperCase();
+  const roleKey = Object.keys(accessControl).find((key) => {
+    const parts = key.split(".");
+    return (
+      parts[0] === branch &&
+      parts[1].toUpperCase() === normalizedDept &&
+      parts.slice(2).join(".") === role
+    );
+  });
+
+  if (roleKey && accessControl[roleKey]) {
     // Parse permission values - some might be comma-separated strings
     const rawPermissions: string[] = [];
     
