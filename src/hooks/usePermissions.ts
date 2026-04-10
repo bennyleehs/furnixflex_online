@@ -7,22 +7,22 @@ import { fetchPermissionsOnce } from "@/utils/permissionCache";
 // The `checkPermissionLogic` will then determine if a user's actual permission
 // (e.g., 1.0.1) grants access to this required action (e.g., 1.0.3).
 const PERMISSION_MAPPINGS = {
-  create: (menu: string, submenu: string) => `${menu}.${submenu}.3`, // Requires X.Y.3 or higher (i.e., 1, 2, or 3)
-  edit: (menu: string, submenu: string) => `${menu}.${submenu}.2`, // Requires X.Y.2 or higher (i.e., 1 or 2)
-  delete: (menu: string, submenu: string) => `${menu}.${submenu}.1`, // Requires X.Y.1 (full access)
-  monitor: (menu: string, submenu: string) => `${menu}.${submenu}.4`, // Requires X.Y.4 or higher (i.e., 1, 2, 3, or 4)
+  create: (prefix: string) => `${prefix}.3`,
+  edit: (prefix: string) => `${prefix}.2`,
+  delete: (prefix: string) => `${prefix}.1`,
+  monitor: (prefix: string) => `${prefix}.4`,
 };
 
 interface UsePermissionsResult {
   permissions: string[];
   loadingPermissions: boolean;
   error: string | null;
-  canCreate: (menu: string, submenu: string) => boolean;
-  canEdit: (menu: string, submenu: string) => boolean;
-  canDelete: (menu: string, submenu: string) => boolean;
-  canMonitor: (menu: string, submenu: string) => boolean;
-  canFullAccess: (menu: string, submenu: string) => boolean; // For checking if user has full access (action 1)
-  hasPermission: (requiredPermission: string) => boolean; // Generic checker for any permission ID
+  canCreate: (prefix: string) => boolean;
+  canEdit: (prefix: string) => boolean;
+  canDelete: (prefix: string) => boolean;
+  canMonitor: (prefix: string) => boolean;
+  canFullAccess: (prefix: string) => boolean;
+  hasPermission: (requiredPermission: string) => boolean;
 }
 
 const usePermissions = (): UsePermissionsResult => {
@@ -113,43 +113,27 @@ const usePermissions = (): UsePermissionsResult => {
 
   // Individual permission checkers using the fetched permissions
   const canCreate = useCallback(
-    (menu: string, submenu: string) => {
-      const required = PERMISSION_MAPPINGS.create(menu, submenu); // Target is X.Y.3
-      return checkPermissionLogic(required, permissions);
-    },
+    (prefix: string) => checkPermissionLogic(PERMISSION_MAPPINGS.create(prefix), permissions),
     [permissions, checkPermissionLogic],
   );
 
   const canEdit = useCallback(
-    (menu: string, submenu: string) => {
-      const required = PERMISSION_MAPPINGS.edit(menu, submenu); // Target is X.Y.2
-      return checkPermissionLogic(required, permissions);
-    },
+    (prefix: string) => checkPermissionLogic(PERMISSION_MAPPINGS.edit(prefix), permissions),
     [permissions, checkPermissionLogic],
   );
 
   const canDelete = useCallback(
-    (menu: string, submenu: string) => {
-      const required = PERMISSION_MAPPINGS.delete(menu, submenu); // Target is X.Y.1
-      return checkPermissionLogic(required, permissions);
-    },
+    (prefix: string) => checkPermissionLogic(PERMISSION_MAPPINGS.delete(prefix), permissions),
     [permissions, checkPermissionLogic],
   );
 
   const canMonitor = useCallback(
-    (menu: string, submenu: string) => {
-      const required = PERMISSION_MAPPINGS.monitor(menu, submenu); // Target is X.Y.4
-      return checkPermissionLogic(required, permissions);
-    },
+    (prefix: string) => checkPermissionLogic(PERMISSION_MAPPINGS.monitor(prefix), permissions),
     [permissions, checkPermissionLogic],
   );
 
-  // This checks if the user has the highest level of access (action 1) for a given menu/submenu.
   const canFullAccess = useCallback(
-    (menu: string, submenu: string) => {
-      const required = PERMISSION_MAPPINGS.delete(menu, submenu); // Action 1 is the 'full access' level
-      return checkPermissionLogic(required, permissions);
-    },
+    (prefix: string) => checkPermissionLogic(PERMISSION_MAPPINGS.delete(prefix), permissions),
     [permissions, checkPermissionLogic],
   );
 

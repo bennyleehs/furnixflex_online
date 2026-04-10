@@ -3,36 +3,35 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import usePermissions from "@/hooks/usePermissions";
 
-// Static route-to-permission mapping: route prefix → "MENU.SUBMENU"
-// Ordered longest-first so sub-routes match before parent routes.
-const ROUTE_PERMISSION_MAP: { route: string; menu: string; submenu: string }[] =
-  [
-    // Admin sub-pages
-    { route: "/admin/branch", menu: "1", submenu: "1" },
-    { route: "/admin/department", menu: "1", submenu: "2" },
-    { route: "/admin/role", menu: "1", submenu: "3" },
-    { route: "/admin/employee", menu: "1", submenu: "4" },
-    { route: "/admin/clock", menu: "1", submenu: "5" },
-    { route: "/admin/scopes_access", menu: "1", submenu: "6" },
-    { route: "/admin/properties", menu: "1", submenu: "7" },
-    { route: "/admin/equipment", menu: "1", submenu: "8" },
-    { route: "/admin/inventory", menu: "1", submenu: "9" },
-    { route: "/admin/partners", menu: "1", submenu: "10" },
-    { route: "/admin/partner", menu: "1", submenu: "10" },
-    // Sales sub-pages
-    { route: "/sales/product", menu: "2", submenu: "1" },
-    { route: "/sales/lead", menu: "2", submenu: "2" },
-    { route: "/sales/task", menu: "2", submenu: "3" },
-    { route: "/sales/quotation", menu: "2", submenu: "4" },
-    { route: "/sales/payment", menu: "2", submenu: "5" },
-    // Production sub-pages
-    { route: "/production/parts", menu: "3", submenu: "1" },
-    { route: "/production/modular", menu: "3", submenu: "2" },
-    // Finance sub-pages
-    { route: "/finance/indoor", menu: "4", submenu: "1" },
-    { route: "/finance/measurement", menu: "4", submenu: "2" },
-    { route: "/finance/dealer", menu: "4", submenu: "3" },
-  ];
+// Static route-to-permission mapping: route prefix → permission prefix (matches sidebar id)
+const ROUTE_PERMISSION_MAP: { route: string; prefix: string }[] = [
+  // Administration
+  { route: "/admin/branch", prefix: "1.1" },
+  { route: "/admin/properties", prefix: "1.2" },
+  { route: "/admin/equipment", prefix: "1.3" },
+  { route: "/admin/inventory", prefix: "1.4" },
+  { route: "/admin/partners", prefix: "1.5" },
+  { route: "/admin/partner", prefix: "1.5" },
+  // Human Resources
+  { route: "/admin/department", prefix: "2.1" },
+  { route: "/admin/role", prefix: "2.2" },
+  { route: "/admin/employee", prefix: "2.3" },
+  { route: "/admin/clock", prefix: "2.4" },
+  { route: "/admin/scopes_access", prefix: "2.5" },
+  // Finance
+  { route: "/finance/indoor", prefix: "4.1" },
+  { route: "/finance/measurement", prefix: "4.2" },
+  { route: "/finance/dealer", prefix: "4.3" },
+  // Sales
+  { route: "/sales/product", prefix: "5.1" },
+  { route: "/sales/lead", prefix: "5.2" },
+  { route: "/sales/task", prefix: "5.3" },
+  { route: "/sales/quotation", prefix: "5.4" },
+  { route: "/sales/payment", prefix: "5.5" },
+  // Production
+  { route: "/production/parts", prefix: "6.1" },
+  { route: "/production/modular", prefix: "6.2" },
+];
 
 // Routes that any authenticated user can access (no permission check needed)
 const PUBLIC_ROUTES = [
@@ -55,7 +54,7 @@ function getRequiredPermission(pathname: string) {
   // Find the matching route permission (longest prefix match)
   for (const entry of ROUTE_PERMISSION_MAP) {
     if (pathname === entry.route || pathname.startsWith(entry.route + "/")) {
-      return { menu: entry.menu, submenu: entry.submenu };
+      return entry.prefix;
     }
   }
 
@@ -88,12 +87,12 @@ export default function RouteGuard({ children }: { children: React.ReactNode }) 
     }
 
     // canMonitor checks for action level 4 (read-only), which is the minimum access
-    const hasAccess = canMonitor(required.menu, required.submenu);
+    const hasAccess = canMonitor(required);
     setAuthorized(hasAccess);
 
     if (!hasAccess) {
       console.warn(
-        `Access denied: route "${pathname}" requires permission ${required.menu}.${required.submenu}`,
+        `Access denied: route "${pathname}" requires permission ${required}`,
       );
     }
   }, [pathname, loadingPermissions, canMonitor, permError]);

@@ -4,9 +4,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
 
-const MENU = "1";
-const SUBMENU = "3";
-const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+const PERMISSION_PREFIX = "2.2";
 
 interface Role {
   id: number;
@@ -430,7 +428,7 @@ export default function RolePage() {
             </div>
 
             {/* Create button */}
-            {!loadingPermissions && canCreate(MENU, SUBMENU) && (
+            {!loadingPermissions && canCreate(PERMISSION_PREFIX) && (
               <button
                 onClick={openCreateModal}
                 className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -513,7 +511,7 @@ export default function RolePage() {
                               onClick={() => openEditModal(role)}
                               className="text-primary hover:text-primary/90"
                               title="Edit role"
-                              disabled={!canEdit(MENU, SUBMENU)}
+                              disabled={!canEdit(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"
@@ -535,7 +533,7 @@ export default function RolePage() {
                               onClick={() => markAsHistory(role)}
                               className="text-danger hover:text-red-700"
                               title="Mark as history"
-                              disabled={!canDelete(MENU, SUBMENU)}
+                              disabled={!canDelete(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"

@@ -5,8 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
 
-const MENU = "1";
-const SUBMENU = "2";
+const PERMISSION_PREFIX = "2.1";
 
 interface Department {
   id: number;
@@ -354,7 +353,7 @@ export default function DepartmentPage() {
               </button>
             </div>
 
-            {!loadingPermissions && canCreate(MENU, SUBMENU) && (
+            {!loadingPermissions && canCreate(PERMISSION_PREFIX) && (
               <button
                 onClick={openCreateModal}
                 className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -438,7 +437,7 @@ export default function DepartmentPage() {
                               onClick={() => openEditModal(department)}
                               className="text-primary hover:text-primary/90"
                               title="Edit department"
-                              disabled={!canEdit(MENU, SUBMENU)}
+                              disabled={!canEdit(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"
@@ -459,7 +458,7 @@ export default function DepartmentPage() {
                               onClick={() => markAsHistory(department)}
                               className="text-danger hover:text-red-700"
                               title="Mark as history"
-                              disabled={!canDelete(MENU, SUBMENU)}
+                              disabled={!canDelete(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"

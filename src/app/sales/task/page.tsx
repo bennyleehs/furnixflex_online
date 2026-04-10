@@ -4,9 +4,7 @@ import Tables from "@/components/Tables/progress";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useAuth } from "@/context/AuthContext";
 
-const MENU = "2";
-const SUBMENU = "3";
-const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+const PERMISSION_PREFIX = "5.3";
 
 // Add the Others group definition for API knows what to fetch
 const OTHERS_GROUP = ["Over Budget", "Others Design", "Drop Interest", "Others"];

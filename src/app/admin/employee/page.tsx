@@ -5,9 +5,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const MENU = "1";
-const SUBMENU = "4";
-const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+const PERMISSION_PREFIX = "2.3";
 
 // Define the employee type
 interface Employee {
@@ -1214,7 +1212,7 @@ export default function EmployeePage() {
             </div>
 
             {/* Keep the create button */}
-            {!loadingPermissions && canCreate(MENU, SUBMENU) && (
+            {!loadingPermissions && canCreate(PERMISSION_PREFIX) && (
               <button
                 onClick={openCreateModal}
                 className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -1305,7 +1303,7 @@ export default function EmployeePage() {
                               onClick={() => openEditModal(employee)}
                               className="text-primary hover:text-primary/90"
                               title="Edit employee"
-                              disabled={!canEdit(MENU, SUBMENU)}
+                              disabled={!canEdit(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"
@@ -1327,7 +1325,7 @@ export default function EmployeePage() {
                               onClick={() => markAsHistory(employee)}
                               className="text-danger hover:text-red-700"
                               title="Mark as history"
-                              disabled={!canDelete(MENU, SUBMENU)}
+                              disabled={!canDelete(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"

@@ -13,22 +13,52 @@
             "route": "/admin/branch"
           },
           {
+            "label": "Asset",
+            "route": "",
+            "children": [
+              {
+                "label": "Properties",
+                "id": "1.2",
+                "route": "/admin/properties"
+              },
+              {
+                "label": "Equipment",
+                "id": "1.3",
+                "route": "/admin/equipment"
+              },
+              {
+                "label": "Inventory",
+                "id": "1.4",
+                "route": "/admin/inventory"
+              }
+            ]
+          },
+          {
+            "label": "Partners",
+            "id": "1.5",
+            "route": ""
+          }
+        ]
+      },
+
+          {
             "label": "Human Resources",
+            "id": "2",
             "route": "#",
             "children": [
               {
                 "label": "Department",
-                "id": "1.2",
+                "id": "2.1",
                 "route": "/admin/department"
               },
               {
                 "label": "Roles",
-                "id": "1.3",
+                "id": "2.2",
                 "route": "/admin/role"
               },
               {
                 "label": "Employee",
-                "id": "1.4",
+                "id": "2.3",
                 "route": "/admin/employee"
               },
               {
@@ -37,7 +67,7 @@
                 "children": [
                   {
                     "label": "Clock",
-                    "id": "1.5",
+                    "id": "2.4",
                     "route": "/admin/clock"
                   }
                 ]
@@ -48,91 +78,37 @@
                 "children": [
                   {
                     "label": "Access",
-                    "id": "1.6",
+                    "id": "2.5",
                     "route": "/admin/scopes_access"
                   }
                 ]
               }
             ]
           },
-          {
-            "label": "Asset",
-            "route": "",
-            "children": [
-              {
-                "label": "Properties",
-                "id": "1.7",
-                "route": "/admin/properties"
-              },
-              {
-                "label": "Equipment",
-                "id": "1.8",
-                "route": "/admin/equipment"
-              },
-              {
-                "label": "Inventory",
-                "id": "1.9",
-                "route": "/admin/inventory"
-              }
-            ]
-          },
-          {
-            "label": "Partners",
-            "id": "1.10",
-            "route": "/admin/partner"
-          }
-        ]
-      },
-      {
-        "label": "Sales",
-        "id": "2",
-        "route": "/sales",
-        "children": [
-          {
-            "label": "Product",
-            "id": "2.1",
-            "route": "/sales/product"
-          },
-          {
-            "label": "Lead",
-            "id": "2.2",
-            "route": "/sales/lead"
-          },
-          {
-            "label": "Task",
-            "id": "2.3",
-            "route": "/sales/task"
-          },
-          {
-            "label": "Quotation",
-            "id": "2.4",
-            "route": "/sales/quotation"
-          },
-          {
-            "label": "Payment",
-            "id": "2.5",
-            "route": "/sales/payment"
-          }
-        ]
-      },
 
       {
-        "label": "Production",
+        "label": "Procurement",
         "id": "3",
         "route": "#",
         "children": [
           {
-            "label": "Parts",
+            "label": "Purchase Request",
             "id": "3.1",
-            "route": "/production/parts"
+            "route": ""
           },
           {
-            "label": "Modular",
+            "label": "Purchase Order",
             "id": "3.2",
-            "route": "/production/modular"
+            "route": ""
+          },
+          {
+            "label": "Vendor",
+            "id": "3.3",
+            "route": ""
           }
         ]
       },
+
       {
         "label": "Finance",
         "id": "4",
@@ -166,7 +142,59 @@
             ]
           }
         ]
+      },
+
+      {
+        "label": "Sales",
+        "id": "5",
+        "route": "/sales",
+        "children": [
+          {
+            "label": "Product",
+            "id": "5.1",
+            "route": "/sales/product"
+          },
+          {
+            "label": "Lead",
+            "id": "5.2",
+            "route": "/sales/lead"
+          },
+          {
+            "label": "Task",
+            "id": "5.3",
+            "route": "/sales/task"
+          },
+          {
+            "label": "Quotation",
+            "id": "5.4",
+            "route": "/sales/quotation"
+          },
+          {
+            "label": "Payment",
+            "id": "5.5",
+            "route": "/sales/payment"
+          }
+        ]
+      },
+
+      {
+        "label": "Production",
+        "id": "6",
+        "route": "#",
+        "children": [
+          {
+            "label": "Parts",
+            "id": "6.1",
+            "route": "/production/parts"
+          },
+          {
+            "label": "Modular",
+            "id": "6.2",
+            "route": "/production/modular"
+          }
+        ]
       }
+
     ]
   }
 ]

@@ -224,7 +224,7 @@ const SignIn = () => {
           </form>
         </div>
         <p className="mt-auto py-4 text-center text-sm text-gray-400">
-          &copy; {new Date().getFullYear()} - FurnixFlex Sdn. Bhd.
+          &copy; {new Date().getFullYear()} - FurnixTech Sdn. Bhd.
         </p>
       </div>
     </div>

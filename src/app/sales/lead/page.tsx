@@ -8,9 +8,7 @@ import { Lead } from "@/types/sales-lead";
 import { useAuth } from "@/context/AuthContext";
 
 // const title = "Lead List";
-const MENU = "2";
-const SUBMENU = "2";
-const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+const PERMISSION_PREFIX = "5.2";
 
 export default function LeadPage() {
   const { user } = useAuth();
@@ -28,7 +26,7 @@ export default function LeadPage() {
   const [selectedStatus, setSelectedStatus] = useState("Assign PIC"); // Initialize with a proper default status
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
   const { canCreate, loadingPermissions } = usePermissions(); // Use the custom hook
-  const canCreateButton = canCreate(MENU, SUBMENU);
+  const canCreateButton = canCreate(PERMISSION_PREFIX);
 
   const fetchData = useCallback(async () => {
     // 1. Determine the sales_uid to use for filtering

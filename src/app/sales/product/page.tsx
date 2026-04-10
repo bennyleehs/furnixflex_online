@@ -25,9 +25,7 @@ interface Product {
 }
 
 const title = "Products Management";
-const MENU = "2";
-const SUBMENU = "1";
-const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+const PERMISSION_PREFIX = "5.1";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -78,23 +76,6 @@ export default function ProductsPage() {
     usePermissions();
   const { country } = useCountry();
 
-  const getMenuSubmenu = (
-    permissionPrefix?: string,
-  ): { menu: string; submenu: string } | null => {
-    if (!permissionPrefix) {
-      return null;
-    }
-    const parts = permissionPrefix.split(".");
-    if (parts.length >= 2) {
-      return { menu: parts[0], submenu: parts[1] };
-    }
-    return null;
-  };
-
-  const createMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
-  const editMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
-  const deleteMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
-  // const monitorMenuSubmenu = getMenuSubmenu(PERMISSION_PREFIX);
 
   // Ref for the form
   const formRef = useRef<HTMLDivElement>(null);
@@ -313,11 +294,7 @@ export default function ProductsPage() {
           {/* Add New Product button */}
           {!loadingPermissions && (
             <>
-              {createMenuSubmenu &&
-                canCreate(
-                  createMenuSubmenu.menu,
-                  createMenuSubmenu.submenu,
-                ) && (
+              {canCreate(PERMISSION_PREFIX) && (
                   <button
                     onClick={() => {
                       resetForm();
@@ -911,11 +888,7 @@ export default function ProductsPage() {
                       <div className="flex items-center justify-center space-x-2">
                         {!loadingPermissions && ( // Only render buttons if permissions are loaded
                           <>
-                            {editMenuSubmenu &&
-                              canEdit(
-                                editMenuSubmenu.menu,
-                                editMenuSubmenu.submenu,
-                              ) && (
+                            {canEdit(PERMISSION_PREFIX) && (
                                 <button
                                   onClick={() => handleEdit(product)}
                                   className="text-primary hover:text-primary/80"
@@ -932,11 +905,7 @@ export default function ProductsPage() {
                                   </svg>
                                 </button>
                               )}
-                            {deleteMenuSubmenu &&
-                              canDelete(
-                                deleteMenuSubmenu.menu,
-                                deleteMenuSubmenu.submenu,
-                              ) && (
+                            {canDelete(PERMISSION_PREFIX) && (
                                 <button
                                   onClick={() => handleDelete(product.id)}
                                   className="text-danger hover:text-danger/80"

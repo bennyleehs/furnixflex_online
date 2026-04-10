@@ -6,8 +6,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import usePermissions from "@/hooks/usePermissions";
 import countriesData from "@/../public/data/countries.json";
 
-const MENU = "1";
-const SUBMENU = "1";
+const PERMISSION_PREFIX = "1.1";
 
 interface Branch {
   id: number;
@@ -711,7 +710,7 @@ export default function BranchPage() {
               </button>
             </div>
 
-            {!loadingPermissions && canCreate(MENU, SUBMENU) && (
+            {!loadingPermissions && canCreate(PERMISSION_PREFIX) && (
               <button
                 onClick={openCreateModal}
                 className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -799,7 +798,7 @@ export default function BranchPage() {
                               onClick={() => openEditModal(branch)}
                               className="text-primary hover:text-primary/90"
                               title="Edit branch"
-                              disabled={!canEdit(MENU, SUBMENU)}
+                              disabled={!canEdit(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"
@@ -820,7 +819,7 @@ export default function BranchPage() {
                               onClick={() => markAsHistory(branch)}
                               className="text-danger hover:text-red-700"
                               title="Mark as history"
-                              disabled={!canDelete(MENU, SUBMENU)}
+                              disabled={!canDelete(PERMISSION_PREFIX)}
                             >
                               <svg
                                 className="h-5 w-5"

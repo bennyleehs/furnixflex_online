@@ -6,9 +6,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Tables from "@/components/Tables";
 
-const MENU = "1";
-const SUBMENU = "6";
-const PERMISSION_PREFIX = `${MENU}.${SUBMENU}`;
+const PERMISSION_PREFIX = "2.5";
 
 interface AccessRow {
   no: number;

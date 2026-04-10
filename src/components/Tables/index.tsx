@@ -77,23 +77,6 @@ export default function Tables({
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
   const [infoError, setInfoError] = useState<string | null>(null);
 
-  const getMenuSubmenu = (
-    permissionPrefix?: string,
-  ): { menu: string; submenu: string } | null => {
-    if (!permissionPrefix) {
-      return null;
-    }
-    const parts = permissionPrefix.split(".");
-    if (parts.length >= 2) {
-      return { menu: parts[0], submenu: parts[1] };
-    }
-    return null;
-  };
-
-  const createMenuSubmenu = getMenuSubmenu(createPermissionPrefix);
-  const editMenuSubmenu = getMenuSubmenu(editPermissionPrefix);
-  const deleteMenuSubmenu = getMenuSubmenu(deletePermissionPrefix);
-  const monitorMenuSubmenu = getMenuSubmenu(monitorPermissionPrefix);
 
   useEffect(() => {
     // Initialize selected filters with "All" for each filterKey (only on first load)
@@ -383,9 +366,9 @@ export default function Tables({
         {/* Create Button - Controlled by showCreateButton prop and canCreate */}
         {showCreateButton &&
           createLink &&
-          createMenuSubmenu &&
           !loadingPermissions &&
-          canCreate(createMenuSubmenu.menu, createMenuSubmenu.submenu) && (
+          createPermissionPrefix &&
+          canCreate(createPermissionPrefix) && (
             <div className="w-full sm:w-30">
               <Link
                 href={createLink}
@@ -443,11 +426,8 @@ export default function Tables({
                         {!loadingPermissions && ( // Only render buttons if permissions are loaded
                           <>
                             {/* Edit Button */}
-                            {editMenuSubmenu &&
-                              canEdit(
-                                editMenuSubmenu.menu,
-                                editMenuSubmenu.submenu,
-                              ) && (
+                            {editPermissionPrefix &&
+                              canEdit(editPermissionPrefix) && (
                                 <button
                                   className="text-primary hover:opacity-70 cursor-pointer"
                                   onClick={() => handleEdit(row)}
@@ -467,12 +447,8 @@ export default function Tables({
                                 </button>
                               )}
                             {/* Delete Button */}
-                            {deleteMenuSubmenu &&
-                              canDelete(
-                                // FIX 2: Changed from canFullAccess to canDelete here
-                                deleteMenuSubmenu.menu,
-                                deleteMenuSubmenu.submenu,
-                              ) && (
+                            {deletePermissionPrefix &&
+                              canDelete(deletePermissionPrefix) && (
                                 <button
                                   className="text-red hover:opacity-70 cursor-pointer"
                                   title="Mark as History"
