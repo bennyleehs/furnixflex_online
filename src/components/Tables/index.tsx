@@ -449,7 +449,7 @@ export default function Tables({
                                 editMenuSubmenu.submenu,
                               ) && (
                                 <button
-                                  className="hover:text-primary cursor-pointer"
+                                  className="text-primary hover:opacity-70 cursor-pointer"
                                   onClick={() => handleEdit(row)}
                                   title="Edit Details"
                                 >
@@ -474,7 +474,7 @@ export default function Tables({
                                 deleteMenuSubmenu.submenu,
                               ) && (
                                 <button
-                                  className="hover:text-red cursor-pointer"
+                                  className="text-red hover:opacity-70 cursor-pointer"
                                   title="Mark as History"
                                 >
                                   <svg
@@ -506,7 +506,7 @@ export default function Tables({
                         )}
                         {/* Info Button (always visible, or controlled by its own permission if desired) */}
                         <button
-                          className="hover:text-primary cursor-pointer"
+                          className="text-primary hover:opacity-70 cursor-pointer"
                           title="Details"
                           onClick={() => handleInfoClick(row)}
                           disabled={isLoadingInfo}
