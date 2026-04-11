@@ -1,5 +1,5 @@
 services:
-  online:
+  flex:
     image: oven/bun:1-alpine
     working_dir: /app
     env_file:
